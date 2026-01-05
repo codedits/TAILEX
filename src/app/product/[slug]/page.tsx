@@ -14,10 +14,12 @@ import {
 } from "@/components/ui/accordion";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 import { useToast } from "@/hooks/use-toast";
+import { useCart } from "@/context/CartContext";
 import productJacket1 from "@/assets/product-jacket-1.jpg";
 import productJacket2 from "@/assets/product-jacket-2.jpg";
 
 const product = {
+  id: "relaxed-linen-jacket",
   name: "Relaxed Linen Jacket",
   price: 69.00,
   description: "A versatile, lightweight jacket crafted from premium linen. Perfect for layering during transitional seasons or cool summer evenings.",
@@ -40,6 +42,7 @@ export default function ProductDetailPage() {
   const slug = params?.slug as string;
   const [selectedSize, setSelectedSize] = useState("");
   const { toast } = useToast();
+  const { addItem } = useCart();
 
   const handleAddToCart = () => {
     if (!selectedSize) {
@@ -49,9 +52,14 @@ export default function ProductDetailPage() {
       });
       return;
     }
-    toast({
-      title: "Added to cart",
-      description: `${product.name} - Size ${selectedSize} has been added to your cart.`,
+    
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: typeof product.images[0] === 'string' ? product.images[0] : product.images[0].src,
+      size: selectedSize,
+      slug: slug || "relaxed-linen-jacket",
     });
   };
 

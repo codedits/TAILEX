@@ -2,12 +2,16 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ShoppingBag, Menu, X } from "lucide-react";
+import { ShoppingBag, Menu, X, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useCart } from "@/context/CartContext";
+import { CartSheet } from "@/components/CartSheet";
+import { SearchModal } from "@/components/SearchModal";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { cartCount, setIsCartOpen } = useCart();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,6 +30,7 @@ const Navbar = () => {
 
   return (
     <>
+      <CartSheet />
       <motion.header 
         className="fixed top-0 left-0 right-0 z-50 mix-blend-difference text-white"
         initial={{ y: -100 }}
@@ -56,10 +61,19 @@ const Navbar = () => {
           </nav>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-8 z-50 relative">
-            <button className="relative group hover:opacity-70 transition-opacity">
+          <div className="flex items-center gap-6 z-50 relative">
+            <SearchModal />
+            
+            <Link href="/login" className="hidden md:block hover:opacity-70 transition-opacity">
+              <User className="w-5 h-5" />
+            </Link>
+
+            <button 
+              className="relative group hover:opacity-70 transition-opacity"
+              onClick={() => setIsCartOpen(true)}
+            >
               <span className="text-[10px] font-medium uppercase tracking-[0.3em] hidden md:inline-block mr-2">Cart</span>
-              <span className="text-[10px] font-medium">(0)</span>
+              <span className="text-[10px] font-medium">({cartCount})</span>
             </button>
 
             <button
