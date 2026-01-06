@@ -14,6 +14,7 @@ export async function updateThemeConfig(formData: FormData) {
   const foregroundColor = formData.get('foregroundColor') as string
   const font = formData.get('font') as string
   const borderRadius = formData.get('borderRadius') as string
+  const mode = (formData.get('mode') as string) || 'light'
 
   const themeValue = {
     primaryColor,
@@ -21,7 +22,8 @@ export async function updateThemeConfig(formData: FormData) {
     backgroundColor,
     foregroundColor,
     font,
-    borderRadius
+    borderRadius,
+    mode
   }
 
   // Upsert Configs
@@ -37,6 +39,7 @@ export async function updateThemeConfig(formData: FormData) {
 
   // Mirror to cookies for fast access (Zero Flash on next page load)
   const cookieOptions = { path: '/', maxAge: 60 * 60 * 24 * 365 } // 1 year
+  cookieStore.set('theme', mode, cookieOptions)
   if (primaryColor) cookieStore.set('brand-primary', primaryColor, cookieOptions)
   if (font) cookieStore.set('brand-font', font, cookieOptions)
   if (backgroundColor) cookieStore.set('brand-bg', backgroundColor, cookieOptions)

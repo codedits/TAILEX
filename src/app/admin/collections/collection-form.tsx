@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { createCollection, updateCollection } from "./actions";
 import { useTransition, useState } from "react";
-import { toast } from "@/hooks/use-toast"; // Corrected import path
+import { toast } from "sonner";
 import Image from "next/image";
 
 export function CollectionForm({ initialData }: { initialData?: any }) {
@@ -17,7 +17,8 @@ export function CollectionForm({ initialData }: { initialData?: any }) {
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            setPreview(URL.createObjectURL(file));
+            const url = URL.createObjectURL(file);
+            setPreview(url);
         }
     }
 
@@ -31,18 +32,28 @@ export function CollectionForm({ initialData }: { initialData?: any }) {
         // Shadcn Switch usually wraps a button. We might need a hidden input.
         
         startTransition(async () => {
-            let res;
-            if (initialData?.id) {
-                formData.append('id', initialData.id);
-                res = await updateCollection(formData);
-            } else {
-                res = await createCollection(formData);
-            }
+            try {
+                let res;
+                if (initialData?.id) {
+                    formData.append('id', initialData.id);
+                    res = await updateCollection(formData);
+                } else {
+                    res = await createCollection(formData);
+                }
 
-            if (res?.error) {
-                toast({ title: "Error", description: res.error, variant: "destructive" });
-            } else {
-                toast({ title: "Success", description: "Collection saved" });
+                if (res?.error) {
+                    toast.error("Error saving collection", {
+                        description: res.error
+                    });
+                } else {
+                    toast.success(initialData?.id ? "Collection updated" : "Collection created", {
+                        description: `${formData.get('title')} has been saved.`
+                    });
+                }
+            } catch (err) {
+                toast.error("Unexpected error", {
+                    description: "Please try again later"
+                });
             }
         });
     };
@@ -62,13 +73,13 @@ export function CollectionForm({ initialData }: { initialData?: any }) {
                     </div>
 
                     <div className="space-y-2">
-                         <Label className="text-white/60 text-xs font-medium uppercase tracking-widest pl-1">Cover Image</Label>
+                         <Label className="text-white/60 text-xs font-medium uppercase tracking-widest pl-1">Cover Image (Display)</Label>
                          {preview && (
-                             <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-white/10 mb-2 bg-black">
-                                 <Image src={preview} alt="Preview" fill className="object-cover" />
+                             <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden border border-white/10 mb-2 bg-black">
+                                 <Image src={preview} alt="Display Preview" fill className="object-cover" />
                              </div>
                          )}
-                         <Input name="imageFile" type="file" accept="image/*" onChange={handleImageChange}
+                         <Input name="imageFile" type="file" accept="image/*" onChange={(e) => handleImageChange(e)}
                                 className="bg-black border-white/10 rounded-xl py-3 px-4 h-14 cursor-pointer file:text-white file:bg-white/10 file:rounded-full file:border-0 file:mr-4 file:px-4 file:text-xs hover:file:bg-white/20" />
                          <input type="hidden" name="existing_image" value={initialData?.image_url || ''} />
                     </div>

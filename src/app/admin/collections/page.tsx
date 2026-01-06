@@ -1,7 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Plus, Edit } from "lucide-react";
+import { Plus, Edit, Trash2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -10,6 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { deleteCollection } from "./actions";
+import { DeleteButton } from "@/components/DeleteButton";
 
 export default async function CollectionsPage() {
   const supabase = await createAdminClient();
@@ -62,11 +64,18 @@ export default async function CollectionsPage() {
                       )}
                   </TableCell>
                   <TableCell className="px-6 text-right">
+                    <div className="flex justify-end gap-1">
                       <Button asChild variant="ghost" size="icon" className="h-8 w-8 hover:bg-white/10">
                           <Link href={`/admin/collections/${col.id}`}>
                             <Edit className="h-4 w-4 text-white/70" />
                           </Link>
                       </Button>
+                      <DeleteButton 
+                        id={col.id} 
+                        onDelete={deleteCollection} 
+                        itemName={col.title}
+                      />
+                    </div>
                   </TableCell>
                 </TableRow>
               ))

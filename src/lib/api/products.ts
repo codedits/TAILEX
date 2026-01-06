@@ -72,6 +72,7 @@ export async function createProduct(formData: FormData): Promise<ApiResponse<Pro
     const status = (formData.get('status') as string) || 'draft'
     const isFeatured = formData.get('is_featured') === 'on'
     const categoryId = formData.get('category_id') as string || null
+    const productType = formData.get('product_type') as string || null
     const tagsRaw = formData.get('tags') as string
     const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : []
     
@@ -143,6 +144,7 @@ export async function createProduct(formData: FormData): Promise<ApiResponse<Pro
       status,
       is_featured: isFeatured,
       category_id: categoryId || null,
+      product_type: productType?.trim() || null,
       tags,
       cover_image: coverImage,
       images: imageUrls,
@@ -210,6 +212,7 @@ export async function updateProduct(formData: FormData): Promise<ApiResponse<Pro
     const status = (formData.get('status') as string) || 'draft'
     const isFeatured = formData.get('is_featured') === 'on'
     const categoryId = formData.get('category_id') as string || null
+    const productType = formData.get('product_type') as string || null
     const tagsRaw = formData.get('tags') as string
     const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : []
     
@@ -281,6 +284,7 @@ export async function updateProduct(formData: FormData): Promise<ApiResponse<Pro
       status,
       is_featured: isFeatured,
       category_id: categoryId || null,
+      product_type: productType?.trim() || null,
       tags,
       cover_image: coverImage,
       images: imageUrls,

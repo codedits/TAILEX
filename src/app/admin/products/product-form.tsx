@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { updateProduct, createProduct } from "./actions";
 import { useTransition, useState } from "react";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import Image from "next/image";
 import { X, Upload, Loader2 } from "lucide-react";
 import type { Product, Collection } from "@/lib/types";
@@ -66,8 +66,10 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
     
     // Add status and category
     formData.set('status', status);
-    if (categoryId) {
+    if (categoryId && categoryId !== 'none') {
       formData.set('category_id', categoryId);
+    } else {
+      formData.delete('category_id');
     }
     
     startTransition(async () => {
@@ -81,18 +83,18 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
         }
 
         if (res?.error) {
-          toast({
-            title: "Error saving product",
+          toast.error("Error saving product", {
             description: res.error,
-            variant: "destructive"
+          });
+        } else {
+          toast.success(initialData?.id ? "Product updated" : "Product created", {
+            description: `${formData.get('title')} has been saved successfully.`
           });
         }
       } catch (error) {
         console.error('Form submission error:', error);
-        toast({
-          title: "Unexpected error",
-          description: "Please try again",
-          variant: "destructive"
+        toast.error("Unexpected error", {
+          description: "Please try again later"
         });
       }
     });
@@ -295,7 +297,7 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
                   <SelectValue placeholder="Select collection" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No collection</SelectItem>
+                  <SelectItem value="none">No collection</SelectItem>
                   {collections.map(col => (
                     <SelectItem key={col.id} value={col.id}>{col.title}</SelectItem>
                   ))}
@@ -304,15 +306,26 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
             </div>
 
             <div className="space-y-2">
+              <Label className="text-white/60 text-xs font-medium uppercase tracking-widest">Product Type</Label>
+              <Input 
+                id="product_type" 
+                name="product_type" 
+                placeholder="e.g., Jacket, Shirt, Trousers" 
+                defaultValue={initialData?.product_type || ''}
+                className="bg-black border-white/10 rounded-xl focus:border-white/40 h-12 text-white" 
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="tags" className="text-white/60 text-xs font-medium uppercase tracking-widest">Tags</Label>
               <Input 
                 id="tags" 
                 name="tags" 
-                placeholder="summer, linen, casual" 
+                placeholder="men, summer, linen, casual" 
                 defaultValue={initialData?.tags?.join(', ') || ''}
                 className="bg-black border-white/10 rounded-xl focus:border-white/40 h-12 text-white" 
               />
-              <p className="text-[10px] text-white/30">Separate with commas</p>
+              <p className="text-[10px] text-white/30">Use &quot;men&quot;, &quot;women&quot;, or &quot;unisex&quot; for gender filtering. Separate with commas.</p>
             </div>
           </div>
 

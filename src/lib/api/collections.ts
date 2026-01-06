@@ -4,11 +4,12 @@
 
 'use server'
 
-import { createAdminClient } from '@/lib/supabase/admin'
+import { createAdminClient, ensureBucketExists } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import type { Collection, ApiResponse } from '@/lib/types'
+import type { Collection, ApiResponse } from '@/lib/types' 
+
 
 // ==========================================
 // IMAGE UPLOAD
@@ -26,21 +27,41 @@ async function uploadImage(file: File): Promise<string> {
   }
   
   const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg'
-  const fileName = `collections/${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`
+  const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`
   
   const { error: uploadError } = await supabase.storage
-    .from('products')
+    .from('collections')
     .upload(fileName, file, {
       contentType: file.type,
       cacheControl: '31536000',
     })
   
   if (uploadError) {
-    throw new Error(`Upload failed: ${uploadError.message}`)
+    // If bucket doesn't exist, try to create it and retry once
+    const msg = (uploadError.message || '').toLowerCase()
+    if (msg.includes('bucket not found') || msg.includes('not found')) {
+      try {
+        await ensureBucketExists('collections')
+        const { error: retryErr } = await supabase.storage
+          .from('collections')
+          .upload(fileName, file, {
+            contentType: file.type,
+            cacheControl: '31536000',
+          })
+
+        if (retryErr) {
+          throw new Error(`Upload failed after bucket create: ${retryErr.message}`)
+        }
+      } catch (err) {
+        throw new Error(`Upload failed and bucket create attempt failed: ${err instanceof Error ? err.message : String(err)}`)
+      }
+    } else {
+      throw new Error(`Upload failed: ${uploadError.message}`)
+    }
   }
   
   const { data: { publicUrl } } = supabase.storage
-    .from('products')
+    .from('collections')
     .getPublicUrl(fileName)
   
   return publicUrl
@@ -81,7 +102,7 @@ export async function createCollection(formData: FormData): Promise<ApiResponse<
       return { error: 'A collection with this slug already exists' }
     }
     
-    // Handle image upload
+    // Handle image uploads
     const imageFile = formData.get('imageFile') as File
     let imageUrl: string | null = null
     
@@ -90,7 +111,7 @@ export async function createCollection(formData: FormData): Promise<ApiResponse<
         imageUrl = await uploadImage(imageFile)
       } catch (error) {
         console.error('Image upload error:', error)
-        return { error: 'Image upload failed' }
+        return { error: 'Primary image upload failed' }
       }
     }
     
@@ -167,18 +188,19 @@ export async function updateCollection(formData: FormData): Promise<ApiResponse<
       return { error: 'A collection with this slug already exists' }
     }
     
-    // Handle image upload
+    // Handle image uploads
     const imageFile = formData.get('imageFile') as File
+
     let imageUrl: string | null = existingImage || null
     
     if (imageFile && imageFile.size > 0) {
       try {
         imageUrl = await uploadImage(imageFile)
       } catch (error) {
-        return { error: 'Image upload failed' }
+        return { error: 'Primary image upload failed' }
       }
     }
-    
+
     const { data, error } = await supabase
       .from('collections')
       .update({

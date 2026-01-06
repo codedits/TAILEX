@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { updateThemeConfig } from "./actions";
 
 const defaultTheme = {
+  mode: 'light',
   primaryColor: '#000000',
   secondaryColor: '#ffffff',
   backgroundColor: '#ffffff',
@@ -32,6 +33,27 @@ export default async function ThemePage() {
             <div className="grid gap-10">
                 <Card className="bg-[#0A0A0A] border-white/10 rounded-2xl overflow-hidden shadow-2xl">
                     <CardHeader className="border-b border-white/5 bg-white/[0.01] px-8 py-6">
+                         <CardTitle className="text-lg text-white">Theme Mode</CardTitle>
+                         <CardDescription className="text-white/40">Select the base appearance for your storefront.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-8">
+                         <div className="space-y-2">
+                            <Label htmlFor="mode" className="text-white/60 text-xs font-medium uppercase tracking-widest pl-1">Appearance</Label>
+                            <Select name="mode" defaultValue={theme.mode}>
+                              <SelectTrigger className="bg-black border-white/10 text-white h-12">
+                                <SelectValue placeholder="Select mode" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="light">Light Mode</SelectItem>
+                                <SelectItem value="dark">Dark Mode</SelectItem>
+                              </SelectContent>
+                            </Select>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="bg-[#0A0A0A] border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+                    <CardHeader className="border-b border-white/5 bg-white/[0.01] px-8 py-6">
                          <CardTitle className="text-lg text-white">Typography</CardTitle>
                          <CardDescription className="text-white/40">Choose the primary font family for your store.</CardDescription>
                     </CardHeader>
@@ -43,10 +65,10 @@ export default async function ThemePage() {
                                 <SelectValue placeholder="Select a font" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="Manrope">Manrope</SelectItem>
-                                <SelectItem value="Inter">Inter</SelectItem>
-                                <SelectItem value="Roboto">Roboto</SelectItem>
-                                <SelectItem value="Playfair Display">Playfair Display</SelectItem>
+                                <SelectItem value="manrope">Manrope (Sans)</SelectItem>
+                                <SelectItem value="inter">Inter (Modern)</SelectItem>
+                                <SelectItem value="playfair">Playfair Display (Serif)</SelectItem>
+                                <SelectItem value="mono">Space Mono (Tech)</SelectItem>
                               </SelectContent>
                             </Select>
                         </div>

@@ -18,8 +18,15 @@ export default async function Home() {
   const [heroResult, brandResult, collectionsResult, productsResult] = await Promise.all([
     supabase.from('site_config').select('value').eq('key', 'hero').maybeSingle(),
     supabase.from('site_config').select('value').eq('key', 'brand').maybeSingle(),
-    supabase.from('collections').select('*').order('title', { ascending: true }).limit(4),
-    supabase.from('products').select('*').order('created_at', { ascending: false }).limit(6)
+    // Select only necessary fields for performance
+    supabase.from('collections')
+      .select('id, title, slug, image_url, description')
+      .order('title', { ascending: true })
+      .limit(4),
+    supabase.from('products')
+      .select('id, title, slug, price, sale_price, cover_image, images')
+      .order('created_at', { ascending: false })
+      .limit(6)
   ]);
 
   const hero = heroResult.data?.value || {};

@@ -53,13 +53,13 @@ const CategoryGrid = ({ collections }: CategoryGridProps) => {
               transition={{ duration: 0.8, delay: index * 0.1 }}
               className={`flex flex-col ${index % 2 === 1 ? "md:mt-32" : ""}`}
             >
-              <Link href={`/collection?category=${collection.title}`} className="group block relative overflow-hidden bg-neutral-100">
+              <Link href={`/collection/${collection.slug}`} className="group block relative overflow-hidden bg-neutral-100">
                 <div className={`relative w-full ${isLarge ? 'aspect-[4/5]' : 'aspect-[1/1]'}`}>
                   <Image
                     src={displayImage}
                     alt={collection.title}
                     fill
-                    className="object-cover transition-transform duration-1000 ease-out group-hover:scale-105"
+                    className="object-cover transition-all duration-1000 ease-out group-hover:scale-105"
                   />
                 </div>
                 
@@ -72,7 +72,7 @@ const CategoryGrid = ({ collections }: CategoryGridProps) => {
                   <h3 className="text-2xl md:text-4xl font-bold tracking-tight uppercase">
                     {collection.title}
                   </h3>
-                  <Link href={`/collection?category=${collection.title}`} className="text-xs font-bold tracking-widest uppercase border-b border-foreground pb-1 hover:opacity-50 transition-opacity">
+                  <Link href={`/collection/${collection.slug}`} className="text-xs font-bold tracking-widest uppercase border-b border-foreground pb-1 hover:opacity-50 transition-opacity">
                     Shop Now
                   </Link>
                 </div>

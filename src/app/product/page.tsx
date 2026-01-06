@@ -8,7 +8,11 @@ export const revalidate = 60; // ISR
 
 export default async function ProductPage() {
   const supabase = await createClient();
-  const { data: products } = await supabase.from('products').select('*').eq('status', 'published').order('created_at', { ascending: false });
+  const { data: products } = await supabase
+    .from('products')
+    .select('id, title, slug, price, sale_price, cover_image, images, category_id, tags')
+    .eq('status', 'active')
+    .order('created_at', { ascending: false });
 
   // Fallback for demo if no DB connection or empty, but in prod we want real data.
   // We'll pass empty array if null.

@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { deleteProduct } from "./actions";
+import { DeleteButton } from "@/components/DeleteButton";
 
 export default async function ProductsPage() {
   const supabase = await createAdminClient();
@@ -94,14 +95,11 @@ export default async function ProductsPage() {
                                 <Edit className="h-4 w-4" />
                             </Link>
                         </Button>
-                         <form action={async () => {
-                             'use server';
-                             await deleteProduct(product.id);
-                         }}>
-                            <Button variant="ghost" size="icon" className="text-white/40 hover:text-red-400 hover:bg-red-400/10 rounded-lg">
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                         </form>
+                        <DeleteButton 
+                          id={product.id} 
+                          onDelete={deleteProduct} 
+                          itemName={product.title}
+                        />
                     </div>
                   </TableCell>
                 </TableRow>

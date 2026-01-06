@@ -1,9 +1,12 @@
 // src/lib/theme.ts
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createStaticClient } from '@supabase/supabase-js'
+import { unstable_cache } from 'next/cache'
 
 export type Theme = 'light' | 'dark'
 export type BrandConfig = {
+    mode: Theme
     primaryColor: string
     secondaryColor: string
     backgroundColor: string
@@ -13,6 +16,7 @@ export type BrandConfig = {
 }
 
 const defaultBrandConfig: BrandConfig = {
+    mode: 'light',
     primaryColor: '#000000',
     secondaryColor: '#ffffff',
     backgroundColor: '#ffffff',
@@ -20,6 +24,24 @@ const defaultBrandConfig: BrandConfig = {
     font: 'manrope',
     borderRadius: '0.5rem'
 }
+
+// Cached fetcher for brand config
+const getCachedSupabaseConfig = unstable_cache(
+    async () => {
+        const supabase = createStaticClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        )
+        const { data } = await supabase
+            .from('site_config')
+            .select('value')
+            .eq('key', 'theme')
+            .maybeSingle()
+        return data?.value
+    },
+    ['brand-config-db'],
+    { tags: ['site_config'], revalidate: 3600 }
+)
 
 export async function getTheme(): Promise<Theme> {
     const cookieStore = await cookies()
@@ -42,16 +64,11 @@ export async function getBrandConfig(): Promise<BrandConfig> {
             }
         }
         
-        // Otherwise, fetch from database
-        const supabase = await createClient()
-        const { data: themeConfig } = await supabase
-            .from('site_config')
-            .select('value')
-            .eq('key', 'theme')
-            .single()
+        // Otherwise, fetch from cache/database
+        const themeConfig = await getCachedSupabaseConfig()
         
-        if (themeConfig?.value) {
-            return { ...defaultBrandConfig, ...themeConfig.value }
+        if (themeConfig) {
+            return { ...defaultBrandConfig, ...themeConfig }
         }
         
         return defaultBrandConfig
