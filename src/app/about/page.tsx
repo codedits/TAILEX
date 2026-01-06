@@ -1,113 +1,137 @@
-"use client";
-
-import { motion } from "framer-motion";
+import { Suspense } from "react";
+import { createClient } from "@/lib/supabase/server";
+import { getBrandConfig, getNavigation, getFooterConfig, getSocialConfig } from "@/lib/theme";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Image from "next/image";
 import style1 from "@/assets/style-1.jpg";
 import style2 from "@/assets/style-2.jpg";
 
-export default function AboutPage() {
+// Make this page dynamic to fetch from CMS
+export const revalidate = 60;
+
+// Page content type for CMS
+type PageContent = {
+  title: string;
+  heroTitle?: string;
+  heroDescription?: string;
+  sections?: {
+    id: string;
+    type: string;
+    title?: string;
+    content?: string;
+    image?: string;
+  }[];
+};
+
+// Default content fallback
+const defaultContent: PageContent = {
+  title: "About Us",
+  heroTitle: "About TAILEX",
+  heroDescription: "Founded with a vision to create timeless menswear that transcends seasons and trends, TAILEX represents the intersection of quality craftsmanship and modern design.",
+  sections: [
+    {
+      id: "story",
+      type: "text-image",
+      title: "Our Story",
+      content: "What began as a small atelier focused on perfecting the essential wardrobe has grown into a global brand trusted by discerning customers worldwide.\n\nEvery piece in our collection is designed with intention — to be worn, loved, and passed down. We believe in buying less but buying better.\n\nOur commitment to quality means sourcing the finest materials from ethical suppliers and working with skilled artisans who share our passion for detail.",
+    },
+    {
+      id: "philosophy",
+      type: "image-text",
+      title: "Our Philosophy",
+      content: "We design for the modern man who values substance over spectacle. Our pieces are meant to be the foundation of your wardrobe — versatile, enduring, and effortlessly refined.",
+    }
+  ]
+};
+
+export default async function AboutPage() {
+  const supabase = await createClient();
+  
+  // Fetch page content and site config in parallel
+  const [brand, navItems, footerConfig, socialConfig, pageResult] = await Promise.all([
+    getBrandConfig(),
+    getNavigation('main-menu'),
+    getFooterConfig(),
+    getSocialConfig(),
+    supabase.from('pages').select('*').eq('slug', 'about').maybeSingle()
+  ]);
+
+  // Use CMS content if available, otherwise defaults
+  const pageData = pageResult.data;
+  const content: PageContent = pageData?.sections 
+    ? { 
+        title: pageData.title,
+        heroTitle: pageData.title,
+        heroDescription: pageData.content || defaultContent.heroDescription,
+        sections: pageData.sections as PageContent['sections']
+      }
+    : { ...defaultContent, heroTitle: `About ${brand.name}` };
+
   return (
     <main className="min-h-screen bg-background">
-      <Navbar />
+      <Navbar brandName={brand.name} navItems={navItems} />
       
       {/* Hero */}
       <section className="pt-32 pb-16 px-6 md:px-12">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="max-w-4xl"
-        >
-          <h1 className="section-title text-foreground mb-6">About TAILEX</h1>
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-4xl">
+          <h1 className="section-title text-foreground mb-6">{content.heroTitle}</h1>
           <p className="text-muted-foreground font-body text-lg md:text-xl leading-relaxed">
-            Founded with a vision to create timeless menswear that transcends seasons and trends, 
-            TAILEX represents the intersection of quality craftsmanship and modern design.
+            {content.heroDescription}
           </p>
-        </motion.div>
+        </div>
       </section>
 
       {/* Story Section */}
       <section className="px-6 md:px-12 pb-20">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center mb-20">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
+          <div className="animate-in fade-in slide-in-from-left-4 duration-700">
             <h2 className="font-display text-2xl md:text-3xl text-foreground mb-6">
-              Our Story
+              {content.sections?.[0]?.title || "Our Story"}
             </h2>
             <div className="space-y-4 font-body text-muted-foreground leading-relaxed">
-              <p>
-                What began as a small atelier focused on perfecting the essential wardrobe 
-                has grown into a global brand trusted by discerning customers worldwide.
-              </p>
-              <p>
-                Every piece in our collection is designed with intention — to be worn, 
-                loved, and passed down. We believe in buying less but buying better.
-              </p>
-              <p>
-                Our commitment to quality means sourcing the finest materials from ethical 
-                suppliers and working with skilled artisans who share our passion for detail.
-              </p>
+              {(content.sections?.[0]?.content || defaultContent.sections?.[0]?.content || '')
+                .split('\n\n')
+                .map((paragraph, idx) => (
+                  <p key={idx}>{paragraph}</p>
+                ))}
             </div>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="aspect-[4/5] overflow-hidden relative"
-          >
+          </div>
+          <div className="animate-in fade-in slide-in-from-right-4 duration-700 aspect-[4/5] overflow-hidden relative">
             <Image
-              src={style1}
-              alt="TAILEX craftsmanship"
+              src={content.sections?.[0]?.image || style1}
+              alt={`${brand.name} craftsmanship`}
               fill
               className="object-cover"
             />
-          </motion.div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="aspect-[4/5] overflow-hidden md:order-1 relative"
-          >
+          <div className="animate-in fade-in slide-in-from-left-4 duration-700 delay-150 aspect-[4/5] overflow-hidden md:order-1 relative">
             <Image
-              src={style2}
-              alt="TAILEX lifestyle"
+              src={content.sections?.[1]?.image || style2}
+              alt={`${brand.name} lifestyle`}
               fill
               className="object-cover"
             />
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="md:order-2"
-          >
+          </div>
+          <div className="animate-in fade-in slide-in-from-right-4 duration-700 delay-150 md:order-2">
             <h2 className="font-display text-2xl md:text-3xl text-foreground mb-6">
-              Our Philosophy
+              {content.sections?.[1]?.title || "Our Philosophy"}
             </h2>
             <div className="space-y-4 font-body text-muted-foreground leading-relaxed">
-              <p>
-                We design for the modern man who values substance over spectacle. 
-                Our pieces are meant to be the foundation of your wardrobe — versatile, 
-                enduring, and effortlessly refined.
-              </p>
+              {(content.sections?.[1]?.content || defaultContent.sections?.[1]?.content || '')
+                .split('\n\n')
+                .map((paragraph, idx) => (
+                  <p key={idx}>{paragraph}</p>
+                ))}
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      <Footer />
+      <Footer config={footerConfig} brandName={brand.name} social={socialConfig} />
     </main>
   );
 }

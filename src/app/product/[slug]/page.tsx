@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductDetail from "@/components/ProductDetail";
+import { getNavigation, getBrandConfig, getFooterConfig, getSocialConfig } from "@/lib/theme";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -23,31 +24,39 @@ export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
   const supabase = await createClient();
 
-  const { data: product, error } = await supabase
-    .from("products")
-    .select("*")
-    .eq("slug", slug)
-    .single();
+  // Fetch product and all config in parallel
+  const [productResult, navItems, brand, footerConfig, socialConfig] = await Promise.all([
+    supabase
+      .from("products")
+      .select(`*, options(*), variants(*)`)
+      .eq("slug", slug)
+      .single(),
+    getNavigation('main-menu'),
+    getBrandConfig(),
+    getFooterConfig(),
+    getSocialConfig()
+  ]);
 
-  if (error || !product) {
-    console.error("Product not found:", error);
+  if (productResult.error || !productResult.data) {
+    console.error("Product not found:", productResult.error);
     notFound();
   }
 
-  const typedProduct = product as Product;
+  const typedProduct = productResult.data as Product;
 
-  // Fetch Related Products (excluding current product)
+  // Fetch Related Products (excluding current product, same category preferred)
   const { data: relatedProducts } = await supabase
     .from("products")
-    .select("*")
+    .select("id, title, slug, price, sale_price, cover_image, images")
+    .eq("status", "active")
     .neq("id", typedProduct.id)
-    .limit(3);
+    .limit(4);
 
   const safeRelated = (relatedProducts || []) as Product[];
 
   return (
-    <main className="min-h-screen bg-background">
-      <Navbar />
+    <main className="min-h-screen bg-background text-foreground">
+      <Navbar brandName={brand.name} navItems={navItems} />
 
       <div className="pt-32 pb-20 px-6 md:px-12">
         {/* Breadcrumbs */}
@@ -59,7 +68,7 @@ export default async function ProductPage({ params }: Props) {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href="/collection">Collection</BreadcrumbLink>
+                <BreadcrumbLink href="/product">Products</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
@@ -72,7 +81,7 @@ export default async function ProductPage({ params }: Props) {
         <ProductDetail product={typedProduct} relatedProducts={safeRelated} />
       </div>
 
-      <Footer />
+      <Footer config={footerConfig} brandName={brand.name} social={socialConfig} />
     </main>
   );
 }

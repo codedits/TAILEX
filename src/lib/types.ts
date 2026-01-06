@@ -488,6 +488,7 @@ export type HeroConfig = {
 }
 
 export type ThemeConfig = {
+  mode: 'light' | 'dark'
   primaryColor: string
   secondaryColor: string
   backgroundColor: string
@@ -509,6 +510,51 @@ export type StoreConfig = {
   currencySymbol: string
   taxRate: number
   taxIncluded: boolean
+}
+
+// Benefits strip items (admin-controlled)
+export type BenefitItem = {
+  icon: 'truck' | 'rotate' | 'shield' | 'headphones' | 'star' | 'heart' | 'gift' | 'clock'
+  text: string
+}
+
+export type BenefitsConfig = {
+  enabled: boolean
+  items: BenefitItem[]
+}
+
+// Footer configuration
+export type FooterConfig = {
+  tagline?: string
+  columns: {
+    title: string
+    handle?: string // Reference navigation_menus handle, OR use links below
+    links?: { label: string; url: string }[]
+  }[]
+  showSocial: boolean
+  copyright?: string
+}
+
+// Homepage sections ordering
+export type HomepageSectionType = 
+  | 'hero' 
+  | 'categories' 
+  | 'featured-products' 
+  | 'benefits' 
+  | 'news' 
+  | 'newsletter'
+  | 'custom'
+
+export type HomepageSection = {
+  id: string
+  type: HomepageSectionType
+  enabled: boolean
+  order: number
+  config?: Record<string, unknown>
+}
+
+export type HomepageConfig = {
+  sections: HomepageSection[]
 }
 
 // ==========================================

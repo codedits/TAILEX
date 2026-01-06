@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CollectionBrowser from "@/components/CollectionBrowser";
 import { createClient } from "@/lib/supabase/server";
+import { getNavigation, getBrandConfig, getFooterConfig, getSocialConfig } from "@/lib/theme";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,33 +14,41 @@ import {
 import { type Product, type Collection } from "@/lib/types";
 import Link from "next/link";
 import Image from "next/image";
+import type { Metadata } from "next";
 
 export const revalidate = 60; // ISR
 
-export const metadata = {
-  title: 'Shop All Collections | TAILEX',
-  description: 'Explore our complete range of premium fashion collections. Quality craftsmanship meets contemporary design.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const brand = await getBrandConfig();
+  return {
+    title: `Shop All Collections | ${brand.name}`,
+    description: `Explore our complete range of premium fashion collections at ${brand.name}. Quality craftsmanship meets contemporary design.`,
+  };
+}
 
 export default async function CollectionPage() {
   const supabase = await createClient();
   
-  // Fetch all active Products (optimized columns)
-  const { data: products } = await supabase
-    .from('products')
-    .select('id, category_id, title, slug, price, sale_price, cover_image, images')
-    .eq('status', 'active')
-    .order('created_at', { ascending: false });
-  
-  // Fetch Visible Collections with product count
-  const { data: collections } = await supabase
-    .from('collections')
-    .select('id, title, slug, image_url, description')
-    .eq('is_visible', true)
-    .order('sort_order', { ascending: true });
+  // Fetch all config and data in parallel
+  const [navItems, brand, footerConfig, socialConfig, productsResult, collectionsResult] = await Promise.all([
+    getNavigation('main-menu'),
+    getBrandConfig(),
+    getFooterConfig(),
+    getSocialConfig(),
+    supabase
+      .from('products')
+      .select('id, category_id, title, slug, price, sale_price, cover_image, images')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('collections')
+      .select('id, title, slug, image_url, description')
+      .eq('is_visible', true)
+      .order('sort_order', { ascending: true })
+  ]);
 
-  const safeProducts = (products || []) as Product[];
-  const safeCollections = (collections || []) as Collection[];
+  const safeProducts = (productsResult.data || []) as Product[];
+  const safeCollections = (collectionsResult.data || []) as Collection[];
 
   // Calculate product count per collection
   const collectionsWithCounts = safeCollections.map(col => ({
@@ -49,7 +58,7 @@ export default async function CollectionPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <Navbar />
+      <Navbar brandName={brand.name} navItems={navItems} />
       
       <div className="pt-32 pb-20 px-6 md:px-12">
         {/* Breadcrumbs */}
@@ -126,7 +135,7 @@ export default async function CollectionPage() {
         <CollectionBrowser products={safeProducts} collections={safeCollections} />
       </div>
 
-      <Footer />
+      <Footer config={footerConfig} brandName={brand.name} social={socialConfig} />
     </main>
   );
 }

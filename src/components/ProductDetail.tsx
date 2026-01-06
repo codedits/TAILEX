@@ -15,10 +15,7 @@ import {
 import { MagneticButton } from "@/components/ui/MagneticButton";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/context/CartContext";
-import { Product } from "@/lib/types";
-
-// Default sizes if none provided in product metadata (assuming clothing for now)
-const DEFAULT_SIZES = ["S", "M", "L", "XL"];
+import { Product, ProductOption } from "@/lib/types";
 
 export default function ProductDetail({ 
   product, 
@@ -27,15 +24,19 @@ export default function ProductDetail({
   product: Product,
   relatedProducts: Product[] 
 }) {
-  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(1);
   const { toast } = useToast();
   const { addItem } = useCart();
 
   const handleAddToCart = () => {
-    if (!selectedSize) {
+    // Check if all options are selected
+    const options = product.options || [];
+    const missingOptions = options.filter(opt => !selectedOptions[opt.name]);
+
+    if (missingOptions.length > 0) {
       toast({
-        title: "Please select a size",
+        title: `Please select ${missingOptions[0].name}`,
         variant: "destructive",
       });
       return;
@@ -46,14 +47,18 @@ export default function ProductDetail({
       name: product.title,
       price: product.price,
       image: productImages[0] || "",
-      size: selectedSize,
+      size: selectedOptions["Size"] || selectedOptions["size"] || "", // Backward compat for cart context
       slug: product.slug,
     });
     
     toast({
       title: "Added to Cart",
-      description: `${product.title} - ${selectedSize} added.`,
+      description: `${product.title} added.`,
     })
+  };
+
+  const handleOptionSelect = (name: string, value: string) => {
+    setSelectedOptions(prev => ({ ...prev, [name]: value }));
   };
 
   const incrementQuantity = () => setQuantity(q => q + 1);
@@ -149,30 +154,34 @@ export default function ProductDetail({
                 {product.description}
               </p>
 
-              {/* Size Selection */}
-              <div className="mb-8">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-sm font-display uppercase tracking-wider">Size</h3>
-                  <button className="text-xs underline text-muted-foreground hover:text-foreground">
-                    Size Guide
-                  </button>
+              {/* Dynamic Product Options */}
+              {product.options && product.options.map((option) => (
+                <div key={option.id} className="mb-8">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-sm font-display uppercase tracking-wider">{option.name}</h3>
+                    {option.name.toLowerCase() === 'size' && (
+                      <button className="text-xs underline text-muted-foreground hover:text-foreground">
+                        Size Guide
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    {option.values.map((value) => (
+                      <button
+                        key={value}
+                        onClick={() => handleOptionSelect(option.name, value)}
+                        className={`min-w-12 h-12 px-4 flex items-center justify-center border transition-all ${
+                          selectedOptions[option.name] === value
+                            ? "border-foreground bg-foreground text-background"
+                            : "border-border hover:border-foreground text-muted-foreground"
+                        }`}
+                      >
+                        {value}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-3">
-                  {DEFAULT_SIZES.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`w-12 h-12 flex items-center justify-center border transition-all ${
-                        selectedSize === size
-                          ? "border-foreground bg-foreground text-background"
-                          : "border-border hover:border-foreground text-muted-foreground"
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              ))}
 
               {/* Quantity & Add to Cart */}
               <div className="space-y-4 mb-8">

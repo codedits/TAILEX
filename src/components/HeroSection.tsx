@@ -9,9 +9,19 @@ type HeroSectionProps = {
   heading?: string;
   subheading?: string;
   image?: string;
+  ctaText?: string;
+  ctaLink?: string;
+  brandName?: string;
 };
 
-const HeroSection = ({ heading, subheading, image }: HeroSectionProps) => {
+const HeroSection = ({ 
+  heading, 
+  subheading, 
+  image, 
+  ctaText = "Shop Now",
+  ctaLink = "/collection",
+  brandName = "TAILEX"
+}: HeroSectionProps) => {
   // Ensure we have a valid non-empty string for the image src
   const displayImage = (typeof image === 'string' && image.trim().length > 0) 
     ? image 
@@ -61,13 +71,13 @@ const HeroSection = ({ heading, subheading, image }: HeroSectionProps) => {
             transition={{ duration: 0.8, delay: 1.0 }}
             className="text-5xl md:text-7xl lg:text-8xl font-normal tracking-tight text-white"
           >
-            TAILEX
+            {brandName}
           </motion.h1>
 
           {/* Right - CTA */}
           <div className="text-right flex flex-col items-end">
-            <Link href="/collection" className="group inline-flex items-center gap-3  text-white px-6 py-3 md:px-8 md:py-4 rounded-full font-medium uppercase tracking-widest transform transition-transform duration-300 hover:scale-105">
-              <span>Shop Now</span>
+            <Link href={ctaLink} className="group inline-flex items-center gap-3  text-white px-6 py-3 md:px-8 md:py-4 rounded-full font-medium uppercase tracking-widest transform transition-transform duration-300 hover:scale-105">
+              <span>{ctaText}</span>
               <ArrowDownRight className="w-4 h-4 transition-transform duration-300 group-hover:rotate-45" />
             </Link>
           </div>

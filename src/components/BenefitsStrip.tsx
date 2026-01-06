@@ -1,28 +1,34 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Truck, RotateCcw, Shield, HeadphonesIcon } from "lucide-react";
+import { Truck, RotateCcw, Shield, HeadphonesIcon, Star, Heart, Gift, Clock, LucideIcon } from "lucide-react";
+import { BenefitItem } from "@/lib/types";
 
-const benefits = [
-  {
-    icon: Truck,
-    text: "Free shipping on orders over $75",
-  },
-  {
-    icon: RotateCcw,
-    text: "14-day hassle-free returns",
-  },
-  {
-    icon: Shield,
-    text: "30-day product warranty",
-  },
-  {
-    icon: HeadphonesIcon,
-    text: "Customer support 24/7",
-  },
+// Icon mapping for admin-controlled icons
+const iconMap: Record<string, LucideIcon> = {
+  truck: Truck,
+  rotate: RotateCcw,
+  shield: Shield,
+  headphones: HeadphonesIcon,
+  star: Star,
+  heart: Heart,
+  gift: Gift,
+  clock: Clock,
+};
+
+// Default benefits if none provided
+const defaultBenefits: BenefitItem[] = [
+  { icon: 'truck', text: 'Free shipping on orders over $75' },
+  { icon: 'rotate', text: '14-day hassle-free returns' },
+  { icon: 'shield', text: '30-day product warranty' },
+  { icon: 'headphones', text: 'Customer support 24/7' },
 ];
 
-const BenefitsStrip = () => {
+interface BenefitsStripProps {
+  items?: BenefitItem[];
+}
+
+const BenefitsStrip = ({ items = defaultBenefits }: BenefitsStripProps) => {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -54,18 +60,21 @@ const BenefitsStrip = () => {
         viewport={{ once: true }}
         variants={containerVariants}
       >
-        {benefits.map((benefit, index) => (
-          <motion.div
-            key={index}
-            variants={itemVariants}
-            className="flex flex-col items-center text-center"
-          >
-            <benefit.icon className="w-6 h-6 text-foreground mb-3" strokeWidth={1.5} />
-            <p className="font-body text-sm text-muted-foreground leading-relaxed">
-              {benefit.text}
-            </p>
-          </motion.div>
-        ))}
+        {items.map((benefit, index) => {
+          const IconComponent = iconMap[benefit.icon] || Truck;
+          return (
+            <motion.div
+              key={index}
+              variants={itemVariants}
+              className="flex flex-col items-center text-center"
+            >
+              <IconComponent className="w-6 h-6 text-foreground mb-3" strokeWidth={1.5} />
+              <p className="font-body text-sm text-muted-foreground leading-relaxed">
+                {benefit.text}
+              </p>
+            </motion.div>
+          );
+        })}
       </motion.div>
     </section>
   );

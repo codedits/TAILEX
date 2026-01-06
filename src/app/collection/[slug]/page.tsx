@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import CollectionBrowser from "@/components/CollectionBrowser";
 import { Product, Collection } from "@/lib/types";
 import { notFound } from "next/navigation";
+import { getNavigation, getBrandConfig, getFooterConfig, getSocialConfig } from "@/lib/theme";
 import Image from "next/image";
 import {
   Breadcrumb,
@@ -76,9 +77,17 @@ export default async function CollectionDetailPage({ params }: Props) {
   // Hero image for collection (like high-end stores)
   const heroImage = collection.image_url || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070';
 
+  // Fetch all config in parallel
+  const [navItems, brand, footerConfig, socialConfig] = await Promise.all([
+    getNavigation('main-menu'),
+    getBrandConfig(),
+    getFooterConfig(),
+    getSocialConfig()
+  ]);
+
   return (
-    <main className="min-h-screen bg-background">
-      <Navbar />
+    <main className="min-h-screen bg-background text-foreground">
+      <Navbar brandName={brand.name} navItems={navItems} />
       
       {/* Collection Hero - Like Loro Piana, Zegna style */}
       <section className="relative h-[50vh] md:h-[60vh] overflow-hidden">
@@ -143,7 +152,7 @@ export default async function CollectionDetailPage({ params }: Props) {
         )}
       </section>
 
-      <Footer />
+      <Footer config={footerConfig} brandName={brand.name} social={socialConfig} />
     </main>
   );
 }
