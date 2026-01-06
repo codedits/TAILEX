@@ -6,7 +6,6 @@ import BenefitsStrip from "@/components/BenefitsStrip";
 import NewsSection from "@/components/NewsSection";
 import Footer from "@/components/Footer";
 import { AnnouncementBar } from "@/components/AnnouncementBar";
-import { createClient } from "@/lib/supabase/server";
 import { Collection, Product } from "@/lib/types";
 import { 
   getNavigation, 
@@ -15,15 +14,18 @@ import {
   getBenefitsConfig,
   getFooterConfig,
   getSocialConfig,
-  getLatestPosts
+  getLatestPosts,
+  getFeaturedCollections,
+  getFeaturedProducts
 } from "@/lib/theme";
 
-export const revalidate = 60; // ISR: Revalidate every 60 seconds
+export const revalidate = 300; // 5 minutes - aggressive cache for storefront
 
 export default async function Home() {
-  const supabase = await createClient();
-  
-  // Fetch all config in parallel for performance
+  // ============================================
+  // ALL DATA IS EDGE-CACHED (Layer 2)
+  // No per-request DB calls - shared across users
+  // ============================================
   const [
     navItems, 
     brand, 
@@ -32,8 +34,8 @@ export default async function Home() {
     footerConfig,
     socialConfig,
     blogPosts,
-    collectionsResult, 
-    productsResult
+    collections, 
+    featuredProducts
   ] = await Promise.all([
     getNavigation('main-menu'),
     getBrandConfig(),
@@ -42,22 +44,19 @@ export default async function Home() {
     getFooterConfig(),
     getSocialConfig(),
     getLatestPosts(3),
-    // Select only necessary fields for performance
-    supabase.from('collections')
-      .select('id, title, slug, image_url, description')
-      .eq('is_visible', true)
-      .order('sort_order', { ascending: true })
-      .limit(4),
-    supabase.from('products')
-      .select('id, title, slug, price, sale_price, cover_image, images')
-      .eq('status', 'active')
-      .eq('is_featured', true)
-      .order('created_at', { ascending: false })
-      .limit(6)
-  ]);
-
-  const collections = (collectionsResult.data || []) as Collection[];
-  const featuredProducts = (productsResult.data || []) as Product[];
+    getFeaturedCollections(4),
+    getFeaturedProducts(6)
+  ]) as [
+    Awaited<ReturnType<typeof getNavigation>>,
+    Awaited<ReturnType<typeof getBrandConfig>>,
+    Awaited<ReturnType<typeof getHeroConfig>>,
+    Awaited<ReturnType<typeof getBenefitsConfig>>,
+    Awaited<ReturnType<typeof getFooterConfig>>,
+    Awaited<ReturnType<typeof getSocialConfig>>,
+    Awaited<ReturnType<typeof getLatestPosts>>,
+    Collection[],
+    Product[]
+  ];
 
   return (
     <main className="relative bg-background min-h-screen">

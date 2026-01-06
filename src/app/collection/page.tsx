@@ -16,15 +16,13 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 
-export const revalidate = 60; // ISR
+export const revalidate = 300; // 5 minutes - aggressive cache
 
-export async function generateMetadata(): Promise<Metadata> {
-  const brand = await getBrandConfig();
-  return {
-    title: `Shop All Collections | ${brand.name}`,
-    description: `Explore our complete range of premium fashion collections at ${brand.name}. Quality craftsmanship meets contemporary design.`,
-  };
-}
+// Static metadata - no DB call
+export const metadata: Metadata = {
+  title: `Shop All Collections | TAILEX`,
+  description: `Explore our complete range of premium fashion collections. Quality craftsmanship meets contemporary design.`,
+};
 
 export default async function CollectionPage() {
   const supabase = await createClient();

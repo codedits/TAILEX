@@ -80,21 +80,29 @@ const getSupabase = () => createStaticClient(
 
 // ==========================================
 // CACHED FETCHERS (with revalidation tags)
+// Edge-cached, shared across all users
 // ==========================================
 
 // Unified site_config fetcher - gets all keys in one call
 export const getSiteConfig = unstable_cache(
     async () => {
-        const supabase = getSupabase()
-        const { data } = await supabase
-            .from('site_config')
-            .select('key, value')
-        
-        const config: Record<string, unknown> = {}
-        data?.forEach(row => {
-            config[row.key] = row.value
-        })
-        return config
+        try {
+            const supabase = getSupabase()
+            const { data, error } = await supabase
+                .from('site_config')
+                .select('key, value')
+            
+            if (error) throw error
+            
+            const config: Record<string, unknown> = {}
+            data?.forEach(row => {
+                config[row.key] = row.value
+            })
+            return config
+        } catch {
+            // Return empty config on error - defaults will be used
+            return {}
+        }
     },
     ['site-config-all'],
     { tags: ['site_config'], revalidate: 300 } // 5 minutes
@@ -103,13 +111,17 @@ export const getSiteConfig = unstable_cache(
 // Navigation menu fetcher
 export const getNavigation = unstable_cache(
     async (handle = 'main-menu'): Promise<MenuItem[]> => {
-        const supabase = getSupabase()
-        const { data } = await supabase
-            .from('navigation_menus')
-            .select('items')
-            .eq('handle', handle)
-            .maybeSingle()
-        return (data?.items as MenuItem[]) || []
+        try {
+            const supabase = getSupabase()
+            const { data } = await supabase
+                .from('navigation_menus')
+                .select('items')
+                .eq('handle', handle)
+                .maybeSingle()
+            return (data?.items as MenuItem[]) || []
+        } catch {
+            return []
+        }
     },
     ['navigation'],
     { tags: ['navigation_menus'], revalidate: 300 }
@@ -118,17 +130,65 @@ export const getNavigation = unstable_cache(
 // Blog posts fetcher (for NewsSection)
 export const getLatestPosts = unstable_cache(
     async (limit = 3) => {
-        const supabase = getSupabase()
-        const { data } = await supabase
-            .from('blog_posts')
-            .select('id, title, slug, excerpt, featured_image, published_at, author_name')
-            .eq('status', 'published')
-            .order('published_at', { ascending: false })
-            .limit(limit)
-        return data || []
+        try {
+            const supabase = getSupabase()
+            const { data } = await supabase
+                .from('blog_posts')
+                .select('id, title, slug, excerpt, featured_image, published_at, author_name')
+                .eq('status', 'published')
+                .order('published_at', { ascending: false })
+                .limit(limit)
+            return data || []
+        } catch {
+            return []
+        }
     },
     ['blog-posts-latest'],
     { tags: ['blog_posts'], revalidate: 300 }
+)
+
+// ==========================================
+// CACHED STOREFRONT DATA (Collections & Products)
+// Edge-cached, shared across all users - NO per-request DB
+// ==========================================
+
+export const getFeaturedCollections = unstable_cache(
+    async (limit = 4) => {
+        try {
+            const supabase = getSupabase()
+            const { data } = await supabase
+                .from('collections')
+                .select('id, title, slug, image_url, description')
+                .eq('is_visible', true)
+                .order('sort_order', { ascending: true })
+                .limit(limit)
+            return data || []
+        } catch {
+            return []
+        }
+    },
+    ['featured-collections'],
+    { tags: ['collections'], revalidate: 300 }
+)
+
+export const getFeaturedProducts = unstable_cache(
+    async (limit = 6) => {
+        try {
+            const supabase = getSupabase()
+            const { data } = await supabase
+                .from('products')
+                .select('id, title, slug, price, sale_price, cover_image, images')
+                .eq('status', 'active')
+                .eq('is_featured', true)
+                .order('created_at', { ascending: false })
+                .limit(limit)
+            return data || []
+        } catch {
+            return []
+        }
+    },
+    ['featured-products'],
+    { tags: ['products'], revalidate: 300 }
 )
 
 // ==========================================

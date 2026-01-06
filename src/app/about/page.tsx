@@ -8,7 +8,7 @@ import style1 from "@/assets/style-1.jpg";
 import style2 from "@/assets/style-2.jpg";
 
 // Make this page dynamic to fetch from CMS
-export const revalidate = 60;
+export const revalidate = 300; // 5 minutes - aggressive cache
 
 // Page content type for CMS
 type PageContent = {

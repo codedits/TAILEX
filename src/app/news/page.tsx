@@ -5,7 +5,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { getNavigation, getBrandConfig, getFooterConfig, getSocialConfig } from "@/lib/theme";
 
-export const revalidate = 60;
+export const revalidate = 300; // 5 minutes - aggressive cache
 
 // Fallback articles if no blog posts in DB
 const fallbackArticles = [

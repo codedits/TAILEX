@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { type Product } from "@/lib/types";
 import { getNavigation, getBrandConfig, getFooterConfig, getSocialConfig } from "@/lib/theme";
 
-export const revalidate = 60; // ISR
+export const revalidate = 300; // 5 minutes - aggressive cache
 
 export default async function ProductPage() {
   const supabase = await createClient();
