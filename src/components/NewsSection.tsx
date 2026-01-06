@@ -3,9 +3,9 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import newsSpring from "@/assets/news-spring.jpg";
-import newsPopup from "@/assets/news-popup.jpg";
-import newsFabric from "@/assets/news-fabric.jpg";
+const newsSpring = "https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?q=80&w=1400&auto=format&fit=crop";
+const newsPopup = "https://images.unsplash.com/photo-1495121605193-b116b5b09a3f?q=80&w=1400&auto=format&fit=crop";
+const newsFabric = "https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=1400&auto=format&fit=crop";
 
 const articles = [
   {

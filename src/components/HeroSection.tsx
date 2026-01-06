@@ -5,16 +5,28 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowDownRight } from "lucide-react";
 
-const HERO_IMAGE_URL = "https://framerusercontent.com/images/T0Z10o3Yaf4JPrk9f5lhcmJJwno.jpg";
+type HeroSectionProps = {
+  heading?: string;
+  subheading?: string;
+  image?: string;
+};
 
-const HeroSection = () => {
+const HeroSection = ({ heading, subheading, image }: HeroSectionProps) => {
+  // Ensure we have a valid non-empty string for the image src
+  const displayImage = (typeof image === 'string' && image.trim().length > 0) 
+    ? image 
+    : "https://framerusercontent.com/images/T0Z10o3Yaf4JPrk9f5lhcmJJwno.jpg";
+    
+  const displayHeading = heading || "Winter Collection";
+  const displaySubheading = subheading || "Discover the new trends";
+
   return (
     <section className="relative h-screen w-full overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
-          src={HERO_IMAGE_URL}
-          alt="Fashion model in dark coat with urban bokeh background"
+          src={displayImage}
+          alt="Hero background"
           fill
           className="object-cover object-center"
           priority

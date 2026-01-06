@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { login } from "./actions";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -9,23 +9,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
+import { useState, useTransition } from "react";
 
 export default function LoginPage() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
+    const formData = new FormData(e.currentTarget);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "Logged in successfully",
-        description: "Welcome back!",
-      });
-      window.location.href = "/";
-    }, 1500);
+    startTransition(async () => {
+      const result = await login(formData);
+      if (result?.error) {
+        toast({
+          title: "Error",
+          description: result.error,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "Logged in successfully",
+        });
+      }
+    });
   };
 
   return (
@@ -42,7 +49,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="m@example.com" required />
+              <Input id="email" name="email" type="email" placeholder="m@example.com" required />
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -51,11 +58,11 @@ export default function LoginPage() {
                   Forgot password?
                 </Link>
               </div>
-              <Input id="password" type="password" required />
+              <Input id="password" name="password" type="password" required />
             </div>
             
-            <Button type="submit" className="w-full uppercase tracking-widest" disabled={isLoading}>
-              {isLoading ? "Logging in..." : "Login"}
+            <Button type="submit" className="w-full uppercase tracking-widest" disabled={isPending}>
+              {isPending ? "Logging in..." : "Login"}
             </Button>
           </form>
 
@@ -71,10 +78,10 @@ export default function LoginPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" disabled={isLoading}>
+            <Button variant="outline" disabled={isPending}>
               Google
             </Button>
-            <Button variant="outline" disabled={isLoading}>
+            <Button variant="outline" disabled={isPending}>
               Apple
             </Button>
           </div>

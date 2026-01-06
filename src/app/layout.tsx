@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
+import { manrope, inter, playfair, spaceMono, getFont } from "@/lib/fonts";
+import { getTheme, getBrandConfig } from "@/lib/theme";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
-
-const manrope = Manrope({
-  subsets: ["latin"],
-  weight: ["300","400","500","600","700","800"],
-  variable: "--font-body",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "TAILEX | Timeless Wardrobe, Everyday Power",
@@ -29,14 +23,36 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const theme = await getTheme();
+  const brand = await getBrandConfig();
+  const font = getFont(brand.font);
+
+  // Dynamic CSS variables that are injected at the root level.
+  // These override defaults from globals.css and can be controlled by the Admin Theme panel.
+  const dynamicStyles = {
+    colorScheme: theme,
+    ['--brand-primary' as string]: brand.primaryColor,
+    ['--brand-secondary' as string]: brand.secondaryColor,
+    ['--brand-background' as string]: brand.backgroundColor,
+    ['--brand-foreground' as string]: brand.foregroundColor,
+    ['--brand-radius' as string]: brand.borderRadius,
+    ['--font-display' as string]: `var(--font-${brand.font})`,
+    ['--font-body' as string]: `var(--font-${brand.font})`,
+  };
+  
   return (
-    <html lang="en">
-      <body className={manrope.className}>
+    <html 
+      lang="en" 
+      data-theme={theme} 
+      style={dynamicStyles} 
+      className={`${theme} ${manrope.variable} ${inter.variable} ${playfair.variable} ${spaceMono.variable}`}
+    >
+      <body className={font.className}>
         <Providers>{children}</Providers>
       </body>
     </html>

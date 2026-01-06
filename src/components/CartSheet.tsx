@@ -38,12 +38,16 @@ export function CartSheet() {
                 {items.map((item) => (
                   <div key={`${item.id}-${item.size}`} className="flex gap-4">
                     <div className="relative w-20 h-24 bg-secondary/30 flex-shrink-0 overflow-hidden">
-                      <Image
-                        src={item.image}
-                        alt={item.name}
-                        fill
-                        className="object-cover"
-                      />
+                      {item.image ? (
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-neutral-200" />
+                      )}
                     </div>
                     <div className="flex-1 flex flex-col justify-between">
                       <div className="flex justify-between items-start">

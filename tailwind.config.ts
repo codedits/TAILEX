@@ -14,8 +14,13 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['Manrope', 'system-ui', 'sans-serif'],
-        body: ['Manrope', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-manrope)', 'system-ui', 'sans-serif'],
+        display: ['var(--font-display)', 'system-ui', 'sans-serif'],
+        body: ['var(--font-body)', 'system-ui', 'sans-serif'],
+        manrope: ['var(--font-manrope)', 'sans-serif'],
+        inter: ['var(--font-inter)', 'sans-serif'],
+        playfair: ['var(--font-playfair)', 'serif'],
+        mono: ['var(--font-mono)', 'monospace'],
       },
       colors: {
         border: "hsl(var(--border))",

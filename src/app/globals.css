@@ -9,6 +9,8 @@
     scroll-behavior: smooth;
   }
   :root {
+    --brand-primary: #000000; /* Fallback */
+
     --background: 0 0% 100%;
     --foreground: 0 0% 8%;
 
@@ -18,7 +20,14 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 8%;
 
-    --primary: 0 0% 8%;
+    /* Map --primary to --brand-primary if intended, BUT shadcn expects HSL numbers usually. 
+     * To support dynamic hex colors without JS conversion, we should use `from var(--brand-primary)` relative color syntax (modern browsers)
+     * OR stick to simple hex for primary if we redefine the utilities.
+     * For broad compatibility without complex conversion, we can repurpose --primary to take the HEX variable directly, 
+     * but we must break tailwind's opacity modifiers (bg-primary/20) unless we use `rgb(from ...)`
+     */
+     
+    --primary: 0 0% 8%; 
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 96%;
@@ -38,32 +47,44 @@
     --ring: 0 0% 8%;
 
     --radius: 0.25rem;
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 0 0% 20%;
-    --sidebar-primary: 0 0% 8%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 96%;
-    --sidebar-accent-foreground: 0 0% 8%;
-    --sidebar-border: 0 0% 90%;
-    --sidebar-ring: 0 0% 8%;
-
-    /* Custom tokens */
-    --font-display: 'Manrope', system-ui, sans-serif;
-    --font-body: 'Manrope', system-ui, sans-serif;
-
-    --transition-smooth: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-fast: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-    --shadow-soft: 0 4px 30px rgba(0, 0, 0, 0.08);
-    --shadow-glow: 0 0 60px rgba(0, 0, 0, 0.03);
-
-    --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+    
+    /* Font Bindings */
+    /* Accessing the font variable injected by next/font */
+    /* If next/font injects a class, we use inheritance. If it injects a variable, we map it here. */
+    /* In layout.tsx, we apply font.className to body, so inheritance works. */
+    /* But if tokens rely on var(--font-body), we need to ensure that variable is present */
+    /* We can bind the variable passed by the font instance */
   }
 
-  .dark {
+  /* Dark Theme Overrides - applied via .dark class or data-theme='dark' */
+  [data-theme='dark'] {
     --background: 0 0% 4%;
     --foreground: 0 0% 98%;
+    
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 98%;
+    
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 98%;
+    
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
   }
 }
 

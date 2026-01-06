@@ -1,174 +1,79 @@
-"use client";
-
-import { useState } from "react";
-import { motion } from "framer-motion";
-import Image from "next/image";
-import { useParams } from "next/navigation";
+import { notFound } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { 
-  Accordion, 
-  AccordionContent, 
-  AccordionItem, 
-  AccordionTrigger 
-} from "@/components/ui/accordion";
-import { MagneticButton } from "@/components/ui/MagneticButton";
-import { useToast } from "@/hooks/use-toast";
-import { useCart } from "@/context/CartContext";
-import productJacket1 from "@/assets/product-jacket-1.jpg";
-import productJacket2 from "@/assets/product-jacket-2.jpg";
+import ProductDetail from "@/components/ProductDetail";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Product } from "@/lib/types";
 
-const product = {
-  id: "relaxed-linen-jacket",
-  name: "Relaxed Linen Jacket",
-  price: 69.00,
-  description: "A versatile, lightweight jacket crafted from premium linen. Perfect for layering during transitional seasons or cool summer evenings.",
-  images: [productJacket1, productJacket2],
-  sizes: ["S", "M", "L", "XL"],
-  details: [
-    {
-      title: "Material & Care",
-      content: "100% Organic Linen. Machine wash cold, tumble dry low. Iron on low heat if needed."
-    },
-    {
-      title: "Shipping & Returns",
-      content: "Free standard shipping on all orders over $75. 14-day hassle-free returns."
-    }
-  ]
+export const revalidate = 60; // Revalidate every minute
+
+type Props = {
+  params: Promise<{ slug: string }>;
 };
 
-export default function ProductDetailPage() {
-  const params = useParams();
-  const slug = params?.slug as string;
-  const [selectedSize, setSelectedSize] = useState("");
-  const { toast } = useToast();
-  const { addItem } = useCart();
+export default async function ProductPage({ params }: Props) {
+  const { slug } = await params;
+  const supabase = await createClient();
 
-  const handleAddToCart = () => {
-    if (!selectedSize) {
-      toast({
-        title: "Please select a size",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    addItem({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: typeof product.images[0] === 'string' ? product.images[0] : product.images[0].src,
-      size: selectedSize,
-      slug: slug || "relaxed-linen-jacket",
-    });
-  };
+  const { data: product, error } = await supabase
+    .from("products")
+    .select("*")
+    .eq("slug", slug)
+    .single();
+
+  if (error || !product) {
+    console.error("Product not found:", error);
+    notFound();
+  }
+
+  const typedProduct = product as Product;
+
+  // Fetch Related Products (excluding current product)
+  const { data: relatedProducts } = await supabase
+    .from("products")
+    .select("*")
+    .neq("id", typedProduct.id)
+    .limit(3);
+
+  const safeRelated = (relatedProducts || []) as Product[];
 
   return (
     <main className="min-h-screen bg-background">
       <Navbar />
-      
+
       <div className="pt-32 pb-20 px-6 md:px-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-          {/* Image Gallery */}
-          <div className="space-y-6">
-             {/* Primary Image with Layout Transition */}
-            <motion.div
-              layoutId={`product-image-${slug}`}
-              className="aspect-[3/4] relative overflow-hidden bg-secondary/30"
-            >
-              <Image
-                src={product.images[0]}
-                alt={`${product.name} view 1`}
-                fill
-                className="object-cover"
-                priority
-              />
-            </motion.div>
-            
-            {/* Secondary Images */}
-            {product.images.slice(1).map((image, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="aspect-[3/4] relative overflow-hidden bg-secondary/30"
-              >
-                <Image
-                  src={image}
-                  alt={`${product.name} view ${index + 2}`}
-                  fill
-                  className="object-cover"
-                />
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Product Info */}
-          <div className="lg:sticky lg:top-32 h-fit">
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <h1 className="text-3xl md:text-4xl font-display text-foreground mb-2">
-                {product.name}
-              </h1>
-              <p className="text-xl font-body text-foreground mb-6">
-                ${product.price.toFixed(2)}
-              </p>
-              
-              <p className="text-muted-foreground font-body leading-relaxed mb-8">
-                {product.description}
-              </p>
-
-              {/* Size Selection */}
-              <div className="mb-8">
-                <h3 className="text-sm font-display uppercase tracking-wider mb-4">Size</h3>
-                <div className="flex flex-wrap gap-3">
-                  {product.sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`w-12 h-12 flex items-center justify-center border transition-all ${
-                        selectedSize === size
-                          ? "border-foreground bg-foreground text-background"
-                          : "border-border hover:border-foreground text-muted-foreground"
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mb-10">
-                <MagneticButton className="w-full" onClick={handleAddToCart}>
-                    <div className="w-full py-6 bg-primary text-primary-foreground text-base font-medium rounded-md flex items-center justify-center">
-                        Add to Cart
-                    </div>
-                </MagneticButton>
-              </div>
-
-              {/* Details Accordion */}
-              <Accordion type="single" collapsible className="w-full">
-                {product.details.map((detail, index) => (
-                  <AccordionItem key={index} value={`item-${index}`}>
-                    <AccordionTrigger className="text-sm font-display uppercase tracking-wider">
-                      {detail.title}
-                    </AccordionTrigger>
-                    <AccordionContent className="font-body text-muted-foreground leading-relaxed">
-                      {detail.content}
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </motion.div>
-          </div>
+        {/* Breadcrumbs */}
+        <div className="mb-8">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/">Home</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/collection">Collection</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{typedProduct.title}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </div>
+
+        <ProductDetail product={typedProduct} relatedProducts={safeRelated} />
       </div>
 
       <Footer />
     </main>
   );
 }
+

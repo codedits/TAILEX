@@ -2,41 +2,13 @@
 
 import { motion } from "framer-motion";
 import ProductCard from "./ProductCard";
-import productJacket1 from "@/assets/product-jacket-1.jpg";
-import productJacket2 from "@/assets/product-jacket-2.jpg";
-import productTee1 from "@/assets/product-tee-1.jpg";
-import productTee2 from "@/assets/product-tee-2.jpg";
-import productJeans1 from "@/assets/product-jeans-1.jpg";
-import productJeans2 from "@/assets/product-jeans-2.jpg";
+import { Product } from "@/lib/types";
 
-const products = [
-  {
-    name: "Relaxed Linen Jacket",
-    category: "JACKET",
-    price: 69.00,
-    imagePrimary: productJacket1,
-    imageSecondary: productJacket2,
-    href: "/product/relaxed-linen-jacket",
-  },
-  {
-    name: "Basic Regular Fit Tee",
-    category: "TEE",
-    price: 19.00,
-    imagePrimary: productTee1,
-    imageSecondary: productTee2,
-    href: "/product/basic-tee",
-  },
-  {
-    name: "Baggy Denim Trousers",
-    category: "PANTS",
-    price: 49.00,
-    imagePrimary: productJeans1,
-    imageSecondary: productJeans2,
-    href: "/product/baggy-denim",
-  },
-];
+interface FavoritesSectionProps {
+  products: Product[];
+}
 
-const FavoritesSection = () => {
+const FavoritesSection = ({ products }: FavoritesSectionProps) => {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -83,7 +55,7 @@ const FavoritesSection = () => {
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 flex-1">
           {products.map((product) => (
             <motion.div
-              key={product.name}
+              key={product.id}
               variants={itemVariants}
             >
               <ProductCard {...product} />

@@ -8,7 +8,7 @@ import { useCart } from "@/context/CartContext";
 import { CartSheet } from "@/components/CartSheet";
 import { SearchModal } from "@/components/SearchModal";
 
-const Navbar = () => {
+const Navbar = ({ brandName = "TAILEX" }: { brandName?: string }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { cartCount, setIsCartOpen } = useCart();
@@ -43,7 +43,7 @@ const Navbar = () => {
             href="/" 
             className="text-2xl font-black tracking-tighter uppercase z-50 relative hover:opacity-70 transition-opacity"
           >
-            TAILEX
+            {brandName}
           </Link>
 
           {/* Desktop Nav */}

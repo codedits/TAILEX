@@ -2,10 +2,10 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import style1 from "@/assets/style-1.jpg";
-import style2 from "@/assets/style-2.jpg";
-import style3 from "@/assets/style-3.jpg";
-import style4 from "@/assets/style-4.jpg";
+const style1 = "https://images.unsplash.com/photo-1491553895911-0055eca6402d?q=80&w=1400&auto=format&fit=crop";
+const style2 = "https://images.unsplash.com/photo-1503342452485-86f7d39cc8b8?q=80&w=1400&auto=format&fit=crop";
+const style3 = "https://images.unsplash.com/photo-1519744792095-2f2205e87b6f?q=80&w=1400&auto=format&fit=crop";
+const style4 = "https://images.unsplash.com/photo-1520975912990-4e4f1d8a0c82?q=80&w=1400&auto=format&fit=crop";
 
 const images = [style1, style2, style3, style4];
 
