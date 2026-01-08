@@ -1,8 +1,9 @@
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import CollectionBrowser from "@/components/CollectionBrowser";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import CollectionBrowser from "@/components/collection/CollectionBrowser";
 import { createClient } from "@/lib/supabase/server";
 import { getNavigation, getBrandConfig, getFooterConfig, getSocialConfig } from "@/lib/theme";
+import { getProducts } from "@/lib/api/products";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -26,18 +27,15 @@ export const metadata: Metadata = {
 
 export default async function CollectionPage() {
   const supabase = await createClient();
-  
+
   // Fetch all config and data in parallel
   const [navItems, brand, footerConfig, socialConfig, productsResult, collectionsResult] = await Promise.all([
     getNavigation('main-menu'),
     getBrandConfig(),
     getFooterConfig(),
     getSocialConfig(),
-    supabase
-      .from('products')
-      .select('id, category_id, title, slug, price, sale_price, cover_image, images')
-      .eq('status', 'active')
-      .order('created_at', { ascending: false }),
+    // Use shared API to ensure consistency (e.g. status='active')
+    getProducts({ status: 'active', limit: 1000, orderBy: 'created_at', order: 'desc' }),
     supabase
       .from('collections')
       .select('id, title, slug, image_url, description')
@@ -45,7 +43,7 @@ export default async function CollectionPage() {
       .order('sort_order', { ascending: true })
   ]);
 
-  const safeProducts = (productsResult.data || []) as Product[];
+  const safeProducts = (productsResult.data?.data || []) as Product[];
   const safeCollections = (collectionsResult.data || []) as Collection[];
 
   // Calculate product count per collection
@@ -57,7 +55,7 @@ export default async function CollectionPage() {
   return (
     <main className="min-h-screen bg-background">
       <Navbar brandName={brand.name} navItems={navItems} />
-      
+
       <div className="pt-32 pb-20 px-6 md:px-12">
         {/* Breadcrumbs */}
         <div className="mb-12">
@@ -92,8 +90,8 @@ export default async function CollectionPage() {
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {collectionsWithCounts.map((collection) => (
-                <Link 
-                  key={collection.id} 
+                <Link
+                  key={collection.id}
                   href={`/collection/${collection.slug}`}
                   className="group relative aspect-[4/5] overflow-hidden bg-muted"
                 >

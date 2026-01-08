@@ -2,13 +2,15 @@
 import { cookies } from 'next/headers'
 import { createClient as createStaticClient } from '@supabase/supabase-js'
 import { unstable_cache } from 'next/cache'
-import type { 
-    BrandConfig as BrandConfigType, 
-    HeroConfig, 
-    SocialConfig, 
-    BenefitsConfig, 
+import type {
+    BrandConfig as BrandConfigType,
+    HeroConfig,
+    SocialConfig,
+    BenefitsConfig,
     FooterConfig,
-    MenuItem
+    MenuItem,
+    Collection,
+    Product
 } from '@/lib/types'
 
 export type Theme = 'light' | 'dark'
@@ -91,9 +93,9 @@ export const getSiteConfig = unstable_cache(
             const { data, error } = await supabase
                 .from('site_config')
                 .select('key, value')
-            
+
             if (error) throw error
-            
+
             const config: Record<string, unknown> = {}
             data?.forEach(row => {
                 config[row.key] = row.value
@@ -158,11 +160,11 @@ export const getFeaturedCollections = unstable_cache(
             const supabase = getSupabase()
             const { data } = await supabase
                 .from('collections')
-                .select('id, title, slug, image_url, description')
+                .select('id, title, slug, image_url, description, is_visible, sort_order')
                 .eq('is_visible', true)
                 .order('sort_order', { ascending: true })
                 .limit(limit)
-            return data || []
+            return (data as Collection[]) || []
         } catch {
             return []
         }
@@ -290,3 +292,32 @@ export async function getFullSiteConfig(): Promise<FullSiteConfig> {
         navigation
     }
 }
+export const getHomepageLayout = unstable_cache(
+    async () => {
+        try {
+            const supabase = getSupabase()
+            const { data } = await supabase
+                .from('site_config')
+                .select('value')
+                .eq('key', 'homepage_layout')
+                .single()
+
+            // Default layout if missing
+            return (data?.value as any[]) || [
+                { id: "hero", type: "hero", enabled: true, order: 0 },
+                { id: "categories", type: "categories", enabled: true, order: 1 },
+                { id: "featured", type: "featured-products", enabled: true, order: 2 },
+                { id: "benefits", type: "benefits", enabled: true, order: 3 },
+                { id: "news", type: "news", enabled: true, order: 4 },
+            ]
+        } catch {
+            return [
+                { id: "hero", type: "hero", enabled: true, order: 0 },
+                { id: "categories", type: "categories", enabled: true, order: 1 },
+                { id: "featured", type: "featured-products", enabled: true, order: 2 },
+            ]
+        }
+    },
+    ['homepage-layout'],
+    { tags: ['site_config'], revalidate: 300 }
+)

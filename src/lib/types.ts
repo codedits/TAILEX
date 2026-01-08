@@ -13,16 +13,16 @@ export type Product = {
   slug: string
   description?: string | null
   short_description?: string | null
-  
+
   // Pricing
   price: number
   sale_price?: number | null
   cost_per_item?: number | null
-  
+
   // Media
   cover_image?: string | null
   images?: string[] // JSONB array in DB
-  
+
   // Inventory
   sku?: string | null
   barcode?: string | null
@@ -31,30 +31,30 @@ export type Product = {
   allow_backorder?: boolean
   weight?: number | null
   weight_unit?: string
-  
+
   // Organization
   category_id?: string | null
   category?: string | null // Virtual field for display
   tags?: string[]
   vendor?: string | null
   product_type?: string | null
-  
+
   // Status
   status?: 'draft' | 'active' | 'archived'
   is_featured?: boolean
-  
+
   // SEO
   seo_title?: string | null
   seo_description?: string | null
-  
+
   // Metadata
   metadata?: Record<string, unknown>
-  
+
   // Timestamps
   created_at?: string
   updated_at?: string
   published_at?: string | null
-  
+
   // Relations (when joined)
   variants?: ProductVariant[]
   options?: ProductOption[]
@@ -66,24 +66,24 @@ export type ProductVariant = {
   id: string
   product_id: string
   title: string
-  
+
   option1_name?: string | null
   option1_value?: string | null
   option2_name?: string | null
   option2_value?: string | null
   option3_name?: string | null
   option3_value?: string | null
-  
+
   price?: number | null
   sale_price?: number | null
-  
+
   sku?: string | null
   barcode?: string | null
   inventory_quantity: number
-  
+
   image_url?: string | null
   position: number
-  
+
   created_at?: string
   updated_at?: string
 }
@@ -110,7 +110,7 @@ export type Collection = {
   metadata?: Record<string, unknown>
   created_at?: string
   updated_at?: string
-  
+
   // Virtual
   product_count?: number
 }
@@ -125,21 +125,21 @@ export type Customer = {
   first_name?: string | null
   last_name?: string | null
   phone?: string | null
-  
+
   total_spent: number
   total_orders: number
-  
+
   accepts_marketing: boolean
   marketing_updated_at?: string | null
-  
+
   notes?: string | null
   tags?: string[]
-  
+
   metadata?: Record<string, unknown>
-  
+
   created_at?: string
   updated_at?: string
-  
+
   // Relations
   addresses?: CustomerAddress[]
   orders?: Order[]
@@ -148,7 +148,7 @@ export type Customer = {
 export type CustomerAddress = {
   id: string
   customer_id: string
-  
+
   first_name?: string | null
   last_name?: string | null
   company?: string | null
@@ -161,10 +161,10 @@ export type CustomerAddress = {
   country_code: string
   zip: string
   phone?: string | null
-  
+
   is_default: boolean
   address_type: 'shipping' | 'billing'
-  
+
   created_at?: string
   updated_at?: string
 }
@@ -180,45 +180,46 @@ export type FulfillmentStatus = 'unfulfilled' | 'partial' | 'fulfilled'
 export type Order = {
   id: string
   order_number: number
-  
+
   customer_id?: string | null
   email: string
   phone?: string | null
-  
+
   status: OrderStatus
   payment_status: PaymentStatus
   fulfillment_status: FulfillmentStatus
-  
+
   currency: string
   subtotal: number
   discount_total: number
   shipping_total: number
   tax_total: number
   total: number
-  
+
   shipping_address?: OrderAddress | null
   billing_address?: OrderAddress | null
-  
+
   tracking_number?: string | null
   tracking_url?: string | null
   shipped_at?: string | null
   delivered_at?: string | null
-  
+
   payment_method?: string | null
   payment_reference?: string | null
-  
+
   discount_codes?: DiscountApplication[]
-  
+
   customer_note?: string | null
   internal_note?: string | null
-  
+  admin_message?: string | null
+
   source: string
-  
+
   created_at: string
   updated_at: string
   cancelled_at?: string | null
   closed_at?: string | null
-  
+
   // Relations
   items?: OrderItem[]
   customer?: Customer
@@ -242,25 +243,25 @@ export type OrderAddress = {
 export type OrderItem = {
   id: string
   order_id: string
-  
+
   product_id?: string | null
   variant_id?: string | null
-  
+
   title: string
   variant_title?: string | null
   sku?: string | null
   image_url?: string | null
-  
+
   quantity: number
   unit_price: number
   discount_amount: number
   total_price: number
-  
+
   fulfilled_quantity: number
   requires_shipping: boolean
-  
+
   properties?: Record<string, unknown>
-  
+
   created_at?: string
 }
 
@@ -282,22 +283,22 @@ export type Review = {
   product_id: string
   customer_id?: string | null
   order_id?: string | null
-  
+
   rating: number
   title?: string | null
   content?: string | null
-  
+
   reviewer_name?: string | null
   reviewer_email?: string | null
-  
+
   status: ReviewStatus
   is_verified_purchase: boolean
-  
+
   helpful_count: number
-  
+
   admin_response?: string | null
   admin_response_at?: string | null
-  
+
   created_at: string
   updated_at: string
 }
@@ -313,28 +314,28 @@ export type Discount = {
   id: string
   code: string
   title?: string | null
-  
+
   type: DiscountType
   value: number
-  
+
   minimum_purchase: number
   minimum_quantity: number
-  
+
   applies_to: DiscountAppliesTo
   applicable_ids?: string[]
-  
+
   exclude_sale_items: boolean
-  
+
   usage_limit?: number | null
   usage_limit_per_customer?: number | null
   usage_count: number
-  
+
   starts_at: string
   ends_at?: string | null
   is_active: boolean
-  
+
   can_combine: boolean
-  
+
   created_at: string
   updated_at: string
 }
@@ -347,14 +348,14 @@ export type Cart = {
   id: string
   customer_id?: string | null
   session_id?: string | null
-  
+
   currency: string
   discount_code?: string | null
-  
+
   created_at: string
   updated_at: string
   expires_at: string
-  
+
   items?: CartItem[]
 }
 
@@ -365,10 +366,10 @@ export type CartItem = {
   variant_id?: string | null
   quantity: number
   properties?: Record<string, unknown>
-  
+
   created_at: string
   updated_at: string
-  
+
   // Expanded fields
   product?: Product
   variant?: ProductVariant
@@ -387,6 +388,17 @@ export type LocalCartItem = {
   variant_id?: string
 }
 
+export type CartValidationItem = {
+  id: string; // Product ID
+  quantity: number;
+  currentPrice: number;
+  slug: string;
+  name: string;
+  image: string;
+  size?: string;
+  color?: string;
+}
+
 // ==========================================
 // WISHLIST
 // ==========================================
@@ -397,7 +409,7 @@ export type WishlistItem = {
   product_id: string
   variant_id?: string | null
   created_at: string
-  
+
   product?: Product
   variant?: ProductVariant
 }
@@ -536,12 +548,12 @@ export type FooterConfig = {
 }
 
 // Homepage sections ordering
-export type HomepageSectionType = 
-  | 'hero' 
-  | 'categories' 
-  | 'featured-products' 
-  | 'benefits' 
-  | 'news' 
+export type HomepageSectionType =
+  | 'hero'
+  | 'categories'
+  | 'featured-products'
+  | 'benefits'
+  | 'news'
   | 'newsletter'
   | 'custom'
 
@@ -567,7 +579,7 @@ export type ShippingZone = {
   countries: string[]
   is_active: boolean
   created_at: string
-  
+
   rates?: ShippingRate[]
 }
 
@@ -576,18 +588,18 @@ export type ShippingRate = {
   zone_id: string
   name: string
   description?: string | null
-  
+
   rate_type: 'flat' | 'weight_based' | 'price_based' | 'free'
   price: number
-  
+
   min_order_amount?: number | null
   max_order_amount?: number | null
   min_weight?: number | null
   max_weight?: number | null
-  
+
   min_delivery_days?: number | null
   max_delivery_days?: number | null
-  
+
   is_active: boolean
   created_at: string
 }

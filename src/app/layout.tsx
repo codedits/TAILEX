@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { manrope, inter, playfair, spaceMono, getFont } from "@/lib/fonts";
 import "./globals.css";
-import { Providers } from "@/components/Providers";
+import { Providers } from "@/components/layout/Providers";
 import { getBaseUrl, hexToHslValues } from "@/lib/utils";
+import { StoreConfigService } from "@/services/config";
 
 // ============================================
 // STATIC METADATA - No DB call, instant
@@ -45,61 +46,61 @@ const DEFAULTS = {
   borderRadius: '0.5rem',
 };
 
+// ... imports
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // ============================================
-  // LAYER 1: COOKIES - INSTANT (0ms, no await DB)
-  // ============================================
   const cookieStore = await cookies();
-  
-  // Read all visual preferences from cookies
-  const theme = (cookieStore.get('theme')?.value as 'light' | 'dark') || DEFAULTS.theme;
-  const primaryColor = cookieStore.get('brand-primary')?.value || DEFAULTS.primaryColor;
-  const secondaryColor = cookieStore.get('brand-secondary')?.value || DEFAULTS.secondaryColor;
-  const backgroundColor = cookieStore.get('brand-background')?.value || DEFAULTS.backgroundColor;
-  const foregroundColor = cookieStore.get('brand-foreground')?.value || DEFAULTS.foregroundColor;
-  const fontName = cookieStore.get('font')?.value || DEFAULTS.font;
-  const borderRadius = cookieStore.get('brand-radius')?.value || DEFAULTS.borderRadius;
-  
+
+  // Fetch Config from DB (Cached)
+  const config = await StoreConfigService.getStoreConfig();
+
+  // Use Cookie overrides if present (e.g. for user toggle), otherwise Config
+  const theme = (cookieStore.get('theme')?.value as 'light' | 'dark') || 'light';
+
+  // Brand settings from DB
+  const primaryColor = config.theme.primaryColor;
+  const fontName = config.theme.font;
+  const borderRadius = config.theme.borderRadius;
+
   const font = getFont(fontName.toLowerCase());
 
-  // Map Brand colors to shadcn HSL variables for full theme integration
+  // Map Brand colors to shadcn HSL variables
   const hslPrimary = hexToHslValues(primaryColor);
-  const hslBackground = hexToHslValues(backgroundColor);
-  const hslForeground = hexToHslValues(foregroundColor);
+  // We might want to derive secondary/background/foreground from primary or keep them white/black for now or add to Config
+  // Current logic uses defaults. Let's stick to config for Primary.
 
-  // Dynamic CSS variables - injected at root level, zero DB calls
+  // Dynamic CSS variables
   const dynamicStyles = {
     colorScheme: theme,
-    // Brand Specific
     ['--brand-primary' as string]: primaryColor,
-    ['--brand-secondary' as string]: secondaryColor,
-    ['--brand-background' as string]: backgroundColor,
-    ['--brand-foreground' as string]: foregroundColor,
     ['--brand-radius' as string]: borderRadius,
     ['--font-display' as string]: `var(--font-${fontName})`,
     ['--font-body' as string]: `var(--font-${fontName})`,
 
-    // Shadcn / System Overrides (HSL values)
+    // Shadcn overrides
     ['--primary' as string]: hslPrimary,
-    ['--background' as string]: hslBackground,
-    ['--foreground' as string]: hslForeground,
     ['--radius' as string]: borderRadius,
   };
-  
+
   return (
-    <html 
-      lang="en" 
-      data-theme={theme} 
-      style={dynamicStyles} 
+    <html
+      lang="en"
+      data-theme={theme}
+      style={dynamicStyles}
       className={`${theme} ${manrope.variable} ${inter.variable} ${playfair.variable} ${spaceMono.variable}`}
     >
       <body className={font.className}>
+        {/* Calder Co. Inspired Blue Glow Border */}
+        <div className="fixed inset-0 pointer-events-none z-[9999] border-[12px] border-blue-500/10 blur-xl" />
+        <div className="fixed inset-0 pointer-events-none z-[9999] border-[1px] border-blue-500/5" />
+
         <Providers>{children}</Providers>
       </body>
     </html>
   );
 }
+

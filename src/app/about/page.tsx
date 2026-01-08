@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getBrandConfig, getNavigation, getFooterConfig, getSocialConfig } from "@/lib/theme";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import Image from "next/image";
 import style1 from "@/assets/style-1.jpg";
 import style2 from "@/assets/style-2.jpg";

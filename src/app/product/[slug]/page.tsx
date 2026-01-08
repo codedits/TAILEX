@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import ProductDetail from "@/components/ProductDetail";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import ProductDetail from "@/components/product/ProductDetail";
 import { getNavigation, getBrandConfig, getFooterConfig, getSocialConfig } from "@/lib/theme";
 import {
   Breadcrumb,
@@ -28,7 +28,7 @@ export default async function ProductPage({ params }: Props) {
   const [productResult, navItems, brand, footerConfig, socialConfig] = await Promise.all([
     supabase
       .from("products")
-      .select(`*, options(*), variants(*)`)
+      .select(`*, options:product_options(*), variants:product_variants(*)`)
       .eq("slug", slug)
       .single(),
     getNavigation('main-menu'),

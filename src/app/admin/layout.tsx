@@ -1,5 +1,5 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { AdminSidebar } from "@/components/AdminSidebar"
+import { AdminSidebar } from "@/components/admin/AdminSidebar"
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (

@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import CollectionBrowser from "@/components/CollectionBrowser";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import CollectionBrowser from "@/components/collection/CollectionBrowser";
 import { Product, Collection } from "@/lib/types";
 import { notFound } from "next/navigation";
 import { getNavigation, getBrandConfig, getFooterConfig, getSocialConfig } from "@/lib/theme";

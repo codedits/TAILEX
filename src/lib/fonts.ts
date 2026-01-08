@@ -30,6 +30,8 @@ const fonts = {
   manrope,
   inter,
   playfair,
+  'space mono': spaceMono,
+  spacemono: spaceMono,
   mono: spaceMono
 }
 

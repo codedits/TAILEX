@@ -1,6 +1,6 @@
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import ProductFeed from "@/components/ProductFeed";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import ProductFeed from "@/components/product/ProductFeed";
 import { createClient } from "@/lib/supabase/server";
 import { type Product } from "@/lib/types";
 import { getNavigation, getBrandConfig, getFooterConfig, getSocialConfig } from "@/lib/theme";

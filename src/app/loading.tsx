@@ -1,5 +1,5 @@
-import { ProductSkeleton } from "@/components/ProductSkeleton";
-import Navbar from "@/components/Navbar";
+import { ProductSkeleton } from "@/components/product/ProductSkeleton";
+import Navbar from "@/components/layout/Navbar";
 
 export default function Loading() {
   return (
