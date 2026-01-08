@@ -55,7 +55,7 @@ const HeroSection = ({
           transition={{ duration: 1.2, ease: [0.21, 0.47, 0.32, 0.98] }}
           className="max-w-[70%]"
         >
-          <h1 className="text-[7vw] md:text-[8vw] font-bold tracking-tighter text-white leading-[0.8] mb-0 whitespace-nowrap">
+          <h1 className="text-[5vw] md:text-[6vw] font-bold tracking-tighter text-white leading-[0.8] mb-0 whitespace-nowrap">
             {brandName}
           </h1>
         </motion.div>
@@ -67,7 +67,7 @@ const HeroSection = ({
           transition={{ duration: 1.2, delay: 0.2, ease: [0.21, 0.47, 0.32, 0.98] }}
           className="max-w-xs md:max-w-md text-right md:pb-4"
         >
-          <p className="text-base md:text-xl text-white font-light leading-snug tracking-tight">
+          <p className="text-sm md:text-lg text-white font-light leading-snug tracking-tight">
             {displaySubheading}
           </p>
 
