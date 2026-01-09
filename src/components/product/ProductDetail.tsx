@@ -1,9 +1,21 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useMemo, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { Minus, Plus, Star, Truck, ShieldCheck, AlertCircle } from "lucide-react";
+import Link from "next/link";
+import { 
+  Minus, 
+  Plus, 
+  Star, 
+  Truck, 
+  ShieldCheck, 
+  AlertCircle, 
+  Heart,
+  ChevronRight,
+  Share2,
+  Info
+} from "lucide-react";
 import ReviewsSection from "@/components/sections/ReviewsSection";
 import RelatedProducts from "@/components/product/RelatedProducts";
 import {
@@ -15,7 +27,10 @@ import {
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/context/CartContext";
-import { Product, ProductOption } from "@/lib/types";
+import { Product, ProductVariant, ProductOption } from "@/lib/types";
+import { cn } from "@/lib/utils";
+
+import { useRouter } from "next/navigation";
 
 export default function ProductDetail({
   product,
@@ -26,8 +41,41 @@ export default function ProductDetail({
 }) {
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(1);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const router = useRouter();
+  
   const { toast } = useToast();
   const { addItem } = useCart();
+
+  // Initialize selected options with defaults
+  useEffect(() => {
+    if (product.options && Object.keys(selectedOptions).length === 0) {
+      const defaults: Record<string, string> = {};
+      product.options.forEach(opt => {
+        if (opt.values.length > 0) defaults[opt.name] = opt.values[0];
+      });
+      setSelectedOptions(defaults);
+    }
+  }, [product.options]);
+
+  // Find matching variant based on selections
+  const selectedVariant = useMemo(() => {
+    if (!product.variants || product.variants.length === 0) return null;
+    
+    return product.variants.find(v => {
+      const match1 = !v.option1_name || v.option1_value === selectedOptions[v.option1_name];
+      const match2 = !v.option2_name || v.option2_value === selectedOptions[v.option2_name];
+      const match3 = !v.option3_name || v.option3_value === selectedOptions[v.option3_name];
+      return match1 && match2 && match3;
+    }) || null;
+  }, [selectedOptions, product.variants]);
+
+  const currentPrice = selectedVariant?.price ?? product.price;
+  const currentSalePrice = selectedVariant?.sale_price ?? product.sale_price;
+  const hasSale = !!currentSalePrice && currentSalePrice < currentPrice;
+  const currentStock = selectedVariant?.inventory_quantity ?? product.stock ?? 0;
+  const isOutOfStock = product.track_inventory && currentStock <= 0 && !product.allow_backorder;
 
   const handleAddToCart = () => {
     // Check if all options are selected
@@ -42,20 +90,37 @@ export default function ProductDetail({
       return;
     }
 
+    if (isOutOfStock) {
+      toast({
+        title: "Out of Stock",
+        description: "This item is currently unavailable.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const variantLabel = Object.values(selectedOptions).join(" / ");
+    
+    // Construct a unique ID for the cart item
+    const variantId = selectedVariant?.id;
+    const uniqueId = variantId ? `${product.id}-${variantId}` : product.id;
+
     addItem({
-      id: product.id,
+      id: uniqueId,
+      productId: product.id,
+      variantId: variantId,
       name: product.title,
-      price: product.price,
-      image: productImages[0] || "",
-      size: selectedOptions["Size"] || selectedOptions["size"] || selectedOptions["Name"] || "",
+      price: currentSalePrice || currentPrice,
+      image: selectedVariant?.image_url || productImages[0] || "",
+      size: variantLabel,
       quantity: quantity,
       slug: product.slug,
     } as any);
 
     toast({
       title: "Added to Cart",
-      description: `${product.title} added.`,
-    })
+      description: `${product.title}${variantLabel ? ` (${variantLabel})` : ""} added.`,
+    });
   };
 
   const handleOptionSelect = (name: string, value: string) => {
@@ -65,195 +130,274 @@ export default function ProductDetail({
   const incrementQuantity = () => setQuantity(q => q + 1);
   const decrementQuantity = () => setQuantity(q => (q > 1 ? q - 1 : 1));
 
-  // Default product details
-  const productDetails = [
-    { title: "Material", content: "Cotton/Linen Blend" },
-    { title: "Care", content: "Machine wash cold" }
-  ];
-
-  const stockCount = product.stock ?? 0;
+  const toggleFavorite = () => {
+    setIsFavorite(!isFavorite);
+    toast({
+      title: !isFavorite ? "Saved to Wishlist" : "Removed from Wishlist",
+      description: product.title,
+    });
+  };
 
   const isValidImage = (img: any): img is string => typeof img === 'string' && img.trim().length > 0;
-
-  // Get images safely
   const productImages = (product.images || []).filter(isValidImage);
   if (productImages.length === 0 && isValidImage(product.cover_image)) {
     productImages.push(product.cover_image);
   }
 
-  return (
-    <>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 mb-20">
-        {/* Image Gallery */}
-        <div className="space-y-6">
-          {/* Primary Image with Layout Transition */}
-          <motion.div
-            layoutId={`product-image-${product.slug}`}
-            className="aspect-[3/4] relative overflow-hidden bg-secondary/30"
-          >
-            {productImages.length > 0 && (
-              <Image
-                src={productImages[0]}
-                alt={`${product.title} view 1`}
-                fill
-                className="object-cover"
-                priority
-              />
-            )}
-          </motion.div>
+  // Shopify-style accordions
+  const details = [
+    { 
+      title: "Details & Care", 
+      content: product.description || "Premium quality product designed for longevity and style." 
+    },
+    { 
+      title: "Shipping & Returns", 
+      content: "Free standard shipping on orders over $150. Returns accepted within 30 days of delivery. Sustainable packaging used for all shipments." 
+    },
+    {
+      title: "Specifications",
+      content: product.metadata && Object.keys(product.metadata).length > 0 
+        ? Object.entries(product.metadata).map(([k, v]) => `${k}: ${v}`).join(", ")
+        : `SKU: ${selectedVariant?.sku || product.sku || "N/A"}`
+    }
+  ];
 
-          {/* Secondary Images */}
-          {productImages.length > 1 && (
-            <div className="grid grid-cols-2 gap-4">
-              {productImages.slice(1).map((image, index) => (
+  return (
+    <div className="max-w-[1400px] mx-auto">
+      {/* Breadcrumbs */}
+      <nav className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-8">
+        <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
+        <ChevronRight className="w-3 h-3" />
+        <Link href="/collection" className="hover:text-foreground transition-colors">Catalog</Link>
+        <ChevronRight className="w-3 h-3" />
+        <span className="text-foreground truncate">{product.title}</span>
+      </nav>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+        {/* Left Column: Media Gallery */}
+        <div className="lg:col-span-7 space-y-4">
+          <div className="flex flex-col-reverse md:flex-row gap-4">
+            {/* Thumbnails */}
+            {productImages.length > 1 && (
+              <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-visible no-scrollbar shrink-0 md:w-20">
+                {productImages.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveImageIndex(idx)}
+                    className={cn(
+                      "relative aspect-[3/4] w-20 md:w-full overflow-hidden border transition-all",
+                      activeImageIndex === idx ? "border-foreground" : "border-transparent opacity-60 hover:opacity-100"
+                    )}
+                  >
+                    <Image src={img} alt="" fill className="object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Main Image */}
+            <div className="grow relative aspect-[3/4] bg-secondary/20 overflow-hidden group">
+              <AnimatePresence mode="wait">
                 <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                  className="aspect-[3/4] relative overflow-hidden bg-secondary/30"
+                  key={activeImageIndex}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.4 }}
+                  className="w-full h-full"
                 >
                   <Image
-                    src={image}
-                    alt={`${product.title} view ${index + 2}`}
+                    src={productImages[activeImageIndex] || "/placeholder.jpg"}
+                    alt={product.title}
                     fill
                     className="object-cover"
+                    priority
                   />
                 </motion.div>
-              ))}
+              </AnimatePresence>
+              
+              {/* Zoom pill (visual only) */}
+              <div className="absolute bottom-4 right-4 bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+                <Info className="w-3 h-3" /> Roll to Zoom
+              </div>
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Product Info */}
-        <div className="lg:sticky lg:top-32 h-fit">
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <div className="mb-4">
-              <h1 className="text-3xl md:text-4xl font-display text-foreground mb-2">
+        {/* Right Column: Information (Sticky) */}
+        <div className="lg:col-span-5 h-fit lg:sticky lg:top-32">
+          <div className="space-y-8">
+            <header>
+              <div className="flex justify-between items-start mb-2">
+                <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+                  {product.vendor || "TAILEX Standard"}
+                </p>
+                <div className="flex gap-4">
+                  <button onClick={toggleFavorite} className="hover:text-primary transition-colors">
+                    <Heart className={cn("w-5 h-5", isFavorite ? "fill-primary text-primary" : "")} />
+                  </button>
+                  <button className="hover:text-primary transition-colors">
+                    <Share2 className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+              <h1 className="text-3xl lg:text-4xl font-display uppercase tracking-tight leading-none mb-4">
                 {product.title}
               </h1>
+              
               <div className="flex items-center gap-4">
-                <p className="text-xl font-body text-foreground">
-                  ${product.price?.toFixed(2)}
-                </p>
-                <div className="flex items-center gap-1">
-                  <div className="flex text-primary">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-3 h-3 fill-current" />
-                    ))}
-                  </div>
-                  <span className="text-xs text-muted-foreground">(128 reviews)</span>
-                </div>
-              </div>
-            </div>
-
-            <p className="text-muted-foreground font-body leading-relaxed mb-8">
-              {product.description}
-            </p>
-
-            {/* Dynamic Product Options */}
-            {product.options && product.options.map((option) => (
-              <div key={option.id} className="mb-8">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-sm font-display uppercase tracking-wider">{option.name}</h3>
-                  {option.name.toLowerCase() === 'size' && (
-                    <button className="text-xs underline text-muted-foreground hover:text-foreground">
-                      Size Guide
-                    </button>
+                <div className="flex items-baseline gap-2">
+                  {hasSale ? (
+                    <>
+                      <span className="text-2xl font-body text-primary">${currentSalePrice?.toFixed(2)}</span>
+                      <span className="text-sm line-through text-muted-foreground">${currentPrice.toFixed(2)}</span>
+                    </>
+                  ) : (
+                    <span className="text-2xl font-body text-foreground">${currentPrice.toFixed(2)}</span>
                   )}
                 </div>
-                <div className="flex flex-wrap gap-3">
-                  {option.values.map((value) => (
-                    <button
-                      key={value}
-                      onClick={() => handleOptionSelect(option.name, value)}
-                      className={`min-w-12 h-12 px-4 flex items-center justify-center border transition-all ${selectedOptions[option.name] === value
-                          ? "border-foreground bg-foreground text-background"
-                          : "border-border hover:border-foreground text-muted-foreground"
-                        }`}
-                    >
-                      {value}
-                    </button>
-                  ))}
-                </div>
+                {hasSale && (
+                  <span className="bg-primary text-primary-foreground px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded">
+                    Sale
+                  </span>
+                )}
               </div>
-            ))}
+            </header>
 
-            {/* Quantity & Add to Cart */}
-            <div className="space-y-4 mb-8">
-              <div className="flex gap-4">
-                <div className="flex items-center border border-input w-32">
-                  <button
-                    onClick={decrementQuantity}
-                    className="p-3 hover:bg-secondary transition-colors"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <span className="flex-1 text-center font-medium">{quantity}</span>
-                  <button
-                    onClick={incrementQuantity}
-                    className="p-3 hover:bg-secondary transition-colors"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
-                <MagneticButton className="flex-1" onClick={handleAddToCart}>
-                  <div className="w-full py-3.5 bg-primary text-primary-foreground text-base font-medium rounded-md flex items-center justify-center h-full">
-                    Add to Cart
+            {/* Product description (Truncated) */}
+            <div className="text-sm font-body leading-relaxed text-muted-foreground max-w-md">
+              <p>{product.short_description || product.description?.slice(0, 160) + "..."}</p>
+            </div>
+
+            {/* Variant Selectors */}
+            {product.options && product.options.length > 0 && (
+              <div className="space-y-6 py-6 border-y border-border">
+                {product.options.map((option) => (
+                  <div key={option.id} className="space-y-3">
+                    <div className="flex justify-between items-baseline">
+                      <span className="text-[10px] uppercase tracking-widest font-bold">
+                        {option.name}: <span className="font-normal text-muted-foreground">{selectedOptions[option.name]}</span>
+                      </span>
+                      {option.name.toLowerCase() === 'size' && (
+                        <button className="text-[10px] uppercase tracking-widest underline hover:opacity-70 transition-opacity">
+                          Size Guide
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {option.values.map((value) => (
+                        <button
+                          key={value}
+                          onClick={() => handleOptionSelect(option.name, value)}
+                          className={cn(
+                            "px-5 py-2.5 text-xs tracking-widest uppercase transition-all border",
+                            selectedOptions[option.name] === value
+                              ? "border-foreground bg-foreground text-background"
+                              : "border-border hover:border-muted-foreground text-foreground"
+                          )}
+                        >
+                          {value}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </MagneticButton>
+                ))}
+              </div>
+            )}
+
+            {/* Purchase Actions */}
+            <div className="space-y-4 pt-2">
+              <div className="flex gap-3">
+                {/* Quantity */}
+                <div className="flex items-center border border-border h-14 bg-secondary/10">
+                  <button 
+                    onClick={decrementQuantity}
+                    className="w-12 h-full flex items-center justify-center hover:bg-secondary transition-colors"
+                  >
+                    <Minus className="w-3 h-3" />
+                  </button>
+                  <span className="w-10 text-center font-body text-sm select-none">{quantity}</span>
+                  <button 
+                    onClick={incrementQuantity}
+                    className="w-12 h-full flex items-center justify-center hover:bg-secondary transition-colors"
+                  >
+                    <Plus className="w-3 h-3" />
+                  </button>
+                </div>
+
+                {/* Main CTA */}
+                <button
+                  onClick={handleAddToCart}
+                  disabled={isOutOfStock}
+                  className={cn(
+                    "flex-1 h-14 uppercase tracking-[0.2em] text-[11px] font-bold transition-all",
+                    isOutOfStock 
+                      ? "bg-muted text-muted-foreground cursor-not-allowed" 
+                      : "bg-foreground text-background hover:bg-foreground/90 active:scale-[0.98]"
+                  )}
+                >
+                  {isOutOfStock ? "Sold Out" : "Add to Cart"}
+                </button>
               </div>
 
-              {/* Stock Indicator */}
-              {stockCount < 10 && (
-                <div className="flex items-center gap-2 text-amber-600 text-sm animate-pulse">
-                  <AlertCircle className="w-4 h-4" />
-                  <span>Only {stockCount} items left in stock!</span>
-                </div>
+              {/* Express Checkout Button */}
+              <button 
+                onClick={() => {
+                   handleAddToCart();
+                   router.push('/checkout');
+                }}
+                disabled={isOutOfStock}
+                className="w-full h-14 border border-foreground uppercase tracking-[0.2em] text-[11px] font-bold hover:bg-foreground hover:text-background transition-all disabled:opacity-50"
+              >
+                Buy it Now
+              </button>
+
+              {/* Stock Warning */}
+              {currentStock > 0 && currentStock < 5 && (
+                <p className="text-[10px] uppercase tracking-widest text-primary font-bold text-center animate-pulse">
+                  Only {currentStock} Left - Selling Fast
+                </p>
               )}
             </div>
 
-            {/* Trust Badges */}
-            <div className="grid grid-cols-2 gap-4 mb-10 p-4 bg-secondary/20 rounded-lg">
-              <div className="flex items-center gap-3">
-                <Truck className="w-5 h-5 text-muted-foreground" />
-                <div className="text-sm">
-                  <p className="font-medium">Free Shipping</p>
-                  <p className="text-muted-foreground text-xs">On orders over $75</p>
-                </div>
+            {/* Shipping & Trust */}
+            <div className="space-y-4 pt-4">
+              <div className="flex items-center gap-3 text-[11px] uppercase tracking-widest text-muted-foreground">
+                <Truck className="w-4 h-4" />
+                <span>Free shipping on orders over $150</span>
               </div>
-              <div className="flex items-center gap-3">
-                <ShieldCheck className="w-5 h-5 text-muted-foreground" />
-                <div className="text-sm">
-                  <p className="font-medium">Secure Checkout</p>
-                  <p className="text-muted-foreground text-xs">SSL Encrypted</p>
-                </div>
+              <div className="flex items-center gap-3 text-[11px] uppercase tracking-widest text-muted-foreground">
+                <ShieldCheck className="w-4 h-4" />
+                <span>45-day easy returns policy</span>
               </div>
             </div>
 
-            {/* Details Accordion */}
-            <Accordion type="single" collapsible className="w-full">
-              {productDetails.map((detail: { title: string; content: string }, index: number) => (
-                <AccordionItem key={index} value={`item-${index}`}>
-                  <AccordionTrigger className="text-sm font-display uppercase tracking-wider">
+            {/* Accordions */}
+            <Accordion type="single" collapsible className="w-full pt-8">
+              {details.map((detail, index) => (
+                <AccordionItem key={index} value={`item-${index}`} className="border-border">
+                  <AccordionTrigger className="text-[11px] uppercase tracking-[0.3em] font-bold hover:no-underline py-4">
                     {detail.title}
                   </AccordionTrigger>
-                  <AccordionContent className="font-body text-muted-foreground leading-relaxed">
+                  <AccordionContent className="font-body text-sm text-muted-foreground leading-relaxed">
                     {detail.content}
                   </AccordionContent>
                 </AccordionItem>
               ))}
             </Accordion>
-          </motion.div>
+          </div>
         </div>
       </div>
 
-      <ReviewsSection />
-      <RelatedProducts products={relatedProducts} />
-    </>
+      {/* Review Section */}
+      <div className="mt-32 border-t border-border pt-20">
+        <ReviewsSection />
+      </div>
+
+      {/* Recommended Section */}
+      <div className="mt-32 mb-20">
+        <RelatedProducts products={relatedProducts} />
+      </div>
+    </div>
   );
 }

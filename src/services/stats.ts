@@ -67,8 +67,13 @@ export const StatsService = {
             const currentRevenue = currentMonthOrders.reduce((s, o) => s + (o.total || 0), 0);
             const lastRevenue = lastMonthOrders.reduce((s, o) => s + (o.total || 0), 0);
 
-            const revenueChange = lastRevenue === 0 ? 100 : ((currentRevenue - lastRevenue) / lastRevenue) * 100;
-            const ordersChange = lastMonthOrders.length === 0 ? 100 : ((currentMonthOrders.length - lastMonthOrders.length) / lastMonthOrders.length) * 100;
+            const revenueChange = lastRevenue === 0
+                ? (currentRevenue === 0 ? 0 : 100)
+                : ((currentRevenue - lastRevenue) / lastRevenue) * 100;
+
+            const ordersChange = lastMonthOrders.length === 0
+                ? (currentMonthOrders.length === 0 ? 0 : 100)
+                : ((currentMonthOrders.length - lastMonthOrders.length) / lastMonthOrders.length) * 100;
 
             return {
                 totalRevenue,

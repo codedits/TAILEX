@@ -94,10 +94,6 @@ export default async function RootLayout({
       className={`${theme} ${manrope.variable} ${inter.variable} ${playfair.variable} ${spaceMono.variable}`}
     >
       <body className={font.className}>
-        {/* Calder Co. Inspired Blue Glow Border */}
-        <div className="fixed inset-0 pointer-events-none z-[9999] border-[12px] border-blue-500/10 blur-xl" />
-        <div className="fixed inset-0 pointer-events-none z-[9999] border-[1px] border-blue-500/5" />
-
         <Providers>{children}</Providers>
       </body>
     </html>

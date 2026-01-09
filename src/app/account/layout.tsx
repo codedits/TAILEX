@@ -2,6 +2,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Link from "next/link";
 import { User, Package, Settings, LogOut } from "lucide-react";
+import { signOut } from "@/app/login/actions";
 
 export default function AccountLayout({
     children,
@@ -35,10 +36,12 @@ export default function AccountLayout({
                                 <Settings className="w-4 h-4" />
                                 <span className="text-sm font-medium">Settings</span>
                             </Link>
-                            <button className="flex items-center gap-3 px-4 py-3 rounded-xl text-red-400/80 hover:text-red-400 hover:bg-red-500/10 transition-colors text-left w-full mt-auto whitespace-nowrap">
-                                <LogOut className="w-4 h-4" />
-                                <span className="text-sm font-medium">Sign Out</span>
-                            </button>
+                            <form action={signOut} className="w-full mt-auto">
+                                <button className="flex items-center gap-3 px-4 py-3 rounded-xl text-red-400/80 hover:text-red-400 hover:bg-red-500/10 transition-colors text-left w-full whitespace-nowrap">
+                                    <LogOut className="w-4 h-4" />
+                                    <span className="text-sm font-medium">Sign Out</span>
+                                </button>
+                            </form>
                         </nav>
                     </div>
 

@@ -2,12 +2,8 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { EmailService } from '@/services/email'
-import { AppError } from '@/services/errors'
-import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-
-// ... existing imports ...
+import { redirect } from 'next/navigation'
 
 // Helper to generate 6-digit code
 function generateCode() {
@@ -23,10 +19,12 @@ export async function sendOTP(formData: FormData) {
     const supabase = await createAdminClient();
 
     // Store code
-    await supabase.from('otp_codes').insert({
+    const { error: dbError } = await supabase.from('otp_codes').insert({
       email,
       code
     });
+
+    if (dbError) throw dbError;
 
     // Send Email
     await EmailService.sendOTP(email, code);
@@ -60,12 +58,24 @@ export async function verifyOTP(formData: FormData) {
     return { error: 'Invalid or expired code' }
   }
 
-  // Valid Code! Consume it (optional)
+  // Valid Code! Consume it
   await supabase.from('otp_codes').delete().eq('email', email);
 
+  // Ensure customer exists in Supabase Auth (Sign Up if needed)
+  // We try to create the user. If they exist, this fails but we ignore it.
+  try {
+     const { error: createError } = await supabase.auth.admin.createUser({
+       email,
+       email_confirm: true,
+     });
+     // If error is not 'user already registered' clean logic is hard, but usually 
+     // we proceed to generate link. If user doesn't exist AND create failed, generateLink will fail.
+  } catch (e) {
+     // Ignore
+  }
+
   // Create Session via Magic Link trick
-  // We generate a magic link, then redirect the user to it. 
-  // This allows Supabase to handle the actual session cookie setting securely.
+  // We generate a magic link, and return it to the client to follow.
   const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
     type: 'magiclink',
     email: email,
@@ -76,46 +86,11 @@ export async function verifyOTP(formData: FormData) {
     return { error: 'Failed to create session' };
   }
 
-  redirect(linkData.properties.action_link);
+  return { success: true, url: linkData.properties.action_link };
 }
 
-export async function login(formData: FormData) {
+export async function signOut() {
   const supabase = await createClient()
-
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
-
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
-
-  if (error) {
-    return { error: error.message }
-  }
-
-  revalidatePath('/', 'layout')
+  await supabase.auth.signOut()
   redirect('/')
-}
-
-export async function signup(formData: FormData) {
-  const supabase = await createClient()
-
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
-
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
-    },
-  })
-
-  if (error) {
-    return { error: error.message }
-  }
-
-  revalidatePath('/', 'layout')
-  redirect('/login?message=Check email to continue sign in process')
 }

@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS otp_codes (
-  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
   email TEXT NOT NULL,
   code TEXT NOT NULL,
   expires_at TIMESTAMP WITH TIME ZONE DEFAULT (now() + interval '10 minutes'),

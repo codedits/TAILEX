@@ -6,7 +6,9 @@ import { validateCartItems } from "@/lib/api/products";
 import { CartValidationItem } from "@/lib/types";
 
 export type CartItem = {
-  id: string;
+  id: string; // Unique key for cart (e.g. "prod_1-var_2")
+  productId: string;
+  variantId?: string;
   name: string;
   price: number;
   image: string;

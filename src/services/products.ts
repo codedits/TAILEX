@@ -4,6 +4,65 @@ import { AppError } from './errors';
 import { Product, ProductVariant, PaginatedResponse } from '@/lib/types';
 import { unstable_cache } from 'next/cache';
 
+type ProductInput = Partial<Product> & {
+    track_quantity?: boolean;
+    existing_images?: string[];
+};
+
+function normalizeProductPayload(data: ProductInput) {
+    const now = new Date().toISOString();
+
+    const price = typeof data.price === 'string' ? Number(data.price) : data.price;
+    const saleRaw = data.sale_price;
+    const sale_price = (saleRaw === null || saleRaw === undefined || (saleRaw as unknown) === '')
+        ? null
+        : typeof saleRaw === 'string'
+            ? Number(saleRaw)
+            : saleRaw;
+
+    const stock = typeof data.stock === 'string' ? Number(data.stock) : data.stock;
+    const tags = Array.isArray(data.tags) ? data.tags : [];
+    const images = Array.isArray(data.images) ? data.images.filter(Boolean) : [];
+
+    const coverImage = data.cover_image && images.includes(data.cover_image)
+        ? data.cover_image
+        : images[0] || null;
+
+    const trackInventory = typeof data.track_inventory === 'boolean'
+        ? data.track_inventory
+        : (typeof data.track_quantity === 'boolean' ? data.track_quantity : true);
+
+    return {
+        title: data.title,
+        slug: data.slug,
+        description: data.description ?? null,
+        short_description: data.short_description ?? null,
+        price: price ?? 0,
+        sale_price,
+        cost_per_item: data.cost_per_item ?? null,
+        cover_image: coverImage,
+        images,
+        sku: data.sku ?? null,
+        barcode: data.barcode ?? null,
+        stock: stock ?? 0,
+        track_inventory: trackInventory,
+        allow_backorder: data.allow_backorder ?? false,
+        weight: data.weight ?? null,
+        weight_unit: data.weight_unit ?? 'kg',
+        category_id: data.category_id ?? null,
+        tags,
+        vendor: data.vendor ?? null,
+        product_type: data.product_type ?? null,
+        status: data.status ?? 'draft',
+        is_featured: data.is_featured ?? false,
+        seo_title: data.seo_title ?? null,
+        seo_description: data.seo_description ?? null,
+        metadata: data.metadata ?? {},
+        updated_at: now,
+        published_at: (data.status === 'active') ? (data.published_at ?? now) : null,
+    } as Partial<Product>;
+}
+
 export const ProductService = {
     async getProducts(options?: {
         status?: 'active' | 'draft' | 'archived';
@@ -83,20 +142,28 @@ export const ProductService = {
     async createProduct(data: Partial<Product>, imageFiles: File[]): Promise<Product> {
         const supabase = await createAdminClient();
 
-        // 1. Validation moved to Service or Logic layer
-        // For now, we assume data is structurally valid or validated by Zod in the Action
+        // Validate slug uniqueness
+        if (data.slug) {
+            const { data: existing, error: existsError } = await supabase
+                .from('products')
+                .select('id')
+                .eq('slug', data.slug)
+                .maybeSingle();
+            
+            if (existsError && existsError.code !== 'PGRST116') {
+                throw new AppError('Failed to validate product slug', 'DB_ERROR', 500);
+            }
 
-        // 2. Handle Image Uploads
-        // Note: In a real service, we might inject a StorageService.
-        // Here we'll inline the upload logic or import a helper.
-        const imageUrls = await this.handleImageUploads(imageFiles, data.images || []);
+            if (existing) {
+                throw AppError.badRequest(`Product with slug "${data.slug}" already exists`);
+            }
+        }
 
-        const productData = {
-            ...data,
-            images: imageUrls,
-            cover_image: imageUrls[0] || null,
-            published_at: data.status === 'active' ? new Date().toISOString() : null,
-        };
+        const existingImages = Array.isArray(data.images) ? data.images : [];
+        const imageUrls = await this.handleImageUploads(imageFiles, existingImages);
+
+        const productData = normalizeProductPayload({ ...data, images: imageUrls });
+        productData.created_at = new Date().toISOString();
 
         const { data: newProduct, error } = await supabase
             .from('products')
@@ -104,21 +171,40 @@ export const ProductService = {
             .select()
             .single();
 
-        if (error) throw new AppError(error.message, 'DB_ERROR', 500);
+        if (error) {
+            if (error.code === '23505') {
+                throw AppError.badRequest('Product with this slug or SKU already exists');
+            }
+            throw new AppError(error.message, 'DB_ERROR', 500);
+        }
         return newProduct as Product;
     },
 
     async updateProduct(id: string, data: Partial<Product>, imageFiles: File[]): Promise<Product> {
         const supabase = await createAdminClient();
 
-        const imageUrls = await this.handleImageUploads(imageFiles, data.images || []);
+        // Validate slug uniqueness if changing
+        if (data.slug) {
+            const { data: existing, error: existsError } = await supabase
+                .from('products')
+                .select('id')
+                .eq('slug', data.slug)
+                .neq('id', id)
+                .maybeSingle();
+            
+            if (existsError && existsError.code !== 'PGRST116') {
+                throw new AppError('Failed to validate product slug', 'DB_ERROR', 500);
+            }
 
-        const productData = {
-            ...data,
-            images: imageUrls,
-            cover_image: imageUrls[0] || (imageUrls.length > 0 ? imageUrls[0] : null),
-            published_at: data.status === 'active' ? new Date().toISOString() : null,
-        };
+            if (existing) {
+                throw AppError.badRequest(`Another product with slug "${data.slug}" already exists`);
+            }
+        }
+
+        const existingImages = Array.isArray(data.images) ? data.images : [];
+        const imageUrls = await this.handleImageUploads(imageFiles, existingImages);
+
+        const productData = normalizeProductPayload({ ...data, images: imageUrls });
 
         const { data: updatedProduct, error } = await supabase
             .from('products')
@@ -127,7 +213,12 @@ export const ProductService = {
             .select()
             .single();
 
-        if (error) throw new AppError(error.message, 'DB_ERROR', 500);
+        if (error) {
+            if (error.code === '23505') {
+                throw AppError.badRequest('Product with this slug or SKU already exists');
+            }
+            throw new AppError(error.message, 'DB_ERROR', 500);
+        }
         return updatedProduct as Product;
     },
 
@@ -172,17 +263,26 @@ export const ProductService = {
 
         for (const item of items) {
             const product = products.find(p => p.id === item.id);
-            if (!product || product.status !== 'active') { // simplified check
-                errors.push(`Product unavailable: ${item.id}`);
+            if (!product || product.status !== 'active') {
+                errors.push(`Product "${item.id}" is unavailable`);
                 allValid = false;
                 continue;
             }
 
-            // ... (Full validation logic would go here, omitting for brevity in this quick add, but essential for real implementation)
-            // For the sake of this refactor, I'll trust the logic allows simple pass-through if basic checks pass, 
-            // OR I should copy the full logic. I'll copy a simplified robust version.
+            // Stock validation
+            const availableStock = product.stock ?? 0;
+            if (availableStock < item.quantity) {
+                errors.push(`Insufficient stock for "${product.title}". Available: ${availableStock}`);
+                allValid = false;
+                continue;
+            }
 
-            let finalPrice = product.price; // simplified
+            // Calculate final price
+            const salePrice = product.sale_price;
+            const finalPrice = (salePrice !== null && salePrice !== undefined && salePrice < product.price) 
+                ? salePrice 
+                : product.price;
+
             validatedItems.push({
                 id: product.id,
                 quantity: item.quantity,
@@ -202,6 +302,7 @@ export const ProductService = {
     async handleImageUploads(files: File[], existingUrls: string[]): Promise<string[]> {
 
         const supabase = await createAdminClient();
+        const preservedUrls = Array.isArray(existingUrls) ? existingUrls.filter(Boolean) : [];
         const validFiles = files.filter(f => f && f.size > 0);
         const newUrls: string[] = [];
 
@@ -222,6 +323,6 @@ export const ProductService = {
             newUrls.push(publicUrl);
         }
 
-        return [...existingUrls, ...newUrls];
+        return Array.from(new Set([...preservedUrls, ...newUrls]));
     },
 };

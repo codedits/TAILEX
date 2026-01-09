@@ -36,52 +36,52 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
     <>
       <CartSheet />
       <motion.header
-        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 pointer-events-auto"
+        className="fixed top-0 left-0 right-0 z-50 mix-blend-difference text-white"
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        transition={{ duration: 0.8 }}
+        transition={{ duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
       >
-        <div className={`px-6 md:px-12 h-20 md:h-24 flex items-center justify-between transition-colors duration-300 ${scrolled ? 'bg-background/80 backdrop-blur-md border-b border-border/10' : 'bg-transparent'}`}>
+        <div className="px-6 md:px-12 h-24 flex items-center justify-between">
           {/* Logo */}
           <Link
             href="/"
-            className="text-xl md:text-2xl font-bold tracking-tighter uppercase z-50 relative hover:opacity-70 transition-opacity"
+            className="text-2xl font-black tracking-tighter uppercase z-50 relative hover:opacity-70 transition-opacity"
           >
             {brandName}
           </Link>
 
-          {/* Desktop Nav - Centered/Right as per reference */}
-          <nav className="hidden md:flex items-center gap-10">
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-12">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/70 hover:text-foreground transition-colors relative group"
+                className="text-[10px] font-medium uppercase tracking-[0.3em] hover:opacity-60 transition-opacity relative group"
               >
                 {link.name}
-                <span className="absolute -bottom-1 left-0 w-0 h-px bg-foreground transition-all duration-300 group-hover:w-full" />
+                <span className="absolute -bottom-1 left-0 w-0 h-px bg-white transition-all duration-300 group-hover:w-full" />
               </Link>
             ))}
           </nav>
 
           {/* Right Actions */}
           <div className="flex items-center gap-6 z-50 relative">
+            <SearchModal />
+
             <Link href="/login" className="hidden md:block hover:opacity-70 transition-opacity">
-              <User className="w-5 h-5 text-foreground/70" />
+              <User className="w-5 h-5" />
             </Link>
 
             <button
-              className="relative group flex items-center gap-2 hover:opacity-70 transition-opacity"
+              className="relative group hover:opacity-70 transition-opacity"
               onClick={() => setIsCartOpen(true)}
             >
-              <ShoppingBag className="w-5 h-5 text-foreground" />
-              <span className="text-[10px] font-bold absolute -top-1 -right-1 bg-primary text-primary-foreground w-4 h-4 rounded-full flex items-center justify-center scale-75">
-                {cartCount}
-              </span>
+              <span className="text-[10px] font-medium uppercase tracking-[0.3em] hidden md:inline-block mr-2">Cart</span>
+              <span className="text-[10px] font-medium">({cartCount})</span>
             </button>
 
             <button
-              className="md:hidden hover:opacity-70 transition-opacity text-[10px] font-bold tracking-widest"
+              className="md:hidden hover:opacity-70 transition-opacity text-[10px] font-medium tracking-[0.3em]"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? "CLOSE" : "MENU"}

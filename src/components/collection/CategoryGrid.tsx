@@ -17,16 +17,17 @@ const CategoryGrid = ({ collections }: CategoryGridProps) => {
 
   return (
     <section className="w-full px-4 sm:px-6 md:px-8 max-w-[1600px] mx-auto">
-      {/* Split Section Header */}
-      <div className="mb-16 md:mb-24 flex flex-col md:flex-row items-start justify-between gap-10">
-        <h2 className="text-5xl md:text-8xl font-bold tracking-tighter uppercase leading-[0.9] max-w-xl">
-          Everyday Essentials
+      {/* Section Header */}
+      <div className="mb-12 md:mb-20 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+        <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase">
+          Shop By Category
         </h2>
-        <div className="max-w-md md:pt-4">
-          <p className="text-lg md:text-xl text-muted-foreground font-light leading-relaxed">
-            Explore our best-selling categories — from crisp polos and refined shirts to versatile jackets and relaxed-fit trousers, made to elevate your everyday wardrobe.
-          </p>
-        </div>
+        <Link
+          href="/collection/all"
+          className="text-sm font-medium uppercase tracking-widest border-b border-foreground pb-1 hover:opacity-60 transition-opacity"
+        >
+          View All Collections
+        </Link>
       </div>
 
       {/* Grid Layout - Standard CSS Grid for stability */}

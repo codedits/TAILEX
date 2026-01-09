@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { updateProduct, createProduct } from "./actions";
 import { useTransition, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Image from "next/image";
 import { X, Upload, Loader2, Save } from "lucide-react";
@@ -23,6 +24,7 @@ type ProductFormProps = {
 }
 
 export function ProductForm({ initialData, collections = [] }: ProductFormProps) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [newFiles, setNewFiles] = useState<File[]>([]);
 
@@ -40,7 +42,7 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
       slug: initialData?.slug || "",
       description: initialData?.description || "",
       price: initialData?.price || 0,
-      sale_price: initialData?.sale_price || "",
+      sale_price: initialData?.sale_price ?? undefined,
       stock: initialData?.stock || 0,
       sku: initialData?.sku || "",
       status: (initialData?.status as any) || "draft",
@@ -50,7 +52,7 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
       is_featured: initialData?.is_featured || false,
       seo_title: initialData?.seo_title || "",
       seo_description: initialData?.seo_description || "",
-      track_quantity: true,
+      track_inventory: initialData?.track_inventory ?? true,
     },
   });
 
@@ -110,6 +112,12 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
           toast.error("Error saving product", { description: res.error });
         } else {
           toast.success(initialData?.id ? "Product updated" : "Product created");
+          
+          // Small delay before redirecting so they see the success toast
+          setTimeout(() => {
+            router.push("/admin/products");
+            router.refresh();
+          }, 1500);
         }
       } catch (error) {
         console.error("Submit Error", error);

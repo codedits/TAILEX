@@ -43,45 +43,57 @@ const HeroSection = ({
           className="object-cover object-center opacity-60"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/30" />
       </div>
 
-      {/* Content Layer - Bottom-Aligned */}
-      <div className="relative z-10 w-full flex flex-col md:flex-row items-end justify-between gap-10">
-        {/* Massive Brand Title - Left */}
-        <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1.2, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="max-w-[70%]"
-        >
-          <h1 className="text-[5vw] md:text-[6vw] font-bold tracking-tighter text-white leading-[0.8] mb-0 whitespace-nowrap">
-            {brandName}
-          </h1>
-        </motion.div>
+      {/* Content Layer */}
+      <div className="relative z-10 w-full px-4 sm:px-6 md:px-12 max-w-[1600px] mx-auto">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 md:gap-12">
 
-        {/* Tagline - Right */}
-        <motion.div
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1.2, delay: 0.2, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="max-w-xs md:max-w-md text-right md:pb-4"
-        >
-          <p className="text-sm md:text-lg text-white font-light leading-snug tracking-tight">
-            {displaySubheading}
-          </p>
-
-          {/* CTA Option - Small and clean if needed, otherwise skip */}
-          <div className="mt-8 flex justify-end">
-            <Link
-              href={ctaLink}
-              className="group inline-flex items-center gap-2 text-white/70 hover:text-white text-sm md:text-base tracking-widest uppercase transition-colors"
+          {/* Text Content */}
+          <div className="max-w-4xl space-y-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
             >
-              {ctaText}
-              <ArrowDownRight className="w-4 h-4 transition-transform group-hover:translate-x-1 group-hover:translate-y-1" />
-            </Link>
+              <p className="text-white/80 text-sm md:text-base tracking-[0.2em] font-medium uppercase mb-4">
+                {brandName}
+              </p>
+              <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-bold tracking-tighter text-white leading-[0.9]">
+                {displayHeading}
+              </h1>
+            </motion.div>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="text-lg md:text-2xl text-white/80 font-light max-w-xl leading-relaxed"
+            >
+              {displaySubheading}
+            </motion.p>
           </div>
-        </motion.div>
+
+          {/* CTA Button */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="flex-shrink-0"
+          >
+            <Button
+              asChild
+              size="lg"
+              className="rounded-full bg-white text-black hover:bg-neutral-200 h-16 px-10 text-lg transition-transform hover:scale-105"
+            >
+              <Link href={ctaLink} className="flex items-center gap-2">
+                {ctaText}
+                <ArrowDownRight className="w-5 h-5" />
+              </Link>
+            </Button>
+          </motion.div>
+        </div>
       </div>
     </section>
   );

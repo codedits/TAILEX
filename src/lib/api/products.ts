@@ -4,7 +4,6 @@ import { ProductService } from '@/services/products';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import type { Product, ProductVariant, ApiResponse, PaginatedResponse } from '@/lib/types';
-import { validateProductData } from '@/lib/logic/product-logic';
 import { AppError } from '@/services/errors';
 
 // Helper to handle Service errors in Actions
@@ -22,42 +21,111 @@ function handleActionError(error: unknown): ApiResponse<any> {
 
 import { productSchema } from '@/lib/validations/product';
 
-// ...
+type ProductPayload = Partial<Product>;
+
+function parseBooleanField(value: FormDataEntryValue | null): boolean | undefined {
+  if (value === null) return undefined;
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') {
+    const normalized = value.toLowerCase();
+    if (['true', 'on', '1'].includes(normalized)) return true;
+    if (['false', 'off', '0'].includes(normalized)) return false;
+  }
+  return undefined;
+}
+
+function parseTagsCsv(tags: string | undefined) {
+  if (!tags) return [] as string[];
+  return tags
+    .split(',')
+    .map(tag => tag.trim())
+    .filter(Boolean);
+}
+
+function extractImageFiles(formData: FormData): File[] {
+  return formData
+    .getAll('imageFiles')
+    .filter((entry): entry is File => entry instanceof File);
+}
+
+function parseExistingImages(formData: FormData): string[] {
+  const existing = formData.get('existing_images');
+  if (!existing || typeof existing !== 'string') return [];
+  try {
+    const parsed = JSON.parse(existing);
+    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === 'string' && item.length > 0) : [];
+  } catch {
+    return [];
+  }
+}
+
+function buildProductPayload(formData: FormData): { data?: ProductPayload; error?: string } {
+  const entries = Array.from(formData.entries()).filter(([, value]) => typeof value === 'string') as Array<[string, string]>;
+  const rawData = Object.fromEntries(entries);
+
+  delete rawData.imageFiles;
+  delete rawData.existing_images;
+  delete rawData.id;
+
+  const status = rawData.status || 'draft';
+  const categoryRaw = rawData.category_id;
+  const category_id = !categoryRaw || categoryRaw === 'none' ? null : categoryRaw;
+
+  // Ensure booleans are correctly parsed from FormData strings
+  const isFeatured = parseBooleanField(formData.get('is_featured')) ?? false;
+  const trackInventory = parseBooleanField(formData.get('track_inventory'));
+  const allowBackorder = parseBooleanField(formData.get('allow_backorder'));
+
+  const schemaInput: Record<string, unknown> = {
+    ...rawData,
+    status,
+    category_id,
+    is_featured: isFeatured,
+  };
+
+  if (typeof trackInventory === 'boolean') {
+    schemaInput.track_inventory = trackInventory;
+  }
+  if (typeof allowBackorder === 'boolean') {
+    schemaInput.allow_backorder = allowBackorder;
+  }
+
+  const validatedFields = productSchema.safeParse(schemaInput);
+
+  if (!validatedFields.success) {
+    console.error('Product validation failed:', validatedFields.error.flatten());
+    const fieldErrors = validatedFields.error.flatten().fieldErrors;
+    const messages = Object.values(fieldErrors).flat().filter(Boolean);
+    return { error: messages.join(', ') || 'Invalid inputs' };
+  }
+
+  const { tags: tagsCsv, sale_price, ...rest } = validatedFields.data;
+  const payload: ProductPayload = {
+    ...rest,
+    sale_price: sale_price ?? null,
+    tags: parseTagsCsv(tagsCsv),
+  };
+
+  return { data: payload };
+}
 
 export async function createProduct(formData: FormData): Promise<ApiResponse<Product>> {
   try {
-    const rawData: any = Object.fromEntries(formData.entries());
-
-    // Manual adjustments for Zod
-    rawData.status = formData.get('status') || 'draft';
-    rawData.is_featured = formData.get('is_featured') === 'on';
-    rawData.price = formData.get('price');
-    rawData.sale_price = formData.get('sale_price');
-    rawData.stock = formData.get('stock');
-    rawData.category_id = formData.get('category_id') || null;
-
-    const validatedFields = productSchema.safeParse(rawData);
-
-    if (!validatedFields.success) {
-      console.error("Validation Error:", validatedFields.error.flatten());
-      return { error: 'Invalid inputs: ' + Object.values(validatedFields.error.flatten().fieldErrors).join(', ') };
+    const { data: productData, error } = buildProductPayload(formData);
+    if (!productData) {
+      return { error: error || 'Invalid product data' };
     }
 
-    const productData = {
-      ...validatedFields.data,
-      tags: formData.get('tags') ? (formData.get('tags') as string).split(',').map(t => t.trim()).filter(Boolean) : [],
-    };
+    const imageFiles = extractImageFiles(formData);
 
-    const imageFiles = formData.getAll('imageFiles') as File[];
-
-    const product = await ProductService.createProduct(productData as any, imageFiles);
+    const product = await ProductService.createProduct(productData, imageFiles);
 
     revalidatePath('/admin/products');
     revalidatePath('/collection');
     revalidatePath('/');
-    redirect('/admin/products');
+    
+    return { data: product };
   } catch (error) {
-    if ((error as any).message === 'NEXT_REDIRECT') throw error;
     return handleActionError(error);
   }
 }
@@ -67,42 +135,24 @@ export async function updateProduct(formData: FormData): Promise<ApiResponse<Pro
     const id = formData.get('id') as string;
     if (!id) return { error: 'Product ID is required' };
 
-    const rawData: any = Object.fromEntries(formData.entries());
-
-    // Manual adjustments for Zod
-    rawData.status = formData.get('status') || 'draft';
-    rawData.is_featured = formData.get('is_featured') === 'on';
-    rawData.price = formData.get('price');
-    rawData.sale_price = formData.get('sale_price');
-    rawData.stock = formData.get('stock');
-    rawData.category_id = formData.get('category_id') || null;
-
-    const validatedFields = productSchema.safeParse(rawData);
-
-    if (!validatedFields.success) {
-      console.error("Validation Error:", validatedFields.error.flatten());
-      return { error: 'Invalid inputs: ' + Object.values(validatedFields.error.flatten().fieldErrors).join(', ') };
+    const { data: productData, error } = buildProductPayload(formData);
+    if (!productData) {
+      return { error: error || 'Invalid product data' };
     }
 
-    const productData = {
-      ...validatedFields.data,
-      tags: formData.get('tags') ? (formData.get('tags') as string).split(',').map(t => t.trim()).filter(Boolean) : [],
-      existing_images: formData.get('existing_images') ? JSON.parse(formData.get('existing_images') as string) : undefined
-    };
+    const existingImages = parseExistingImages(formData);
+    const imageFiles = extractImageFiles(formData);
 
-    const imageFiles = formData.getAll('imageFiles') as File[];
-
-    // Pass validated data merging existing_images as expected by service
-    const product = await ProductService.updateProduct(id, { ...productData as any, images: productData.existing_images }, imageFiles);
+    const product = await ProductService.updateProduct(id, { ...productData, images: existingImages }, imageFiles);
 
     revalidatePath('/admin/products');
     revalidatePath(`/admin/products/${id}`);
     revalidatePath(`/product/${productData.slug}`);
     revalidatePath('/collection');
     revalidatePath('/');
-    redirect('/admin/products');
+    
+    return { data: product };
   } catch (error) {
-    if ((error as any).message === 'NEXT_REDIRECT') throw error;
     return handleActionError(error);
   }
 }

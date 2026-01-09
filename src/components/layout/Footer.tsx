@@ -73,65 +73,78 @@ const Footer = ({
   ].filter(Boolean) as { name: string; href: string; Icon: typeof Facebook }[];
 
   return (
-    <footer className="w-full px-6 md:px-12 py-24 md:py-32 bg-background border-t border-border/10">
-      <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row justify-between gap-16 md:gap-24">
+    <footer className="bg-secondary/50 border-t border-border/30">
+      <motion.div
+        className="px-6 md:px-12 py-16 md:py-20"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        variants={containerVariants}
+      >
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-12 md:gap-8">
+          {/* Brand Column */}
+          <motion.div variants={itemVariants} className="col-span-2 md:col-span-2">
+            <Link href="/" className="font-display text-2xl text-foreground mb-4 block">
+              {brandName}
+            </Link>
+            <p className="font-body text-sm text-muted-foreground leading-relaxed mb-6 max-w-xs">
+              {config.tagline || defaultConfig.tagline}
+            </p>
+          </motion.div>
 
-        {/* Giant Brand Title - Left */}
-        <div className="flex-1">
-          <Link href="/" className="text-[12vw] md:text-[8vw] font-bold tracking-tighter leading-[0.8] uppercase flex flex-col">
-            <span>{brandName.split(' ')[0]}</span>
-            <span>{brandName.split(' ').slice(1).join(' ')}</span>
-          </Link>
-          <p className="mt-8 text-sm md:text-base text-muted-foreground max-w-xs font-light tracking-tight">
-            © {currentYear} {brandName}. All rights reserved. {config.tagline || defaultConfig.tagline}
-          </p>
-        </div>
-
-        {/* Link Columns - Right */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-12 md:gap-24">
           {/* Dynamic Columns */}
           {(config.columns || defaultConfig.columns).map((column, idx) => (
-            <div key={idx} className="space-y-6">
-              <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-foreground mb-4">
+            <motion.div key={idx} variants={itemVariants}>
+              <h4 className="font-display text-sm uppercase tracking-wider text-foreground mb-4">
                 {column.title}
               </h4>
-              <ul className="space-y-4">
+              <ul className="space-y-3">
                 {column.links?.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.url}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors font-light"
+                      className="font-body text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {link.label}
                     </Link>
                   </li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
           ))}
 
           {/* Social Links */}
           {config.showSocial && socialLinks.length > 0 && (
-            <div className="space-y-6">
-              <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-foreground mb-4">
+            <motion.div variants={itemVariants}>
+              <h4 className="font-display text-sm uppercase tracking-wider text-foreground mb-4">
                 Social
               </h4>
-              <ul className="space-y-4">
+              <ul className="space-y-3">
                 {socialLinks.map((link) => (
                   <li key={link.name}>
                     <a
                       href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors font-light flex items-center gap-2"
+                      className="font-body text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-2"
                     >
+                      <link.Icon className="w-4 h-4" />
                       {link.name}
                     </a>
                   </li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
           )}
+        </div>
+      </motion.div>
+
+      {/* Bottom Bar */}
+      <div className="border-t border-border/30 px-6 md:px-12 py-6">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="font-body text-xs text-muted-foreground">
+            {copyrightText}
+          </p>
         </div>
       </div>
     </footer>

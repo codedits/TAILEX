@@ -13,6 +13,13 @@ import {
 import { calculateProductPrice } from '@/lib/logic/product-logic';
 import { revalidatePath } from 'next/cache';
 
+type StockAdjustment = {
+    productId: string;
+    variantId?: string | null;
+    from: number;
+    to: number;
+};
+
 export const OrderService = {
     async createOrder(input: CreateOrderInput): Promise<Order> {
         const supabase = await createAdminClient();
@@ -40,6 +47,7 @@ export const OrderService = {
         const productMap = new Map(products.map(p => [p.id, p]));
         const orderItems: any[] = [];
         let subtotal = 0;
+        const stockAdjustments = new Map<string, StockAdjustment>();
 
         // 3. Process Items (Price & Stock Check)
         for (const item of input.items) {
@@ -56,13 +64,14 @@ export const OrderService = {
                 const variant = variants.find(v => v.id === item.variant_id);
                 if (!variant) throw AppError.badRequest(`Variant ID ${item.variant_id} not found`);
 
-                stockAvailable = variant.inventory_quantity;
+                const variantStock = variant.inventory_quantity ?? 0;
+                stockAvailable = variantStock;
                 variantTitle = variant.title;
                 sku = variant.sku || sku;
 
-                const vPrice = variant.price || product.price;
-                const vSalePrice = variant.sale_price;
-                unitPrice = (vSalePrice !== null && vSalePrice !== undefined && vSalePrice < vPrice) ? vSalePrice : vPrice;
+                const vPrice = variant.price ?? product.price;
+                const vSalePrice = variant.sale_price ?? null;
+                unitPrice = (vSalePrice !== null && vSalePrice < vPrice) ? vSalePrice : vPrice;
             } else {
                 const priceInfo = calculateProductPrice(product);
                 unitPrice = priceInfo.finalPrice;
@@ -70,6 +79,19 @@ export const OrderService = {
 
             if (stockAvailable < item.quantity) {
                 throw AppError.badRequest(`Insufficient stock for "${product.title}"${variantTitle ? ' (' + variantTitle + ')' : ''}. Available: ${stockAvailable}`);
+            }
+
+            const adjustmentKey = `${product.id}:${item.variant_id || 'base'}`;
+            const existingAdjustment = stockAdjustments.get(adjustmentKey);
+            if (existingAdjustment) {
+                existingAdjustment.to -= item.quantity;
+            } else {
+                stockAdjustments.set(adjustmentKey, {
+                    productId: product.id,
+                    variantId: item.variant_id || null,
+                    from: stockAvailable,
+                    to: stockAvailable - item.quantity,
+                });
             }
 
             const totalPrice = unitPrice * item.quantity;
@@ -98,50 +120,48 @@ export const OrderService = {
         const serverClient = await createClient();
         const { data: { user } } = await serverClient.auth.getUser();
 
-        const { data: order, error: orderError } = await supabase
-            .from('orders')
-            .insert({
-                customer_id: user?.id || null,
-                email: input.email,
-                phone: input.phone || null,
-                status: 'pending',
-                payment_status: 'pending',
-                fulfillment_status: 'unfulfilled',
-                subtotal,
-                shipping_total: shippingTotal,
-                tax_total: taxTotal,
-                total,
-                shipping_address: input.shipping_address,
-                billing_address: input.billing_address || input.shipping_address,
-            })
-            .select()
-            .single();
+        const itemsWithOrderId = orderItems.map(item => ({ ...item, order_id: '' }));
+        let order: any;
 
-        if (orderError) throw new AppError(orderError.message, 'DB_ERROR');
+        try {
+            const { data: createdOrder, error: orderError } = await supabase
+                .from('orders')
+                .insert({
+                    customer_id: user?.id || null,
+                    email: input.email,
+                    phone: input.phone || null,
+                    status: 'pending',
+                    payment_status: 'pending',
+                    fulfillment_status: 'unfulfilled',
+                    subtotal,
+                    shipping_total: shippingTotal,
+                    tax_total: taxTotal,
+                    total,
+                    shipping_address: input.shipping_address,
+                    billing_address: input.billing_address || input.shipping_address,
+                })
+                .select()
+                .single();
 
-        // 6. Insert Order Items
-        const itemsWithOrderId = orderItems.map(item => ({ ...item, order_id: order.id }));
-        const { error: itemsError } = await supabase.from('order_items').insert(itemsWithOrderId);
+            if (orderError || !createdOrder) throw new AppError(orderError?.message || 'Failed to create order', 'DB_ERROR');
+            order = createdOrder;
 
-        if (itemsError) {
-            await supabase.from('orders').delete().eq('id', order.id); // Rollback
-            throw new AppError(itemsError.message, 'DB_ERROR');
-        }
+            itemsWithOrderId.forEach(item => { item.order_id = order.id; });
+            const { error: itemsError } = await supabase.from('order_items').insert(itemsWithOrderId);
+            if (itemsError) throw new AppError(itemsError.message, 'DB_ERROR');
 
-        // 7. Atomic Stock Update
-        for (const item of input.items) {
-            await supabase.rpc('decrement_stock', {
-                product_id: item.product_id,
-                variant_id: item.variant_id || null,
-                quantity: item.quantity,
-            });
+            await applyStockAdjustments(supabase, Array.from(stockAdjustments.values()));
+        } catch (err) {
+            if (order?.id) {
+                await supabase.from('order_items').delete().eq('order_id', order.id);
+                await supabase.from('orders').delete().eq('id', order.id);
+            }
+            if (err instanceof AppError) throw err;
+            throw new AppError('Failed to create order', 'DB_ERROR');
         }
 
         // 8. Send Email Confirmation
-        const fullOrder = await OrderService.getOrder(order.id); // Re-fetch to get items joined if needed, or pass constructed object
-        // Actually, sendOrderConfirmation needs items. The 'order' variable from insert doesn't have items attached yet. 
-        // We have 'itemsWithOrderId' but it's raw DB structure.
-        // Let's re-fetch the full order to be safe and clean.
+        const fullOrder = await OrderService.getOrder(order.id);
         await EmailService.sendOrderConfirmation(input.email, fullOrder);
 
         revalidatePath('/admin/orders');
@@ -243,3 +263,36 @@ export const OrderService = {
         return updated as Order;
     }
 };
+
+async function applyStockAdjustments(
+    supabase: Awaited<ReturnType<typeof createAdminClient>>,
+    adjustments: StockAdjustment[]
+) {
+    for (const adjustment of adjustments) {
+        if (adjustment.variantId) {
+            const { error, data } = await supabase
+                .from('product_variants')
+                .update({ inventory_quantity: adjustment.to })
+                .eq('id', adjustment.variantId)
+                .eq('inventory_quantity', adjustment.from)
+                .select('id')
+                .single();
+
+            if (error || !data) {
+                throw AppError.badRequest('Variant stock changed, please refresh and try again');
+            }
+        } else {
+            const { error, data } = await supabase
+                .from('products')
+                .update({ stock: adjustment.to })
+                .eq('id', adjustment.productId)
+                .eq('stock', adjustment.from)
+                .select('id')
+                .single();
+
+            if (error || !data) {
+                throw AppError.badRequest('Product stock changed, please refresh and try again');
+            }
+        }
+    }
+}

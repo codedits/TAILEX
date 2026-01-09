@@ -13,26 +13,25 @@ const FavoritesSection = ({ products }: FavoritesSectionProps) => {
   if (!products || products.length === 0) return null;
 
   return (
-    <section className="w-full px-4 sm:px-6 md:px-8 max-w-[1600px] mx-auto py-24 md:py-32">
-      {/* Split Section Header */}
-      <div className="mb-16 md:mb-24 flex flex-col md:flex-row items-start justify-between gap-10">
-        <h2 className="text-5xl md:text-8xl font-bold tracking-tighter uppercase leading-[0.9] max-w-xl">
-          Proven Favorites
+    <section className="w-full py-12 md:py-20">
+      <div className="px-4 sm:px-6 md:px-8 max-w-[1600px] mx-auto mb-10 flex items-center justify-between">
+        <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
+          Trending Now
         </h2>
-        <div className="max-w-md md:pt-4">
-          <p className="text-lg md:text-xl text-muted-foreground font-light leading-relaxed">
-            Trusted by thousands of customers. These pieces define versatility — perfect for workdays or weekends.
-          </p>
-        </div>
+        <Link href="/collection/all" className="hidden md:flex items-center gap-2 text-sm font-medium hover:opacity-60 transition-opacity">
+          Shop All <ArrowRight className="w-4 h-4" />
+        </Link>
       </div>
 
-      {/* Grid Layout - 3 columns as per reference */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-16">
-        {products.slice(0, 3).map((product) => (
-          <div key={product.id} className="w-full">
-            <ProductCard {...product} />
-          </div>
-        ))}
+      {/* Horizontal Scroll Container */}
+      <div className="relative w-full overflow-x-auto pb-12 hide-scrollbar">
+        <div className="flex gap-6 px-4 md:px-8 w-max">
+          {products.map((product) => (
+            <div key={product.id} className="w-[280px] md:w-[350px] flex-shrink-0">
+              <ProductCard {...product} />
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

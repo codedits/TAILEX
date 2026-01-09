@@ -78,51 +78,58 @@ const NewsSection = ({ posts }: NewsSectionProps) => {
   };
 
   return (
-    <section className="w-full px-4 sm:px-6 md:px-8 max-w-[1600px] mx-auto py-24 md:py-32">
-      {/* Split Section Header */}
-      <div className="mb-16 md:mb-24 flex flex-col md:flex-row items-start justify-between gap-10">
-        <h2 className="text-5xl md:text-8xl font-bold tracking-tighter uppercase leading-[0.9] max-w-xl">
-          Style It
-        </h2>
-        <div className="max-w-md md:pt-4">
-          <p className="text-lg md:text-xl text-muted-foreground font-light leading-relaxed">
-            From new product drops to style tips — read our latest features, editorials, and brand announcements.
-          </p>
-        </div>
-      </div>
+    <section className="py-20 md:py-32 px-6 md:px-12 bg-background">
+      {/* Section Header */}
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
+        variants={itemVariants}
+        className="max-w-3xl mb-12 md:mb-16"
+      >
+        <h2 className="section-title text-foreground mb-6">Latest News</h2>
+        <p className="text-muted-foreground font-body text-base md:text-lg leading-relaxed">
+          From new product drops to style tips — read our latest features,
+          editorials, and brand announcements.
+        </p>
+      </motion.div>
 
       {/* Articles Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16">
+      <motion.div
+        className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
+        variants={containerVariants}
+      >
         {articles.map((article, index) => {
           const imageUrl = article.featured_image || fallbackImages[index % fallbackImages.length];
           return (
-            <article key={article.id} className="w-full">
-              <Link href={`/news/${article.slug}`} className="group block space-y-6">
-                <div className="aspect-[4/5] md:aspect-[3/4] overflow-hidden relative bg-neutral-100 dark:bg-neutral-900">
+            <motion.article
+              key={article.id}
+              variants={itemVariants}
+            >
+              <Link href={`/news/${article.slug}`} className="group block">
+                <div className="aspect-[3/2] overflow-hidden mb-4 relative">
                   <Image
                     src={imageUrl}
                     alt={article.title}
                     fill
-                    className="object-cover transition-transform duration-1000 group-hover:scale-105"
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
                   />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
                 </div>
-
-                <div className="space-y-3">
-                  <span className="text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase text-muted-foreground">
-                    {article.author_name || "Calder 2026 Essentials"}
-                  </span>
-                  <h3 className="text-xl md:text-2xl font-bold text-foreground leading-tight group-hover:opacity-70 transition-opacity uppercase tracking-tight">
-                    {article.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground font-light leading-relaxed line-clamp-2">
-                    {article.excerpt || 'Read more...'}
-                  </p>
-                </div>
+                <h3 className="font-display text-lg md:text-xl text-foreground mb-2 group-hover:opacity-70 transition-opacity">
+                  {article.title}
+                </h3>
+                <p className="font-body text-sm text-muted-foreground leading-relaxed">
+                  {article.excerpt || 'Read more...'}
+                </p>
               </Link>
-            </article>
+            </motion.article>
           );
         })}
-      </div>
+      </motion.div>
     </section>
   );
 };
