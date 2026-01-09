@@ -3,7 +3,7 @@ import ProductCard from "@/components/product/ProductCard";
 import { Suspense } from "react";
 
 interface AsyncProductGridProps {
-    productsPromise: Promise<Product[]>;
+    productsPromise: Promise<Product[]> | PromiseLike<Product[]>;
 }
 
 export default async function AsyncProductGrid({ productsPromise }: AsyncProductGridProps) {

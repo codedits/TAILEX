@@ -10,7 +10,7 @@ import { useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Image from "next/image";
-import { X, Upload, Loader2, Save } from "lucide-react";
+import { X, Upload, Loader2, Save, Crop as CropIcon } from "lucide-react";
 import type { Product, Collection } from "@/lib/types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +18,7 @@ import { productSchema, type ProductFormValues } from "@/lib/validations/product
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
 import { convertFileToWebP } from '@/lib/image-utils';
+import { ImageCropper } from "@/components/ui/image-cropper";
 
 type ProductFormProps = {
   initialData?: Partial<Product>
@@ -28,6 +29,7 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [cropData, setCropData] = useState<{ index: number, image: string } | null>(null);
 
   // Image handling
   const [previews, setPreviews] = useState<string[]>(
@@ -216,13 +218,22 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
                   {previews.map((src, idx) => (
                     <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-white/10 bg-black group">
                       <Image src={src} alt="Preview" fill className="object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(idx)}
-                        className="absolute top-2 right-2 bg-black/80 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
+                      <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          type="button"
+                          onClick={() => setCropData({ index: idx, image: src })}
+                          className="bg-black/80 text-white p-1.5 rounded-full hover:bg-white hover:text-black transition-colors"
+                        >
+                          <CropIcon className="w-3 h-3" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeImage(idx)}
+                          className="bg-black/80 text-white p-1.5 rounded-full hover:bg-red-500 transition-colors"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -386,6 +397,43 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
 
         </div>
       </form>
+
+      {cropData && (
+        <ImageCropper
+          image={cropData.image}
+          aspect={3 / 4} // Products use 3:4 aspect
+          onCropComplete={(blob) => {
+            const file = new File([blob], `product-${cropData.index}.webp`, { type: "image/webp" });
+            const objectUrl = URL.createObjectURL(file);
+            
+            const initialCount = (initialData?.images?.length || (initialData?.cover_image ? 1 : 0));
+            
+            // Update previews
+            const newPreviews = [...previews];
+            newPreviews[cropData.index] = objectUrl;
+            setPreviews(newPreviews);
+            
+            // Update/Add to new files
+            if (cropData.index >= initialCount) {
+              // It's already in the "new files" range
+              const newFilesIndex = cropData.index - initialCount;
+              const updatedNewFiles = [...newFiles];
+              updatedNewFiles[newFilesIndex] = file;
+              setNewFiles(updatedNewFiles);
+            } else {
+              // It was an initial image, now it's effectively a new one.
+              // We'll treat it as a new file by adding it to newFiles
+              // and in onSubmit we'll make sure it's handled.
+              // Actually, to keep it simple, let's just add it to a separate "replacedFiles" map
+              // or just push it to newFiles and adjust onSubmit.
+              setNewFiles(prev => [...prev, file]);
+            }
+            
+            setCropData(null);
+          }}
+          onCancel={() => setCropData(null)}
+        />
+      )}
     </Form>
   );
 }

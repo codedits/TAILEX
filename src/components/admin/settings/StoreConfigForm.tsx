@@ -200,6 +200,15 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
                                         <Button
                                             type="button"
+                                            variant="secondary"
+                                            size="icon"
+                                            className="rounded-full w-10 h-10"
+                                            onClick={() => setTempCropImage(heroFile ? URL.createObjectURL(heroFile) : config.hero?.image || null)}
+                                        >
+                                            <CropIcon className="w-4 h-4" />
+                                        </Button>
+                                        <Button
+                                            type="button"
                                             variant="destructive"
                                             size="icon"
                                             className="rounded-full w-10 h-10"
@@ -229,7 +238,8 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                                         className="hidden"
                                         onChange={(e) => {
                                             if (e.target.files?.[0]) {
-                                                setHeroFile(e.target.files[0]);
+                                                const file = e.target.files[0];
+                                                setTempCropImage(URL.createObjectURL(file));
                                             }
                                         }}
                                     />
@@ -375,6 +385,19 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                     </CardContent>
                 </Card>
             </TabsContent>
+
+            {tempCropImage && (
+                <ImageCropper
+                    image={tempCropImage}
+                    aspect={16 / 9} // Hero is usually wide
+                    onCropComplete={(blob) => {
+                        const file = new File([blob], 'hero.webp', { type: 'image/webp' });
+                        setHeroFile(file);
+                        setTempCropImage(null);
+                    }}
+                    onCancel={() => setTempCropImage(null)}
+                />
+            )}
         </Tabs>
     );
 }
