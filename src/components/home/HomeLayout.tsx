@@ -1,11 +1,10 @@
 "use client";
 
 import { HomeData } from "@/lib/home-data";
-import { FadeInView } from "@/components/animations/FadeInView";
 import HeroSection from "@/components/sections/HeroSection";
+import ProductGridSection from "@/components/sections/ProductGridSection";
+import OutlookSection from "@/components/sections/OutlookSection";
 import CategoryGrid from "@/components/collection/CategoryGrid";
-import FavoritesSection from "@/components/sections/FavoritesSection";
-import BenefitsStrip from "@/components/sections/BenefitsStrip";
 import NewsSection from "@/components/sections/NewsSection";
 import Footer from "@/components/layout/Footer";
 
@@ -16,59 +15,68 @@ interface HomeLayoutProps {
 export default function HomeLayout({ data }: HomeLayoutProps) {
     const { layout, hero, brand, collections, products, benefits, posts, footer, social } = data;
 
-    // Render sections based on order, but purely vertical stack now.
+    // Render sections based on order
     const sortedSections = [...layout].sort((a, b) => a.order - b.order);
 
+    // Find specific sections to control specific layout grouping
+    const heroSection = sortedSections.find(s => s.type === 'hero');
+    const categoriesSection = sortedSections.find(s => s.type === 'categories');
+    const productSection = sortedSections.find(s => s.type === 'featured-products');
+    const outlookSection = sortedSections.find(s => s.type === 'outlook');
+    const newsSection = sortedSections.find(s => s.type === 'news');
+
     return (
-        <div className="bg-background min-h-screen selection:bg-neutral-900 selection:text-white font-sans">
-            {sortedSections.map((section) => {
-                if (!section.enabled) return null;
+        <div className="bg-white min-h-screen selection:bg-neutral-900 selection:text-white">
 
-                return (
-                    <div key={section.id} className="w-full">
-                        {section.type === 'hero' && (
-                            <HeroSection
-                                heading={hero.heading}
-                                subheading={hero.subheading}
-                                image={hero.image}
-                                ctaText={hero.ctaText}
-                                ctaLink={hero.ctaLink}
-                                brandName={brand.name}
-                            />
-                        )}
+            {/* Wrapper for Hero + New Arrivals (Categories) - mimics framer-1u6vz46 */}
+            <div className="relative flex flex-col items-center justify-center w-full overflow-visible">
+                {heroSection?.enabled && (
+                    <HeroSection
+                        heading={heroSection.content?.heading || brand.name}
+                        subheading={heroSection.content?.subheading || hero.subheading}
+                        image={heroSection.content?.image || hero.image}
+                        brandName={brand.name}
+                    />
+                )}
 
-                        {section.type === 'categories' && (
-                            <div className="py-24 sm:py-32 bg-background">
-                                <FadeInView>
-                                    <CategoryGrid collections={collections} />
-                                </FadeInView>
-                            </div>
-                        )}
+                {categoriesSection?.enabled && (
+                    <CategoryGrid
+                        collections={collections}
+                        sectionTitle={categoriesSection.content?.title || "Everyday\nEssentials"}
+                        sectionDescription={categoriesSection.content?.description || "Explore our best-selling categories — from crisp polos and refined shirts to versatile jackets and relaxed-fit trousers."}
+                    />
+                )}
+            </div>
 
-                        {section.type === 'featured-products' && (
-                            <div className="py-24 sm:py-32 bg-neutral-50 dark:bg-neutral-900/50">
-                                <FadeInView>
-                                    <FavoritesSection products={products} />
-                                </FadeInView>
-                            </div>
-                        )}
+            {/* Other Sections as siblings */}
+            {productSection?.enabled && (
+                <div className="w-full">
+                    <ProductGridSection
+                        products={products}
+                        title={productSection.content?.title || "Proven\nFavorites"}
+                        description={productSection.content?.description || "Icons that endure year after year — top-rated staples chosen again and again for their timeless fit, premium feel, and versatility."}
+                    />
+                </div>
+            )}
 
-                        {section.type === 'benefits' && benefits.enabled && (
-                            <div className="border-t border-b border-border bg-background">
-                                <BenefitsStrip items={benefits.items} />
-                            </div>
-                        )}
+            {outlookSection?.enabled && (
+                <div className="w-full">
+                    <OutlookSection
+                        title={outlookSection.content?.title || "Style It\nYour Way"}
+                    />
+                </div>
+            )}
 
-                        {section.type === 'news' && (
-                            <div className="py-24 bg-background">
-                                <FadeInView>
-                                    <NewsSection posts={posts} />
-                                </FadeInView>
-                            </div>
-                        )}
-                    </div>
-                );
-            })}
+            {newsSection?.enabled && (
+                <div className="w-full">
+                    <NewsSection
+                        posts={posts}
+                        brandName={brand.name}
+                        sectionTitle={newsSection.content?.title}
+                        sectionDescription={newsSection.content?.description}
+                    />
+                </div>
+            )}
 
             <Footer
                 config={footer}

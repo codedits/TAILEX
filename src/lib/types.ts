@@ -552,6 +552,7 @@ export type HomepageSectionType =
   | 'hero'
   | 'categories'
   | 'featured-products'
+  | 'outlook'
   | 'benefits'
   | 'news'
   | 'newsletter'
@@ -563,6 +564,13 @@ export type HomepageSection = {
   enabled: boolean
   order: number
   config?: Record<string, unknown>
+  content?: {
+    title?: string
+    description?: string
+    image?: string
+    items?: any[]
+    [key: string]: any
+  }
 }
 
 export type HomepageConfig = {

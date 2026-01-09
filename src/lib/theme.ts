@@ -304,17 +304,107 @@ export const getHomepageLayout = unstable_cache(
 
             // Default layout if missing
             return (data?.value as any[]) || [
-                { id: "hero", type: "hero", enabled: true, order: 0 },
-                { id: "categories", type: "categories", enabled: true, order: 1 },
-                { id: "featured", type: "featured-products", enabled: true, order: 2 },
-                { id: "benefits", type: "benefits", enabled: true, order: 3 },
-                { id: "news", type: "news", enabled: true, order: 4 },
+                {
+                    id: "hero",
+                    type: "hero",
+                    enabled: true,
+                    order: 0,
+                    content: {
+                        heading: "Calder Co.",
+                        subheading: "Timeless Wardrobe.\nEveryday Power."
+                    }
+                },
+                {
+                    id: "categories",
+                    type: "categories",
+                    enabled: true,
+                    order: 1,
+                    content: {
+                        title: "Everyday\nEssentials",
+                        description: "Explore our best-selling categories — from crisp polos and refined shirts to versatile jackets and relaxed-fit trousers, made to elevate your everyday wardrobe."
+                    }
+                },
+                {
+                    id: "featured",
+                    type: "featured-products",
+                    enabled: true,
+                    order: 2,
+                    content: {
+                        title: "Proven\nFavorites",
+                        description: "Icons that endure year after year — top-rated staples chosen again and again for their timeless fit, premium feel, and versatility."
+                    }
+                },
+                {
+                    id: "outlook",
+                    type: "outlook",
+                    enabled: true,
+                    order: 3,
+                    content: {
+                        title: "Style It\nYour Way"
+                    }
+                },
+                {
+                    id: "news",
+                    type: "news",
+                    enabled: true,
+                    order: 4,
+                    content: {
+                        title: "What's New at\nCalder Co.",
+                        description: "From new product drops to style tips — read our latest features, editorials, and brand announcements."
+                    }
+                },
             ]
         } catch {
             return [
-                { id: "hero", type: "hero", enabled: true, order: 0 },
-                { id: "categories", type: "categories", enabled: true, order: 1 },
-                { id: "featured", type: "featured-products", enabled: true, order: 2 },
+                {
+                    id: "hero",
+                    type: "hero",
+                    enabled: true,
+                    order: 0,
+                    content: {
+                        heading: "Calder Co.",
+                        subheading: "Timeless Wardrobe.\nEveryday Power."
+                    }
+                },
+                {
+                    id: "categories",
+                    type: "categories",
+                    enabled: true,
+                    order: 1,
+                    content: {
+                        title: "Everyday\nEssentials",
+                        description: "Explore our best-selling categories — from crisp polos and refined shirts to versatile jackets and relaxed-fit trousers, made to elevate your everyday wardrobe."
+                    }
+                },
+                {
+                    id: "featured",
+                    type: "featured-products",
+                    enabled: true,
+                    order: 2,
+                    content: {
+                        title: "Proven\nFavorites",
+                        description: "Icons that endure year after year — top-rated staples chosen again and again for their timeless fit, premium feel, and versatility."
+                    }
+                },
+                {
+                    id: "outlook",
+                    type: "outlook",
+                    enabled: true,
+                    order: 3,
+                    content: {
+                        title: "Style It\nYour Way"
+                    }
+                },
+                {
+                    id: "news",
+                    type: "news",
+                    enabled: true,
+                    order: 4,
+                    content: {
+                        title: "What's New at\nCalder Co.",
+                        description: "From new product drops to style tips — read our latest features, editorials, and brand announcements."
+                    }
+                }
             ]
         }
     },

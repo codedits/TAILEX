@@ -18,7 +18,8 @@ import {
     BenefitsConfig,
     FooterConfig,
     Collection,
-    Product
+    Product,
+    HomepageSection
 } from "@/lib/types";
 
 export interface HomeData {
@@ -30,7 +31,7 @@ export interface HomeData {
     collections: Collection[];
     products: Product[];
     brand: BrandConfig;
-    layout: any[];
+    layout: HomepageSection[];
 }
 
 export async function getHomeData(): Promise<HomeData> {

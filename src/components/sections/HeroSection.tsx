@@ -2,9 +2,6 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import Link from "next/link";
-import { ArrowDownRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 type HeroSectionProps = {
   heading?: string;
@@ -19,81 +16,114 @@ const HeroSection = ({
   heading,
   subheading,
   image,
-  ctaText = "Shop Now",
-  ctaLink = "/collection/all",
-  brandName = "TAILEX"
+  brandName = "Calder Co."
 }: HeroSectionProps) => {
   // Safe default image
   const displayImage = (typeof image === 'string' && image.trim().length > 0)
     ? image
-    : "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070&auto=format&fit=crop";
+    : "https://framerusercontent.com/images/T0Z10o3Yaf4JPrk9f5lhcmJJwno.jpg";
 
-  // Default text
-  const displayHeading = heading || "Winter Collection";
-  const displaySubheading = subheading || "Discover the new trends defining the season.";
+  // Default text - use brand name as main heading
+  const displayHeading = heading || brandName;
+  const displaySubheading = subheading || "Timeless Wardrobe.\nEveryday Power.";
 
   return (
-    <section className="relative h-[100dvh] w-full bg-black overflow-hidden px-6 md:px-12 pb-12 md:pb-20 flex flex-col justify-end">
-      {/* Background Layer */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src={displayImage}
-          alt="Hero background"
-          fill
-          className="object-cover object-center opacity-60"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/30" />
+    <section
+      className="relative w-full overflow-visible"
+      style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 1
+      }}
+    >
+      {/* Background Container */}
+      <div className="absolute inset-0 h-full w-full overflow-hidden z-0">
+        <motion.div
+          className="absolute inset-0 h-full w-full"
+          initial={{ opacity: 0.001, scale: 1.2 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{
+            type: "spring",
+            bounce: 0,
+            delay: 1,
+            duration: 0.8
+          }}
+        >
+          <Image
+            src={displayImage}
+            alt="Hero background"
+            fill
+            className="object-cover object-top"
+            priority
+          />
+        </motion.div>
       </div>
 
-      {/* Content Layer */}
-      <div className="relative z-10 w-full px-4 sm:px-6 md:px-12 max-w-[1600px] mx-auto">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 md:gap-12">
-
-          {/* Text Content */}
-          <div className="max-w-4xl space-y-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              <p className="text-white/80 text-sm md:text-base tracking-[0.2em] font-medium uppercase mb-4">
-                {brandName}
-              </p>
-              <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-bold tracking-tighter text-white leading-[0.9]">
-                {displayHeading}
-              </h1>
-            </motion.div>
-
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="text-lg md:text-2xl text-white/80 font-light max-w-xl leading-relaxed"
-            >
-              {displaySubheading}
-            </motion.p>
-          </div>
-
-          {/* CTA Button */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            className="flex-shrink-0"
+      {/* Content Container - 100vh height */}
+      <div
+        className="relative flex flex-row items-end justify-between w-full px-6 md:px-10 pb-10"
+        style={{
+          height: '100vh',
+          maxWidth: '1920px',
+          margin: '0 auto'
+        }}
+      >
+        {/* Brand Name - Bottom Left */}
+        <motion.div
+          className="z-10"
+          initial={{ opacity: 0.001, y: -80 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            type: "spring",
+            bounce: 0,
+            delay: 1.4,
+            duration: 0.8
+          }}
+        >
+          <h1
+            className="font-normal tracking-[-0.02em] text-white leading-[1.1]"
+            style={{
+              fontFamily: '"Manrope", "Manrope Placeholder", sans-serif',
+              fontSize: 'clamp(72px, 10vw, 110px)'
+            }}
           >
-            <Button
-              asChild
-              size="lg"
-              className="rounded-full bg-white text-black hover:bg-neutral-200 h-16 px-10 text-lg transition-transform hover:scale-105"
-            >
-              <Link href={ctaLink} className="flex items-center gap-2">
-                {ctaText}
-                <ArrowDownRight className="w-5 h-5" />
-              </Link>
-            </Button>
-          </motion.div>
-        </div>
+            {displayHeading}
+          </h1>
+        </motion.div>
+
+        {/* Tagline - Bottom Right */}
+        <motion.div
+          className="z-10 text-right"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 1.6 }}
+        >
+          <p
+            className="text-white leading-[1.4] tracking-[0.02em] whitespace-pre-line"
+            style={{
+              fontFamily: '"Manrope", "Manrope Placeholder", sans-serif',
+              fontSize: 'clamp(28px, 3vw, 32px)'
+            }}
+          >
+            {displaySubheading}
+          </p>
+        </motion.div>
+      </div>
+
+      {/* Transition Overlay - for scroll transition effect */}
+      <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
+        <motion.div
+          className="absolute bottom-0 left-0 right-0 bg-white"
+          style={{ height: '50%' }}
+          initial={{ opacity: 0, y: 450 }}
+          animate={{ opacity: 0, y: 450 }}
+        />
+        <motion.div
+          className="absolute top-0 left-0 right-0 bg-white"
+          style={{ height: '50%' }}
+          initial={{ opacity: 0, y: -450 }}
+          animate={{ opacity: 0, y: -450 }}
+        />
       </div>
     </section>
   );
