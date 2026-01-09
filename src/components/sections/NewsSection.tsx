@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Post } from "@/lib/types";
+import { BlogPost } from "@/lib/types";
 import { motion } from "framer-motion";
 
 interface NewsSectionProps {
-  posts: Post[];
+  posts: BlogPost[];
   brandName?: string;
   sectionTitle?: string;
   sectionDescription?: string;
@@ -112,12 +112,12 @@ const NewsSection = ({
             variants={containerVariants}
           >
             {displayPosts.map((post, index) => {
-              const imageUrl = post.image || fallbackImages[index % fallbackImages.length];
+              const imageUrl = post.featured_image || fallbackImages[index % fallbackImages.length];
 
               return (
                 <motion.div key={post.id} variants={itemVariants}>
                   <Link
-                    href={`/blog/${post.slug}`}
+                    href={`/news/${post.slug}`}
                     className="group block w-full cursor-pointer"
                   >
                     {/* Image Container */}

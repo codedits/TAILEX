@@ -8,7 +8,8 @@ export async function updateStoreConfigAction(key: string, value: any) {
         await StoreConfigService.updateConfig(key, value);
         revalidatePath('/', 'layout'); // Revalidate everything as config might affect navbar/footer
         return { success: true };
-    } catch (error) {
-        return { error: 'Failed to update configuration' };
+    } catch (error: any) {
+        console.error('Update Store Config Error:', error);
+        return { error: error.message || 'Failed to update configuration' };
     }
 }

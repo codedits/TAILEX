@@ -26,7 +26,7 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
         if (result.success) {
             toast.success(`${section.charAt(0).toUpperCase() + section.slice(1)} settings saved`);
         } else {
-            toast.error('Failed to save settings');
+            toast.error(result.error || 'Failed to save settings');
         }
     };
 
@@ -34,11 +34,11 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
         <Tabs defaultValue="brand" className="space-y-4">
             <TabsList>
                 <TabsTrigger value="brand">Brand & Identity</TabsTrigger>
-                <TabsTrigger value="theme">Theme & Design</TabsTrigger>
+                {/* Theme moved to /admin/theme */}
                 <TabsTrigger value="hero">Hero</TabsTrigger>
                 <TabsTrigger value="benefits">Benefits</TabsTrigger>
                 <TabsTrigger value="currency">Currency</TabsTrigger>
-                <TabsTrigger value="navigation">Navigation</TabsTrigger>
+                {/* Navigation moved to /admin/navigation */}
             </TabsList>
 
             <TabsContent value="brand">
@@ -51,63 +51,37 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                         <div className="space-y-2">
                             <Label>Store Name</Label>
                             <Input
-                                value={config.brand.name}
+                                value={config.brand.name || ''}
                                 onChange={(e) => setConfig({ ...config, brand: { ...config.brand, name: e.target.value } })}
                             />
                         </div>
                         <div className="space-y-2">
                             <Label>Tagline</Label>
                             <Input
-                                value={config.brand.tagline}
+                                value={config.brand.tagline || ''}
                                 onChange={(e) => setConfig({ ...config, brand: { ...config.brand, tagline: e.target.value } })}
                             />
                         </div>
                         <div className="space-y-2">
                             <Label>Announcement Bar</Label>
                             <Input
-                                value={config.brand.announcement}
+                                value={config.brand.announcement || ''}
                                 onChange={(e) => setConfig({ ...config, brand: { ...config.brand, announcement: e.target.value } })}
                                 placeholder="e.g. Free shipping over $100"
                             />
                         </div>
+                        <div className="flex items-center space-x-2">
+                            <input
+                                type="checkbox"
+                                id="show-announcement"
+                                checked={config.brand.showAnnouncement || false}
+                                onChange={(e) => setConfig({ ...config, brand: { ...config.brand, showAnnouncement: e.target.checked } })}
+                                className="rounded border-gray-300"
+                            />
+                            <Label htmlFor="show-announcement">Show Announcement Bar</Label>
+                        </div>
                         <Button onClick={() => handleSave('brand')} disabled={isSaving}>
                             {isSaving ? 'Saving...' : 'Save Brand Settings'}
-                        </Button>
-                    </CardContent>
-                </Card>
-            </TabsContent>
-
-            <TabsContent value="theme">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Theme Settings</CardTitle>
-                        <CardDescription>Customize the look and feel of your store.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label>Primary Color</Label>
-                                <div className="flex gap-2">
-                                    <div
-                                        className="w-10 h-10 rounded border"
-                                        style={{ backgroundColor: config.theme.primaryColor }}
-                                    />
-                                    <Input
-                                        value={config.theme.primaryColor}
-                                        onChange={(e) => setConfig({ ...config, theme: { ...config.theme, primaryColor: e.target.value } })}
-                                    />
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Font Family</Label>
-                                <Input
-                                    value={config.theme.font}
-                                    onChange={(e) => setConfig({ ...config, theme: { ...config.theme, font: e.target.value } })}
-                                />
-                            </div>
-                        </div>
-                        <Button onClick={() => handleSave('theme')} disabled={isSaving}>
-                            {isSaving ? 'Saving...' : 'Save Theme Settings'}
                         </Button>
                     </CardContent>
                 </Card>
@@ -232,7 +206,7 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                             <div key={index} className="grid grid-cols-[100px_1fr] gap-2 items-center border p-2 rounded-lg border-white/5">
                                 <select
                                     className="bg-black border border-white/10 rounded px-2 py-1 text-sm h-9"
-                                    value={item.icon}
+                                    value={item.icon || 'truck'}
                                     onChange={(e) => {
                                         const newItems = [...(config.benefits?.items || [])];
                                         // @ts-ignore
@@ -248,7 +222,7 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                                     <option value="gift">Gift</option>
                                 </select>
                                 <Input
-                                    value={item.text}
+                                    value={item.text || ''}
                                     onChange={(e) => {
                                         const currentItems = config.benefits?.items || [];
                                         const newItems: { icon: string; text: string }[] = [...currentItems];
@@ -270,23 +244,6 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
 
                         <Button onClick={() => handleSave('benefits')} disabled={isSaving}>
                             {isSaving ? 'Saving...' : 'Save Benefits Settings'}
-                        </Button>
-                    </CardContent>
-                </Card>
-            </TabsContent>
-
-            <TabsContent value="navigation">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Navigation</CardTitle>
-                        <CardDescription>Configure main menu and footer links.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-sm text-muted-foreground mb-4">
-                            You can manage the full navigation structures in the designated section.
-                        </p>
-                        <Button variant="outline" asChild>
-                            <a href="/admin/navigation">Go to Navigation Manager</a>
                         </Button>
                     </CardContent>
                 </Card>

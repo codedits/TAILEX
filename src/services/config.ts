@@ -49,7 +49,7 @@ export const StoreConfigService = {
         const supabase = await createAdminClient();
         const { error } = await supabase
             .from('site_config')
-            .upsert({ key, value })
+            .upsert({ key, value }, { onConflict: 'key' })
             .select();
 
         if (error) throw new AppError(error.message, 'DB_ERROR');

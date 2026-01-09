@@ -2,18 +2,22 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  
+
   // Server Actions config
   experimental: {
     serverActions: {
       bodySizeLimit: '64mb',
     },
   },
-  
+
   // Image optimization config
   images: {
     // Allow images from any HTTPS source (Supabase, external CDNs, etc.)
     remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.pexels.com',
+      },
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
@@ -35,10 +39,10 @@ const nextConfig: NextConfig = {
     // Cache optimized images for 1 year
     minimumCacheTTL: 31536000,
   },
-  
+
   // Enable compression
   compress: true,
-  
+
   // Optimize for production
   poweredByHeader: false,
 };
