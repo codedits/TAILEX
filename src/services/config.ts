@@ -5,11 +5,20 @@ import { unstable_cache } from 'next/cache';
 
 export type StoreConfig = {
     brand: { name: string; tagline: string; announcement: string; showAnnouncement: boolean };
-    theme: { primaryColor: string; font: string; borderRadius: string };
+    theme: {
+        primaryColor: string;
+        font: string;
+        borderRadius: string;
+        backgroundColor?: string;
+        foregroundColor?: string;
+        secondaryColor?: string; // Optional legacy
+        mode?: 'light' | 'dark';
+    };
     navigation: { main: any[]; footer: any[] };
     currency: { code: string; symbol: string };
     hero?: { heading?: string; subheading?: string; image?: string; ctaText?: string; ctaLink?: string };
     benefits?: { enabled: boolean; items: { icon: string; text: string }[] };
+    categoryGrid?: { aspectRatio: string };
 };
 
 export const StoreConfigService = {
@@ -34,11 +43,19 @@ export const StoreConfigService = {
             // Transform raw KV to typed object with defaults
             return {
                 brand: config.brand || { name: 'TAILEX', tagline: '', announcement: '', showAnnouncement: false },
-                theme: config.theme || { primaryColor: '#000000', font: 'manrope', borderRadius: '0.5rem' },
+                theme: {
+                    primaryColor: '#000000',
+                    font: 'manrope',
+                    borderRadius: '0.5rem',
+                    backgroundColor: '#ffffff',
+                    foregroundColor: '#000000',
+                    ...config.theme // access DB overrides
+                },
                 navigation: { main: mainNav, footer: footerNav },
                 currency: config.currency || { code: 'USD', symbol: '$' },
                 hero: config.hero || { heading: '', subheading: '', image: '', ctaText: '', ctaLink: '' },
-                benefits: config.benefits || { enabled: true, items: [] }
+                benefits: config.benefits || { enabled: true, items: [] },
+                categoryGrid: config.categoryGrid || { aspectRatio: '0.8' } // Default to 4:5
             };
         },
         ['store-config'],

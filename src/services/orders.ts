@@ -146,6 +146,64 @@ export const OrderService = {
             if (orderError || !createdOrder) throw new AppError(orderError?.message || 'Failed to create order', 'DB_ERROR');
             order = createdOrder;
 
+            // --- UPSERT LOGIC START ---
+            if (user) {
+                // 1. Upsert Customer Profile
+                const { data: existingCustomer } = await supabase
+                    .from('customers')
+                    .select('id, phone')
+                    .eq('user_id', user.id)
+                    .single();
+
+                let customerId = existingCustomer?.id;
+
+                if (!existingCustomer) {
+                    // Create new customer
+                    const { data: newCustomer } = await supabase
+                        .from('customers')
+                        .insert({
+                            user_id: user.id,
+                            email: input.email,
+                            first_name: input.shipping_address.first_name || '',
+                            last_name: input.shipping_address.last_name || '',
+                            phone: input.phone || null
+                        })
+                        .select('id')
+                        .single();
+                    customerId = newCustomer?.id;
+                } else if (input.phone && existingCustomer.phone !== input.phone) {
+                    // Update phone if provided and different
+                    await supabase
+                        .from('customers')
+                        .update({ phone: input.phone })
+                        .eq('id', existingCustomer.id);
+                }
+
+                // 2. Save Address if it's the first one (Simple logic for now)
+                if (customerId) {
+                    const { count } = await supabase
+                        .from('customer_addresses')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('customer_id', customerId);
+
+                    if (count === 0) {
+                        await supabase.from('customer_addresses').insert({
+                            customer_id: customerId,
+                            label: 'Home',
+                            first_name: input.shipping_address.first_name,
+                            last_name: input.shipping_address.last_name,
+                            address1: input.shipping_address.address1,
+                            city: input.shipping_address.city,
+                            postal_code: input.shipping_address.zip,
+                            country: input.shipping_address.country,
+                            phone: input.phone,
+                            is_default: true
+                        });
+                    }
+                }
+            }
+            // --- UPSERT LOGIC END ---
+
             itemsWithOrderId.forEach(item => { item.order_id = order.id; });
             const { error: itemsError } = await supabase.from('order_items').insert(itemsWithOrderId);
             if (itemsError) throw new AppError(itemsError.message, 'DB_ERROR');

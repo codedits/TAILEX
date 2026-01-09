@@ -119,16 +119,9 @@ export default async function CollectionPage() {
         )}
 
         {/* Divider */}
-        <div className="h-px bg-border mb-12" />
+        {/* <div className="h-px bg-border mb-12" /> */}
 
-        {/* All Products */}
-        <div className="mb-8">
-          <h2 className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            All Products ({safeProducts.length})
-          </h2>
-        </div>
-
-        <CollectionBrowser products={safeProducts} collections={safeCollections} />
+        {/* All Products Removed - See /shop */}
       </div>
 
       <Footer config={footerConfig} brandName={brand.name} social={socialConfig} />

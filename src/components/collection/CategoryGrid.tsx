@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Collection } from "@/lib/types";
 import { motion } from "framer-motion";
+import { TextReveal } from "@/components/ui/text-reveal";
 
 // Fallback image if none provided
 const fallbackImage = "https://framerusercontent.com/images/BjQfJy7nQoVxvCYTFzwZxprDWiQ.jpg";
@@ -12,12 +13,14 @@ interface CategoryGridProps {
   collections: Collection[];
   sectionTitle?: string;
   sectionDescription?: string;
+  aspectRatio?: number;
 }
 
 const CategoryGrid = ({
   collections,
   sectionTitle = "Everyday\nEssentials",
-  sectionDescription = "Explore our best-selling categories — from crisp polos and refined shirts to versatile jackets and relaxed-fit trousers, made to elevate your everyday wardrobe."
+  sectionDescription = "Explore our best-selling categories — from crisp polos and refined shirts to versatile jackets and relaxed-fit trousers, made to elevate your everyday wardrobe.",
+  aspectRatio = 0.8
 }: CategoryGridProps) => {
   // Use first 4 active collections
   const items = collections.slice(0, 4);
@@ -44,7 +47,7 @@ const CategoryGrid = ({
 
   return (
     <section
-      className="relative w-full bg-white overflow-visible"
+      className="relative w-full bg-background overflow-visible"
       style={{ zIndex: 2 }}
     >
       <div
@@ -57,22 +60,19 @@ const CategoryGrid = ({
           {/* Section Header - Split layout */}
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 w-full">
             {/* Title - Left */}
-            <motion.h2
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
+            <TextReveal
+              variant="stagger"
               className="text-foreground whitespace-pre-line"
               style={{
                 fontFamily: '"Manrope", "Manrope Placeholder", sans-serif',
                 fontSize: 'clamp(40px, 5vw, 64px)',
-                fontWeight: 400,
+                fontWeight: 700,
                 letterSpacing: '-0.02em',
                 lineHeight: '110%'
               }}
             >
               {sectionTitle}
-            </motion.h2>
+            </TextReveal>
 
             {/* Description - Right */}
             <motion.div
@@ -117,23 +117,25 @@ const CategoryGrid = ({
                     {/* Image Container with hover effect */}
                     <div
                       className="relative w-full overflow-hidden rounded-lg"
-                      style={{ aspectRatio: '0.8 / 1' }}
+                      style={{ aspectRatio: `${aspectRatio} / 1` }}
                     >
                       <motion.div
-                        className="absolute inset-0 w-[101%] h-[101%]"
+                        className="absolute w-[101%] h-[101%]"
                         style={{
                           left: '50%',
                           top: '50%',
-                          transform: 'translate(-50%, -50%)'
                         }}
+                        initial={{ x: '-50%', y: '-50%' }}
                         whileHover={{ scale: 1.1 }}
-                        transition={{ duration: 0.5 }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
                       >
                         <Image
                           src={imageUrl}
                           alt={collection.title}
                           fill
                           className="object-cover"
+                          quality={95}
+                          sizes="(max-width: 768px) 150vw, 50vw"
                         />
                       </motion.div>
                     </div>

@@ -64,21 +64,26 @@ export async function verifyOTP(formData: FormData) {
   // Ensure customer exists in Supabase Auth (Sign Up if needed)
   // We try to create the user. If they exist, this fails but we ignore it.
   try {
-     const { error: createError } = await supabase.auth.admin.createUser({
-       email,
-       email_confirm: true,
-     });
-     // If error is not 'user already registered' clean logic is hard, but usually 
-     // we proceed to generate link. If user doesn't exist AND create failed, generateLink will fail.
+    const { error: createError } = await supabase.auth.admin.createUser({
+      email,
+      email_confirm: true,
+    });
+    // If error is not 'user already registered' clean logic is hard, but usually 
+    // we proceed to generate link. If user doesn't exist AND create failed, generateLink will fail.
   } catch (e) {
-     // Ignore
+    // Ignore
   }
+
+  const redirectTo = formData.get('redirectTo') as string || '/account';
 
   // Create Session via Magic Link trick
   // We generate a magic link, and return it to the client to follow.
   const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
     type: 'magiclink',
     email: email,
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=${redirectTo}`
+    }
   });
 
   if (linkError || !linkData.properties?.action_link) {

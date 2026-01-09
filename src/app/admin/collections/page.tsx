@@ -12,10 +12,13 @@ import {
 } from "@/components/ui/table";
 import { deleteCollection } from "./actions";
 import { DeleteButton } from "@/components/admin/DeleteButton";
+import { StoreConfigService } from "@/services/config";
 
 export default async function CollectionsPage() {
   const supabase = await createAdminClient();
   const { data: collections } = await supabase.from("collections").select("*").order('created_at', { ascending: false });
+  const config = await StoreConfigService.getStoreConfig();
+  const aspectRatio = parseFloat(config.categoryGrid?.aspectRatio || '0.8');
 
   return (
     <div className="space-y-8">
@@ -25,7 +28,7 @@ export default async function CollectionsPage() {
           <p className="text-white/50 text-sm">Organize your products into logical groups.</p>
         </div>
         <Button asChild className="bg-white text-black hover:bg-white/90 rounded-full px-6 font-medium">
-          <Link href="/admin/collections/new">
+          <Link href={`/admin/collections/new?ratio=${aspectRatio}`}>
             <Plus className="mr-2 h-4 w-4" /> Create Collection
           </Link>
         </Button>
@@ -36,6 +39,7 @@ export default async function CollectionsPage() {
           <TableHeader className="bg-white/[0.02]">
             <TableRow className="border-white/10 hover:bg-transparent">
               <TableHead className="text-white/40 font-medium px-6 py-4">Collection</TableHead>
+              {/* ... existing headers ... */}
               <TableHead className="text-white/40 font-medium px-4">Slug</TableHead>
               <TableHead className="text-white/40 font-medium px-4 text-center">Sort Order</TableHead>
               <TableHead className="text-white/40 font-medium px-4">Visibility</TableHead>
@@ -49,7 +53,12 @@ export default async function CollectionsPage() {
                   <TableCell className="px-6 py-4">
                     <div className="flex items-center gap-4">
                       {col.image_url ? (
-                        <img src={col.image_url} alt={col.title} className="w-12 h-12 object-cover rounded-xl border border-white/10" />
+                        <img
+                          src={col.image_url}
+                          alt={col.title}
+                          className="object-cover rounded-xl border border-white/10"
+                          style={{ width: '48px', height: `${48 / aspectRatio}px` }}
+                        />
                       ) : (
                         <div className="w-12 h-12 bg-white/5 rounded-xl border border-white/10" />
                       )}
@@ -68,7 +77,7 @@ export default async function CollectionsPage() {
                   <TableCell className="px-6 text-right">
                     <div className="flex justify-end gap-1">
                       <Button asChild variant="ghost" size="icon" className="h-8 w-8 hover:bg-white/10">
-                        <Link href={`/admin/collections/${col.id}`}>
+                        <Link href={`/admin/collections/${col.id}?ratio=${aspectRatio}`}>
                           <Edit className="h-4 w-4 text-white/70" />
                         </Link>
                       </Button>

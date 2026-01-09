@@ -58,8 +58,8 @@ export default async function RootLayout({
   // Fetch Config from DB (Cached)
   const config = await StoreConfigService.getStoreConfig();
 
-  // Use Cookie overrides if present (e.g. for user toggle), otherwise Config
-  const theme = (cookieStore.get('theme')?.value as 'light' | 'dark') || 'light';
+  // Force Light Mode for Storefront (Admin handles its own dark mode)
+  const theme = 'light';
 
   // Brand settings from DB
   const primaryColor = config.theme.primaryColor;
@@ -70,8 +70,8 @@ export default async function RootLayout({
 
   // Map Brand colors to shadcn HSL variables
   const hslPrimary = hexToHslValues(primaryColor);
-  // We might want to derive secondary/background/foreground from primary or keep them white/black for now or add to Config
-  // Current logic uses defaults. Let's stick to config for Primary.
+  const hslBackground = hexToHslValues(config.theme.backgroundColor || '#ffffff');
+  const hslForeground = hexToHslValues(config.theme.foregroundColor || '#000000');
 
   // Dynamic CSS variables
   const dynamicStyles = {
@@ -83,6 +83,8 @@ export default async function RootLayout({
 
     // Shadcn overrides
     ['--primary' as string]: hslPrimary,
+    ['--background' as string]: hslBackground,
+    ['--foreground' as string]: hslForeground,
     ['--radius' as string]: borderRadius,
   };
 

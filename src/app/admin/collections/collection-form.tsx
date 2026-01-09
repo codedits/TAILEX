@@ -10,9 +10,14 @@ import { useTransition, useState, useRef } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { ImageCropper } from "@/components/ui/image-cropper";
+import { useSearchParams } from "next/navigation";
+import { convertFileToWebP } from '@/lib/image-utils';
 
 export function CollectionForm({ initialData }: { initialData?: any }) {
     const [isPending, startTransition] = useTransition();
+    const searchParams = useSearchParams();
+    const aspectRatio = parseFloat(searchParams.get('ratio') || '0.8');
+
     const [preview, setPreview] = useState<string | null>(initialData?.image_url || null);
     const [tempImage, setTempImage] = useState<string | null>(null);
     const [croppedBlob, setCroppedBlob] = useState<Blob | null>(null);
@@ -35,42 +40,61 @@ export function CollectionForm({ initialData }: { initialData?: any }) {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const formData = new FormData(e.currentTarget);
 
-        // Use the cropped blob if available
-        if (croppedBlob) {
-            formData.set('imageFile', croppedBlob, 'collection-image.jpg');
-        }
+        // We need to handle the async conversion before we can submit
+        // Since we cannot make the form handler async nicely without preventing default immediately (which we did),
+        // we will wrap the logic in an async function.
 
-        // Handle Switch manually because it doesn't always submit like a native checkbox
-        const isVisible = (e.currentTarget.elements.namedItem('is_visible') as HTMLInputElement)?.ariaChecked === 'true';
-        formData.set('is_visible', isVisible ? 'on' : 'off');
+        const submitLogic = async () => {
+            const formData = new FormData(e.currentTarget);
 
-        startTransition(async () => {
-            try {
-                let res;
-                if (initialData?.id) {
-                    formData.append('id', initialData.id);
-                    res = await updateCollection(formData);
-                } else {
-                    res = await createCollection(formData);
+            // Use the cropped blob if available
+            if (croppedBlob) {
+                try {
+                    toast.loading('Optimizing collection image...');
+                    // Convert blob to File first
+                    const fileFromBlob = new File([croppedBlob], "collection-image.jpg", { type: "image/jpeg" });
+                    const webpFile = await convertFileToWebP(fileFromBlob, 0.9);
+                    formData.set('imageFile', webpFile);
+                    toast.dismiss();
+                } catch (error) {
+                    console.error("WebP conversion failed", error);
+                    formData.set('imageFile', croppedBlob, 'collection-image.jpg');
                 }
-
-                if (res?.error) {
-                    toast.error("Error saving collection", {
-                        description: res.error
-                    });
-                } else {
-                    toast.success(initialData?.id ? "Collection updated" : "Collection created", {
-                        description: `${formData.get('title')} has been saved.`
-                    });
-                }
-            } catch (err) {
-                toast.error("Unexpected error", {
-                    description: "Please try again later"
-                });
             }
-        });
+
+            // Handle Switch manually because it doesn't always submit like a native checkbox
+            const isVisible = (e.currentTarget.elements.namedItem('is_visible') as HTMLInputElement)?.ariaChecked === 'true';
+            formData.set('is_visible', isVisible ? 'on' : 'off');
+
+            startTransition(async () => {
+                try {
+                    let res;
+                    if (initialData?.id) {
+                        formData.append('id', initialData.id);
+                        res = await updateCollection(formData);
+                    } else {
+                        res = await createCollection(formData);
+                    }
+
+                    if (res?.error) {
+                        toast.error("Error saving collection", {
+                            description: res.error
+                        });
+                    } else {
+                        toast.success(initialData?.id ? "Collection updated" : "Collection created", {
+                            description: `${formData.get('title')} has been saved.`
+                        });
+                    }
+                } catch (err) {
+                    toast.error("Unexpected error", {
+                        description: "Please try again later"
+                    });
+                }
+            });
+        };
+
+        submitLogic();
     };
 
     return (
@@ -136,7 +160,7 @@ export function CollectionForm({ initialData }: { initialData?: any }) {
             {tempImage && (
                 <ImageCropper
                     image={tempImage}
-                    aspect={4 / 5}
+                    aspect={aspectRatio}
                     onCropComplete={onCropComplete}
                     onCancel={() => setTempImage(null)}
                 />

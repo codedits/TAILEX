@@ -1,0 +1,110 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { SignJWT } from 'jose';
+
+const JWT_SECRET = new TextEncoder().encode(
+    process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production'
+);
+
+export async function POST(request: NextRequest) {
+    try {
+        const { email, code } = await request.json();
+
+        // 1. Validate Input
+        if (!email || !code) {
+            return NextResponse.json(
+                { error: 'Email and code are required' },
+                { status: 400 }
+            );
+        }
+
+        const supabase = await createAdminClient();
+
+        // 2. Verify OTP: Find a matching, non-expired record
+        const { data: otpRecord, error: otpError } = await supabase
+            .from('otp_codes')
+            .select('*')
+            .eq('email', email)
+            .eq('code', code) // Using 'code' as per existing schema
+            .gt('expires_at', new Date().toISOString())
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+        if (otpError || !otpRecord) {
+            return NextResponse.json(
+                { error: 'Invalid or expired code' },
+                { status: 401 }
+            );
+        }
+
+        // 3. Delete the used OTP (prevents reuse)
+        await supabase.from('otp_codes').delete().eq('id', otpRecord.id);
+
+        // 4. Upsert User: Check if user exists, if not create
+        let user;
+        const { data: existingUser, error: userFetchError } = await supabase
+            .from('users')
+            .select('id, email, name, phone, address')
+            .eq('email', email)
+            .single();
+
+        if (userFetchError && userFetchError.code !== 'PGRST116') {
+            // PGRST116 = "JSON object requested, multiple (or no) rows returned"
+            console.error('User Fetch Error:', userFetchError);
+        }
+
+        if (!existingUser) {
+            // Create new user
+            const { data: newUser, error: insertError } = await supabase
+                .from('users')
+                .insert({ email })
+                .select('id, email, name, phone, address')
+                .single();
+
+            if (insertError) {
+                console.error('User Insert Error:', insertError);
+                return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
+            }
+            user = newUser;
+        } else {
+            user = existingUser;
+        }
+
+        // 5. Generate JWT
+        const token = await new SignJWT({
+            userId: user.id,
+            email: user.email,
+        })
+            .setProtectedHeader({ alg: 'HS256' })
+            .setIssuedAt()
+            .setExpirationTime('30d')
+            .sign(JWT_SECRET);
+
+        // 6. Create Response
+        const response = NextResponse.json({
+            success: true,
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                phone: user.phone,
+                address: user.address,
+            },
+        });
+
+        // 7. Set HTTP-only Secure Cookie
+        response.cookies.set('auth_token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 30, // 30 days
+            path: '/',
+        });
+
+        return response;
+    } catch (error) {
+        console.error('Verify OTP Error:', error);
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    }
+}

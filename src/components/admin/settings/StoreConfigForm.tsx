@@ -1,14 +1,17 @@
 'use client'
 
 import { useState } from 'react';
-import { updateStoreConfigAction } from '@/actions/config';
+import { updateStoreConfigAction, uploadSiteAsset, deleteSiteAsset } from '@/actions/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import { Upload, Trash2, Crop as CropIcon } from 'lucide-react';
+import { ImageCropper } from '@/components/ui/image-cropper';
 import { StoreConfig } from '@/services/config';
+import { convertFileToWebP } from '@/lib/image-utils';
 
 interface StoreConfigFormProps {
     initialConfig: StoreConfig;
@@ -18,14 +21,55 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
     const [config, setConfig] = useState(initialConfig);
     const [isSaving, setIsSaving] = useState(false);
 
+    const [heroFile, setHeroFile] = useState<File | null>(null);
+    const [tempCropImage, setTempCropImage] = useState<string | null>(null);
+
     const handleSave = async (section: keyof StoreConfig) => {
         setIsSaving(true);
-        const result = await updateStoreConfigAction(section, config[section]);
+        let currentConfig = { ...config };
+
+
+
+        // ...
+
+        // Handle File Upload for Hero
+        if (section === 'hero' && heroFile) {
+            const formData = new FormData();
+
+            try {
+                toast.loading('Optimizing image...');
+                const webpFile = await convertFileToWebP(heroFile, 0.9); // High quality for hero
+                formData.append('file', webpFile);
+            } catch (error) {
+                console.error('WebP conversion failed', error);
+                formData.append('file', heroFile); // Fallback
+            }
+
+            toast.loading('Uploading image...');
+            const uploadRes = await uploadSiteAsset(formData);
+
+            if (uploadRes.success && uploadRes.url) {
+                currentConfig = {
+                    ...currentConfig,
+                    hero: { ...currentConfig.hero, image: uploadRes.url }
+                };
+                setConfig(currentConfig); // Update local state with new URL
+                setHeroFile(null); // Clear file input
+            } else {
+                toast.error(uploadRes.error || 'Failed to upload image');
+                setIsSaving(false);
+                return;
+            }
+        }
+
+        const result = await updateStoreConfigAction(section, currentConfig[section]);
         setIsSaving(false);
 
         if (result.success) {
+            toast.dismiss();
             toast.success(`${section.charAt(0).toUpperCase() + section.slice(1)} settings saved`);
         } else {
+            toast.dismiss();
             toast.error(result.error || 'Failed to save settings');
         }
     };
@@ -36,6 +80,7 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                 <TabsTrigger value="brand">Brand & Identity</TabsTrigger>
                 {/* Theme moved to /admin/theme */}
                 <TabsTrigger value="hero">Hero</TabsTrigger>
+                <TabsTrigger value="categoryGrid">Collections</TabsTrigger>
                 <TabsTrigger value="benefits">Benefits</TabsTrigger>
                 <TabsTrigger value="currency">Currency</TabsTrigger>
                 {/* Navigation moved to /admin/navigation */}
@@ -142,16 +187,66 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                                 placeholder="e.g. Discover the new trends"
                             />
                         </div>
-                        <div className="space-y-2">
-                            <Label>Hero Image URL</Label>
+                        <div className="space-y-4">
+                            <Label>Hero Image</Label>
+
+                            {(config.hero?.image || heroFile) ? (
+                                <div className="relative w-full h-64 rounded-xl overflow-hidden border border-white/10 group">
+                                    <img
+                                        src={heroFile ? URL.createObjectURL(heroFile) : config.hero?.image}
+                                        alt="Hero Preview"
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                                        <Button
+                                            type="button"
+                                            variant="destructive"
+                                            size="icon"
+                                            className="rounded-full w-10 h-10"
+                                            onClick={async () => {
+                                                if (heroFile) {
+                                                    setHeroFile(null);
+                                                } else if (config.hero?.image) {
+                                                    if (confirm('Are you sure you want to delete this image?')) {
+                                                        await deleteSiteAsset(config.hero!.image!);
+                                                        setConfig({ ...config, hero: { ...config.hero, image: '' } });
+                                                        toast.success('Image deleted');
+                                                    }
+                                                }
+                                            }}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-white/30 transition-all bg-black/20 hover:bg-white/5">
+                                    <Upload className="w-8 h-8 text-white/40 mb-2" />
+                                    <span className="text-sm text-white/40 font-light">Drop image or click to upload</span>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            if (e.target.files?.[0]) {
+                                                setHeroFile(e.target.files[0]);
+                                            }
+                                        }}
+                                    />
+                                </label>
+                            )}
+
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground uppercase tracking-wider">OR</span>
+                                <div className="h-px bg-white/10 flex-1" />
+                            </div>
+
                             <Input
                                 value={config.hero?.image || ''}
                                 onChange={(e) => setConfig({ ...config, hero: { ...config.hero, image: e.target.value } })}
-                                placeholder="https://..."
+                                placeholder="Paste image URL directly..."
+                                className="text-sm text-muted-foreground"
                             />
-                            {config.hero?.image && (
-                                <img src={config.hero.image} alt="Hero Preview" className="w-full h-48 object-cover rounded-md border border-white/10 mt-2" />
-                            )}
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
@@ -244,6 +339,38 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
 
                         <Button onClick={() => handleSave('benefits')} disabled={isSaving}>
                             {isSaving ? 'Saving...' : 'Save Benefits Settings'}
+                        </Button>
+                    </CardContent>
+                </Card>
+            </TabsContent>
+            <TabsContent value="categoryGrid">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Collection Grid</CardTitle>
+                        <CardDescription>Customize the appearance of collection cards.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <Label>Card Aspect Ratio</Label>
+                            <select
+                                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                value={config.categoryGrid?.aspectRatio || '0.8'}
+                                onChange={(e) => setConfig({
+                                    ...config,
+                                    categoryGrid: { aspectRatio: e.target.value }
+                                })}
+                            >
+                                <option value="0.8">Portrait (4:5) - Default</option>
+                                <option value="1">Square (1:1)</option>
+                                <option value="1.33">Landscape (4:3)</option>
+                                <option value="0.66">Tall (2:3)</option>
+                            </select>
+                            <p className="text-[0.8rem] text-muted-foreground">
+                                This controls the shape of collection cards on the homepage and cropping aspect ratio.
+                            </p>
+                        </div>
+                        <Button onClick={() => handleSave('categoryGrid')} disabled={isSaving}>
+                            {isSaving ? 'Saving...' : 'Save Collection Settings'}
                         </Button>
                     </CardContent>
                 </Card>

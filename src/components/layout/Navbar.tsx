@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ShoppingBag, Menu, X, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/UserAuthContext";
 import { CartSheet } from "@/components/layout/CartSheet";
 import { SearchModal } from "@/components/layout/SearchModal";
 import { MenuItem } from "@/lib/types";
@@ -13,6 +14,7 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { cartCount, setIsCartOpen } = useCart();
+  const { isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,15 +24,11 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navLinks = navItems?.map(item => ({
-    name: item.label,
-    href: item.url
-  })) || [
-      { name: "Collection", href: "/collection" },
-      { name: "Product", href: "/product" },
-      { name: "About", href: "/about" },
-      { name: "Journal", href: "/news" },
-    ];
+  const navLinks = [
+    { name: "Collection", href: "/collection" },
+    { name: "Shop All", href: "/shop" },
+    { name: "About", href: "/about" },
+  ];
 
   return (
     <>
@@ -41,22 +39,22 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
         animate={{ y: 0 }}
         transition={{ duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
       >
-        <div className="px-6 md:px-12 h-24 flex items-center justify-between">
+        <div className="px-6 md:px-12 h-24 flex items-center">
           {/* Logo */}
           <Link
             href="/"
-            className="text-2xl font-black tracking-tighter uppercase z-50 relative hover:opacity-70 transition-opacity"
+            className="text-2xl font-manrope font-black tracking-tighter uppercase z-50 relative hover:opacity-70 transition-opacity"
           >
             {brandName}
           </Link>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-12">
+          {/* Desktop Nav - Left Aligned */}
+          <nav className="hidden md:flex items-center gap-8 ml-16">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                className="text-[10px] font-medium uppercase tracking-[0.3em] hover:opacity-60 transition-opacity relative group"
+                className="text-xs font-manrope font-black uppercase tracking-widest hover:opacity-60 transition-opacity relative group"
               >
                 {link.name}
                 <span className="absolute -bottom-1 left-0 w-0 h-px bg-white transition-all duration-300 group-hover:w-full" />
@@ -64,24 +62,31 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
             ))}
           </nav>
 
-          {/* Right Actions */}
-          <div className="flex items-center gap-6 z-50 relative">
+          {/* Right Actions - Pushed to right */}
+          <div className="flex items-center gap-6 z-50 relative ml-auto">
             <SearchModal />
 
-            <Link href="/login" className="hidden md:block hover:opacity-70 transition-opacity">
-              <User className="w-5 h-5" />
-            </Link>
+            {isLoading ? (
+              <div className="w-5 h-5 rounded-full bg-white/20 animate-pulse hidden md:block" />
+            ) : (
+              <Link
+                href={isAuthenticated ? "/account" : "/login"}
+                className="hidden md:block hover:opacity-70 transition-opacity"
+              >
+                <User className="w-5 h-5" />
+              </Link>
+            )}
 
             <button
-              className="relative group hover:opacity-70 transition-opacity"
+              className="relative group hover:opacity-70 transition-opacity flex items-center gap-2"
               onClick={() => setIsCartOpen(true)}
             >
-              <span className="text-[10px] font-medium uppercase tracking-[0.3em] hidden md:inline-block mr-2">Cart</span>
-              <span className="text-[10px] font-medium">({cartCount})</span>
+              <ShoppingBag className="w-5 h-5" />
+              <span className="text-[10px] font-manrope font-black tracking-widest">({cartCount})</span>
             </button>
 
             <button
-              className="md:hidden hover:opacity-70 transition-opacity text-[10px] font-medium tracking-[0.3em]"
+              className="md:hidden hover:opacity-70 transition-opacity text-[10px] font-manrope font-black tracking-[0.3em]"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? "CLOSE" : "MENU"}

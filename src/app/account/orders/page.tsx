@@ -1,26 +1,27 @@
-import { OrderService } from '@/services/orders';
 import OrderList from '@/components/account/OrderList';
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
+import { requireAuth } from '@/lib/auth';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export default async function OrdersPage() {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await requireAuth();
 
-    if (!user) {
-        redirect('/login');
-    }
-
-    const orders = await OrderService.getCustomerOrders(user.id);
+    // Fetch orders by email (since we don't set customer_id in new auth flow)
+    const supabase = await createAdminClient();
+    const { data: orders } = await supabase
+        .from('orders')
+        .select('*, items:order_items(*)')
+        .eq('email', user.email)
+        .order('created_at', { ascending: false });
 
     return (
         <div className="space-y-8">
             <div>
-                <h2 className="text-2xl font-light text-white mb-2">Order History</h2>
-                <p className="text-white/40 text-sm">Track your shipments and view past purchases.</p>
+                <h2 className="text-2xl font-light text-black mb-2">Order History</h2>
+                <p className="text-neutral-500 text-sm">Track your shipments and view past purchases.</p>
             </div>
 
-            <OrderList initialOrders={orders} />
+            <OrderList initialOrders={orders || []} />
         </div>
     );
 }
+

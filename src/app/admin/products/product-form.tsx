@@ -17,6 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { productSchema, type ProductFormValues } from "@/lib/validations/product";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
+import { convertFileToWebP } from '@/lib/image-utils';
 
 type ProductFormProps = {
   initialData?: Partial<Product>
@@ -88,10 +89,32 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
       }
     });
 
-    // Handle files
-    newFiles.forEach(file => {
-      formData.append('imageFiles', file);
-    });
+
+
+    // ... (inside onSubmit)
+
+    // Handle files with WebP conversion
+    // We do this before startTransition to avoid blocking the UI update too much, 
+    // although for large files it might take a moment.
+    try {
+      if (newFiles.length > 0) {
+        toast.loading("Optimizing images...");
+        const convertedFiles = await Promise.all(
+          newFiles.map(file => convertFileToWebP(file, 0.85))
+        );
+        convertedFiles.forEach(file => {
+          formData.append('imageFiles', file);
+        });
+        toast.dismiss();
+      }
+    } catch (error) {
+      console.error("Image conversion failed", error);
+      toast.error("Image optimization failed, using originals");
+      // Fallback
+      newFiles.forEach(file => {
+        formData.append('imageFiles', file);
+      });
+    }
 
     // Existing images
     const initialImagesList = initialData?.images || (initialData?.cover_image ? [initialData.cover_image] : []);
@@ -112,7 +135,7 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
           toast.error("Error saving product", { description: res.error });
         } else {
           toast.success(initialData?.id ? "Product updated" : "Product created");
-          
+
           // Small delay before redirecting so they see the success toast
           setTimeout(() => {
             router.push("/admin/products");

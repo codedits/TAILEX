@@ -7,6 +7,7 @@ import OutlookSection from "@/components/sections/OutlookSection";
 import CategoryGrid from "@/components/collection/CategoryGrid";
 import NewsSection from "@/components/sections/NewsSection";
 import Footer from "@/components/layout/Footer";
+import { HOMEPAGE_TEXT } from "@/config/homepage-text";
 
 interface HomeLayoutProps {
     data: HomeData;
@@ -26,7 +27,7 @@ export default function HomeLayout({ data }: HomeLayoutProps) {
     const newsSection = sortedSections.find(s => s.type === 'news');
 
     return (
-        <div className="bg-white min-h-screen selection:bg-neutral-900 selection:text-white">
+        <div className="bg-background text-foreground min-h-screen selection:bg-primary selection:text-primary-foreground">
 
             {/* Wrapper for Hero + New Arrivals (Categories) - mimics framer-1u6vz46 */}
             <div className="relative flex flex-col items-center justify-center w-full overflow-visible">
@@ -42,8 +43,9 @@ export default function HomeLayout({ data }: HomeLayoutProps) {
                 {categoriesSection?.enabled && (
                     <CategoryGrid
                         collections={collections}
-                        sectionTitle={categoriesSection.content?.title || "Everyday\nEssentials"}
-                        sectionDescription={categoriesSection.content?.description || "Explore our best-selling categories — from crisp polos and refined shirts to versatile jackets and relaxed-fit trousers."}
+                        sectionTitle={categoriesSection.content?.title || HOMEPAGE_TEXT.categories.title}
+                        sectionDescription={categoriesSection.content?.description || HOMEPAGE_TEXT.categories.description}
+                        aspectRatio={parseFloat(data.categoryGrid?.aspectRatio || '0.8')}
                     />
                 )}
             </div>
@@ -53,30 +55,20 @@ export default function HomeLayout({ data }: HomeLayoutProps) {
                 <div className="w-full">
                     <ProductGridSection
                         products={products}
-                        title={productSection.content?.title || "Proven\nFavorites"}
-                        description={productSection.content?.description || "Icons that endure year after year — top-rated staples chosen again and again for their timeless fit, premium feel, and versatility."}
+                        title={productSection.content?.title || HOMEPAGE_TEXT.featuredProducts.title}
+                        description={productSection.content?.description || HOMEPAGE_TEXT.featuredProducts.description}
                     />
                 </div>
             )}
 
+            {/* Outlook Section */}
             {outlookSection?.enabled && (
                 <div className="w-full">
-                    <OutlookSection
-                        title={outlookSection.content?.title || "Style It\nYour Way"}
-                    />
+
                 </div>
             )}
 
-            {newsSection?.enabled && (
-                <div className="w-full">
-                    <NewsSection
-                        posts={posts}
-                        brandName={brand.name}
-                        sectionTitle={newsSection.content?.title}
-                        sectionDescription={newsSection.content?.description}
-                    />
-                </div>
-            )}
+            {/* News Section */}
 
             <Footer
                 config={footer}

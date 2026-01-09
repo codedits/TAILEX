@@ -28,10 +28,10 @@ export async function updateThemeConfig(formData: FormData) {
 
   // Upsert Configs
   const { error } = await supabase.from('site_config').upsert({
-      key: 'theme',
-      value: themeValue
+    key: 'theme',
+    value: themeValue
   }, { onConflict: 'key' })
-  
+
   if (error) {
     console.error('Failed to update theme:', error)
     throw new Error('Failed to save theme configuration')

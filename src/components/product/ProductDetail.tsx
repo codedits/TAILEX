@@ -42,6 +42,7 @@ export default function ProductDetail({
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const router = useRouter();
   
@@ -165,11 +166,11 @@ export default function ProductDetail({
   return (
     <div className="max-w-[1400px] mx-auto">
       {/* Breadcrumbs */}
-      <nav className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-8">
-        <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
-        <ChevronRight className="w-3 h-3" />
-        <Link href="/collection" className="hover:text-foreground transition-colors">Catalog</Link>
-        <ChevronRight className="w-3 h-3" />
+      <nav className="flex items-center gap-3 text-[10px] font-manrope font-black uppercase tracking-[0.3em] text-muted-foreground mb-12">
+        <Link href="/" className="hover:text-foreground transition-colors">Studio</Link>
+        <span className="opacity-30">/</span>
+        <Link href="/shop" className="hover:text-foreground transition-colors">Catalog</Link>
+        <span className="opacity-30">/</span>
         <span className="text-foreground truncate">{product.title}</span>
       </nav>
 
@@ -183,7 +184,10 @@ export default function ProductDetail({
                 {productImages.map((img, idx) => (
                   <button
                     key={idx}
-                    onClick={() => setActiveImageIndex(idx)}
+                    onClick={() => {
+                      setDirection(idx > activeImageIndex ? 1 : -1);
+                      setActiveImageIndex(idx);
+                    }}
                     className={cn(
                       "relative aspect-[3/4] w-20 md:w-full overflow-hidden border transition-all",
                       activeImageIndex === idx ? "border-foreground" : "border-transparent opacity-60 hover:opacity-100"
@@ -197,27 +201,73 @@ export default function ProductDetail({
 
             {/* Main Image */}
             <div className="grow relative aspect-[3/4] bg-secondary/20 overflow-hidden group">
-              <AnimatePresence mode="wait">
+              <AnimatePresence mode="wait" custom={direction}>
                 <motion.div
                   key={activeImageIndex}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.4 }}
-                  className="w-full h-full"
+                  custom={direction}
+                  variants={{
+                    enter: (direction: number) => ({
+                      x: direction > 0 ? 20 : direction < 0 ? -20 : 0,
+                      opacity: 0
+                    }),
+                    center: {
+                      x: 0,
+                      opacity: 1
+                    },
+                    exit: (direction: number) => ({
+                      x: direction > 0 ? -20 : direction < 0 ? 20 : 0,
+                      opacity: 0
+                    })
+                  }}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  drag="x"
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragElastic={0.05}
+                  onDragEnd={(e, { offset, velocity }) => {
+                    if (productImages.length <= 1) return;
+                    const swipeThreshold = 50;
+                    if (offset.x < -swipeThreshold) {
+                      setDirection(1);
+                      setActiveImageIndex((prev) => (prev + 1) % productImages.length);
+                    } else if (offset.x > swipeThreshold) {
+                      setDirection(-1);
+                      setActiveImageIndex((prev) => (prev - 1 + productImages.length) % productImages.length);
+                    }
+                  }}
+                  className="w-full h-full cursor-grab active:cursor-grabbing touch-pan-y"
                 >
                   <Image
                     src={productImages[activeImageIndex] || "/placeholder.jpg"}
                     alt={product.title}
                     fill
-                    className="object-cover"
+                    className="object-cover pointer-events-none"
                     priority
+                    quality={100}
+                    sizes="(max-width: 1024px) 200vw, 100vw"
                   />
                 </motion.div>
               </AnimatePresence>
+
+              {/* Mobile Dots */}
+              {productImages.length > 1 && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 md:hidden z-10">
+                  {productImages.map((_, idx) => (
+                    <div 
+                      key={idx}
+                      className={cn(
+                        "w-1 h-1 rounded-full transition-all duration-300",
+                        activeImageIndex === idx ? "bg-foreground w-4" : "bg-foreground/30"
+                      )}
+                    />
+                  ))}
+                </div>
+              )}
               
               {/* Zoom pill (visual only) */}
-              <div className="absolute bottom-4 right-4 bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+              <div className="absolute bottom-4 right-4 bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2 font-manrope font-bold">
                 <Info className="w-3 h-3" /> Roll to Zoom
               </div>
             </div>
@@ -229,7 +279,7 @@ export default function ProductDetail({
           <div className="space-y-8">
             <header>
               <div className="flex justify-between items-start mb-2">
-                <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+                <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground font-manrope font-bold">
                   {product.vendor || "TAILEX Standard"}
                 </p>
                 <div className="flex gap-4">
@@ -241,23 +291,23 @@ export default function ProductDetail({
                   </button>
                 </div>
               </div>
-              <h1 className="text-3xl lg:text-4xl font-display uppercase tracking-tight leading-none mb-4">
+              <h1 className="text-4xl lg:text-6xl font-manrope font-black tracking-tight leading-[0.9] mb-6">
                 {product.title}
               </h1>
               
               <div className="flex items-center gap-4">
-                <div className="flex items-baseline gap-2">
+                <div className="flex items-baseline gap-2 font-manrope">
                   {hasSale ? (
                     <>
-                      <span className="text-2xl font-body text-primary">${currentSalePrice?.toFixed(2)}</span>
-                      <span className="text-sm line-through text-muted-foreground">${currentPrice.toFixed(2)}</span>
+                      <span className="text-3xl font-black text-[#D03030]">${currentSalePrice?.toFixed(2)}</span>
+                      <span className="text-xl line-through text-muted-foreground/60">${currentPrice.toFixed(2)}</span>
                     </>
                   ) : (
-                    <span className="text-2xl font-body text-foreground">${currentPrice.toFixed(2)}</span>
+                    <span className="text-3xl font-black text-foreground">${currentPrice.toFixed(2)}</span>
                   )}
                 </div>
                 {hasSale && (
-                  <span className="bg-primary text-primary-foreground px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded">
+                  <span className="bg-[#D03030] text-white px-2 py-0.5 text-[10px] font-manrope font-black uppercase tracking-widest rounded-none">
                     Sale
                   </span>
                 )}
@@ -265,8 +315,8 @@ export default function ProductDetail({
             </header>
 
             {/* Product description (Truncated) */}
-            <div className="text-sm font-body leading-relaxed text-muted-foreground max-w-md">
-              <p>{product.short_description || product.description?.slice(0, 160) + "..."}</p>
+            <div className="text-sm font-manrope font-medium leading-relaxed text-muted-foreground max-w-md">
+              {product.short_description || product.description?.split('\n')[0] || "Premium piece designed for timeless style and comfort."}
             </div>
 
             {/* Variant Selectors */}
@@ -275,11 +325,11 @@ export default function ProductDetail({
                 {product.options.map((option) => (
                   <div key={option.id} className="space-y-3">
                     <div className="flex justify-between items-baseline">
-                      <span className="text-[10px] uppercase tracking-widest font-bold">
-                        {option.name}: <span className="font-normal text-muted-foreground">{selectedOptions[option.name]}</span>
+                      <span className="text-[10px] uppercase tracking-widest font-manrope font-black">
+                        {option.name}: <span className="font-medium text-muted-foreground">{selectedOptions[option.name]}</span>
                       </span>
                       {option.name.toLowerCase() === 'size' && (
-                        <button className="text-[10px] uppercase tracking-widest underline hover:opacity-70 transition-opacity">
+                        <button className="text-[10px] uppercase tracking-widest underline underline-offset-4 font-manrope font-bold hover:opacity-70 transition-opacity">
                           Size Guide
                         </button>
                       )}
@@ -290,7 +340,7 @@ export default function ProductDetail({
                           key={value}
                           onClick={() => handleOptionSelect(option.name, value)}
                           className={cn(
-                            "px-5 py-2.5 text-xs tracking-widest uppercase transition-all border",
+                            "px-5 py-2.5 text-xs font-manrope font-bold tracking-widest uppercase transition-all border",
                             selectedOptions[option.name] === value
                               ? "border-foreground bg-foreground text-background"
                               : "border-border hover:border-muted-foreground text-foreground"
@@ -316,7 +366,7 @@ export default function ProductDetail({
                   >
                     <Minus className="w-3 h-3" />
                   </button>
-                  <span className="w-10 text-center font-body text-sm select-none">{quantity}</span>
+                  <span className="w-10 text-center font-manrope font-black text-sm select-none">{quantity}</span>
                   <button 
                     onClick={incrementQuantity}
                     className="w-12 h-full flex items-center justify-center hover:bg-secondary transition-colors"
@@ -330,13 +380,13 @@ export default function ProductDetail({
                   onClick={handleAddToCart}
                   disabled={isOutOfStock}
                   className={cn(
-                    "flex-1 h-14 uppercase tracking-[0.2em] text-[11px] font-bold transition-all",
+                    "flex-1 h-14 uppercase tracking-[0.2em] text-[11px] font-manrope font-black transition-all",
                     isOutOfStock 
                       ? "bg-muted text-muted-foreground cursor-not-allowed" 
                       : "bg-foreground text-background hover:bg-foreground/90 active:scale-[0.98]"
                   )}
                 >
-                  {isOutOfStock ? "Sold Out" : "Add to Cart"}
+                  {isOutOfStock ? "Sold Out" : "Add to Bag"}
                 </button>
               </div>
 
@@ -347,14 +397,14 @@ export default function ProductDetail({
                    router.push('/checkout');
                 }}
                 disabled={isOutOfStock}
-                className="w-full h-14 border border-foreground uppercase tracking-[0.2em] text-[11px] font-bold hover:bg-foreground hover:text-background transition-all disabled:opacity-50"
+                className="w-full h-14 border border-foreground uppercase tracking-[0.2em] text-[11px] font-manrope font-black hover:bg-foreground hover:text-background transition-all disabled:opacity-50"
               >
                 Buy it Now
               </button>
 
               {/* Stock Warning */}
               {currentStock > 0 && currentStock < 5 && (
-                <p className="text-[10px] uppercase tracking-widest text-primary font-bold text-center animate-pulse">
+                <p className="text-[10px] uppercase tracking-widest text-[#D03030] font-manrope font-black text-center animate-pulse">
                   Only {currentStock} Left - Selling Fast
                 </p>
               )}
@@ -362,11 +412,11 @@ export default function ProductDetail({
 
             {/* Shipping & Trust */}
             <div className="space-y-4 pt-4">
-              <div className="flex items-center gap-3 text-[11px] uppercase tracking-widest text-muted-foreground">
+              <div className="flex items-center gap-3 text-[10px] uppercase tracking-widest text-muted-foreground font-manrope font-bold">
                 <Truck className="w-4 h-4" />
                 <span>Free shipping on orders over $150</span>
               </div>
-              <div className="flex items-center gap-3 text-[11px] uppercase tracking-widest text-muted-foreground">
+              <div className="flex items-center gap-3 text-[10px] uppercase tracking-widest text-muted-foreground font-manrope font-bold">
                 <ShieldCheck className="w-4 h-4" />
                 <span>45-day easy returns policy</span>
               </div>
@@ -376,10 +426,10 @@ export default function ProductDetail({
             <Accordion type="single" collapsible className="w-full pt-8">
               {details.map((detail, index) => (
                 <AccordionItem key={index} value={`item-${index}`} className="border-border">
-                  <AccordionTrigger className="text-[11px] uppercase tracking-[0.3em] font-bold hover:no-underline py-4">
+                  <AccordionTrigger className="text-[10px] uppercase tracking-[0.3em] font-manrope font-black hover:no-underline py-4">
                     {detail.title}
                   </AccordionTrigger>
-                  <AccordionContent className="font-body text-sm text-muted-foreground leading-relaxed">
+                  <AccordionContent className="font-manrope font-medium text-sm text-muted-foreground leading-relaxed">
                     {detail.content}
                   </AccordionContent>
                 </AccordionItem>
@@ -391,11 +441,19 @@ export default function ProductDetail({
 
       {/* Review Section */}
       <div className="mt-32 border-t border-border pt-20">
-        <ReviewsSection />
+        <ReviewsSection productId={product.id} />
       </div>
 
       {/* Recommended Section */}
       <div className="mt-32 mb-20">
+        <div className="flex items-end justify-between mb-12">
+          <h2 className="text-2xl lg:text-4xl font-manrope font-black tracking-tight">
+            You May Also Like
+          </h2>
+          <Link href="/shop" className="text-xs font-manrope font-bold uppercase tracking-widest underline underline-offset-8">
+            View all
+          </Link>
+        </div>
         <RelatedProducts products={relatedProducts} />
       </div>
     </div>

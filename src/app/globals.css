@@ -8,8 +8,10 @@
   html {
     scroll-behavior: smooth;
   }
+
   :root {
-    --brand-primary: #000000; /* Fallback */
+    --brand-primary: #000000;
+    /* Fallback */
 
     --background: 0 0% 100%;
     --foreground: 0 0% 8%;
@@ -26,8 +28,8 @@
      * For broad compatibility without complex conversion, we can repurpose --primary to take the HEX variable directly, 
      * but we must break tailwind's opacity modifiers (bg-primary/20) unless we use `rgb(from ...)`
      */
-     
-    --primary: 0 0% 8%; 
+
+    --primary: 0 0% 8%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 96%;
@@ -47,7 +49,7 @@
     --ring: 0 0% 8%;
 
     --radius: 0.25rem;
-    
+
     /* Font Bindings */
     /* Accessing the font variable injected by next/font */
     /* If next/font injects a class, we use inheritance. If it injects a variable, we map it here. */
@@ -60,28 +62,28 @@
   [data-theme='dark'] {
     --background: 0 0% 4%;
     --foreground: 0 0% 98%;
-    
+
     --card: 0 0% 4%;
     --card-foreground: 0 0% 98%;
-    
+
     --popover: 0 0% 4%;
     --popover-foreground: 0 0% 98%;
-    
+
     --primary: 0 0% 98%;
     --primary-foreground: 0 0% 9%;
-    
+
     --secondary: 0 0% 14.9%;
     --secondary-foreground: 0 0% 98%;
-    
+
     --muted: 0 0% 14.9%;
     --muted-foreground: 0 0% 63.9%;
-    
+
     --accent: 0 0% 14.9%;
     --accent-foreground: 0 0% 98%;
-    
+
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    
+
     --border: 0 0% 14.9%;
     --input: 0 0% 14.9%;
     --ring: 0 0% 83.1%;
@@ -103,7 +105,12 @@
     overflow-x: hidden;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-display);
     letter-spacing: -0.03em;
   }
@@ -113,7 +120,7 @@
   .text-balance {
     text-wrap: balance;
   }
-  
+
   .mix-blend-difference {
     mix-blend-mode: difference;
   }
@@ -202,6 +209,7 @@
       opacity: 0;
       transform: translateY(30px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -212,14 +220,29 @@
     from {
       opacity: 0;
     }
+
     to {
       opacity: 1;
     }
   }
 
-  .delay-100 { animation-delay: 100ms; }
-  .delay-200 { animation-delay: 200ms; }
-  .delay-300 { animation-delay: 300ms; }
-  .delay-400 { animation-delay: 400ms; }
-  .delay-500 { animation-delay: 500ms; }
+  .delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .delay-500 {
+    animation-delay: 500ms;
+  }
 }

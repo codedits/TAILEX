@@ -45,7 +45,7 @@ const defaultHeroConfig: HeroConfig = {
     heading: 'Winter Collection',
     subheading: 'Discover the new trends',
     ctaText: 'Shop Now',
-    ctaLink: '/collection'
+    ctaLink: '/shop'
 }
 
 const defaultSocialConfig: SocialConfig = {

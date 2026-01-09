@@ -17,6 +17,7 @@ export type Product = {
   // Pricing
   price: number
   sale_price?: number | null
+  compare_at_price?: number | null
   cost_per_item?: number | null
 
   // Media

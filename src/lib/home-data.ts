@@ -21,6 +21,7 @@ import {
     Product,
     HomepageSection
 } from "@/lib/types";
+import { StoreConfigService, StoreConfig } from "@/services/config";
 
 export interface HomeData {
     hero: HeroConfig;
@@ -32,6 +33,7 @@ export interface HomeData {
     products: Product[];
     brand: BrandConfig;
     layout: HomepageSection[];
+    categoryGrid?: { aspectRatio: string };
 }
 
 export async function getHomeData(): Promise<HomeData> {
@@ -44,7 +46,8 @@ export async function getHomeData(): Promise<HomeData> {
         collections,
         products,
         brand,
-        layout
+        layout,
+        config
     ] = await Promise.all([
         getHeroConfig(),
         getBenefitsConfig(),
@@ -54,8 +57,11 @@ export async function getHomeData(): Promise<HomeData> {
         getFeaturedCollections(4),
         getFeaturedProducts(6),
         getBrandConfig(),
-        getHomepageLayout()
+        getHomepageLayout(),
+        StoreConfigService.getStoreConfig() // Fetch full config to get categoryGrid
     ]);
+
+    const storeConfig = config as StoreConfig;
 
     return {
         hero: hero as HeroConfig,
@@ -66,6 +72,7 @@ export async function getHomeData(): Promise<HomeData> {
         collections,
         products,
         brand: brand as BrandConfig,
-        layout
+        layout,
+        categoryGrid: storeConfig.categoryGrid
     };
 }

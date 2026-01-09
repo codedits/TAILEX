@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import { TextReveal } from "@/components/ui/text-reveal";
 
 type OutlookSectionProps = {
   title?: string;
@@ -36,7 +37,7 @@ const OutlookSection = ({
   return (
     <section
       ref={containerRef}
-      className="relative w-full bg-white overflow-visible"
+      className="relative w-full bg-background overflow-visible"
     >
       {/* Inner sticky wrapper - framer-wk3tyu */}
       <div
@@ -57,18 +58,19 @@ const OutlookSection = ({
             zIndex: 1
           }}
         >
-          <h2
+          <TextReveal
+            variant="stagger"
             className="text-center text-foreground whitespace-pre-line"
             style={{
               fontFamily: '"Manrope", "Manrope Placeholder", sans-serif',
               fontSize: 'clamp(50px, 7vw, 80px)',
-              fontWeight: 400,
+              fontWeight: 700,
               letterSpacing: '-0.02em',
               lineHeight: '110%'
             }}
           >
             {title}
-          </h2>
+          </TextReveal>
         </div>
 
         {/* Scattered images container - framer-1nn26df */}
@@ -91,6 +93,9 @@ const OutlookSection = ({
                   alt="Outlook image 1"
                   fill
                   className="object-cover"
+                  quality={100}
+                  sizes="(max-width: 768px) 150vw, 30vw"
+                  priority
                 />
               </div>
             </motion.div>
@@ -113,6 +118,8 @@ const OutlookSection = ({
                     alt="Outlook image 2"
                     fill
                     className="object-cover"
+                    quality={100}
+                    sizes="(max-width: 768px) 150vw, 30vw"
                   />
                 </div>
               </motion.div>
@@ -132,6 +139,8 @@ const OutlookSection = ({
                   alt="Outlook image 3"
                   fill
                   className="object-cover"
+                  quality={100}
+                  sizes="(max-width: 768px) 150vw, 25vw"
                 />
               </div>
             </motion.div>
@@ -152,6 +161,8 @@ const OutlookSection = ({
                   alt="Outlook image 4"
                   fill
                   className="object-cover"
+                  quality={100}
+                  sizes="(max-width: 768px) 150vw, 35vw"
                 />
               </div>
             </motion.div>

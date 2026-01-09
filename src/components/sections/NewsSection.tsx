@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { BlogPost } from "@/lib/types";
 import { motion } from "framer-motion";
+import { TextReveal } from "@/components/ui/text-reveal";
 
 interface NewsSectionProps {
   posts: BlogPost[];
@@ -52,7 +53,7 @@ const NewsSection = ({
   };
 
   return (
-    <section className="relative w-full bg-white overflow-hidden">
+    <section className="relative w-full bg-background overflow-hidden">
       <div
         className="flex flex-col items-center justify-center w-full"
         style={{ maxWidth: '1920px', margin: '0 auto' }}
@@ -61,24 +62,21 @@ const NewsSection = ({
         <div className="w-full px-6 md:px-10 py-24 md:py-[150px] flex flex-col gap-16 md:gap-20">
 
           {/* Section Header - Split layout */}
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 w-full overflow-hidden">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 w-full mb-16">
             {/* Title - Left */}
-            <motion.h2
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
+            <TextReveal
+              variant="stagger"
               className="text-foreground whitespace-pre-line"
               style={{
                 fontFamily: '"Manrope", "Manrope Placeholder", sans-serif',
                 fontSize: 'clamp(40px, 5vw, 64px)',
-                fontWeight: 400,
+                fontWeight: 700,
                 letterSpacing: '-0.02em',
                 lineHeight: '110%'
               }}
             >
               {title}
-            </motion.h2>
+            </TextReveal>
 
             {/* Description - Right */}
             <motion.div
@@ -139,6 +137,8 @@ const NewsSection = ({
                           alt={post.title}
                           fill
                           className="object-cover"
+                          quality={95}
+                          sizes="(max-width: 768px) 150vw, 33vw"
                         />
                       </motion.div>
                     </div>

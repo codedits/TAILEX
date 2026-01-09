@@ -4,6 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { Product } from "@/lib/types";
 import { motion } from "framer-motion";
+import ProductCard from "@/components/product/ProductCard";
+import { TextReveal } from "@/components/ui/text-reveal";
 
 interface ProductGridSectionProps {
   products: Product[];
@@ -54,7 +56,7 @@ const ProductGridSection = ({
   };
 
   return (
-    <section className="relative w-full bg-white overflow-hidden">
+    <section className="relative w-full bg-background overflow-hidden">
       <div
         className="flex flex-col items-center justify-center w-full"
         style={{ maxWidth: '1920px', margin: '0 auto' }}
@@ -63,24 +65,17 @@ const ProductGridSection = ({
         <div className="w-full px-6 md:px-10 py-24 md:py-[150px] flex flex-col gap-16 md:gap-20">
 
           {/* Section Header - Split layout */}
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 w-full overflow-hidden">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 w-full overflow-hidden border-b border-foreground/10 pb-12">
             {/* Title - Left */}
-            <motion.h2
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-foreground whitespace-pre-line"
+            <TextReveal
+              variant="stagger"
+              className="text-foreground whitespace-pre-line font-manrope font-black tracking-tight leading-[0.9]"
               style={{
-                fontFamily: '"Manrope", "Manrope Placeholder", sans-serif',
-                fontSize: 'clamp(40px, 5vw, 64px)',
-                fontWeight: 400,
-                letterSpacing: '-0.02em',
-                lineHeight: '110%'
+                fontSize: 'clamp(48px, 8vw, 120px)',
               }}
             >
               {title}
-            </motion.h2>
+            </TextReveal>
 
             {/* Description - Right */}
             <motion.div
@@ -88,26 +83,34 @@ const ProductGridSection = ({
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="md:w-1/4"
+              className="md:w-1/3"
             >
               <p
-                className="text-muted-foreground"
+                className="text-muted-foreground font-manrope font-medium italic mb-6"
                 style={{
-                  fontFamily: '"Geist", "Geist Placeholder", sans-serif',
-                  fontSize: 'clamp(15px, 1.5vw, 18px)',
-                  fontWeight: 400,
-                  letterSpacing: '0.02em',
-                  lineHeight: '140%'
+                  fontSize: 'clamp(16px, 1.8vw, 22px)',
+                  lineHeight: '130%'
                 }}
               >
                 {description}
               </p>
+              <Link 
+                href={viewAllLink} 
+                className="inline-flex items-center gap-2 text-xs font-manrope font-black uppercase tracking-[0.2em] group border-b border-foreground pb-2 hover:opacity-70 transition-all"
+              >
+                Explore Collection
+                <div className="w-4 h-4 rounded-full border border-foreground flex items-center justify-center group-hover:translate-x-1 transition-transform">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 9L9 1M9 1H1M9 1V9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+              </Link>
             </motion.div>
           </div>
 
           {/* Grid - 3 columns */}
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
@@ -119,116 +122,8 @@ const ProductGridSection = ({
               const category = product.category || "ESSENTIALS";
 
               return (
-                <motion.div key={product.id} variants={itemVariants}>
-                  <Link
-                    href={`/product/${product.slug}`}
-                    className="group block w-full cursor-pointer"
-                  >
-                    {/* Image Container with dual-image hover */}
-                    <div
-                      className="relative w-full overflow-hidden"
-                      style={{ aspectRatio: '0.8004484304932735 / 1' }}
-                    >
-                      {/* Primary Image */}
-                      <motion.div
-                        className="absolute inset-0 w-[101%] h-[101%]"
-                        style={{
-                          left: 'calc(49.85994397759106% - 101% / 2)',
-                          top: 'calc(50.00000000000002% - 101% / 2)'
-                        }}
-                        initial={{ opacity: 1 }}
-                        whileHover={{ opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <Image
-                          src={primaryImage}
-                          alt={product.title}
-                          fill
-                          className="object-cover"
-                        />
-                      </motion.div>
-
-                      {/* Secondary Image (shown on hover) */}
-                      <motion.div
-                        className="absolute inset-0 w-[101%] h-[101%]"
-                        style={{
-                          left: 'calc(49.85994397759106% - 101% / 2)',
-                          top: 'calc(50.00000000000002% - 101% / 2)'
-                        }}
-                        initial={{ opacity: 0 }}
-                        whileHover={{ opacity: 1 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <Image
-                          src={secondaryImage}
-                          alt={`${product.title} - alternate view`}
-                          fill
-                          className="object-cover"
-                        />
-                      </motion.div>
-                    </div>
-
-                    {/* Product Info */}
-                    <div className="flex flex-col items-start pt-4 gap-1 overflow-hidden w-full">
-                      {/* Product Info Row */}
-                      <div className="flex flex-col gap-1 w-full">
-                        {/* Product Title */}
-                        <p
-                          className="text-foreground"
-                          style={{
-                            fontFamily: '"Manrope", "Manrope Placeholder", sans-serif',
-                            fontSize: 'clamp(14px, 1.3vw, 16px)',
-                            fontWeight: 400,
-                            letterSpacing: '0.02em',
-                            lineHeight: '140%'
-                          }}
-                        >
-                          {product.title}
-                        </p>
-
-                        {/* Category */}
-                        <p
-                          className="text-muted-foreground uppercase"
-                          style={{
-                            fontFamily: '"Fragment Mono", monospace',
-                            fontSize: '12px',
-                            fontWeight: 400,
-                            letterSpacing: '0.06em',
-                            lineHeight: '140%'
-                          }}
-                        >
-                          {category}
-                        </p>
-                      </div>
-
-                      {/* Price Row */}
-                      <div className="flex items-center gap-2 mt-1">
-                        <span
-                          className="text-foreground"
-                          style={{
-                            fontFamily: '"Manrope", "Manrope Placeholder", sans-serif',
-                            fontSize: '14px',
-                            fontWeight: 500,
-                            letterSpacing: '0.02em'
-                          }}
-                        >
-                          ${formatPrice(product.price)}
-                        </span>
-                        {product.compare_at_price && product.compare_at_price > (product.price ?? 0) && (
-                          <span
-                            className="text-muted-foreground line-through"
-                            style={{
-                              fontFamily: '"Manrope", "Manrope Placeholder", sans-serif',
-                              fontSize: '14px',
-                              fontWeight: 400
-                            }}
-                          >
-                            ${formatPrice(product.compare_at_price)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </Link>
+                <motion.div key={product.id} variants={itemVariants} className="h-full">
+                  <ProductCard {...product} />
                 </motion.div>
               );
             })}

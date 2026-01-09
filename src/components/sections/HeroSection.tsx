@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 
 type HeroSectionProps = {
   heading?: string;
@@ -55,22 +56,40 @@ const HeroSection = ({
             fill
             className="object-cover object-top"
             priority
+            quality={100}
+            sizes="(max-width: 768px) 300vw, 150vw"
           />
         </motion.div>
       </div>
 
       {/* Content Container - 100vh height */}
       <div
-        className="relative flex flex-row items-end justify-between w-full px-6 md:px-10 pb-10"
+        className="relative flex flex-col md:flex-row items-center md:items-end justify-center md:justify-between w-full px-6 md:px-10 pb-10 gap-8 md:gap-0"
         style={{
           height: '100vh',
           maxWidth: '1920px',
           margin: '0 auto'
         }}
       >
-        {/* Brand Name - Bottom Left */}
+        {/* Mobile View: Centered CTA only */}
+        <div className="flex flex-col items-center justify-center md:hidden w-full">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1.2 }}
+          >
+            <Link
+              href="/shop"
+              className="px-8 py-3 bg-transparent border border-white text-white text-[10px] uppercase font-manrope font-black tracking-[0.4em] hover:bg-white hover:text-black transition-all duration-300"
+            >
+              Shop Now
+            </Link>
+          </motion.div>
+        </div>
+
+        {/* Desktop View: Brand Name - Bottom Left */}
         <motion.div
-          className="z-10"
+          className="z-10 hidden md:block"
           initial={{ opacity: 0.001, y: -80 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{
@@ -81,7 +100,7 @@ const HeroSection = ({
           }}
         >
           <h1
-            className="font-normal tracking-[-0.02em] text-white leading-[1.1]"
+            className="font-normal tracking-[-0.02em] text-foreground leading-[1.1]"
             style={{
               fontFamily: '"Manrope", "Manrope Placeholder", sans-serif',
               fontSize: 'clamp(72px, 10vw, 110px)'
@@ -91,15 +110,15 @@ const HeroSection = ({
           </h1>
         </motion.div>
 
-        {/* Tagline - Bottom Right */}
+        {/* Desktop View: Tagline - Bottom Right */}
         <motion.div
-          className="z-10 text-right"
+          className="z-10 text-right hidden md:block"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 1.6 }}
         >
           <p
-            className="text-white leading-[1.4] tracking-[0.02em] whitespace-pre-line"
+            className="text-foreground leading-[1.4] tracking-[0.02em] whitespace-pre-line"
             style={{
               fontFamily: '"Manrope", "Manrope Placeholder", sans-serif',
               fontSize: 'clamp(28px, 3vw, 32px)'
@@ -113,13 +132,13 @@ const HeroSection = ({
       {/* Transition Overlay - for scroll transition effect */}
       <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
         <motion.div
-          className="absolute bottom-0 left-0 right-0 bg-white"
+          className="absolute bottom-0 left-0 right-0 bg-background"
           style={{ height: '50%' }}
           initial={{ opacity: 0, y: 450 }}
           animate={{ opacity: 0, y: 450 }}
         />
         <motion.div
-          className="absolute top-0 left-0 right-0 bg-white"
+          className="absolute top-0 left-0 right-0 bg-background"
           style={{ height: '50%' }}
           initial={{ opacity: 0, y: -450 }}
           animate={{ opacity: 0, y: -450 }}

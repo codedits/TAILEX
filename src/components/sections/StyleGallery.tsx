@@ -74,6 +74,8 @@ const StyleGallery = () => {
               className="object-cover transition-transform duration-700 hover:scale-105"
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.5 }}
+              quality={95}
+              sizes="(max-width: 768px) 150vw, 25vw"
             />
           </motion.div>
         ))}
