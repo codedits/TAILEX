@@ -193,7 +193,13 @@ export default function ProductDetail({
                       activeImageIndex === idx ? "border-foreground" : "border-transparent opacity-60 hover:opacity-100"
                     )}
                   >
-                    <Image src={img} alt="" fill className="object-cover" />
+                    <Image 
+                      src={img} 
+                      alt="" 
+                      fill 
+                      className="object-cover" 
+                      sizes="80px"
+                    />
                   </button>
                 ))}
               </div>
@@ -245,11 +251,31 @@ export default function ProductDetail({
                     fill
                     className="object-cover pointer-events-none"
                     priority
-                    quality={90}
-                    sizes="(max-width: 1024px) 200vw, 100vw"
+                    quality={80}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
                   />
                 </motion.div>
               </AnimatePresence>
+
+              {/* Pre-render next/prev images for instant transition */}
+              {productImages.length > 1 && (
+                <div className="hidden">
+                  <Image
+                    src={productImages[(activeImageIndex + 1) % productImages.length]}
+                    alt=""
+                    width={800}
+                    height={1000}
+                    loading="lazy"
+                  />
+                  <Image
+                    src={productImages[(activeImageIndex - 1 + productImages.length) % productImages.length]}
+                    alt=""
+                    width={800}
+                    height={1000}
+                    loading="lazy"
+                  />
+                </div>
+              )}
 
               {/* Mobile Dots */}
               {productImages.length > 1 && (
@@ -381,8 +407,6 @@ export default function ProductDetail({
                   </button>
                 </div>
 
-
-// Change in component:
                 {/* Main CTA */}
                 <Button
                   onClick={() => handleAddToCart()}

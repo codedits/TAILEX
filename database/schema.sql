@@ -674,8 +674,7 @@ CREATE POLICY "Public: View product variants" ON product_variants FOR SELECT USI
 DROP POLICY IF EXISTS "Public: View product options" ON product_options;
 CREATE POLICY "Public: View product options" ON product_options FOR SELECT USING (true);
 
-DROP POLICY IF EXISTS "Public: View approved reviews" ON reviews;
-CREATE POLICY "Public: View approved reviews" ON reviews FOR SELECT USING (status = 'approved');
+-- Reviews policy consolidated in section below
 
 DROP POLICY IF EXISTS "Public: View active discounts" ON discounts;
 CREATE POLICY "Public: View active discounts" ON discounts FOR SELECT USING (is_active = true AND starts_at <= NOW() AND (ends_at IS NULL OR ends_at > NOW()));
@@ -694,46 +693,74 @@ CREATE POLICY "Public: View navigation" ON navigation_menus FOR SELECT USING (tr
 
 -- CUSTOMER POLICIES (for authenticated users)
 DROP POLICY IF EXISTS "Customer: View own profile" ON customers;
-CREATE POLICY "Customer: View own profile" ON customers FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Customer: View own profile" ON customers FOR SELECT USING ((select auth.uid()) = id);
 
 DROP POLICY IF EXISTS "Customer: Update own profile" ON customers;
-CREATE POLICY "Customer: Update own profile" ON customers FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Customer: Update own profile" ON customers FOR UPDATE USING ((select auth.uid()) = id);
 
+-- Consolidating Multiple Permissive Policies for customer_addresses
 DROP POLICY IF EXISTS "Customer: View own addresses" ON customer_addresses;
-CREATE POLICY "Customer: View own addresses" ON customer_addresses FOR SELECT USING (customer_id = auth.uid());
-
 DROP POLICY IF EXISTS "Customer: Manage own addresses" ON customer_addresses;
-CREATE POLICY "Customer: Manage own addresses" ON customer_addresses FOR ALL USING (customer_id = auth.uid());
+CREATE POLICY "Customer: Manage own addresses" ON customer_addresses FOR ALL USING (customer_id = (select auth.uid()));
 
+-- Consolidated Order Policies for Performance
+DROP POLICY IF EXISTS "Orders: Manage all Admin" ON orders;
+DROP POLICY IF EXISTS "Orders: Select own Customer" ON orders;
+DROP POLICY IF EXISTS "Orders: Create own Customer" ON orders;
 DROP POLICY IF EXISTS "Customer: View own orders" ON orders;
-CREATE POLICY "Customer: View own orders" ON orders FOR SELECT USING (customer_id = auth.uid());
-
 DROP POLICY IF EXISTS "Admin: View all orders" ON orders;
-CREATE POLICY "Admin: View all orders" ON orders FOR SELECT USING (auth.jwt() ->> 'role' = 'service_role' OR (auth.jwt() -> 'app_metadata' ->> 'role')::text = 'admin');
-
 DROP POLICY IF EXISTS "Admin: Manage all orders" ON orders;
-CREATE POLICY "Admin: Manage all orders" ON orders FOR ALL USING (auth.jwt() ->> 'role' = 'service_role' OR (auth.jwt() -> 'app_metadata' ->> 'role')::text = 'admin');
-
 DROP POLICY IF EXISTS "Customer: Create orders" ON orders;
-CREATE POLICY "Customer: Create orders" ON orders FOR INSERT WITH CHECK (customer_id = auth.uid() OR customer_id IS NULL);
+DROP POLICY IF EXISTS "Orders: Select Policy" ON orders;
+DROP POLICY IF EXISTS "Orders: Insert Policy" ON orders;
+DROP POLICY IF EXISTS "Orders: Update Policy" ON orders;
+DROP POLICY IF EXISTS "Orders: Delete Policy" ON orders;
+
+CREATE POLICY "Orders: Select Policy" ON orders FOR SELECT USING (
+  customer_id = (select auth.uid()) OR 
+  (select auth.jwt()) ->> 'role' = 'service_role' OR 
+  ((select auth.jwt()) -> 'app_metadata' ->> 'role')::text = 'admin'
+);
+
+CREATE POLICY "Orders: Insert Policy" ON orders FOR INSERT WITH CHECK (
+  customer_id = (select auth.uid()) OR 
+  customer_id IS NULL OR
+  (select auth.jwt()) ->> 'role' = 'service_role' OR 
+  ((select auth.jwt()) -> 'app_metadata' ->> 'role')::text = 'admin'
+);
+
+CREATE POLICY "Orders: Update Policy" ON orders FOR UPDATE USING (
+  (select auth.jwt()) ->> 'role' = 'service_role' OR 
+  ((select auth.jwt()) -> 'app_metadata' ->> 'role')::text = 'admin'
+);
+
+CREATE POLICY "Orders: Delete Policy" ON orders FOR DELETE USING (
+  (select auth.jwt()) ->> 'role' = 'service_role' OR 
+  ((select auth.jwt()) -> 'app_metadata' ->> 'role')::text = 'admin'
+);
 
 DROP POLICY IF EXISTS "Customer: View order items" ON order_items;
-CREATE POLICY "Customer: View order items" ON order_items FOR SELECT USING (EXISTS (SELECT 1 FROM orders WHERE orders.id = order_items.order_id AND orders.customer_id = auth.uid()));
+CREATE POLICY "Customer: View order items" ON order_items FOR SELECT USING (EXISTS (SELECT 1 FROM orders WHERE orders.id = order_items.order_id AND orders.customer_id = (select auth.uid())));
 
 DROP POLICY IF EXISTS "Customer: Manage own wishlist" ON wishlists;
-CREATE POLICY "Customer: Manage own wishlist" ON wishlists FOR ALL USING (customer_id = auth.uid());
+CREATE POLICY "Customer: Manage own wishlist" ON wishlists FOR ALL USING (customer_id = (select auth.uid()));
 
 DROP POLICY IF EXISTS "Customer: Manage own cart" ON carts;
-CREATE POLICY "Customer: Manage own cart" ON carts FOR ALL USING (customer_id = auth.uid());
+CREATE POLICY "Customer: Manage own cart" ON carts FOR ALL USING (customer_id = (select auth.uid()));
 
 DROP POLICY IF EXISTS "Customer: Manage cart items" ON cart_items;
-CREATE POLICY "Customer: Manage cart items" ON cart_items FOR ALL USING (EXISTS (SELECT 1 FROM carts WHERE carts.id = cart_items.cart_id AND carts.customer_id = auth.uid()));
+CREATE POLICY "Customer: Manage cart items" ON cart_items FOR ALL USING (EXISTS (SELECT 1 FROM carts WHERE carts.id = cart_items.cart_id AND carts.customer_id = (select auth.uid())));
 
+-- Consolidating Multiple Permissive Policies for reviews
 DROP POLICY IF EXISTS "Customer: Submit reviews" ON reviews;
-CREATE POLICY "Customer: Submit reviews" ON reviews FOR INSERT WITH CHECK (customer_id = auth.uid());
+CREATE POLICY "Customer: Submit reviews" ON reviews FOR INSERT WITH CHECK (customer_id = (select auth.uid()));
 
+DROP POLICY IF EXISTS "Public: View approved reviews" ON reviews;
 DROP POLICY IF EXISTS "Customer: View own reviews" ON reviews;
-CREATE POLICY "Customer: View own reviews" ON reviews FOR SELECT USING (customer_id = auth.uid());
+DROP POLICY IF EXISTS "Reviews: Select approved or own" ON reviews;
+CREATE POLICY "Reviews: Select approved or own" ON reviews FOR SELECT USING (
+  status = 'approved' OR customer_id = (select auth.uid())
+);
 
 -- ==========================================
 -- DEFAULT DATA SEEDS
@@ -809,20 +836,23 @@ INSERT INTO inventory_locations (name, is_default) VALUES
 ON CONFLICT DO NOTHING;
 
 -- ==========================================
--- OTP CODES (For Passwordless Auth)
+-- USER OTPS (For Passwordless Auth)
 -- ==========================================
 
-CREATE TABLE IF NOT EXISTS otp_codes (
+CREATE TABLE IF NOT EXISTS user_otps (
   id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
   email TEXT NOT NULL,
-  code TEXT NOT NULL,
+  otp_code TEXT NOT NULL,
+  used boolean DEFAULT false,
   expires_at TIMESTAMP WITH TIME ZONE DEFAULT (now() + interval '10 minutes'),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS idx_otp_codes_email ON otp_codes(email);
+-- Clean up legacy index name if it exists
+DROP INDEX IF EXISTS idx_otp_codes_email;
+CREATE INDEX IF NOT EXISTS idx_user_otps_email ON user_otps(email);
 
-ALTER TABLE otp_codes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_otps ENABLE ROW LEVEL SECURITY;
 -- Purely server-side access via service role/admin client
 
 -- ==========================================
@@ -845,24 +875,24 @@ DROP POLICY IF EXISTS "Public Access Products" ON storage.objects;
 CREATE POLICY "Public Access Products" ON storage.objects FOR SELECT USING (bucket_id = 'products');
 
 DROP POLICY IF EXISTS "Auth Upload Products" ON storage.objects;
-CREATE POLICY "Auth Upload Products" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'products' AND auth.role() = 'authenticated');
+CREATE POLICY "Auth Upload Products" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'products' AND (select auth.role()) = 'authenticated');
 
 DROP POLICY IF EXISTS "Auth Update Products" ON storage.objects;
-CREATE POLICY "Auth Update Products" ON storage.objects FOR UPDATE USING (bucket_id = 'products' AND auth.role() = 'authenticated');
+CREATE POLICY "Auth Update Products" ON storage.objects FOR UPDATE USING (bucket_id = 'products' AND (select auth.role()) = 'authenticated');
 
 DROP POLICY IF EXISTS "Auth Delete Products" ON storage.objects;
-CREATE POLICY "Auth Delete Products" ON storage.objects FOR DELETE USING (bucket_id = 'products' AND auth.role() = 'authenticated');
+CREATE POLICY "Auth Delete Products" ON storage.objects FOR DELETE USING (bucket_id = 'products' AND (select auth.role()) = 'authenticated');
 
 -- 3. Storage Policies (Collections)
 DROP POLICY IF EXISTS "Public Access Collections" ON storage.objects;
 CREATE POLICY "Public Access Collections" ON storage.objects FOR SELECT USING (bucket_id = 'collections');
 
 DROP POLICY IF EXISTS "Auth Upload Collections" ON storage.objects;
-CREATE POLICY "Auth Upload Collections" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'collections' AND auth.role() = 'authenticated');
+CREATE POLICY "Auth Upload Collections" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'collections' AND (select auth.role()) = 'authenticated');
 
 -- 4. Storage Policies (Avatars)
 DROP POLICY IF EXISTS "Public Access Avatars" ON storage.objects;
 CREATE POLICY "Public Access Avatars" ON storage.objects FOR SELECT USING (bucket_id = 'avatars');
 
 DROP POLICY IF EXISTS "User Upload Avatar" ON storage.objects;
-CREATE POLICY "User Upload Avatar" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'avatars' AND auth.role() = 'authenticated');
+CREATE POLICY "User Upload Avatar" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'avatars' AND (select auth.role()) = 'authenticated');

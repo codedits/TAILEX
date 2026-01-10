@@ -22,10 +22,10 @@ export async function POST(request: NextRequest) {
 
         // 2. Verify OTP: Find a matching, non-expired record
         const { data: otpRecord, error: otpError } = await supabase
-            .from('otp_codes')
+            .from('user_otps')
             .select('*')
             .eq('email', email)
-            .eq('code', code) // Using 'code' as per existing schema
+            .eq('otp_code', code)
             .gt('expires_at', new Date().toISOString())
             .order('created_at', { ascending: false })
             .limit(1)
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 3. Delete the used OTP (prevents reuse)
-        await supabase.from('otp_codes').delete().eq('id', otpRecord.id);
+        await supabase.from('user_otps').delete().eq('id', otpRecord.id);
 
         // 4. Upsert User: Check if user exists, if not create
         let user;

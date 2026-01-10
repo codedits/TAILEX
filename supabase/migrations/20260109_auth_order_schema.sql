@@ -18,14 +18,21 @@ CREATE TABLE IF NOT EXISTS public.users (
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Users can read/update their own data
+DROP POLICY IF EXISTS "Users can manage their own profile" ON public.users;
 CREATE POLICY "Users can manage their own profile" ON public.users
-    FOR ALL USING (auth.uid()::text = id::text OR auth.role() = 'service_role');
+    FOR ALL USING ((select auth.uid()) = id OR (select auth.role()) = 'service_role');
 
--- 2. Rename otp_codes to user_otps (if exists) or create new
+-- 2. Clean up old otp_codes and ensure user_otps exists
 DO $$
 BEGIN
-    IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'otp_codes') THEN
+    -- If old table exists and new one doesn't, rename it
+    IF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'otp_codes') 
+       AND NOT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'user_otps') THEN
         ALTER TABLE public.otp_codes RENAME TO user_otps;
+    -- If both exist, just drop the old one
+    ELSIF EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'otp_codes') 
+          AND EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'user_otps') THEN
+        DROP TABLE public.otp_codes;
     END IF;
 END $$;
 
@@ -41,6 +48,9 @@ CREATE TABLE IF NOT EXISTS public.user_otps (
 
 -- Add used column if not present
 ALTER TABLE public.user_otps ADD COLUMN IF NOT EXISTS used boolean DEFAULT false;
+
+-- Clean up duplicate indexes
+DROP INDEX IF EXISTS public.idx_otp_codes_email;
 
 -- Rate limiting index
 CREATE INDEX IF NOT EXISTS idx_user_otps_email_created 
@@ -61,8 +71,9 @@ CREATE TABLE IF NOT EXISTS public.user_cart (
 ALTER TABLE public.user_cart ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Users can manage their own cart
+DROP POLICY IF EXISTS "Users can manage their own cart" ON public.user_cart;
 CREATE POLICY "Users can manage their own cart" ON public.user_cart
-    FOR ALL USING (auth.uid()::text = user_id::text OR auth.role() = 'service_role');
+    FOR ALL USING ((select auth.uid()) = user_id OR (select auth.role()) = 'service_role');
 
 -- 4. Add payment_proof to orders
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS payment_proof jsonb;

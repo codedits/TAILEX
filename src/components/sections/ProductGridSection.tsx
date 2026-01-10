@@ -56,7 +56,7 @@ const ProductGridSection = ({
   };
 
   return (
-    <section className="relative w-full bg-background overflow-hidden">
+    <section className="relative w-full bg-background overflow-hidden z-10">
       <div
         className="flex flex-col items-center justify-center w-full"
         style={{ maxWidth: '1920px', margin: '0 auto' }}

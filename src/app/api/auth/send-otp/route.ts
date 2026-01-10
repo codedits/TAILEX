@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
         // 2. Rate Limiting: Max 5 OTPs per email per hour
         const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
         const { count } = await supabase
-            .from('otp_codes')
+            .from('user_otps')
             .select('*', { count: 'exact', head: true })
             .eq('email', email)
             .gte('created_at', oneHourAgo);
@@ -44,9 +44,9 @@ export async function POST(request: NextRequest) {
         const code = generateCode();
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
 
-        const { error: insertError } = await supabase.from('otp_codes').insert({
+        const { error: insertError } = await supabase.from('user_otps').insert({
             email,
-            code, // Using 'code' as per existing schema
+            otp_code: code,
             expires_at: expiresAt,
         });
 

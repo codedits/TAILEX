@@ -19,9 +19,9 @@ export async function sendOTP(formData: FormData) {
     const supabase = await createAdminClient();
 
     // Store code
-    const { error: dbError } = await supabase.from('otp_codes').insert({
+    const { error: dbError } = await supabase.from('user_otps').insert({
       email,
-      code
+      otp_code: code
     });
 
     if (dbError) throw dbError;
@@ -46,10 +46,10 @@ export async function verifyOTP(formData: FormData) {
 
   // Verify Code
   const { data: records } = await supabase
-    .from('otp_codes')
+    .from('user_otps')
     .select('*')
     .eq('email', email)
-    .eq('code', code)
+    .eq('otp_code', code)
     .gt('expires_at', new Date().toISOString())
     .order('created_at', { ascending: false })
     .limit(1);
@@ -59,7 +59,7 @@ export async function verifyOTP(formData: FormData) {
   }
 
   // Valid Code! Consume it
-  await supabase.from('otp_codes').delete().eq('email', email);
+  await supabase.from('user_otps').delete().eq('email', email);
 
   // Ensure customer exists in Supabase Auth (Sign Up if needed)
   // We try to create the user. If they exist, this fails but we ignore it.

@@ -1,6 +1,7 @@
 import OrderList from '@/components/account/OrderList';
 import { requireAuth } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { FadeInView } from '@/components/animations/FadeInView';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,11 +17,14 @@ export default async function OrdersPage() {
         .order('created_at', { ascending: false });
 
     return (
-        <div className="space-y-8">
-            <div>
-                <h2 className="text-2xl font-light text-black mb-2">Order History</h2>
-                <p className="text-neutral-500 text-sm">Track your shipments and view past purchases.</p>
-            </div>
+        <div className="max-w-5xl mx-auto">
+            <FadeInView>
+                <div className="mb-12 border-b border-neutral-100 pb-10">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400 mb-2">Purchase History</p>
+                    <h2 className="text-4xl font-light text-black tracking-tight">Your <span className="italic">Orders</span></h2>
+                    <p className="text-neutral-500 text-sm mt-4 font-light">Manage your past purchases, track active shipments, and download invoices.</p>
+                </div>
+            </FadeInView>
 
             <OrderList initialOrders={orders || []} />
         </div>

@@ -27,7 +27,7 @@ export default function HomeLayout({ data }: HomeLayoutProps) {
     const newsSection = sortedSections.find(s => s.type === 'news');
 
     return (
-        <div className="bg-background text-foreground min-h-screen selection:bg-primary selection:text-primary-foreground">
+        <div className="bg-background text-foreground min-h-screen">
 
             {/* Wrapper for Hero + New Arrivals (Categories) - mimics framer-1u6vz46 */}
             <div className="relative flex flex-col items-center justify-center w-full overflow-visible">

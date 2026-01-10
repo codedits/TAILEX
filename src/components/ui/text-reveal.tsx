@@ -224,8 +224,8 @@ export function TextReveal({
   className,
   style,
   delay = 0,
-  duration = 0.6,
-  staggerDelay = 0.03,
+  duration = 1.0,
+  staggerDelay = 0.06,
   once = true,
   startOnView = true,
   wordLevel = false,
@@ -236,10 +236,8 @@ export function TextReveal({
 
   const shouldAnimate = startOnView ? isInView : true;
 
-  // Split text into words or characters
-  const elements = wordLevel
-    ? children.split(' ').map((word, i, arr) => (i < arr.length - 1 ? `${word} ` : word))
-    : children.split('');
+  // Split text into lines first
+  const lines = children.split('\n');
 
   // Update container variants with custom stagger delay
   const customContainerVariants = {
@@ -255,8 +253,8 @@ export function TextReveal({
   // Use original item variants - only override duration if explicitly different from default
   const originalVariant = itemVariants[variant];
   const customItemVariants =
-    duration === 0.6
-      ? originalVariant // Use original variant unchanged if default duration
+    duration === (originalVariant.visible as any).transition?.duration
+      ? originalVariant
       : {
           hidden: originalVariant.hidden,
           visible: {
@@ -276,6 +274,33 @@ export function TextReveal({
 
   const MotionComponent = variant === 'typewriter' ? motion.div : motion.span;
 
+  const renderElements = (text: string, lineIndex: number) => {
+    const elements = wordLevel
+      ? text.split(' ').map((word, i, arr) => (i < arr.length - 1 ? `${word} ` : word))
+      : text.split('');
+
+    return elements.map((element, index) => (
+      <MotionComponent
+        key={`${lineIndex}-${index}`}
+        className={cn('inline-block', {
+          'whitespace-pre': !wordLevel,
+        })}
+        variants={customItemVariants}
+        style={{
+          display: 'inline-block',
+          transformOrigin: variant === 'rotate' ? 'center center' : undefined,
+          willChange: 'transform, opacity',
+          WebkitBackfaceVisibility: 'hidden',
+          backfaceVisibility: 'hidden',
+          WebkitTransform: 'translate3d(0,0,0)',
+          transform: 'translate3d(0,0,0)',
+        }}
+      >
+        {element === ' ' ? '\u00A0' : element}
+      </MotionComponent>
+    ));
+  };
+
   return (
     <motion.div
       ref={ref}
@@ -289,8 +314,6 @@ export function TextReveal({
         backfaceVisibility: 'hidden',
         WebkitTransform: 'translate3d(0,0,0)',
         transform: 'translate3d(0,0,0)',
-        isolation: 'isolate',
-        contain: 'layout style paint',
         ...style,
       }}
     >
@@ -306,26 +329,10 @@ export function TextReveal({
           {children}
         </motion.span>
       ) : (
-        elements.map((element, index) => (
-          <MotionComponent
-            key={index}
-            className={cn('inline-block', {
-              'whitespace-pre': !wordLevel,
-            })}
-            variants={customItemVariants}
-            style={{
-              display: 'inline-block',
-              transformOrigin: variant === 'rotate' ? 'center center' : undefined,
-              willChange: 'transform, opacity',
-              WebkitBackfaceVisibility: 'hidden',
-              backfaceVisibility: 'hidden',
-              WebkitTransform: 'translate3d(0,0,0)',
-              transform: 'translate3d(0,0,0)',
-              isolation: 'isolate',
-            }}
-          >
-            {element === ' ' ? '\u00A0' : element}
-          </MotionComponent>
+        lines.map((line, i) => (
+          <div key={i} className="block">
+            {renderElements(line, i)}
+          </div>
         ))
       )}
     </motion.div>

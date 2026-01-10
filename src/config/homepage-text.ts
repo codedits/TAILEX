@@ -1,10 +1,10 @@
 export const HOMEPAGE_TEXT = {
     categories: {
-        title: "WEAR THE MOMENT",
+        title: "WEAR\nTHE\nMOMENT",
         description: "Explore our best-selling categories — from crisp polos and refined shirts to versatile jackets and relaxed-fit trousers."
     },
     featuredProducts: {
-        title: "CHECK OUT OUR FEATURED PRODUCTS",
+        title: "PROVEN\nFAVORITES",
         description: "Icons that endure year after year — top-rated staples chosen again and again for their timeless fit, premium feel, and versatility."
     },
     outlook: {

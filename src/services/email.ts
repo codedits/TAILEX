@@ -38,7 +38,7 @@ export const EmailService = {
       `;
 
       await transporter.sendMail({
-        from: `"Tailex Concierge" <${process.env.SMTP_USER}>`,
+        from: `"Tailex Support" <${process.env.SMTP_USER}>`,
         to: email,
         subject: 'Secure Sign-in Code',
         html,
@@ -110,7 +110,7 @@ export const EmailService = {
       `;
 
       await transporter.sendMail({
-        from: `"Tailex Concierge" <${process.env.SMTP_USER}>`,
+        from: `"Tailex Support" <${process.env.SMTP_USER}>`,
         to: email,
         subject: `Order Confirmation #${order.id.slice(0, 8)}`,
         html,
@@ -157,7 +157,7 @@ export const EmailService = {
        `;
 
       await transporter.sendMail({
-        from: `"Tailex Concierge" <${process.env.SMTP_USER}>`,
+        from: `"Tailex Support" <${process.env.SMTP_USER}>`,
         to: email,
         subject: `Status Update #${order.id.slice(0, 8)}`,
         html,

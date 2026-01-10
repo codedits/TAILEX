@@ -42,115 +42,135 @@ export default function OrderList({ initialOrders }: { initialOrders: Order[] })
         };
     }, [supabase, initialOrders]);
 
-    const getStatusColor = (status: string) => {
+    const getStatusStyles = (status: string) => {
         switch (status) {
-            case 'delivered': return 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20';
-            case 'shipped': return 'text-blue-500 bg-blue-500/10 border-blue-500/20';
-            case 'processing': return 'text-amber-500 bg-amber-500/10 border-amber-500/20';
-            case 'cancelled': return 'text-red-500 bg-red-500/10 border-red-500/20';
-            default: return 'text-neutral-500 bg-neutral-500/10 border-neutral-500/20';
+            case 'delivered': return 'bg-emerald-50 text-emerald-700 border-emerald-100';
+            case 'shipped': return 'bg-blue-50 text-blue-700 border-blue-100';
+            case 'processing': return 'bg-amber-50 text-amber-700 border-amber-100';
+            case 'cancelled': return 'bg-red-50 text-red-700 border-red-100';
+            default: return 'bg-neutral-50 text-neutral-700 border-neutral-100';
         }
     };
 
     const getStatusIcon = (status: string) => {
         switch (status) {
-            case 'delivered': return <CheckCircle className="w-4 h-4" />;
-            case 'shipped': return <Truck className="w-4 h-4" />;
-            case 'processing': return <Package className="w-4 h-4" />;
-            case 'cancelled': return <AlertCircle className="w-4 h-4" />;
-            default: return <Clock className="w-4 h-4" />;
+            case 'delivered': return <CheckCircle className="w-3.5 h-3.5" />;
+            case 'shipped': return <Truck className="w-3.5 h-3.5" />;
+            case 'processing': return <Package className="w-3.5 h-3.5" />;
+            case 'cancelled': return <AlertCircle className="w-3.5 h-3.5" />;
+            default: return <Clock className="w-3.5 h-3.5" />;
         }
     };
 
     if (!orders || orders.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-                <Package className="w-16 h-16 text-neutral-800 mb-4" />
-                <h3 className="text-xl font-medium text-neutral-400">No orders yet</h3>
-                <p className="text-neutral-600 mt-2 mb-8">Start shopping to see your orders here.</p>
-                <Button asChild>
-                    <Link href="/collection">Browse Collection</Link>
+            <div className="flex flex-col items-center justify-center py-32 text-center bg-neutral-50/30 border border-dashed border-neutral-200 rounded-3xl">
+                <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center border border-neutral-100 mb-6 shadow-sm">
+                    <Package className="w-8 h-8 text-neutral-300" />
+                </div>
+                <h3 className="text-2xl font-light text-neutral-800 tracking-tight">No orders yet</h3>
+                <p className="text-neutral-500 mt-2 mb-10 max-w-sm font-light">Your order history will appear here once you've made your first purchase.</p>
+                <Button asChild size="lg" className="rounded-full px-10 font-bold text-xs uppercase tracking-widest bg-black text-white">
+                    <Link href="/collection">Start Shopping</Link>
                 </Button>
             </div>
         )
     }
 
     return (
-        <div className="space-y-6">
-            <AnimatePresence>
-                {orders.map((order) => (
+        <div className="space-y-8 pb-12">
+            <AnimatePresence mode="popLayout">
+                {orders.map((order, idx) => (
                     <motion.div
                         key={order.id}
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="group relative bg-white border border-neutral-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow"
+                        transition={{ delay: idx * 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                        className="group relative bg-white border border-neutral-100 rounded-[2rem] overflow-hidden hover:border-neutral-200 hover:shadow-2xl hover:shadow-black/5 transition-all duration-500"
                     >
-                        <div className="p-6">
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                                <div className="space-y-1">
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-lg font-mono text-black">#{order.id.slice(0, 8)}</span>
-                                        <span className={`px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wider flex items-center gap-2 border ${getStatusColor(order.status)}`}>
+                        <div className="p-8 md:p-10">
+                            <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-10">
+                                <div className="space-y-3">
+                                    <div className="flex flex-wrap items-center gap-3">
+                                        <span className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-400">Order ID</span>
+                                        <span className="text-lg font-mono text-black font-medium tracking-tighter">#{order.id.slice(0, 8).toUpperCase()}</span>
+                                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 border ${getStatusStyles(order.status)}`}>
                                             {getStatusIcon(order.status)}
                                             {order.status}
                                         </span>
                                     </div>
-                                    <p className="text-sm text-neutral-500">
-                                        Placed on {new Date(order.created_at).toLocaleDateString()}
+                                    <p className="text-sm text-neutral-400 font-light italic">
+                                        Placed on {new Date(order.created_at).toLocaleDateString(undefined, { dateStyle: 'long' })}
                                     </p>
                                 </div>
-                                <div className="text-right">
-                                    <p className="text-2xl font-manrope font-black text-black">{formatCurrency(order.total)}</p>
-                                    <p className="text-xs text-neutral-500 uppercase tracking-widest">{order.payment_status}</p>
+                                <div className="text-left md:text-right">
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400 mb-1">Grand Total</p>
+                                    <p className="text-4xl font-light text-black tracking-tighter">{formatCurrency(order.total)}</p>
                                 </div>
                             </div>
 
-                            {/* Progress Bar for active orders */}
+                            {/* Refined Tracking Visualization */}
                             {['pending', 'processing', 'shipped', 'delivered'].includes(order.status) && (
-                                <div className="relative h-1 bg-neutral-100 rounded-full mb-6 overflow-hidden">
-                                    <motion.div
-                                        className="absolute left-0 top-0 h-full bg-black"
-                                        initial={{ width: 0 }}
-                                        animate={{
-                                            width: order.status === 'delivered' ? '100%' :
-                                                order.status === 'shipped' ? '75%' :
-                                                    order.status === 'processing' ? '50%' : '25%'
-                                        }}
-                                        transition={{ duration: 1, ease: "easeOut" }}
-                                    />
+                                <div className="mb-10 group/progress">
+                                    <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-neutral-300 mb-3">
+                                        <span className={order.status !== 'pending' ? 'text-black' : ''}>Ordered</span>
+                                        <span className={['processing', 'shipped', 'delivered'].includes(order.status) ? 'text-black' : ''}>Confirmed</span>
+                                        <span className={['shipped', 'delivered'].includes(order.status) ? 'text-black' : ''}>Shipped</span>
+                                        <span className={order.status === 'delivered' ? 'text-emerald-600' : ''}>Delivered</span>
+                                    </div>
+                                    <div className="relative h-1 bg-neutral-100 rounded-full overflow-hidden">
+                                        <motion.div
+                                            className="absolute left-0 top-0 h-full bg-black group-hover/progress:bg-neutral-800 transition-colors"
+                                            initial={{ width: 0 }}
+                                            animate={{
+                                                width: order.status === 'delivered' ? '100%' :
+                                                    order.status === 'shipped' ? '75%' :
+                                                        order.status === 'processing' ? '50%' : '25%'
+                                            }}
+                                            transition={{ duration: 1.5, ease: [0.34, 1.56, 0.64, 1] }}
+                                        />
+                                    </div>
                                 </div>
                             )}
 
-                            {/* Admin Message / Status Update */}
+                            {/* Admin Notification */}
                             {order.admin_message && (
-                                <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6">
-                                    <h4 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Status Update</h4>
-                                    <p className="text-sm text-blue-800">{order.admin_message}</p>
+                                <div className="bg-neutral-50 rounded-2xl p-6 mb-10 border border-neutral-100 flex gap-4">
+                                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 border border-neutral-100 shadow-sm">
+                                        <AlertCircle className="w-4 h-4 text-black" />
+                                    </div>
+                                    <div>
+                                        <h4 className="text-[10px] font-bold text-black uppercase tracking-[0.2em] mb-1">Merchant Note</h4>
+                                        <p className="text-sm text-neutral-600 font-light leading-relaxed italic">"{order.admin_message}"</p>
+                                    </div>
                                 </div>
                             )}
 
-                            <div className="flex items-center justify-between pt-4 border-t border-neutral-100">
-                                <div className="flex -space-x-2">
-                                    {order.items?.slice(0, 4).map((item, i) => (
-                                        <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-neutral-100 overflow-hidden relative">
-                                            {/* Placeholder for image if available, using initials or icon otherwise */}
-                                            {/* For now just a gray circle if no image, ideally we pass images in order.items */}
-                                            <div className="w-full h-full flex items-center justify-center text-[10px] text-neutral-500">
-                                                {item.quantity}x
-                                            </div>
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-8 border-t border-neutral-50">
+                                <div className="flex -space-x-3 self-start sm:self-center">
+                                    {order.items?.slice(0, 5).map((item, i) => (
+                                        <div key={i} className="w-12 h-12 rounded-full border-[3px] border-white bg-neutral-50 overflow-hidden relative shadow-sm flex items-center justify-center group-hover:scale-105 transition-transform duration-500" style={{ zIndex: 10 - i }}>
+                                            <span className="text-[10px] font-bold text-neutral-400">{item.quantity}x</span>
                                         </div>
                                     ))}
-                                    {order.items && order.items.length > 4 && (
-                                        <div className="w-10 h-10 rounded-full border-2 border-white bg-neutral-100 flex items-center justify-center text-xs text-neutral-500">
-                                            +{order.items.length - 4}
+                                    {order.items && order.items.length > 5 && (
+                                        <div className="w-12 h-12 rounded-full border-[3px] border-white bg-black flex items-center justify-center text-[10px] font-bold text-white shadow-sm" style={{ zIndex: 0 }}>
+                                            +{order.items.length - 5}
                                         </div>
                                     )}
                                 </div>
-                                <Button variant="ctaOutline" size="sm" asChild>
-                                    <Link href={`/account/orders/${order.id}`}>
-                                        View Details <ChevronRight className="w-4 h-4 ml-1" />
-                                    </Link>
-                                </Button>
+                                
+                                <div className="flex items-center gap-4 w-full sm:w-auto">
+                                    <div className="hidden md:block text-right mr-4">
+                                        <p className="text-[10px] font-bold text-neutral-300 uppercase tracking-widest">Payment</p>
+                                        <p className="text-xs font-medium text-black uppercase">{order.payment_status}</p>
+                                    </div>
+                                    <Button variant="outline" className="flex-1 sm:flex-none h-14 px-8 rounded-full font-bold text-xs uppercase tracking-[0.2em] border-neutral-200 hover:border-black hover:bg-black hover:text-white transition-all duration-300" asChild>
+                                        <Link href={`/account/orders/${order.id}`}>
+                                            Order Details <ChevronRight className="w-3 h-3 ml-2" />
+                                        </Link>
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </motion.div>
@@ -158,4 +178,5 @@ export default function OrderList({ initialOrders }: { initialOrders: Order[] })
             </AnimatePresence>
         </div>
     );
+}
 }

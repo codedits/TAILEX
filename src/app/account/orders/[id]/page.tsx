@@ -7,8 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
-import { Package, Calendar, MapPin, ArrowLeft, CheckCircle, Truck, Clock, AlertCircle } from "lucide-react";
+import { Package, Calendar, MapPin, ArrowLeft, CheckCircle, Truck, Clock, AlertCircle, ExternalLink, Printer } from "lucide-react";
 import Link from "next/link";
+import { FadeInView } from "@/components/animations/FadeInView";
 
 export const dynamic = 'force-dynamic';
 
@@ -35,151 +36,211 @@ export default async function OrderDetailPage({ params }: Props) {
         notFound();
     }
 
-    const getStatusColor = (status: string) => {
+    const getStatusStyles = (status: string) => {
         switch (status) {
-            case 'delivered': return 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20';
-            case 'shipped': return 'text-blue-500 bg-blue-500/10 border-blue-500/20';
-            case 'processing': return 'text-amber-500 bg-amber-500/10 border-amber-500/20';
-            case 'cancelled': return 'text-red-500 bg-red-500/10 border-red-500/20';
-            default: return 'text-neutral-500 bg-neutral-500/10 border-neutral-500/20';
+            case 'delivered': return 'bg-emerald-50 text-emerald-700 border-emerald-100';
+            case 'shipped': return 'bg-blue-50 text-blue-700 border-blue-100';
+            case 'processing': return 'bg-amber-50 text-amber-700 border-amber-100';
+            case 'cancelled': return 'bg-red-50 text-red-700 border-red-100';
+            default: return 'bg-neutral-50 text-neutral-700 border-neutral-100';
         }
     };
 
     const getStatusIcon = (status: string) => {
         switch (status) {
-            case 'delivered': return <CheckCircle className="w-4 h-4" />;
-            case 'shipped': return <Truck className="w-4 h-4" />;
-            case 'processing': return <Package className="w-4 h-4" />;
-            case 'cancelled': return <AlertCircle className="w-4 h-4" />;
-            default: return <Clock className="w-4 h-4" />;
+            case 'delivered': return <CheckCircle className="w-3.5 h-3.5" />;
+            case 'shipped': return <Truck className="w-3.5 h-3.5" />;
+            case 'processing': return <Package className="w-3.5 h-3.5" />;
+            case 'cancelled': return <AlertCircle className="w-3.5 h-3.5" />;
+            default: return <Clock className="w-3.5 h-3.5" />;
         }
     };
 
     return (
-        <div className="space-y-8">
-            {/* Header */}
-            <div className="flex items-center gap-4 mb-8">
-                <Link href="/account/orders" className="text-neutral-400 hover:text-black transition-colors">
-                    <ArrowLeft className="w-5 h-5" />
-                </Link>
-                <div>
-                    <h1 className="text-2xl font-light text-black flex items-center gap-3">
-                        Order #{order.id.slice(0, 8)}
-                    </h1>
-                    <p className="text-neutral-500 text-sm mt-1">
-                        Placed on {new Date(order.created_at).toLocaleDateString()}
-                    </p>
-                </div>
-                <div className="ml-auto">
-                    <Badge variant="outline" className={`${getStatusColor(order.status)} uppercase text-xs tracking-wider font-medium border flex items-center gap-2 pl-2 pr-3 py-1`}>
-                        {getStatusIcon(order.status)}
-                        {order.status}
-                    </Badge>
-                </div>
-            </div>
-
-            {/* Status Message */}
-            {['processing', 'shipped'].includes(order.status) && (
-                <div className="bg-neutral-50 border border-neutral-200 p-6 rounded-xl mb-8">
-                    <h3 className="text-black font-medium mb-1">
-                        {order.status === 'processing' ? 'We are preparing your order' : 'Your order is on the way'}
-                    </h3>
-                    <p className="text-neutral-500 text-sm">
-                        {order.status === 'processing'
-                            ? 'Our tailors are finalizing the details. You will receive an email when it ships.'
-                            : 'Track your shipment below.'}
-                    </p>
-                    {order.tracking_number && (
-                        <div className="mt-4 p-4 bg-white rounded border border-neutral-200 flex justify-between items-center shadow-sm">
-                            <div>
-                                <p className="text-[10px] uppercase tracking-widest text-neutral-400">Tracking Number</p>
-                                <p className="text-black font-mono">{order.tracking_number}</p>
+        <div className="max-w-5xl mx-auto pb-20">
+            <FadeInView>
+                {/* Navigation & Header */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+                    <div className="flex items-center gap-6">
+                        <Link href="/account/orders" className="w-12 h-12 rounded-full border border-neutral-100 flex items-center justify-center text-neutral-400 hover:text-black hover:border-black transition-all group shadow-sm bg-white">
+                            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                        </Link>
+                        <div>
+                            <div className="flex items-center gap-3 mb-1">
+                                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400">Order Detail</span>
+                                <Badge variant="outline" className={`${getStatusStyles(order.status)} uppercase text-[9px] tracking-[0.15em] font-bold border rounded-full px-3 py-0.5 flex items-center gap-1.5`}>
+                                    {getStatusIcon(order.status)}
+                                    {order.status}
+                                </Badge>
                             </div>
-                            <Button variant="outline" size="sm" className="text-xs">Track Shipment</Button>
+                            <h1 className="text-3xl font-light text-black tracking-tight">
+                                ID <span className="font-mono font-medium tracking-tighter">#{order.id.slice(0, 8).toUpperCase()}</span>
+                            </h1>
                         </div>
-                    )}
+                    </div>
+                    <div className="flex gap-3">
+                        <Button variant="outline" className="h-12 rounded-full font-bold text-xs uppercase tracking-widest px-6 border-neutral-100 hover:border-black transition-colors shadow-sm bg-white">
+                            <Printer className="w-4 h-4 mr-2" /> Invoice
+                        </Button>
+                        <Button className="h-12 rounded-full font-bold text-xs uppercase tracking-widest px-6 bg-black text-white hover:bg-neutral-800 transition-colors shadow-lg shadow-black/5">
+                            Track Order
+                        </Button>
+                    </div>
                 </div>
-            )}
+            </FadeInView>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Main Content: Items */}
-                <div className="lg:col-span-2 space-y-8">
-
-                    {/* Items Card */}
-                    <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden shadow-sm">
-                        <div className="divide-y divide-neutral-100">
-                            {order.items.map((item: any) => (
-                                <div key={item.id} className="p-6 flex gap-6">
-                                    <div className="relative w-20 h-24 bg-neutral-100 rounded-sm overflow-hidden flex-shrink-0">
-                                        {item.image_url ? (
-                                            <Image src={item.image_url} alt={item.title} fill className="object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-neutral-300">
-                                                <Package className="w-8 h-8" />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                <div className="lg:col-span-2 space-y-12">
+                    {/* Status Message */}
+                    <FadeInView delay={0.1}>
+                        {(order.admin_message || ['processing', 'shipped'].includes(order.status)) && (
+                            <div className="bg-neutral-50 border border-neutral-100 p-8 rounded-[2.5rem] relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-8 opacity-5">
+                                    <Package className="w-32 h-32" />
+                                </div>
+                                <div className="relative z-10">
+                                    <h3 className="text-xl font-medium text-black mb-3">
+                                        {order.status === 'processing' ? 'We are tailoring your order' : 
+                                         order.status === 'shipped' ? 'Your package is on the way' : 
+                                         'Order Update'}
+                                    </h3>
+                                    <p className="text-neutral-500 font-light text-sm leading-relaxed mb-6 max-w-sm">
+                                        {order.admin_message ? order.admin_message :
+                                         order.status === 'processing'
+                                            ? 'Our team is carefully preparing each item. You will receive an automated shipping notification shortly.'
+                                            : 'Your order has left our boutique and is currently with the courier.'}
+                                    </p>
+                                    
+                                    {order.tracking_number && (
+                                        <div className="flex flex-col sm:flex-row items-center gap-4 bg-white p-6 rounded-2xl border border-neutral-100 shadow-sm">
+                                            <div className="flex-1">
+                                                <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-neutral-300 mb-1">Carrier Details</p>
+                                                <p className="text-black font-mono font-medium">{order.tracking_number}</p>
                                             </div>
-                                        )}
+                                            <Link href="#" className="text-black text-[10px] font-bold uppercase tracking-widest flex items-center hover:underline">
+                                                Track Shipment <ExternalLink className="w-3 h-3 ml-2" />
+                                            </Link>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </FadeInView>
+
+                    {/* Items List */}
+                    <FadeInView delay={0.2}>
+                        <div className="space-y-6">
+                            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400 border-b border-neutral-50 pb-4 mb-6">Manifest</h2>
+                            <div className="space-y-4">
+                                {order.items.map((item: any, i: number) => (
+                                    <div key={item.id} className="flex gap-8 group">
+                                        <div className="relative w-24 h-32 bg-neutral-50 rounded-2xl overflow-hidden flex-shrink-0 border border-neutral-100 transition-transform group-hover:scale-[1.02] duration-500 shadow-sm">
+                                            {item.image_url ? (
+                                                <Image src={item.image_url} alt={item.title} fill className="object-cover" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-neutral-200">
+                                                    <Package className="w-10 h-10" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex-grow py-2 flex flex-col justify-between">
+                                            <div>
+                                                <p className="text-[10px] font-bold text-neutral-300 uppercase tracking-widest mb-1">{item.sku || 'N/A'}</p>
+                                                <h4 className="text-xl font-light text-black tracking-tight">{item.title}</h4>
+                                                <p className="text-neutral-500 text-xs mt-2 font-light italic">{item.variant_title || 'Unique Selection'}</p>
+                                            </div>
+                                            <div className="flex items-center gap-6 mt-4">
+                                                <div className="px-3 py-1 bg-neutral-50 rounded-lg border border-neutral-100">
+                                                    <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mr-2">Qty</span>
+                                                    <span className="text-xs font-semibold text-black">{item.quantity}</span>
+                                                </div>
+                                                <p className="text-lg font-light text-black tracking-tighter">
+                                                    {formatCurrency(item.total_price, storeConfig.currency)}
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="flex-1">
-                                        <h4 className="text-black font-medium">{item.title}</h4>
-                                        <p className="text-neutral-500 text-sm mt-1 mb-2">{item.variant_title || 'Standard'}</p>
+                                ))}
+                            </div>
+                        </div>
+                    </FadeInView>
+                </div>
+
+                {/* Sidebar Summary & Details */}
+                <div className="space-y-12">
+                    {/* Summary Card */}
+                    <FadeInView delay={0.3}>
+                        <div className="bg-neutral-50/50 border border-neutral-100 rounded-[2.5rem] p-8 shadow-sm">
+                            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400 mb-8 pb-4 border-b border-neutral-100">Financial Summary</h3>
+                            <div className="space-y-4">
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-neutral-500 font-light">Boutique Subtotal</span>
+                                    <span className="text-black font-medium">{formatCurrency(order.subtotal, storeConfig.currency)}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-neutral-500 font-light">Global Shipping</span>
+                                    <span className="text-black font-medium">{formatCurrency(order.shipping_total, storeConfig.currency)}</span>
+                                </div>
+                                {order.tax_total > 0 && (
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-neutral-500 font-light">Duties & Taxes</span>
+                                        <span className="text-black font-medium">{formatCurrency(order.tax_total, storeConfig.currency)}</span>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-black font-medium font-mono text-sm">
-                                            {formatCurrency(item.total_price, storeConfig.currency)}
-                                        </p>
-                                        <p className="text-neutral-400 text-xs mt-1">Qty: {item.quantity}</p>
+                                )}
+                                <div className="pt-6 mt-2 border-t border-neutral-200">
+                                    <div className="flex justify-between items-end">
+                                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400 pb-1">Total Amount</span>
+                                        <span className="text-3xl font-light text-black tracking-tighter">
+                                            {formatCurrency(order.total, storeConfig.currency)}
+                                        </span>
+                                    </div>
+                                    <div className="mt-4 flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                        <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-[0.2em]">{order.payment_status}</span>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                        <div className="bg-neutral-50 p-6 space-y-3">
-                            <div className="flex justify-between text-sm text-neutral-500">
-                                <span>Subtotal</span>
-                                <span>{formatCurrency(order.subtotal, storeConfig.currency)}</span>
-                            </div>
-                            <div className="flex justify-between text-sm text-neutral-500">
-                                <span>Shipping</span>
-                                <span>{formatCurrency(order.shipping_total, storeConfig.currency)}</span>
-                            </div>
-                            <Separator className="bg-neutral-200 my-2" />
-                            <div className="flex justify-between text-lg font-medium text-black">
-                                <span>Total</span>
-                                <span>{formatCurrency(order.total, storeConfig.currency)}</span>
                             </div>
                         </div>
-                    </div>
+                    </FadeInView>
 
-                </div>
-
-                {/* Sidebar */}
-                <div className="space-y-6">
-                    <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm">
-                        <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-400 mb-4 flex items-center gap-2">
-                            <MapPin className="w-3 h-3" /> Shipping Address
-                        </h3>
-                        {order.shipping_address ? (
-                            <div className="text-sm text-neutral-600 leading-relaxed font-light">
-                                <p className="text-black font-medium mb-1">
-                                    {order.shipping_address.firstName} {order.shipping_address.lastName}
-                                </p>
-                                <p>{order.shipping_address.address1}</p>
-                                {order.shipping_address.address2 && <p>{order.shipping_address.address2}</p>}
-                                <p>{order.shipping_address.city}, {order.shipping_address.state} {order.shipping_address.postalCode}</p>
-                                <p className="uppercase text-xs mt-2 tracking-wide opacity-60">{order.shipping_address.country}</p>
+                    {/* Delivery Details */}
+                    <FadeInView delay={0.4}>
+                        <div className="space-y-8 px-4">
+                            <div>
+                                <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400 mb-4 flex items-center gap-3">
+                                    <MapPin className="w-3.5 h-3.5" /> Recipient Details
+                                </h3>
+                                <div className="text-sm text-neutral-600 font-light leading-relaxed">
+                                    <p className="font-medium text-black text-base mb-2">{order.shipping_address?.first_name || order.shipping_address?.firstName} {order.shipping_address?.last_name || order.shipping_address?.lastName}</p>
+                                    <p>{order.shipping_address?.address1}</p>
+                                    {order.shipping_address?.address2 && <p>{order.shipping_address?.address2}</p>}
+                                    <p>{order.shipping_address?.city}, {order.shipping_address?.state} {order.shipping_address?.zip || order.shipping_address?.postalCode}</p>
+                                    <p>{order.shipping_address?.country}</p>
+                                </div>
                             </div>
-                        ) : (
-                            <p className="text-neutral-400 text-sm italic">No shipping details provided</p>
-                        )}
-                    </div>
 
-                    <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm">
-                        <h3 className="text-xs font-bold uppercase tracking-widest text-neutral-400 mb-4">Need Help?</h3>
-                        <p className="text-sm text-neutral-500 mb-4 leading-relaxed">
-                            If you have any questions about your order, please contact our concierge.
-                        </p>
-                        <Button variant="outline" className="w-full text-xs uppercase tracking-widest">Contact Support</Button>
-                    </div>
-
+                            <div>
+                                <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400 mb-4 flex items-center gap-3">
+                                    <Calendar className="w-3.5 h-3.5" /> Order Metadata
+                                </h3>
+                                <div className="space-y-4">
+                                    <div>
+                                        <p className="text-[10px] uppercase font-bold text-neutral-300 tracking-widest mb-0.5">Contact</p>
+                                        <p className="text-sm text-black font-light">{order.email}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] uppercase font-bold text-neutral-300 tracking-widest mb-0.5">Purchased On</p>
+                                        <p className="text-sm text-black font-light">
+                                            {new Date(order.created_at).toLocaleDateString(undefined, { dateStyle: 'full' })}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="pt-8 pt-4">
+                                     <Button variant="outline" className="w-full text-[10px] uppercase tracking-widest border-neutral-100 font-bold h-12 rounded-xl">Contact Support</Button>
+                                </div>
+                            </div>
+                        </div>
+                    </FadeInView>
                 </div>
             </div>
         </div>
