@@ -159,7 +159,7 @@ export default function OrderList({ initialOrders }: { initialOrders: Order[] })
                                         </div>
                                     )}
                                 </div>
-                                
+
                                 <div className="flex items-center gap-4 w-full sm:w-auto">
                                     <div className="hidden md:block text-right mr-4">
                                         <p className="text-[10px] font-bold text-neutral-300 uppercase tracking-widest">Payment</p>
@@ -179,4 +179,4 @@ export default function OrderList({ initialOrders }: { initialOrders: Order[] })
         </div>
     );
 }
-}
+

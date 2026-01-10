@@ -12,6 +12,7 @@ export interface AuthUser {
     name?: string;
     phone?: string;
     address?: any;
+    created_at?: string;
 }
 
 /**
@@ -33,7 +34,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
         const supabase = await createAdminClient();
         const { data: user, error } = await supabase
             .from('users')
-            .select('id, email, name, phone, address')
+            .select('id, email, name, phone, address, created_at')
             .eq('id', userId)
             .single();
 
