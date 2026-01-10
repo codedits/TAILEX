@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package, User, MapPin, CreditCard, ChevronRight } from "lucide-react";
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AccountPage() {
     const user = await requireAuth();
 

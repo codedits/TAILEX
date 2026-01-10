@@ -82,10 +82,7 @@ export const columns: ColumnDef<Order>[] = [
         header: () => <div className="text-right">Amount</div>,
         cell: ({ row }) => {
             const amount = parseFloat(row.getValue("total"))
-            const formatted = new Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: "USD",
-            }).format(amount)
+            const formatted = `PKR Rs.${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 
             return <div className="text-right font-mono font-medium">{formatted}</div>
         },

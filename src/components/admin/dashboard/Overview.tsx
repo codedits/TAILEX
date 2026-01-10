@@ -19,7 +19,7 @@ export function Overview({ data }: { data: any[] }) {
                     fontSize={10}
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={(value) => `$${value}`}
+                    tickFormatter={(value) => `Rs.${value}`}
                     tick={{ fill: "#ffffff50" }}
                 />
                 <Bar

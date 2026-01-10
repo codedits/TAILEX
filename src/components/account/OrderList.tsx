@@ -98,7 +98,7 @@ export default function OrderList({ initialOrders }: { initialOrders: Order[] })
                                     </p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-2xl font-light text-black">${order.total.toFixed(2)}</p>
+                                    <p className="text-2xl font-light text-black">PKR Rs.{order.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                                     <p className="text-xs text-neutral-500 uppercase tracking-widest">{order.payment_status}</p>
                                 </div>
                             </div>

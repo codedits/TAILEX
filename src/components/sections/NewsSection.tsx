@@ -137,7 +137,7 @@ const NewsSection = ({
                           alt={post.title}
                           fill
                           className="object-cover"
-                          quality={95}
+                          quality={80}
                           sizes="(max-width: 768px) 150vw, 33vw"
                         />
                       </motion.div>

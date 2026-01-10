@@ -17,7 +17,7 @@ const HeroSection = ({
   heading,
   subheading,
   image,
-  brandName = "Calder Co."
+  brandName = "TAILEX"
 }: HeroSectionProps) => {
   // Safe default image
   const displayImage = (typeof image === 'string' && image.trim().length > 0)
@@ -56,9 +56,11 @@ const HeroSection = ({
             fill
             className="object-cover object-top"
             priority
-            quality={100}
+            quality={90}
             sizes="(max-width: 768px) 300vw, 150vw"
           />
+          {/* Subtle Overlay for Text Readability */}
+          <div className="absolute inset-0 bg-black/20" />
         </motion.div>
       </div>
 
@@ -72,7 +74,17 @@ const HeroSection = ({
         }}
       >
         {/* Mobile View: Centered CTA only */}
-        <div className="flex flex-col items-center justify-center md:hidden w-full">
+        <div className="flex flex-col items-center justify-center md:hidden w-full text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 1.0 }}
+            className="mb-6"
+          >
+            <h2 className="text-white text-6xl font-normal tracking-tighter uppercase leading-none">
+              {displayHeading}
+            </h2>
+          </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -100,7 +112,7 @@ const HeroSection = ({
           }}
         >
           <h1
-            className="font-normal tracking-[-0.02em] text-foreground leading-[1.1]"
+            className="font-normal tracking-[-0.02em] text-white leading-[1.1]"
             style={{
               fontFamily: '"Manrope", "Manrope Placeholder", sans-serif',
               fontSize: 'clamp(72px, 10vw, 110px)'
@@ -118,7 +130,7 @@ const HeroSection = ({
           transition={{ duration: 0.6, delay: 1.6 }}
         >
           <p
-            className="text-foreground leading-[1.4] tracking-[0.02em] whitespace-pre-line"
+            className="text-white leading-[1.4] tracking-[0.02em] whitespace-pre-line"
             style={{
               fontFamily: '"Manrope", "Manrope Placeholder", sans-serif',
               fontSize: 'clamp(28px, 3vw, 32px)'

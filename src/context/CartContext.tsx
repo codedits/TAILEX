@@ -20,7 +20,7 @@ export type CartItem = {
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (item: Omit<CartItem, "quantity">) => void;
+  addItem: (item: Omit<CartItem, "quantity">, openCart?: boolean) => void;
   removeItem: (id: string, size?: string) => void;
   updateQuantity: (id: string, size: string | undefined, quantity: number) => void;
   clearCart: () => void;
@@ -97,7 +97,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, isMounted]);
 
-  const addItem = (newItem: Omit<CartItem, "quantity">) => {
+  const addItem = (newItem: Omit<CartItem, "quantity">, openCart: boolean = true) => {
     setItems((prevItems) => {
       // Check for exact match including variants
       const existingItem = prevItems.find(
@@ -115,11 +115,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return [...prevItems, { ...newItem, quantity: 1 }];
     });
 
-    setIsCartOpen(true);
-    toast({
-      title: "Added to cart",
-      description: `${newItem.name} has been added to your cart.`,
-    });
+    if (openCart) {
+      setIsCartOpen(true);
+      toast({
+        title: "Added to cart",
+        description: `${newItem.name} has been added to your cart.`,
+      });
+    }
   };
 
   const removeItem = (id: string, size?: string) => {

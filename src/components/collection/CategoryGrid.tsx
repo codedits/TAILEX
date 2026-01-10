@@ -134,7 +134,7 @@ const CategoryGrid = ({
                           alt={collection.title}
                           fill
                           className="object-cover"
-                          quality={95}
+                          quality={80}
                           sizes="(max-width: 768px) 150vw, 50vw"
                         />
                       </motion.div>

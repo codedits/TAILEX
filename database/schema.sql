@@ -744,7 +744,7 @@ INSERT INTO site_config (key, value) VALUES
 ('brand', '{
   "name": "TAILEX",
   "tagline": "Timeless Wardrobe, Everyday Power",
-  "announcement": "Free shipping on orders over $100",
+  "announcement": "Free shipping on orders over PKR Rs.12,000",
   "showAnnouncement": true
 }'::jsonb),
 ('homepage_layout', '[
@@ -776,8 +776,8 @@ INSERT INTO site_config (key, value) VALUES
   "tiktok": ""
 }'::jsonb),
 ('store', '{
-  "currency": "USD",
-  "currencySymbol": "$",
+  "currency": "PKR",
+  "currencySymbol": "PKR Rs.",
   "taxRate": 0,
   "taxIncluded": false
 }'::jsonb)

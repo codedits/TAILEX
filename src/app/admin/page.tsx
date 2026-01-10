@@ -41,7 +41,7 @@ export default async function AdminDashboard() {
         {[
           {
             title: "Total Revenue",
-            value: `$${stats.totalRevenue.toFixed(2)}`,
+            value: `PKR Rs.${stats.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
             change: stats.revenueChange,
             icon: DollarSign,
           },

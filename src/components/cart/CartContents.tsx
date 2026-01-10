@@ -54,7 +54,7 @@ export function CartContents({ onClose }: { onClose: () => void }) {
                                             <p className="text-xs text-muted-foreground mt-1">Size: {item.size}</p>
                                         )}
                                     </div>
-                                    <p className="font-medium text-sm">${item.price.toFixed(2)}</p>
+                                    <p className="font-medium text-sm">PKR Rs.{item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                                 </div>
 
                                 <div className="flex justify-between items-center">
@@ -90,7 +90,7 @@ export function CartContents({ onClose }: { onClose: () => void }) {
                 <Separator />
                 <div className="flex justify-between items-center">
                     <span className="font-medium uppercase tracking-wide">Subtotal</span>
-                    <span className="font-medium text-lg">${cartTotal.toFixed(2)}</span>
+                    <span className="font-medium text-lg">PKR Rs.{cartTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
                 <p className="text-xs text-muted-foreground text-center">
                     Shipping and taxes calculated at checkout.

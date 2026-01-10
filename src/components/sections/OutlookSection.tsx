@@ -93,7 +93,7 @@ const OutlookSection = ({
                   alt="Outlook image 1"
                   fill
                   className="object-cover"
-                  quality={100}
+                  quality={90}
                   sizes="(max-width: 768px) 150vw, 30vw"
                   priority
                 />
@@ -118,7 +118,7 @@ const OutlookSection = ({
                     alt="Outlook image 2"
                     fill
                     className="object-cover"
-                    quality={100}
+                    quality={90}
                     sizes="(max-width: 768px) 150vw, 30vw"
                   />
                 </div>
@@ -139,7 +139,7 @@ const OutlookSection = ({
                   alt="Outlook image 3"
                   fill
                   className="object-cover"
-                  quality={100}
+                  quality={90}
                   sizes="(max-width: 768px) 150vw, 25vw"
                 />
               </div>
@@ -161,7 +161,7 @@ const OutlookSection = ({
                   alt="Outlook image 4"
                   fill
                   className="object-cover"
-                  quality={100}
+                  quality={90}
                   sizes="(max-width: 768px) 150vw, 35vw"
                 />
               </div>

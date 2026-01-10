@@ -32,7 +32,7 @@ export function RecentSales({ sales }: RecentSaleProps) {
                         </p>
                     </div>
                     <div className="ml-auto font-mono text-sm font-medium text-white/60 group-hover:text-white transition-colors">
-                        +${sale.amount.toFixed(2)}
+                        +PKR Rs.{sale.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
                 </div>
             ))}

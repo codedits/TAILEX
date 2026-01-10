@@ -199,7 +199,7 @@ export default function CheckoutForm({ user }: CheckoutFormProps) {
                         </div>
 
                         <Button type="submit" className="w-full py-6 text-lg uppercase tracking-widest" disabled={isProcessing}>
-                            {isProcessing ? "Processing..." : `Pay $${cartTotal.toFixed(2)}`}
+                            {isProcessing ? "Processing..." : `Pay PKR Rs.${cartTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                         </Button>
                     </form>
                 </div>
@@ -229,7 +229,7 @@ export default function CheckoutForm({ user }: CheckoutFormProps) {
                                     <h3 className="font-medium text-sm">{item.name}</h3>
                                     <p className="text-xs text-muted-foreground">Size: {item.size}</p>
                                 </div>
-                                <p className="font-medium text-sm">${(item.price * item.quantity).toFixed(2)}</p>
+                                <p className="font-medium text-sm">PKR Rs.{(item.price * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                             </div>
                         ))}
                     </div>
@@ -239,7 +239,7 @@ export default function CheckoutForm({ user }: CheckoutFormProps) {
                     <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">Subtotal</span>
-                            <span>${cartTotal.toFixed(2)}</span>
+                            <span>PKR Rs.{cartTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">Shipping</span>
@@ -251,7 +251,7 @@ export default function CheckoutForm({ user }: CheckoutFormProps) {
 
                     <div className="flex justify-between items-center">
                         <span className="font-medium text-lg">Total</span>
-                        <span className="font-medium text-lg">${cartTotal.toFixed(2)}</span>
+                        <span className="font-medium text-lg">PKR Rs.{cartTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                 </div>
             </div>

@@ -78,11 +78,7 @@ export const columns: ColumnDef<Product>[] = [
         header: "Price",
         cell: ({ row }) => {
             const price = parseFloat(row.getValue("price"))
-            const formatted = new Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: "USD",
-            }).format(price)
-
+            const formatted = `PKR Rs.${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
             const salePrice = row.original.sale_price;
 
             return (
@@ -90,7 +86,7 @@ export const columns: ColumnDef<Product>[] = [
                     <span className="font-mono text-white/90">{formatted}</span>
                     {salePrice && (
                         <span className="text-emerald-400 text-[10px] font-mono">
-                            {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(salePrice)}
+                            PKR Rs.{salePrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                     )}
                 </div>

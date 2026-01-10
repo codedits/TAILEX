@@ -9,6 +9,8 @@ import { Separator } from "@/components/ui/separator";
 import { Package, Calendar, MapPin, ArrowLeft, CheckCircle, Truck, Clock, AlertCircle } from "lucide-react";
 import Link from "next/link";
 
+export const dynamic = 'force-dynamic';
+
 interface Props {
     params: Promise<{ id: string }>;
 }

@@ -2,6 +2,8 @@ import OrderList from '@/components/account/OrderList';
 import { requireAuth } from '@/lib/auth';
 import { createAdminClient } from '@/lib/supabase/admin';
 
+export const dynamic = 'force-dynamic';
+
 export default async function OrdersPage() {
     const user = await requireAuth();
 

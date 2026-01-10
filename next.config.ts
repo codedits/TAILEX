@@ -36,6 +36,7 @@ const nextConfig: NextConfig = {
     // Higher starting values to prevent low-resolution fetches on mobile
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 2560, 3840],
     imageSizes: [256, 384, 512],
+    qualities: [75, 80, 85, 90],
     // Cache optimized images for 1 year
     minimumCacheTTL: 31536000,
   },

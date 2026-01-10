@@ -255,7 +255,7 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
                   name="price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-white/60 text-xs font-medium uppercase tracking-widest">Price ($)</FormLabel>
+                      <FormLabel className="text-white/60 text-xs font-medium uppercase tracking-widest">Price (PKR Rs.)</FormLabel>
                       <FormControl>
                         <Input type="number" step="0.01" {...field} className="bg-black border-white/10 text-white rounded-xl h-12 font-mono" />
                       </FormControl>
@@ -268,7 +268,7 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
                   name="sale_price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-white/60 text-xs font-medium uppercase tracking-widest">Sale Price ($)</FormLabel>
+                      <FormLabel className="text-white/60 text-xs font-medium uppercase tracking-widest">Sale Price (PKR Rs.)</FormLabel>
                       <FormControl>
                         <Input type="number" step="0.01" {...field} value={field.value || ''} className="bg-black border-white/10 text-white rounded-xl h-12 font-mono" />
                       </FormControl>

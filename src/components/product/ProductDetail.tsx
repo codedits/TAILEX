@@ -78,7 +78,7 @@ export default function ProductDetail({
   const currentStock = selectedVariant?.inventory_quantity ?? product.stock ?? 0;
   const isOutOfStock = product.track_inventory && currentStock <= 0 && !product.allow_backorder;
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (openCart: boolean = true) => {
     // Check if all options are selected
     const options = product.options || [];
     const missingOptions = options.filter(opt => !selectedOptions[opt.name]);
@@ -88,7 +88,7 @@ export default function ProductDetail({
         title: `Please select ${missingOptions[0].name}`,
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
     if (isOutOfStock) {
@@ -97,7 +97,7 @@ export default function ProductDetail({
         description: "This item is currently unavailable.",
         variant: "destructive",
       });
-      return;
+      return false;
     }
 
     const variantLabel = Object.values(selectedOptions).join(" / ");
@@ -116,12 +116,9 @@ export default function ProductDetail({
       size: variantLabel,
       quantity: quantity,
       slug: product.slug,
-    } as any);
+    } as any, openCart);
 
-    toast({
-      title: "Added to Cart",
-      description: `${product.title}${variantLabel ? ` (${variantLabel})` : ""} added.`,
-    });
+    return true;
   };
 
   const handleOptionSelect = (name: string, value: string) => {
@@ -245,7 +242,7 @@ export default function ProductDetail({
                     fill
                     className="object-cover pointer-events-none"
                     priority
-                    quality={100}
+                    quality={90}
                     sizes="(max-width: 1024px) 200vw, 100vw"
                   />
                 </motion.div>
@@ -299,11 +296,17 @@ export default function ProductDetail({
                 <div className="flex items-baseline gap-2 font-manrope">
                   {hasSale ? (
                     <>
-                      <span className="text-3xl font-black text-[#D03030]">${currentSalePrice?.toFixed(2)}</span>
-                      <span className="text-xl line-through text-muted-foreground/60">${currentPrice.toFixed(2)}</span>
+                      <span className="text-3xl font-black text-[#D03030]">
+                        PKR Rs.{currentSalePrice?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                      <span className="text-xl line-through text-muted-foreground/60">
+                        PKR Rs.{currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
                     </>
                   ) : (
-                    <span className="text-3xl font-black text-foreground">${currentPrice.toFixed(2)}</span>
+                    <span className="text-3xl font-black text-foreground">
+                      PKR Rs.{currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
                   )}
                 </div>
                 {hasSale && (
@@ -393,8 +396,9 @@ export default function ProductDetail({
               {/* Express Checkout Button */}
               <button 
                 onClick={() => {
-                   handleAddToCart();
-                   router.push('/checkout');
+                   if (handleAddToCart(false)) {
+                     router.push('/checkout');
+                   }
                 }}
                 disabled={isOutOfStock}
                 className="w-full h-14 border border-foreground uppercase tracking-[0.2em] text-[11px] font-manrope font-black hover:bg-foreground hover:text-background transition-all disabled:opacity-50"
