@@ -8,209 +8,226 @@ import { notFound } from "next/navigation";
 import { getNavigation, getBrandConfig, getFooterConfig, getSocialConfig } from "@/lib/theme";
 import Image from "next/image";
 import Link from "next/link";
-import Loading from "./loading";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
 export const revalidate = 60; // ISR: Revalidate every 60 seconds
 
 type Props = {
-  params: Promise<{ slug: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+    params: Promise<{ slug: string }>;
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 // High-end store: Generate metadata for SEO
 export async function generateMetadata({ params }: Props) {
-  const { slug } = await params;
-  const supabase = await createClient();
+    const { slug } = await params;
+    const supabase = await createClient();
 
-  const { data: collection } = await supabase
-    .from('collections')
-    .select('title, seo_title, seo_description, description')
-    .eq('slug', slug)
-    .single();
+    const { data: collection } = await supabase
+        .from('collections')
+        .select('title, seo_title, seo_description, description')
+        .eq('slug', slug)
+        .single();
 
-  if (!collection) {
-    return { title: 'Collection Not Found' };
-  }
+    if (!collection) {
+        return { title: 'Collection Not Found' };
+    }
 
-  return {
-    title: collection.seo_title || `${collection.title} Collection | TAILEX`,
-    description: collection.seo_description || collection.description || `Shop our ${collection.title} collection`,
-  };
+    return {
+        title: collection.seo_title || `${collection.title} Collection | TAILEX`,
+        description: collection.seo_description || collection.description || `Shop our ${collection.title} collection`,
+    };
 }
 
 export default async function CollectionDetailPage({ params, searchParams }: Props) {
-  const { slug } = await params;
-  const resolvedSearchParams = await searchParams; // Await searchParams for dynamic handling
-  const supabase = await createClient();
+    const { slug } = await params;
+    const supabase = await createClient();
 
-  // 1. Parallel Fetching: Start all critical data fetches simultaneously
-  // We don't await products here to allow streaming, but we await the promise in the grid component?
-  // Actually, to use Suspense effectively for the grid specifically, we should pass the PROMISE to the grid,
-  // or let the Grid fetch. But Grid props need to be serializable.
-  // The best pattern with Promise.all for Page Data + Streaming Grid is:
-  // Await Page Data (Meta, Hero).
-  // Start Grid Data fetch.
+    const collectionPromise = supabase
+        .from('collections')
+        .select('*')
+        .eq('slug', slug)
+        .single();
 
-  const collectionPromise = supabase
-    .from('collections')
-    .select('*')
-    .eq('slug', slug)
-    .single();
+    const collectionsListPromise = supabase
+        .from('collections')
+        .select('id, title, slug')
+        .eq('is_visible', true)
+        .order('sort_order', { ascending: true })
+        .order('title');
 
-  const collectionsListPromise = supabase
-    .from('collections')
-    .select('id, title, slug')
-    .eq('is_visible', true)
-    .order('title');
+    const configPromises = Promise.all([
+        getNavigation('main-menu'),
+        getBrandConfig(),
+        getFooterConfig(),
+        getSocialConfig()
+    ]);
 
-  const configPromises = Promise.all([
-    getNavigation('main-menu'),
-    getBrandConfig(),
-    getFooterConfig(),
-    getSocialConfig()
-  ]);
+    const [collectionResult, collectionsListResult, [navItems, brand, footerConfig, socialConfig]] = await Promise.all([
+        collectionPromise,
+        collectionsListPromise,
+        configPromises
+    ]);
 
-  // Await critical shell data
-  const [collectionResult, collectionsListResult, [navItems, brand, footerConfig, socialConfig]] = await Promise.all([
-    collectionPromise,
-    collectionsListPromise,
-    configPromises
-  ]);
+    const collection = collectionResult.data;
+    if (!collection) notFound();
 
-  const collection = collectionResult.data;
-  if (!collection) notFound();
+    const allCollections = (collectionsListResult.data || []) as Collection[];
 
-  const allCollections = (collectionsListResult.data || []) as Collection[];
+    const productsPromise = supabase
+        .from('products')
+        .select('*')
+        .eq('category_id', collection.id)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .then(res => (res.data || []) as Product[]) as Promise<Product[]>;
 
-  // 2. Fetch Products (Dynamic/Streamed Data) based on current collection
-  // We pass this promise to the AsyncProductGrid
-  const productsPromise = supabase
-    .from('products')
-    .select('*')
-    .eq('category_id', collection.id)
-    .eq('status', 'active')
-    .order('created_at', { ascending: false })
-    .then(res => (res.data || []) as Product[]) as Promise<Product[]>;
+    // Use image_url as hero
+    const heroImage = collection.image_url || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070';
 
-  // Hero image with fallback
-  const heroImage = collection.image_url || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070';
-  const productCount = "approx"; // We could count, but for speed we skip count query if not needed critically
+    return (
+        <main className="min-h-screen bg-neutral-950 text-white selection:bg-white selection:text-black font-sans">
+            <Navbar brandName={brand.name} navItems={navItems} />
 
-  return (
-    <main className="min-h-screen bg-background text-foreground">
-      <Navbar brandName={brand.name} navItems={navItems} />
+            {/* Sticky Stacking Context - Editorial Parallax Layout */}
+            <div className="relative">
 
-      {/* Sticky Stacking Context Provider (Implicit via CSS) */}
-      <div className="relative">
+                {/* Hero Section */}
+                <section className="relative h-[90vh] w-full overflow-hidden sticky top-0">
+                    <Image
+                        src={heroImage}
+                        alt={collection.title}
+                        fill
+                        className="object-cover transition-transform duration-[30s] ease-linear scale-105 hover:scale-110 motion-reduce:transition-none"
+                        priority
+                        sizes="100vw"
+                        quality={95}
+                    />
+                    {/* Refined Gradients for legibility without killing the vibe */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60" />
+                    <div className="absolute inset-0 bg-black/10 backdrop-blur-[1px]" />
 
-        {/* Collection Hero - Sticky Parallax Header */}
-        <section className="relative h-[60vh] w-full overflow-hidden sticky top-0 -z-10">
-          <Image
-            src={heroImage}
-            alt={collection.title}
-            fill
-            className="object-cover opacity-80"
-            priority // LCP Optimization
-            sizes="100vw"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent" />
+                    <div className="absolute inset-0 flex flex-col justify-end pb-32 md:pb-40 px-6 md:px-12 lg:px-24">
+                        <div className="max-w-[90rem] w-full mx-auto space-y-10 animate-fade-up opacity-0" style={{ animationDelay: "200ms", animationFillMode: "forwards" }}>
 
-          <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-16">
-            <div className="max-w-4xl animate-in fade-in-50 slide-in-from-bottom-5 duration-700">
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-medium text-white tracking-tighter mb-6">
-                {collection.title}
-              </h1>
-              {collection.description && (
-                <p className="text-white/80 text-lg md:text-xl max-w-xl font-light leading-relaxed mb-8">
-                  {collection.description}
-                </p>
-              )}
+                            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-t border-white/20 pt-8">
+                                <div>
+                                    <span className="block text-white/80 text-xs tracking-[0.4em] uppercase font-mono mb-4">
+                                        Collection / 0{(allCollections.findIndex(c => c.id === collection.id) + 1) || 1}
+                                    </span>
+                                    <h1 className="text-7xl md:text-9xl lg:text-[10rem] font-display font-medium text-white tracking-tighter leading-[0.85] -ml-1 md:-ml-2">
+                                        {collection.title}
+                                    </h1>
+                                </div>
+
+                                {collection.description && (
+                                    <p className="text-white/70 text-lg md:text-xl font-light leading-relaxed max-w-md text-pretty md:pb-2">
+                                        {collection.description}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Content Section - Surfaces over the sticky hero */}
+                <div className="relative z-10 bg-neutral-950 min-h-screen -mt-20 pt-24 md:pt-32 shadow-[0_-25px_50px_rgba(0,0,0,0.9)] rounded-t-[2.5rem] md:rounded-t-[4rem]">
+
+                    {/* Layout Grid */}
+                    <div className="px-6 md:px-12 lg:px-24 max-w-[100rem] mx-auto grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-16 lg:gap-32">
+
+                        {/* Sidebar Navigation - Sticky & Minimal */}
+                        <aside className="hidden lg:block space-y-16 sticky top-40 self-start h-fit animate-fade-in opacity-0" style={{ animationDelay: "500ms" }}>
+                            <div className="space-y-8">
+                                <Link href="/collection" className="inline-flex items-center gap-3 text-white/50 hover:text-white transition-colors group">
+                                    <span className="w-8 h-px bg-white/30 group-hover:bg-white transition-colors" />
+                                    <span className="text-xs uppercase tracking-widest">Back to All</span>
+                                </Link>
+
+                                <div className="pt-8">
+                                    <h3 className="font-display text-2xl font-medium text-white mb-6">Explore</h3>
+                                    <nav>
+                                        <ul className="space-y-3">
+                                            {allCollections.map(col => {
+                                                const isActive = col.slug === slug;
+                                                return (
+                                                    <li key={col.id}>
+                                                        <Link
+                                                            href={`/collection/${col.slug}`}
+                                                            className={`group flex items-center justify-between text-base tracking-wide transition-all duration-300 py-2 ${isActive
+                                                                ? "text-white translate-x-2"
+                                                                : "text-neutral-500 hover:text-white hover:translate-x-2"
+                                                                }`}
+                                                        >
+                                                            <span>{col.title}</span>
+                                                            <span className={`h-1.5 w-1.5 rounded-full bg-white transition-opacity ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-50"}`} />
+                                                        </Link>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </aside>
+
+                        {/* Main Content Area */}
+                        <div className="space-y-16">
+                            {/* Controls / Beadcrumbs (Mobile Only or Secondary) */}
+                            <div className="lg:hidden pb-8 border-b border-white/5">
+                                <Breadcrumb>
+                                    <BreadcrumbList className="text-white/40 text-xs uppercase tracking-widest">
+                                        <BreadcrumbItem><BreadcrumbLink href="/" className="hover:text-white">Home</BreadcrumbLink></BreadcrumbItem>
+                                        <BreadcrumbSeparator />
+                                        <BreadcrumbItem><BreadcrumbPage className="text-white">{collection.title}</BreadcrumbPage></BreadcrumbItem>
+                                    </BreadcrumbList>
+                                </Breadcrumb>
+                            </div>
+
+                            <div className="flex justify-between items-end border-b border-white/10 pb-6 mb-12 animate-fade-in opacity-0" style={{ animationDelay: "600ms" }}>
+                                <span className="text-white/40 text-xs uppercase tracking-widest font-mono">
+                                    Catalog
+                                </span>
+                                <span className="text-white/40 text-xs uppercase tracking-widest font-mono">
+                                    Showing Results
+                                </span>
+                            </div>
+
+                            {/* Products */}
+                            <div className="min-h-[50vh] animate-fade-up opacity-0 transform-gpu" style={{ animationDelay: "800ms", animationFillMode: "forwards" }}>
+                                <Suspense fallback={<GridSkeleton />}>
+                                    <AsyncProductGrid productsPromise={productsPromise} />
+                                </Suspense>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </section>
 
-        {/* Content Section - Slides over the sticky hero */}
-        <div className="relative z-10 bg-background min-h-screen border-t border-white/10 rounded-t-[3rem] -mt-12 pt-12 shadow-2xl">
-
-          {/* Breadcrumbs */}
-          <div className="px-6 md:px-12 mb-12">
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/" className="text-white/40 hover:text-white">Home</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="text-white/20" />
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/collection" className="text-white/40 hover:text-white">Collections</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="text-white/20" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage className="text-white font-medium">{collection.title}</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
-
-          <div className="px-6 md:px-12 pb-24 grid grid-cols-1 lg:grid-cols-4 gap-12">
-
-            {/* Sidebar (Server Component) - Navigation based filtering (High Perf) */}
-            <aside className="hidden lg:block space-y-12 sticky top-32 self-start">
-              <div>
-                <h3 className="font-display text-xs uppercase tracking-[0.2em] text-white/40 mb-6">Collections</h3>
-                <ul className="space-y-4">
-                  {allCollections.map(col => (
-                    <li key={col.id}>
-                      <Link
-                        href={`/collection/${col.slug}`}
-                        className={`text-sm tracking-wide transition-colors ${col.slug === slug
-                          ? "text-white font-medium pl-2 border-l-2 border-white"
-                          : "text-white/60 hover:text-white"
-                          }`}
-                      >
-                        {col.title}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </aside>
-
-            {/* Product Grid Area - Streaming */}
-            <div className="lg:col-span-3">
-              <Suspense fallback={<GridSkeleton />}>
-                <AsyncProductGrid productsPromise={productsPromise} />
-              </Suspense>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <Footer config={footerConfig} brandName={brand.name} social={socialConfig} />
-    </main>
-  );
+            <Footer config={footerConfig} brandName={brand.name} social={socialConfig} />
+        </main>
+    );
 }
 
-// Inline Skeleton for granular Loading state of just the grid (if page loads faster than products)
+// Elegant minimal skeleton
 function GridSkeleton() {
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-4 md:gap-y-16 md:gap-x-8">
-      {Array.from({ length: 9 }).map((_, i) => (
-        <div key={i} className="space-y-4 animate-pulse">
-          <div className="w-full aspect-[3/4] bg-neutral-900 rounded-sm" />
-          <div className="space-y-2">
-            <div className="h-4 w-3/4 bg-neutral-900" />
-            <div className="h-3 w-1/4 bg-neutral-900" />
-          </div>
+    return (
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-y-16 gap-x-8">
+            {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="space-y-6">
+                    <div className="w-full aspect-[3/4] bg-neutral-900/50 grayscale opacity-50 animate-pulse" />
+                    <div className="space-y-3">
+                        <div className="h-2 w-12 bg-neutral-900 rounded-full" />
+                        <div className="h-4 w-32 bg-neutral-900 rounded-full" />
+                    </div>
+                </div>
+            ))}
         </div>
-      ))}
-    </div>
-  );
+    );
 }

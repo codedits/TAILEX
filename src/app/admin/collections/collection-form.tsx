@@ -45,8 +45,10 @@ export function CollectionForm({ initialData }: { initialData?: any }) {
         // Since we cannot make the form handler async nicely without preventing default immediately (which we did),
         // we will wrap the logic in an async function.
 
+        const form = e.currentTarget;
+
         const submitLogic = async () => {
-            const formData = new FormData(e.currentTarget);
+            const formData = new FormData(form);
 
             // Use the cropped blob if available
             if (croppedBlob) {
@@ -63,9 +65,11 @@ export function CollectionForm({ initialData }: { initialData?: any }) {
                 }
             }
 
-            // Handle Switch manually because it doesn't always submit like a native checkbox
-            const isVisible = (e.currentTarget.elements.namedItem('is_visible') as HTMLInputElement)?.ariaChecked === 'true';
-            formData.set('is_visible', isVisible ? 'on' : 'off');
+            // Trust native form behavior for Switch (Radix UI puts a hidden input)
+            // If it's not in formData, it's off.
+            if (!formData.has('is_visible')) {
+                formData.set('is_visible', 'off');
+            }
 
             startTransition(async () => {
                 try {
