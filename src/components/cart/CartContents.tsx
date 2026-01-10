@@ -8,8 +8,10 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { CartItem } from "@/context/CartContext";
+import { useFormatCurrency } from "@/context/StoreConfigContext";
 
 export function CartContents({ onClose }: { onClose: () => void }) {
+    const formatCurrency = useFormatCurrency();
     const { items, removeItem, updateQuantity, cartTotal } = useCart();
 
     if (items.length === 0) {
@@ -49,12 +51,12 @@ export function CartContents({ onClose }: { onClose: () => void }) {
                             <div className="flex-1 flex flex-col justify-between">
                                 <div className="flex justify-between items-start">
                                     <div>
-                                        <h3 className="font-medium text-sm uppercase tracking-wide">{item.name}</h3>
+                                        <h3 className="font-manrope font-black text-[11px] uppercase tracking-widest">{item.name}</h3>
                                         {item.size && (
-                                            <p className="text-xs text-muted-foreground mt-1">Size: {item.size}</p>
+                                            <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">Size: {item.size}</p>
                                         )}
                                     </div>
-                                    <p className="font-medium text-sm">PKR Rs.{item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                    <p className="font-manrope font-black text-sm">{formatCurrency(item.price)}</p>
                                 </div>
 
                                 <div className="flex justify-between items-center">
@@ -89,13 +91,13 @@ export function CartContents({ onClose }: { onClose: () => void }) {
             <div className="space-y-4 pt-4 mt-auto">
                 <Separator />
                 <div className="flex justify-between items-center">
-                    <span className="font-medium uppercase tracking-wide">Subtotal</span>
-                    <span className="font-medium text-lg">PKR Rs.{cartTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <span className="font-manrope font-black uppercase tracking-widest text-xs">Subtotal</span>
+                    <span className="font-manrope font-black text-lg">{formatCurrency(cartTotal)}</span>
                 </div>
-                <p className="text-xs text-muted-foreground text-center">
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground text-center">
                     Shipping and taxes calculated at checkout.
                 </p>
-                <Button className="w-full uppercase tracking-widest py-6" asChild>
+                <Button variant="cta" size="xl" className="w-full" asChild>
                     <Link href="/checkout" onClick={onClose}>
                         Checkout
                     </Link>

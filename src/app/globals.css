@@ -50,6 +50,9 @@
 
     --radius: 0.25rem;
 
+    --cta: 0 0% 8%;
+    --cta-foreground: 0 0% 100%;
+
     /* Font Bindings */
     /* Accessing the font variable injected by next/font */
     /* If next/font injects a class, we use inheritance. If it injects a variable, we map it here. */
@@ -87,6 +90,8 @@
     --border: 0 0% 14.9%;
     --input: 0 0% 14.9%;
     --ring: 0 0% 83.1%;
+    --cta: 0 0% 98%;
+    --cta-foreground: 0 0% 9%;
   }
 }
 

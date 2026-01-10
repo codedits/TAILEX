@@ -1,15 +1,19 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { ShoppingBag, Search } from "lucide-react";
 import { Product } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { useFormatCurrency } from "@/context/StoreConfigContext";
 
 interface ProductCardProps extends Product {
   priority?: boolean;
 }
 
 const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
+  const formatCurrency = useFormatCurrency();
   const { title, price, images, slug, cover_image, sale_price, tags } = product;
 
   const isValidImage = (img: any): img is string => typeof img === 'string' && img.trim().length > 0;
@@ -108,15 +112,15 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
           {isSale ? (
             <>
               <span className="text-neutral-500 line-through decoration-neutral-500/50">
-                PKR Rs.{price?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {formatCurrency(price || 0)}
               </span>
               <span className="text-[#D03030] font-bold">
-                PKR Rs.{sale_price?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {formatCurrency(sale_price || 0)}
               </span>
             </>
           ) : (
             <span className="text-neutral-800 font-medium">
-              PKR Rs.{price?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {formatCurrency(price || 0)}
             </span>
           )}
         </div>

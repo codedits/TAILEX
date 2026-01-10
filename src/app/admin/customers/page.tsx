@@ -1,6 +1,8 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Button } from "@/components/ui/button";
 import { Users, Mail, ShoppingBag } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
+import { StoreConfigService } from "@/services/config";
 import {
   Table,
   TableBody,
@@ -12,7 +14,10 @@ import {
 
 export default async function CustomersPage() {
   const supabase = await createAdminClient();
-  const { data: customers } = await supabase.from("customers").select("*").order('created_at', { ascending: false });
+  const [{ data: customers }, storeConfig] = await Promise.all([
+    supabase.from("customers").select("*").order('created_at', { ascending: false }),
+    StoreConfigService.getStoreConfig()
+  ]);
 
   return (
     <div className="space-y-8">
@@ -75,7 +80,7 @@ export default async function CustomersPage() {
                     </span>
                   </TableCell>
                   <TableCell className="px-4 text-right font-mono text-white">
-                    ${(customer.total_spent || 0).toFixed(2)}
+                    {formatCurrency(customer.total_spent || 0, storeConfig.currency)}
                   </TableCell>
                 </TableRow>
               ))

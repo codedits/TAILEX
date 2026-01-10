@@ -19,7 +19,7 @@ CREATE TABLE orders (
   fulfillment_status TEXT DEFAULT 'unfulfilled' CHECK (fulfillment_status IN ('unfulfilled', 'partial', 'fulfilled')),
   
   -- Financial Breakdown
-  currency TEXT DEFAULT 'USD',
+  currency TEXT DEFAULT 'PKR',
   subtotal NUMERIC(10,2) NOT NULL,
   discount_total NUMERIC(10,2) DEFAULT 0,
   shipping_total NUMERIC(10,2) DEFAULT 0,

@@ -220,7 +220,7 @@ CREATE TABLE IF NOT EXISTS orders (
   fulfillment_status TEXT DEFAULT 'unfulfilled' CHECK (fulfillment_status IN ('unfulfilled', 'partial', 'fulfilled')),
   
   -- Pricing breakdown
-  currency TEXT DEFAULT 'USD',
+  currency TEXT DEFAULT 'PKR',
   subtotal NUMERIC(10,2) NOT NULL,
   discount_total NUMERIC(10,2) DEFAULT 0,
   shipping_total NUMERIC(10,2) DEFAULT 0,
@@ -407,7 +407,7 @@ CREATE TABLE IF NOT EXISTS carts (
   session_id TEXT, -- For guest carts
   
   -- Cart state
-  currency TEXT DEFAULT 'USD',
+  currency TEXT DEFAULT 'PKR',
   discount_code TEXT,
   
   -- Timestamps
@@ -744,7 +744,7 @@ INSERT INTO site_config (key, value) VALUES
 ('brand', '{
   "name": "TAILEX",
   "tagline": "Timeless Wardrobe, Everyday Power",
-  "announcement": "Free shipping on orders over PKR Rs.12,000",
+  "announcement": "Free shipping on all orders this week",
   "showAnnouncement": true
 }'::jsonb),
 ('homepage_layout', '[
@@ -775,11 +775,10 @@ INSERT INTO site_config (key, value) VALUES
   "facebook": "",
   "tiktok": ""
 }'::jsonb),
-('store', '{
-  "currency": "PKR",
-  "currencySymbol": "PKR Rs.",
-  "taxRate": 0,
-  "taxIncluded": false
+('currency', '{
+  "code": "PKR",
+  "symbol": "PKR Rs.",
+  "format": "symbol amount"
 }'::jsonb)
 ON CONFLICT (key) DO NOTHING;
 

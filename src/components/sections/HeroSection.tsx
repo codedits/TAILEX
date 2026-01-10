@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 type HeroSectionProps = {
   heading?: string;
@@ -90,12 +91,16 @@ const HeroSection = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 1.2 }}
           >
-            <Link
-              href="/shop"
-              className="px-8 py-3 bg-transparent border border-white text-white text-[10px] uppercase font-manrope font-black tracking-[0.4em] hover:bg-white hover:text-black transition-all duration-300"
+            <Button
+              asChild
+              variant="ctaHeroOutline"
+              size="xl"
+              className="px-12"
             >
-              Shop Now
-            </Link>
+              <Link href="/shop">
+                Shop Now
+              </Link>
+            </Button>
           </motion.div>
         </div>
 

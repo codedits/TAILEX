@@ -2,6 +2,7 @@ import { requireAuth } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notFound } from "next/navigation";
 import { formatCurrency } from "@/lib/utils";
+import { StoreConfigService } from "@/services/config";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -20,12 +21,15 @@ export default async function OrderDetailPage({ params }: Props) {
     const user = await requireAuth();
 
     const supabase = await createAdminClient();
-    const { data: order } = await supabase
-        .from('orders')
-        .select('*, items:order_items(*)')
-        .eq('id', id)
-        .eq('email', user.email) // Security: only own orders by email
-        .single();
+    const [{ data: order }, storeConfig] = await Promise.all([
+        supabase
+            .from('orders')
+            .select('*, items:order_items(*)')
+            .eq('id', id)
+            .eq('email', user.email) // Security: only own orders by email
+            .single(),
+        StoreConfigService.getStoreConfig()
+    ]);
 
     if (!order) {
         notFound();
@@ -121,7 +125,7 @@ export default async function OrderDetailPage({ params }: Props) {
                                     </div>
                                     <div className="text-right">
                                         <p className="text-black font-medium font-mono text-sm">
-                                            {formatCurrency(item.total_price)}
+                                            {formatCurrency(item.total_price, storeConfig.currency)}
                                         </p>
                                         <p className="text-neutral-400 text-xs mt-1">Qty: {item.quantity}</p>
                                     </div>
@@ -131,16 +135,16 @@ export default async function OrderDetailPage({ params }: Props) {
                         <div className="bg-neutral-50 p-6 space-y-3">
                             <div className="flex justify-between text-sm text-neutral-500">
                                 <span>Subtotal</span>
-                                <span>{formatCurrency(order.subtotal)}</span>
+                                <span>{formatCurrency(order.subtotal, storeConfig.currency)}</span>
                             </div>
                             <div className="flex justify-between text-sm text-neutral-500">
                                 <span>Shipping</span>
-                                <span>{formatCurrency(order.shipping_total)}</span>
+                                <span>{formatCurrency(order.shipping_total, storeConfig.currency)}</span>
                             </div>
                             <Separator className="bg-neutral-200 my-2" />
                             <div className="flex justify-between text-lg font-medium text-black">
                                 <span>Total</span>
-                                <span>{formatCurrency(order.total)}</span>
+                                <span>{formatCurrency(order.total, storeConfig.currency)}</span>
                             </div>
                         </div>
                     </div>

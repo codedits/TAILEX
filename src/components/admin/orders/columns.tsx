@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { MoreHorizontal, ArrowUpDown } from "lucide-react"
+import { useFormatCurrency } from "@/context/StoreConfigContext"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -15,6 +16,11 @@ import {
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
+
+const CurrencyValue = ({ amount }: { amount: number }) => {
+    const formatCurrency = useFormatCurrency();
+    return <>{formatCurrency(amount)}</>;
+};
 
 export const columns: ColumnDef<Order>[] = [
     {
@@ -82,9 +88,11 @@ export const columns: ColumnDef<Order>[] = [
         header: () => <div className="text-right">Amount</div>,
         cell: ({ row }) => {
             const amount = parseFloat(row.getValue("total"))
-            const formatted = `PKR Rs.${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-
-            return <div className="text-right font-mono font-medium">{formatted}</div>
+            return (
+                <div className="text-right font-mono font-medium">
+                    <CurrencyValue amount={amount} />
+                </div>
+            )
         },
     },
     {

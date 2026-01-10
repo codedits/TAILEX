@@ -1,8 +1,11 @@
+"use client";
+
 import {
     Avatar,
     AvatarFallback,
     AvatarImage,
 } from "@/components/ui/avatar"
+import { useFormatCurrency } from "@/context/StoreConfigContext"
 
 type RecentSaleProps = {
     sales: {
@@ -15,6 +18,7 @@ type RecentSaleProps = {
 }
 
 export function RecentSales({ sales }: RecentSaleProps) {
+    const formatCurrency = useFormatCurrency();
     return (
         <div className="space-y-8">
             {sales.length === 0 && <p className="text-sm text-neutral-500">No sales yet.</p>}
@@ -32,7 +36,7 @@ export function RecentSales({ sales }: RecentSaleProps) {
                         </p>
                     </div>
                     <div className="ml-auto font-mono text-sm font-medium text-white/60 group-hover:text-white transition-colors">
-                        +PKR Rs.{sale.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        +{formatCurrency(sale.amount)}
                     </div>
                 </div>
             ))}

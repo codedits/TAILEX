@@ -1,5 +1,7 @@
 import transporter from '@/lib/nodemailer';
 import { Order } from '@/lib/types';
+import { formatCurrency } from '@/lib/utils';
+import { StoreConfigService } from './config';
 
 export const EmailService = {
   async sendOTP(email: string, otp: string) {
@@ -51,6 +53,9 @@ export const EmailService = {
     try {
       if (!process.env.SMTP_USER) return;
 
+      const config = await StoreConfigService.getStoreConfig();
+      const currency = config.currency;
+
       const itemsList = order.items?.map(item => `
         <div style="border-bottom: 1px solid #eaeaea; padding: 15px 0; display: flex; justify-content: space-between;">
            <div style="flex: 1;">
@@ -58,7 +63,7 @@ export const EmailService = {
               <span style="display: block; font-size: 12px; color: #999; margin-top: 4px;">${item.variant_title || 'Standard'} x${item.quantity}</span>
            </div>
            <div style="text-align: right;">
-              <span style="font-size: 14px; color: #000;">$${item.unit_price.toFixed(2)}</span>
+              <span style="font-size: 14px; color: #000;">${formatCurrency(item.unit_price, currency)}</span>
            </div>
         </div>
       `).join('');
@@ -81,18 +86,18 @@ export const EmailService = {
                 ${itemsList}
               </div>
 
-              <div style="border-top: 2px solid #000; paddingTop: 20px; font-size: 14px; color: #000;">
+              <div style="border-top: 2px solid #000; padding-top: 20px; font-size: 14px; color: #000;">
                  <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                     <span>Subtotal</span>
-                    <span>$${order.subtotal.toFixed(2)}</span>
+                    <span>${formatCurrency(order.subtotal, currency)}</span>
                  </div>
                  <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                     <span>Shipping</span>
-                    <span>$${order.shipping_total.toFixed(2)}</span>
+                    <span>${formatCurrency(order.shipping_total, currency)}</span>
                  </div>
                  <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 16px; margin-top: 20px;">
                     <span>Total</span>
-                    <span>$${order.total.toFixed(2)}</span>
+                    <span>${formatCurrency(order.total, currency)}</span>
                  </div>
               </div>
 

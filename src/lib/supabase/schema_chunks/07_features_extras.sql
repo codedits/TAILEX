@@ -83,7 +83,7 @@ CREATE TABLE carts (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   customer_id UUID REFERENCES customers(id) ON DELETE CASCADE,
   session_id TEXT, -- For guest carts
-  currency TEXT DEFAULT 'USD',
+  currency TEXT DEFAULT 'PKR',
   discount_code TEXT,
   
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,

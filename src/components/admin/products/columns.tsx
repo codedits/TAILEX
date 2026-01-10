@@ -17,6 +17,21 @@ import {
 import Link from "next/link"
 import { DeleteButton } from "@/components/admin/DeleteButton"
 import { deleteProduct } from "@/app/admin/products/actions"
+import { useFormatCurrency } from "@/context/StoreConfigContext"
+
+const PriceCell = ({ amount, saleAmount }: { amount: number, saleAmount?: number | null }) => {
+    const formatCurrency = useFormatCurrency();
+    return (
+        <div className="flex flex-col">
+            <span className="font-mono text-white/90">{formatCurrency(amount)}</span>
+            {saleAmount && (
+                <span className="text-emerald-400 text-[10px] font-mono">
+                    {formatCurrency(saleAmount)}
+                </span>
+            )}
+        </div>
+    );
+};
 
 export const columns: ColumnDef<Product>[] = [
     {
@@ -78,19 +93,9 @@ export const columns: ColumnDef<Product>[] = [
         header: "Price",
         cell: ({ row }) => {
             const price = parseFloat(row.getValue("price"))
-            const formatted = `PKR Rs.${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
             const salePrice = row.original.sale_price;
 
-            return (
-                <div className="flex flex-col">
-                    <span className="font-mono text-white/90">{formatted}</span>
-                    {salePrice && (
-                        <span className="text-emerald-400 text-[10px] font-mono">
-                            PKR Rs.{salePrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </span>
-                    )}
-                </div>
-            )
+            return <PriceCell amount={price} saleAmount={salePrice} />
         },
     },
     {

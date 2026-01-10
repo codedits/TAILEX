@@ -96,7 +96,7 @@ export default async function RootLayout({
       className={`${theme} ${manrope.variable} ${inter.variable} ${playfair.variable} ${spaceMono.variable}`}
     >
       <body className={font.className}>
-        <Providers>{children}</Providers>
+        <Providers initialConfig={config}>{children}</Providers>
       </body>
     </html>
   );

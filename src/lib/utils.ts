@@ -53,7 +53,31 @@ export function hexToHslValues(hex: string): string {
   return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
 }
 
-export function formatCurrency(amount: number): string {
-  return `PKR Rs.${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+export interface CurrencyConfig {
+  code: string;
+  symbol: string;
+  format?: "symbol amount" | "amount symbol";
+}
+
+let activeCurrency: CurrencyConfig = {
+  code: "PKR",
+  symbol: "PKR Rs.",
+  format: "symbol amount",
+};
+
+export function setGlobalCurrency(config: CurrencyConfig) {
+  activeCurrency = {
+    ...activeCurrency,
+    ...config,
+  };
+}
+
+export function formatCurrency(amount: number, config?: CurrencyConfig): string {
+  const cfg = config || activeCurrency;
+  const formattedAmount = Math.round(amount).toLocaleString();
+  
+  return cfg.format === "amount symbol"
+    ? `${formattedAmount} ${cfg.symbol}`
+    : `${cfg.symbol} ${formattedAmount}`;
 }
 

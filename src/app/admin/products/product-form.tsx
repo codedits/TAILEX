@@ -10,7 +10,7 @@ import { useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Image from "next/image";
-import { X, Upload, Loader2, Save, Crop as CropIcon } from "lucide-react";
+import { X, Upload, Loader2, Save, Crop as CropIcon, ChevronUp, ChevronDown, GripVertical } from "lucide-react";
 import type { Product, Collection } from "@/lib/types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,24 +19,134 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Switch } from "@/components/ui/switch";
 import { convertFileToWebP } from '@/lib/image-utils';
 import { ImageCropper } from "@/components/ui/image-cropper";
+import { useStoreConfig } from "@/context/StoreConfigContext";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+  useSortable
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 type ProductFormProps = {
   initialData?: Partial<Product>
   collections?: Collection[]
 }
 
+type ImageItem = {
+  id: string;
+  url: string;
+  file?: File;
+  isExisting: boolean;
+};
+
+function SortableImage({ 
+  item, 
+  index, 
+  onRemove, 
+  onCrop 
+}: { 
+  item: ImageItem; 
+  index: number; 
+  onRemove: (idx: number) => void; 
+  onCrop: (idx: number, url: string) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: item.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 20 : 0,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      className="relative aspect-square rounded-xl overflow-hidden border border-white/10 bg-black group transition-all"
+    >
+      <Image src={item.url} alt="Preview" fill className="object-cover" />
+      
+      {/* Drag Handle */}
+      <div 
+        {...attributes} 
+        {...listeners}
+        className="absolute top-2 left-2 p-1.5 bg-black/80 text-white rounded-full opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-20"
+      >
+        <GripVertical className="w-4 h-4" />
+      </div>
+
+      <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+        <button
+          type="button"
+          onClick={() => onCrop(index, item.url)}
+          className="bg-black/80 text-white p-1.5 rounded-full hover:bg-white hover:text-black transition-colors"
+        >
+          <CropIcon className="w-3 h-3" />
+        </button>
+        <button
+          type="button"
+          onClick={() => onRemove(index)}
+          className="bg-black/80 text-white p-1.5 rounded-full hover:bg-red-500 transition-colors"
+        >
+          <X className="w-3 h-3" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function ProductForm({ initialData, collections = [] }: ProductFormProps) {
   const router = useRouter();
+  const { currency } = useStoreConfig();
   const [isPending, startTransition] = useTransition();
-  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [images, setImages] = useState<ImageItem[]>(() => {
+    const existing = initialData?.images?.length
+      ? initialData.images
+      : (initialData?.cover_image ? [initialData.cover_image] : []);
+    return existing.map(url => ({
+      id: Math.random().toString(36).substr(2, 9),
+      url,
+      isExisting: true
+    }));
+  });
   const [cropData, setCropData] = useState<{ index: number, image: string } | null>(null);
 
-  // Image handling
-  const [previews, setPreviews] = useState<string[]>(
-    initialData?.images?.length
-      ? initialData.images
-      : (initialData?.cover_image ? [initialData.cover_image] : [])
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
   );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setImages((items) => {
+        const oldIndex = items.findIndex((i) => i.id === active.id);
+        const newIndex = items.findIndex((i) => i.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
@@ -62,19 +172,22 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      const fileArray = Array.from(files).slice(0, 10 - previews.length);
-      const newPreviews = fileArray.map(file => URL.createObjectURL(file));
-      setPreviews(prev => [...prev, ...newPreviews]);
-      setNewFiles(prev => [...prev, ...fileArray]);
+      const remainingSlots = 10 - images.length;
+      const fileArray = Array.from(files).slice(0, remainingSlots);
+      
+      const newItems: ImageItem[] = fileArray.map(file => ({
+        id: Math.random().toString(36).substr(2, 9),
+        url: URL.createObjectURL(file),
+        file,
+        isExisting: false
+      }));
+
+      setImages(prev => [...prev, ...newItems]);
     }
   };
 
   const removeImage = (index: number) => {
-    setPreviews(prev => prev.filter((_, i) => i !== index));
-    const initialCount = (initialData?.images?.length || (initialData?.cover_image ? 1 : 0));
-    if (index >= initialCount) {
-      setNewFiles(prev => prev.filter((_, i) => i !== index - initialCount));
-    }
+    setImages(prev => prev.filter((_, i) => i !== index));
   };
 
   async function onSubmit(data: ProductFormValues) {
@@ -99,10 +212,11 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
     // We do this before startTransition to avoid blocking the UI update too much, 
     // although for large files it might take a moment.
     try {
-      if (newFiles.length > 0) {
+      const newFilesItems = images.filter(img => !img.isExisting && img.file);
+      if (newFilesItems.length > 0) {
         toast.loading("Optimizing images...");
         const convertedFiles = await Promise.all(
-          newFiles.map(file => convertFileToWebP(file, 0.85))
+          newFilesItems.map(item => convertFileToWebP(item.file!, 0.85))
         );
         convertedFiles.forEach(file => {
           formData.append('imageFiles', file);
@@ -113,14 +227,13 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
       console.error("Image conversion failed", error);
       toast.error("Image optimization failed, using originals");
       // Fallback
-      newFiles.forEach(file => {
-        formData.append('imageFiles', file);
+      images.filter(img => !img.isExisting && img.file).forEach(item => {
+        formData.append('imageFiles', item.file!);
       });
     }
 
-    // Existing images
-    const initialImagesList = initialData?.images || (initialData?.cover_image ? [initialData.cover_image] : []);
-    const existingImages = previews.slice(0, initialImagesList.length).filter(p => initialImagesList.includes(p));
+    // Existing images (now preserved in order)
+    const existingImages = images.filter(img => img.isExisting).map(img => img.url);
     formData.set('existing_images', JSON.stringify(existingImages));
 
     startTransition(async () => {
@@ -213,30 +326,29 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
             <div className="bg-[#0A0A0A] border border-white/10 rounded-2xl p-8 space-y-6">
               <h3 className="text-lg font-light tracking-tight text-white mb-4 border-b border-white/5 pb-4">Media</h3>
 
-              {previews.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                  {previews.map((src, idx) => (
-                    <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-white/10 bg-black group">
-                      <Image src={src} alt="Preview" fill className="object-cover" />
-                      <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          type="button"
-                          onClick={() => setCropData({ index: idx, image: src })}
-                          className="bg-black/80 text-white p-1.5 rounded-full hover:bg-white hover:text-black transition-colors"
-                        >
-                          <CropIcon className="w-3 h-3" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => removeImage(idx)}
-                          className="bg-black/80 text-white p-1.5 rounded-full hover:bg-red-500 transition-colors"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
+              {images.length > 0 && (
+                <DndContext 
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext 
+                    items={images.map(img => img.id)}
+                    strategy={rectSortingStrategy}
+                  >
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                      {images.map((item, idx) => (
+                        <SortableImage 
+                          key={item.id} 
+                          item={item} 
+                          index={idx}
+                          onRemove={removeImage}
+                          onCrop={(i, url) => setCropData({ index: i, image: url })}
+                        />
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </SortableContext>
+                </DndContext>
               )}
 
               <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-white/30 transition-all bg-black/20 hover:bg-white/5">
@@ -255,7 +367,9 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
                   name="price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-white/60 text-xs font-medium uppercase tracking-widest">Price (PKR Rs.)</FormLabel>
+                      <FormLabel className="text-white/60 text-xs font-medium uppercase tracking-widest">
+                        Price ({currency?.code || 'PKR'} {currency?.symbol || 'Rs.'})
+                      </FormLabel>
                       <FormControl>
                         <Input type="number" step="0.01" {...field} className="bg-black border-white/10 text-white rounded-xl h-12 font-mono" />
                       </FormControl>
@@ -268,7 +382,9 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
                   name="sale_price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-white/60 text-xs font-medium uppercase tracking-widest">Sale Price (PKR Rs.)</FormLabel>
+                      <FormLabel className="text-white/60 text-xs font-medium uppercase tracking-widest">
+                        Sale Price ({currency?.code || 'PKR'} {currency?.symbol || 'Rs.'})
+                      </FormLabel>
                       <FormControl>
                         <Input type="number" step="0.01" {...field} value={field.value || ''} className="bg-black border-white/10 text-white rounded-xl h-12 font-mono" />
                       </FormControl>
@@ -403,31 +519,19 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
           image={cropData.image}
           aspect={3 / 4} // Products use 3:4 aspect
           onCropComplete={(blob) => {
-            const file = new File([blob], `product-${cropData.index}.webp`, { type: "image/webp" });
+            const file = new File([blob], `product-${Date.now()}.webp`, { type: "image/webp" });
             const objectUrl = URL.createObjectURL(file);
             
-            const initialCount = (initialData?.images?.length || (initialData?.cover_image ? 1 : 0));
-            
-            // Update previews
-            const newPreviews = [...previews];
-            newPreviews[cropData.index] = objectUrl;
-            setPreviews(newPreviews);
-            
-            // Update/Add to new files
-            if (cropData.index >= initialCount) {
-              // It's already in the "new files" range
-              const newFilesIndex = cropData.index - initialCount;
-              const updatedNewFiles = [...newFiles];
-              updatedNewFiles[newFilesIndex] = file;
-              setNewFiles(updatedNewFiles);
-            } else {
-              // It was an initial image, now it's effectively a new one.
-              // We'll treat it as a new file by adding it to newFiles
-              // and in onSubmit we'll make sure it's handled.
-              // Actually, to keep it simple, let's just add it to a separate "replacedFiles" map
-              // or just push it to newFiles and adjust onSubmit.
-              setNewFiles(prev => [...prev, file]);
-            }
+            setImages(prev => {
+              const next = [...prev];
+              next[cropData.index] = {
+                ...next[cropData.index],
+                url: objectUrl,
+                file: file,
+                isExisting: false // Even after crop it's a new file
+              };
+              return next;
+            });
             
             setCropData(null);
           }}

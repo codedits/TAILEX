@@ -12,6 +12,7 @@ import { Upload, Trash2, Crop as CropIcon } from 'lucide-react';
 import { ImageCropper } from '@/components/ui/image-cropper';
 import { StoreConfig } from '@/services/config';
 import { convertFileToWebP } from '@/lib/image-utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface StoreConfigFormProps {
     initialConfig: StoreConfig;
@@ -112,7 +113,7 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                             <Input
                                 value={config.brand.announcement || ''}
                                 onChange={(e) => setConfig({ ...config, brand: { ...config.brand, announcement: e.target.value } })}
-                                placeholder="e.g. Free shipping over $100"
+                                placeholder="e.g. Free shipping over Rs. 10,000"
                             />
                         </div>
                         <div className="flex items-center space-x-2">
@@ -140,20 +141,46 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
+                            <div className="col-span-2 space-y-2">
+                                <Label>Preset Currencies</Label>
+                                <Select onValueChange={(val) => {
+                                    const presets: Record<string, { code: string, symbol: string }> = {
+                                        'PKR': { code: 'PKR', symbol: 'Rs.' },
+                                        'USD': { code: 'USD', symbol: '$' },
+                                        'GBP': { code: 'GBP', symbol: '£' },
+                                        'EUR': { code: 'EUR', symbol: '€' },
+                                        'AED': { code: 'AED', symbol: 'د.إ' }
+                                    };
+                                    if (presets[val]) {
+                                        setConfig({ ...config, currency: presets[val] });
+                                    }
+                                }}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a preset..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="PKR">PKR - Pakistani Rupee</SelectItem>
+                                        <SelectItem value="USD">USD - US Dollar</SelectItem>
+                                        <SelectItem value="GBP">GBP - British Pound</SelectItem>
+                                        <SelectItem value="EUR">EUR - Euro</SelectItem>
+                                        <SelectItem value="AED">AED - UAE Dirham</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                             <div className="space-y-2">
                                 <Label>Currency Code (ISO)</Label>
                                 <Input
-                                    value={config.currency?.code || 'USD'} // Safe access with fallback
-                                    onChange={(e) => setConfig({ ...config, currency: { ...(config.currency || { symbol: '$' }), code: e.target.value } })}
-                                    placeholder="USD"
+                                    value={config.currency?.code ?? ''}
+                                    onChange={(e) => setConfig({ ...config, currency: { ...(config.currency || { symbol: 'Rs.' }), code: e.target.value } })}
+                                    placeholder="PKR"
                                 />
                             </div>
                             <div className="space-y-2">
                                 <Label>Currency Symbol</Label>
                                 <Input
-                                    value={config.currency?.symbol || '$'} // Safe access with fallback
-                                    onChange={(e) => setConfig({ ...config, currency: { ...(config.currency || { code: 'USD' }), symbol: e.target.value } })}
-                                    placeholder="$"
+                                    value={config.currency?.symbol ?? ''}
+                                    onChange={(e) => setConfig({ ...config, currency: { ...(config.currency || { code: 'PKR' }), symbol: e.target.value } })}
+                                    placeholder="Rs."
                                 />
                             </div>
                         </div>

@@ -1,8 +1,11 @@
 "use client"
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
+import { useFormatCurrency } from "@/context/StoreConfigContext"
 
 export function Overview({ data }: { data: any[] }) {
+    const formatCurrency = useFormatCurrency();
+    
     return (
         <ResponsiveContainer width="100%" height={350}>
             <BarChart data={data}>
@@ -19,7 +22,7 @@ export function Overview({ data }: { data: any[] }) {
                     fontSize={10}
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={(value) => `Rs.${value}`}
+                    tickFormatter={(value) => formatCurrency(value)}
                     tick={{ fill: "#ffffff50" }}
                 />
                 <Bar

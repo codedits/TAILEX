@@ -8,7 +8,7 @@ INSERT INTO site_config (key, value) VALUES
 ('brand', '{
   "name": "TAILEX",
   "tagline": "Timeless Wardrobe, Everyday Power",
-  "announcement": "Free shipping on orders over $100",
+  "announcement": "Free shipping on orders over Rs. 10,000",
   "showAnnouncement": true
 }'::jsonb),
 ('hero', '{
@@ -33,7 +33,7 @@ INSERT INTO site_config (key, value) VALUES
   "tiktok": ""
 }'::jsonb),
 ('store', '{
-  "currency": "USD",
+  "currency": "PKR",
   "currencySymbol": "$",
   "taxRate": 0,
   "taxIncluded": false

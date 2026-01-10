@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { jwtVerify } from 'jose';
 import { EmailService } from '@/services/email';
+import { StoreConfigService } from '@/services/config';
 
 const JWT_SECRET = new TextEncoder().encode(
     process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production'
@@ -97,6 +98,9 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        const config = await StoreConfigService.getStoreConfig();
+        const currencyCode = config.currency?.code || 'PKR';
+
         // Create Order
         // NOTE: customer_id is set to null because the existing schema has a FK to `customers` table.
         // Our new auth system uses the `users` table. Email is still tracked for order lookup.
@@ -109,12 +113,12 @@ export async function POST(request: NextRequest) {
             status: 'pending',
             payment_status: payment_method === 'COD' ? 'proof_submitted' : 'paid', // Default to paid for card, proof for COD
             fulfillment_status: 'unfulfilled',
-            currency: 'USD',
+            currency: currencyCode,
             subtotal,
             discount_total: 0,
-            shipping_total: 9.99, // Fixed shipping for now
+            shipping_total: 250, // Fixed shipping for now to match CheckoutWizard
             tax_total: 0,
-            total: subtotal + 9.99,
+            total: subtotal + 250,
             shipping_address,
             billing_address: shipping_address,
             payment_method,

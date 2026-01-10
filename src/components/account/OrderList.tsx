@@ -7,8 +7,10 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Package, ChevronRight, Clock, CheckCircle, Truck, AlertCircle } from 'lucide-react';
+import { useFormatCurrency } from '@/context/StoreConfigContext';
 
 export default function OrderList({ initialOrders }: { initialOrders: Order[] }) {
+    const formatCurrency = useFormatCurrency();
     const [orders, setOrders] = useState<Order[]>(initialOrders);
     const supabase = createClient();
 
@@ -98,7 +100,7 @@ export default function OrderList({ initialOrders }: { initialOrders: Order[] })
                                     </p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-2xl font-light text-black">PKR Rs.{order.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                    <p className="text-2xl font-manrope font-black text-black">{formatCurrency(order.total)}</p>
                                     <p className="text-xs text-neutral-500 uppercase tracking-widest">{order.payment_status}</p>
                                 </div>
                             </div>
@@ -144,9 +146,9 @@ export default function OrderList({ initialOrders }: { initialOrders: Order[] })
                                         </div>
                                     )}
                                 </div>
-                                <Button variant="ghost" className="hover:bg-black text-black hover:text-white rounded-full transition-all" asChild>
+                                <Button variant="ctaOutline" size="sm" asChild>
                                     <Link href={`/account/orders/${order.id}`}>
-                                        View Details <ChevronRight className="w-4 h-4 ml-2" />
+                                        View Details <ChevronRight className="w-4 h-4 ml-1" />
                                     </Link>
                                 </Button>
                             </div>

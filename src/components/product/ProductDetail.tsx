@@ -11,11 +11,14 @@ import {
   Truck, 
   ShieldCheck, 
   AlertCircle, 
-  Heart,
+ Heart,
   ChevronRight,
   Share2,
   Info
 } from "lucide-react";
+import { formatCurrency as utilsFormatCurrency, cn } from "@/lib/utils";
+import { useFormatCurrency } from "@/context/StoreConfigContext";
+import { Button } from "@/components/ui/button";
 import ReviewsSection from "@/components/sections/ReviewsSection";
 import RelatedProducts from "@/components/product/RelatedProducts";
 import {
@@ -28,7 +31,6 @@ import { MagneticButton } from "@/components/ui/magnetic-button";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/context/CartContext";
 import { Product, ProductVariant, ProductOption } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
 import { useRouter } from "next/navigation";
 
@@ -39,6 +41,7 @@ export default function ProductDetail({
   product: Product,
   relatedProducts: Product[]
 }) {
+  const formatCurrency = useFormatCurrency();
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -150,7 +153,7 @@ export default function ProductDetail({
     },
     { 
       title: "Shipping & Returns", 
-      content: "Free standard shipping on orders over $150. Returns accepted within 30 days of delivery. Sustainable packaging used for all shipments." 
+      content: `Free standard shipping on orders over ${formatCurrency(10000)}. Returns accepted within 30 days of delivery. Sustainable packaging used for all shipments.`
     },
     {
       title: "Specifications",
@@ -297,15 +300,15 @@ export default function ProductDetail({
                   {hasSale ? (
                     <>
                       <span className="text-3xl font-black text-[#D03030]">
-                        PKR Rs.{currentSalePrice?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        {formatCurrency(currentSalePrice!)}
                       </span>
                       <span className="text-xl line-through text-muted-foreground/60">
-                        PKR Rs.{currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        {formatCurrency(currentPrice)}
                       </span>
                     </>
                   ) : (
                     <span className="text-3xl font-black text-foreground">
-                      PKR Rs.{currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {formatCurrency(currentPrice)}
                     </span>
                   )}
                 </div>
@@ -378,33 +381,34 @@ export default function ProductDetail({
                   </button>
                 </div>
 
+
+// Change in component:
                 {/* Main CTA */}
-                <button
-                  onClick={handleAddToCart}
+                <Button
+                  onClick={() => handleAddToCart()}
                   disabled={isOutOfStock}
-                  className={cn(
-                    "flex-1 h-14 uppercase tracking-[0.2em] text-[11px] font-manrope font-black transition-all",
-                    isOutOfStock 
-                      ? "bg-muted text-muted-foreground cursor-not-allowed" 
-                      : "bg-foreground text-background hover:bg-foreground/90 active:scale-[0.98]"
-                  )}
+                  variant="cta"
+                  size="xl"
+                  className="flex-1"
                 >
                   {isOutOfStock ? "Sold Out" : "Add to Bag"}
-                </button>
+                </Button>
               </div>
 
               {/* Express Checkout Button */}
-              <button 
+              <Button 
                 onClick={() => {
                    if (handleAddToCart(false)) {
                      router.push('/checkout');
                    }
                 }}
                 disabled={isOutOfStock}
-                className="w-full h-14 border border-foreground uppercase tracking-[0.2em] text-[11px] font-manrope font-black hover:bg-foreground hover:text-background transition-all disabled:opacity-50"
+                variant="ctaOutline"
+                size="xl"
+                className="w-full"
               >
                 Buy it Now
-              </button>
+              </Button>
 
               {/* Stock Warning */}
               {currentStock > 0 && currentStock < 5 && (
@@ -418,7 +422,7 @@ export default function ProductDetail({
             <div className="space-y-4 pt-4">
               <div className="flex items-center gap-3 text-[10px] uppercase tracking-widest text-muted-foreground font-manrope font-bold">
                 <Truck className="w-4 h-4" />
-                <span>Free shipping on orders over $150</span>
+                <span>Free shipping on orders over {formatCurrency(10000)}</span>
               </div>
               <div className="flex items-center gap-3 text-[10px] uppercase tracking-widest text-muted-foreground font-manrope font-bold">
                 <ShieldCheck className="w-4 h-4" />

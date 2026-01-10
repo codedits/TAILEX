@@ -52,7 +52,7 @@ export const StoreConfigService = {
                     ...config.theme // access DB overrides
                 },
                 navigation: { main: mainNav, footer: footerNav },
-                currency: config.currency || { code: 'USD', symbol: '$' },
+                currency: config.currency || { code: 'PKR', symbol: 'Rs.' },
                 hero: config.hero || { heading: '', subheading: '', image: '', ctaText: '', ctaLink: '' },
                 benefits: config.benefits || { enabled: true, items: [] },
                 categoryGrid: config.categoryGrid || { aspectRatio: '0.8' } // Default to 4:5

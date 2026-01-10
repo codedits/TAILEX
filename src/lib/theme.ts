@@ -57,7 +57,7 @@ const defaultSocialConfig: SocialConfig = {
 const defaultBenefitsConfig: BenefitsConfig = {
     enabled: true,
     items: [
-        { icon: 'truck', text: 'Free shipping on orders over $75' },
+        { icon: 'truck', text: 'Free shipping on all orders this week' },
         { icon: 'rotate', text: '14-day hassle-free returns' },
         { icon: 'shield', text: '30-day product warranty' },
         { icon: 'headphones', text: 'Customer support 24/7' }

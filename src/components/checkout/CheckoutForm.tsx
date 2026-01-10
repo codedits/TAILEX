@@ -13,12 +13,14 @@ import { toast } from "@/hooks/use-toast";
 import { createOrderAction } from "@/actions/order";
 import { useRouter } from "next/navigation";
 import { User } from "@supabase/supabase-js";
+import { useFormatCurrency } from "@/context/StoreConfigContext";
 
 interface CheckoutFormProps {
     user: User | null;
 }
 
 export default function CheckoutForm({ user }: CheckoutFormProps) {
+    const formatCurrency = useFormatCurrency();
     const { items, cartTotal, clearCart } = useCart();
     const [isProcessing, setIsProcessing] = useState(false);
     const router = useRouter();
@@ -198,8 +200,9 @@ export default function CheckoutForm({ user }: CheckoutFormProps) {
                             </div>
                         </div>
 
-                        <Button type="submit" className="w-full py-6 text-lg uppercase tracking-widest" disabled={isProcessing}>
-                            {isProcessing ? "Processing..." : `Pay PKR Rs.${cartTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+
+                        <Button type="submit" variant="cta" size="xl" className="w-full" disabled={isProcessing}>
+                            {isProcessing ? "Processing..." : `Pay ${formatCurrency(cartTotal)}`}
                         </Button>
                     </form>
                 </div>
@@ -229,7 +232,7 @@ export default function CheckoutForm({ user }: CheckoutFormProps) {
                                     <h3 className="font-medium text-sm">{item.name}</h3>
                                     <p className="text-xs text-muted-foreground">Size: {item.size}</p>
                                 </div>
-                                <p className="font-medium text-sm">PKR Rs.{(item.price * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                <p className="font-medium text-sm">{formatCurrency(item.price * item.quantity)}</p>
                             </div>
                         ))}
                     </div>
@@ -239,7 +242,7 @@ export default function CheckoutForm({ user }: CheckoutFormProps) {
                     <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">Subtotal</span>
-                            <span>PKR Rs.{cartTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            <span>{formatCurrency(cartTotal)}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">Shipping</span>
@@ -250,8 +253,8 @@ export default function CheckoutForm({ user }: CheckoutFormProps) {
                     <Separator className="my-6" />
 
                     <div className="flex justify-between items-center">
-                        <span className="font-medium text-lg">Total</span>
-                        <span className="font-medium text-lg">PKR Rs.{cartTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        <span className="font-manrope font-black uppercase tracking-widest">Total</span>
+                        <span className="font-manrope font-black text-2xl">{formatCurrency(cartTotal)}</span>
                     </div>
                 </div>
             </div>

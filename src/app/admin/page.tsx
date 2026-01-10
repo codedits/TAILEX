@@ -4,14 +4,17 @@ import { Overview } from "@/components/admin/dashboard/Overview";
 import { RecentSales } from "@/components/admin/dashboard/RecentSales";
 import { LowStockAlert } from "@/components/admin/dashboard/LowStockAlert";
 import { Package, DollarSign, ShoppingBag, Activity } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
+import { StoreConfigService } from "@/services/config";
 
 export default async function AdminDashboard() {
   // Parallel Data Fetching
-  const [stats, monthlyRevenue, recentSales, lowStockProducts] = await Promise.all([
+  const [stats, monthlyRevenue, recentSales, lowStockProducts, storeConfig] = await Promise.all([
     StatsService.getDashboardStats(),
     StatsService.getMonthlyRevenue(),
     StatsService.getRecentSales(),
-    StatsService.getLowStockProducts()
+    StatsService.getLowStockProducts(),
+    StoreConfigService.getStoreConfig()
   ]);
 
   return (
@@ -41,7 +44,7 @@ export default async function AdminDashboard() {
         {[
           {
             title: "Total Revenue",
-            value: `PKR Rs.${stats.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+            value: formatCurrency(stats.totalRevenue, storeConfig.currency),
             change: stats.revenueChange,
             icon: DollarSign,
           },

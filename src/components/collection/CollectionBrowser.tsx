@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import type { Product, Collection } from "@/lib/types";
+import { useFormatCurrency } from "@/context/StoreConfigContext";
 
 // Gender/Category options - like high-end fashion stores
 const GENDER_OPTIONS = [
@@ -50,17 +51,19 @@ export default function CollectionBrowser({
   initialCollectionId,
   showGenderTabs = true 
 }: CollectionBrowserProps) {
+  const formatCurrency = useFormatCurrency();
   const [selectedCategories, setSelectedCategories] = useState<string[]>(initialCollectionId ? [initialCollectionId] : []);
   const [selectedGender, setSelectedGender] = useState<string>('all');
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState([0, 1000]);
-  const [sortOption, setSortOption] = useState("featured");
-  const [gridCols, setGridCols] = useState<2 | 3>(3); // Grid view toggle
-
+  
   // Calculate max price from products
   const maxPrice = useMemo(() => {
     return Math.max(...products.map(p => p.price), 500);
   }, [products]);
+
+  const [priceRange, setPriceRange] = useState([0, maxPrice]);
+  const [sortOption, setSortOption] = useState("featured");
+  const [gridCols, setGridCols] = useState<2 | 3>(3); // Grid view toggle
 
   const toggleCategory = (collectionId: string) => {
     setSelectedCategories((prev) =>
@@ -229,8 +232,8 @@ export default function CollectionBrowser({
           className="mb-4"
         />
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>${priceRange[0]}</span>
-          <span>${priceRange[1]}</span>
+          <span>{formatCurrency(priceRange[0])}</span>
+          <span>{formatCurrency(priceRange[1])}</span>
         </div>
       </div>
     </div>

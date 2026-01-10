@@ -18,6 +18,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, Loader2, Lock } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/context/UserAuthContext"; // ADDED
+import { formatCurrency as utilsFormatCurrency, cn } from "@/lib/utils";
+import { useFormatCurrency } from "@/context/StoreConfigContext";
 
 interface CheckoutWizardProps {
     user: User | null;
@@ -28,6 +30,7 @@ interface CheckoutWizardProps {
 type CheckoutStep = 'email' | 'otp' | 'details' | 'success';
 
 export default function CheckoutWizard({ user: initialUser, customer, savedAddress }: CheckoutWizardProps) {
+    const formatCurrency = useFormatCurrency();
     const { items, cartTotal, clearCart } = useCart();
     const { sendOTP, verifyOTP, user: authUser } = useAuth(); // ADDED
     const [step, setStep] = useState<CheckoutStep>(initialUser ? 'details' : 'email');
@@ -351,8 +354,8 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
                                         </div>
                                     </div>
 
-                                    <Button type="submit" className="w-full py-6 text-lg uppercase tracking-widest" disabled={isProcessing}>
-                                        {isProcessing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : `Pay $${cartTotal.toFixed(2)}`}
+                                    <Button type="submit" variant="cta" size="xl" className="w-full" disabled={isProcessing}>
+                                        {isProcessing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : `PAY : ${formatCurrency(cartTotal + (step === 'details' ? 250 : 0))}`}
                                     </Button>
                                 </form>
                             </motion.div>
@@ -364,11 +367,11 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
                 {/* RIGHT COLUMN: SUMMARY */}
                 {/* Order Summary (Reuse existing design) */}
                 <div className="bg-secondary/20 p-8 rounded-lg h-fit">
-                    <h2 className="text-xl font-medium uppercase tracking-wide mb-6">Order Summary</h2>
+                    <h2 className="text-xl font-manrope font-black uppercase tracking-widest mb-6 border-b border-foreground/10 pb-4">Order Summary</h2>
                     <div className="space-y-6">
                         {items.map((item) => (
                             <div key={`${item.id}-${item.size}`} className="flex gap-4">
-                                <div className="relative w-16 h-20 bg-secondary/30 flex-shrink-0 overflow-hidden rounded-md">
+                                <div className="relative w-16 h-20 bg-secondary/30 flex-shrink-0 overflow-hidden rounded-none border border-foreground/5">
                                     {item.image ? (
                                         <Image
                                             src={item.image}
@@ -379,37 +382,37 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
                                     ) : (
                                         <div className="w-full h-full bg-neutral-200" />
                                     )}
-                                    <span className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs w-5 h-5 flex items-center justify-center rounded-bl-md">
+                                    <span className="absolute top-0 right-0 bg-foreground text-background text-[10px] font-manrope font-black w-5 h-5 flex items-center justify-center">
                                         {item.quantity}
                                     </span>
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className="font-medium text-sm">{item.name}</h3>
-                                    <p className="text-xs text-muted-foreground">Size: {item.size}</p>
+                                    <h3 className="font-manrope font-black text-[11px] uppercase tracking-widest">{item.name}</h3>
+                                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Size: {item.size}</p>
                                 </div>
-                                <p className="font-medium text-sm">${(item.price * item.quantity).toFixed(2)}</p>
+                                <p className="font-manrope font-black text-sm">{formatCurrency(item.price * item.quantity)}</p>
                             </div>
                         ))}
                     </div>
 
-                    <Separator className="my-6" />
+                    <Separator className="my-6 opacity-30" />
 
-                    <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Subtotal</span>
-                            <span>${cartTotal.toFixed(2)}</span>
+                    <div className="space-y-3">
+                        <div className="flex justify-between text-[11px] uppercase tracking-widest font-manrope font-black">
+                            <span className="text-muted-foreground/60">Subtotal</span>
+                            <span>{formatCurrency(cartTotal)}</span>
                         </div>
-                        <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Shipping</span>
-                            {step === 'details' ? <span>$9.99</span> : <span className="text-neutral-600">Calculated next step</span>}
+                        <div className="flex justify-between text-[11px] uppercase tracking-widest font-manrope font-black">
+                            <span className="text-muted-foreground/60">Shipping</span>
+                            {step === 'details' ? <span>{formatCurrency(250)}</span> : <span className="text-neutral-400 font-medium italic">Calculated next step</span>}
                         </div>
                     </div>
 
-                    <Separator className="my-6" />
+                    <Separator className="my-6 opacity-30" />
 
                     <div className="flex justify-between items-center">
-                        <span className="font-medium text-lg">Total</span>
-                        <span className="font-medium text-lg">${cartTotal.toFixed(2)}</span>
+                        <span className="font-manrope font-black uppercase tracking-widest text-xs">Total</span>
+                        <span className="font-manrope font-black text-3xl">{formatCurrency(cartTotal + (step === 'details' ? 250 : 0))}</span>
                     </div>
                 </div>
 

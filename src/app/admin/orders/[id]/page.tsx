@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notFound } from "next/navigation";
 import { formatCurrency } from "@/lib/utils";
+import { StoreConfigService } from "@/services/config";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { OrderStatusSelector } from "@/components/admin/orders/order-status-selector"; // We will create this
@@ -18,11 +19,14 @@ export default async function AdminOrderDetailPage({ params }: Props) {
     const { id } = await params;
     const supabase = await createAdminClient();
 
-    const { data: order } = await supabase
-        .from('orders')
-        .select('*, items:order_items(*)')
-        .eq('id', id)
-        .single();
+    const [{ data: order }, storeConfig] = await Promise.all([
+        supabase
+            .from('orders')
+            .select('*, items:order_items(*)')
+            .eq('id', id)
+            .single(),
+        StoreConfigService.getStoreConfig()
+    ]);
 
     if (!order) {
         notFound();
@@ -101,22 +105,22 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                         <div className="bg-neutral-950/50 p-6 space-y-3">
                             <div className="flex justify-between text-sm text-white/60">
                                 <span>Subtotal</span>
-                                <span>{formatCurrency(order.subtotal)}</span>
+                                <span>{formatCurrency(order.subtotal, storeConfig.currency)}</span>
                             </div>
                             <div className="flex justify-between text-sm text-white/60">
                                 <span>Shipping</span>
-                                <span>{formatCurrency(order.shipping_total)}</span>
+                                <span>{formatCurrency(order.shipping_total, storeConfig.currency)}</span>
                             </div>
                             {order.tax_total > 0 && (
                                 <div className="flex justify-between text-sm text-white/60">
                                     <span>Tax</span>
-                                    <span>{formatCurrency(order.tax_total)}</span>
+                                    <span>{formatCurrency(order.tax_total, storeConfig.currency)}</span>
                                 </div>
                             )}
                             <Separator className="bg-white/10 my-2" />
                             <div className="flex justify-between text-lg font-medium text-white">
                                 <span>Total</span>
-                                <span>{formatCurrency(order.total)}</span>
+                                <span>{formatCurrency(order.total, storeConfig.currency)}</span>
                             </div>
                         </div>
                     </div>

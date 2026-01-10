@@ -7,21 +7,31 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { useState } from "react";
 import { CartProvider } from "@/context/CartContext";
 import { UserAuthProvider } from "@/context/UserAuthContext";
+import { StoreConfigProvider } from "@/context/StoreConfigContext";
+import { StoreConfig } from "@/services/config";
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({ 
+  children,
+  initialConfig
+}: { 
+  children: React.ReactNode;
+  initialConfig: StoreConfig;
+}) {
   const [queryClient] = useState(() => new QueryClient());
 
   return (
     <QueryClientProvider client={queryClient}>
-      <UserAuthProvider>
-        <CartProvider>
-          <TooltipProvider>
-            {children}
-            <Toaster />
-            <Sonner />
-          </TooltipProvider>
-        </CartProvider>
-      </UserAuthProvider>
+      <StoreConfigProvider initialConfig={initialConfig}>
+        <UserAuthProvider>
+          <CartProvider>
+            <TooltipProvider>
+              {children}
+              <Toaster />
+              <Sonner />
+            </TooltipProvider>
+          </CartProvider>
+        </UserAuthProvider>
+      </StoreConfigProvider>
     </QueryClientProvider>
   );
 }
