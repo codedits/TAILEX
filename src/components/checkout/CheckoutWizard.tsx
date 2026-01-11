@@ -111,7 +111,8 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
                     city: formData.get("city") as string,
                     postal_code: formData.get("postalCode") as string, // Note: payload expects zip or postal_code? API Route uses schema "shipping_address"
                     zip: formData.get("postalCode") as string,
-                    country: "US"
+                    country: "US",
+                    country_code: "US"
                 },
                 payment_method: "card", // Default for now
                 user_name: `${formData.get("firstName")} ${formData.get("lastName")}`,
@@ -308,6 +309,7 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
                                                 name="address"
                                                 placeholder="123 Main St"
                                                 required
+                                                minLength={5}
                                                 defaultValue={savedAddress?.address1 || ''}
                                             />
                                         </div>
@@ -329,6 +331,7 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
                                                     id="city"
                                                     name="city"
                                                     required
+                                                    minLength={2}
                                                     defaultValue={savedAddress?.city || ''}
                                                 />
                                             </div>
