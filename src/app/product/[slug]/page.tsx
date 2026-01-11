@@ -13,12 +13,54 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Product } from "@/lib/types";
+import { Metadata } from "next";
 
 export const revalidate = 60; // Revalidate every minute
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const supabase = await createClient();
+
+  // Fetch product for metadata
+  const { data: product } = await supabase
+    .from("products")
+    .select("title, description, cover_image")
+    .eq("slug", slug)
+    .single();
+
+  if (!product) {
+    return {
+      title: "Product Not Found",
+    };
+  }
+
+  const title = `${product.title} | TAILEX`;
+  const description = product.description
+    ? product.description.slice(0, 160)
+    : `Discover ${product.title} at TAILEX.`;
+
+  const images = product.cover_image ? [product.cover_image] : [];
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images,
+    },
+  };
+}
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
