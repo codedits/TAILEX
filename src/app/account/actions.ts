@@ -1,41 +1,71 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { getAuthUser } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 
 export async function updateProfile(formData: FormData) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthUser()
   if (!user) return { error: 'Not authenticated' }
 
-  const first_name = formData.get('first_name') as string
-  const last_name = formData.get('last_name') as string
-  const phone = formData.get('phone') as string
+  const supabase = await createAdminClient()
 
-  // Address fields
-  const address1 = formData.get('address1') as string
-  const address2 = formData.get('address2') as string
-  const city = formData.get('city') as string
-  const province = formData.get('province') as string
-  const zip = formData.get('zip') as string
-  const country = formData.get('country') as string || 'US'
+  const profileData = {
+    first_name: formData.get('first_name') as string || null,
+    last_name: formData.get('last_name') as string || null,
+    phone: formData.get('phone') as string || null,
+    address1: formData.get('address1') as string || null,
+    address2: formData.get('address2') as string || null,
+    city: formData.get('city') as string || null,
+    province: formData.get('province') as string || null,
+    zip: formData.get('zip') as string || null,
+    country: formData.get('country') as string || 'US',
+  }
 
-  const { error } = await supabase
+  // Check if customer exists for this user
+  const { data: existingCustomer } = await supabase
     .from('customers')
-    .update({
-      first_name,
-      last_name,
-      phone,
-      address1,
-      address2,
-      city,
-      province,
-      zip,
-      country
-    })
+    .select('id')
     .eq('user_id', user.id)
+    .single()
 
-  if (error) return { error: error.message }
+  if (existingCustomer) {
+    // Update existing customer
+    const { error } = await supabase
+      .from('customers')
+      .update(profileData)
+      .eq('id', existingCustomer.id)
+
+    if (error) return { error: error.message }
+  } else {
+    // Create new customer linked to user
+    const { error } = await supabase
+      .from('customers')
+      .insert({
+        user_id: user.id,
+        email: user.email,
+        ...profileData
+      })
+
+    if (error) return { error: error.message }
+  }
+
   revalidatePath('/account')
   return { success: true }
+}
+
+// Get customer profile for the current user
+export async function getCustomerProfile() {
+  const user = await getAuthUser()
+  if (!user) return null
+
+  const supabase = await createAdminClient()
+
+  const { data: customer } = await supabase
+    .from('customers')
+    .select('*')
+    .eq('user_id', user.id)
+    .single()
+
+  return customer
 }

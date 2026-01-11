@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
 
         // 4. Upsert User: Check if user exists, if not create
         let user;
+        let isNewUser = false;
         const { data: existingUser, error: userFetchError } = await supabase
             .from('users')
             .select('id, email, name, phone, address')
@@ -67,11 +68,34 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
             }
             user = newUser;
+            isNewUser = true;
         } else {
             user = existingUser;
         }
 
-        // 5. Generate JWT
+        // 5. Ensure customer record exists (linked to the user)
+        const { data: existingCustomer } = await supabase
+            .from('customers')
+            .select('id')
+            .eq('user_id', user.id)
+            .single();
+
+        if (!existingCustomer) {
+            // Create customer record for this user
+            const { error: customerError } = await supabase
+                .from('customers')
+                .insert({
+                    user_id: user.id,
+                    email: user.email
+                });
+
+            if (customerError) {
+                console.error('Customer Insert Error:', customerError);
+                // Non-fatal - continue anyway
+            }
+        }
+
+        // 6. Generate JWT
         const token = await new SignJWT({
             userId: user.id,
             email: user.email,
@@ -81,7 +105,7 @@ export async function POST(request: NextRequest) {
             .setExpirationTime('30d')
             .sign(JWT_SECRET);
 
-        // 6. Create Response
+        // 7. Create Response
         const response = NextResponse.json({
             success: true,
             user: {
@@ -93,7 +117,7 @@ export async function POST(request: NextRequest) {
             },
         });
 
-        // 7. Set HTTP-only Secure Cookie
+        // 8. Set HTTP-only Secure Cookie
         response.cookies.set('auth_token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',

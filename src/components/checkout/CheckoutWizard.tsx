@@ -11,18 +11,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { toast } from "@/hooks/use-toast";
 import { createOrderAction } from "@/actions/order";
-// import { sendOTP, verifyOTP } from "@/app/login/actions"; // REMOVED
 import { useRouter } from "next/navigation";
-import { User } from "@supabase/supabase-js";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, Loader2, Lock } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { useAuth } from "@/context/UserAuthContext"; // ADDED
+import { useAuth } from "@/context/UserAuthContext";
 import { formatCurrency as utilsFormatCurrency, cn } from "@/lib/utils";
 import { useFormatCurrency } from "@/context/StoreConfigContext";
+import type { AuthUser } from "@/lib/auth";
 
 interface CheckoutWizardProps {
-    user: User | null;
+    user: AuthUser | null;
     customer?: any;
     savedAddress?: any;
 }

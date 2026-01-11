@@ -1,5 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin';
-import { createClient } from '@/lib/supabase/server';
+import { getAuthUser } from '@/lib/auth';
 import { AppError } from './errors';
 import { EmailService } from './email';
 import {
@@ -117,8 +117,7 @@ export const OrderService = {
         const total = subtotal + shippingTotal + taxTotal;
 
         // 5. Create Order Logic
-        const serverClient = await createClient();
-        const { data: { user } } = await serverClient.auth.getUser();
+        const user = await getAuthUser();
 
         const itemsWithOrderId = orderItems.map(item => ({ ...item, order_id: '' }));
         let order: any;

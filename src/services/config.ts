@@ -1,65 +1,109 @@
-import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { AppError } from './errors';
 import { unstable_cache } from 'next/cache';
+import { HomepageSection, FooterConfig, SocialConfig, BenefitsConfig } from '@/lib/types';
 
 export type StoreConfig = {
-    brand: { name: string; tagline: string; announcement: string; showAnnouncement: boolean };
+    brand: { name: string; tagline: string; announcement: string; showAnnouncement: boolean; logoUrl?: string };
     theme: {
         primaryColor: string;
         font: string;
         borderRadius: string;
         backgroundColor?: string;
         foregroundColor?: string;
-        secondaryColor?: string; // Optional legacy
+        secondaryColor?: string;
         mode?: 'light' | 'dark';
     };
     navigation: { main: any[]; footer: any[] };
+    footer: FooterConfig;
+    social: SocialConfig;
     currency: { code: string; symbol: string };
-    hero?: { heading?: string; subheading?: string; image?: string; ctaText?: string; ctaLink?: string };
-    benefits?: { enabled: boolean; items: { icon: string; text: string }[] };
-    categoryGrid?: { aspectRatio: string };
+    hero: { heading: string; subheading?: string; image?: string; ctaText?: string; ctaLink?: string };
+    benefits: BenefitsConfig;
+    categoryGrid: { aspectRatio: string };
+    homepageLayout: HomepageSection[];
 };
 
 export const StoreConfigService = {
     getStoreConfig: unstable_cache(
         async (): Promise<StoreConfig> => {
             const supabase = await createAdminClient();
-            const { data, error } = await supabase.from('site_config').select('key, value');
 
+            // 1. Fetch Key-Value Config
+            const { data, error } = await supabase.from('site_config').select('key, value');
             if (error) throw new AppError(error.message, 'DB_ERROR');
 
+            // 2. Fetch Navigation Menus
             const { data: navMenus } = await supabase.from('navigation_menus').select('*');
 
-            const config: any = {};
+            const dbConfig: any = {};
             data.forEach(row => {
-                config[row.key] = row.value;
+                dbConfig[row.key] = row.value;
             });
 
             const mainNav = navMenus?.find(n => n.handle === 'main-menu')?.items || [];
-            // If footer nav exists in DB use it, otherwise fallback/empty
-            const footerNav = navMenus?.find(n => n.handle === 'footer')?.items || [];
 
-            // Transform raw KV to typed object with defaults
+            // Navigation fallback logic
+            const footerNavItems = navMenus?.find(n => n.handle === 'footer')?.items || [];
+
+            // Defaults
+            const defaultBrand = { name: 'TAILEX', tagline: '', announcement: '', showAnnouncement: false };
+            const defaultTheme = {
+                primaryColor: '#000000',
+                font: 'manrope',
+                borderRadius: '0.5rem',
+                backgroundColor: '#ffffff',
+                foregroundColor: '#000000',
+                mode: 'light' as const
+            };
+            const defaultCurrency = { code: 'PKR', symbol: 'Rs.' };
+            const defaultHero = { heading: '', subheading: '', image: '', ctaText: '', ctaLink: '' };
+            const defaultBenefits = { enabled: true, items: [] };
+
+            const defaultFooter: FooterConfig = {
+                tagline: 'Timeless wardrobe essentials.',
+                columns: [], // Will be populated below if not in config
+                showSocial: true,
+                copyright: '© {year} {brand}. All rights reserved.'
+            };
+
+            const defaultSocial = { instagram: '', twitter: '', facebook: '' };
+
+            // Merge DB config with defaults
+            const brand = { ...defaultBrand, ...dbConfig.brand };
+            const theme = { ...defaultTheme, ...dbConfig.theme };
+            const currency = dbConfig.currency || defaultCurrency;
+            const hero = { ...defaultHero, ...dbConfig.hero };
+            const benefits = { ...defaultBenefits, ...dbConfig.benefits };
+            const social = { ...defaultSocial, ...dbConfig.social };
+
+            // Footer Logic: Merge DB footer config with defaults AND inject navigation items if needed
+            const dbFooter = dbConfig.footer || {};
+            const footer: FooterConfig = {
+                ...defaultFooter,
+                ...dbFooter,
+                // Ensure columns exist. If DB has columns use them, otherwise use navigation menu items as a single column or empty
+                columns: dbFooter.columns || (footerNavItems.length > 0 ? [{ title: 'Links', links: footerNavItems }] : [])
+            };
+
+            const homepageLayout = dbConfig.homepage_layout || [];
+            const categoryGrid = dbConfig.categoryGrid || { aspectRatio: '0.8' };
+
             return {
-                brand: config.brand || { name: 'TAILEX', tagline: '', announcement: '', showAnnouncement: false },
-                theme: {
-                    primaryColor: '#000000',
-                    font: 'manrope',
-                    borderRadius: '0.5rem',
-                    backgroundColor: '#ffffff',
-                    foregroundColor: '#000000',
-                    ...config.theme // access DB overrides
-                },
-                navigation: { main: mainNav, footer: footerNav },
-                currency: config.currency || { code: 'PKR', symbol: 'Rs.' },
-                hero: config.hero || { heading: '', subheading: '', image: '', ctaText: '', ctaLink: '' },
-                benefits: config.benefits || { enabled: true, items: [] },
-                categoryGrid: config.categoryGrid || { aspectRatio: '0.8' } // Default to 4:5
+                brand,
+                theme,
+                navigation: { main: mainNav, footer: footerNavItems }, // Keep for backward compat
+                footer,
+                social,
+                currency,
+                hero,
+                benefits,
+                categoryGrid,
+                homepageLayout
             };
         },
         ['store-config'],
-        { tags: ['site_config'], revalidate: 3600 }
+        { tags: ['site_config', 'navigation_menus'], revalidate: 3600 }
     ),
 
     async updateConfig(key: string, value: any): Promise<void> {
