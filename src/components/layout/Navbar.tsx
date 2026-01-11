@@ -68,12 +68,42 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
 
             {isLoading ? (
               <div className="w-5 h-5 rounded-full bg-white/20 animate-pulse hidden md:block" />
+            ) : isAuthenticated ? (
+              <div className="hidden md:block relative group">
+                <button className="hover:opacity-70 transition-opacity flex items-center gap-2">
+                  <User className="w-5 h-5" />
+                  <span className="text-[10px] font-manrope font-black uppercase tracking-widest">Account</span>
+                </button>
+                <div className="absolute right-0 top-full mt-2 w-40 bg-black border border-white/10 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                  <Link
+                    href="/account"
+                    className="block px-4 py-3 text-[10px] font-manrope font-black uppercase tracking-widest hover:bg-white/5 transition-colors"
+                  >
+                    My Account
+                  </Link>
+                  <Link
+                    href="/account/orders"
+                    className="block px-4 py-3 text-[10px] font-manrope font-black uppercase tracking-widest hover:bg-white/5 transition-colors"
+                  >
+                    Orders
+                  </Link>
+                  <form action="/api/auth/signout" method="POST" className="border-t border-white/10">
+                    <button
+                      type="submit"
+                      className="w-full text-left px-4 py-3 text-[10px] font-manrope font-black uppercase tracking-widest hover:bg-white/5 transition-colors text-red-400"
+                    >
+                      Sign Out
+                    </button>
+                  </form>
+                </div>
+              </div>
             ) : (
               <Link
-                href={isAuthenticated ? "/account" : "/login"}
-                className="hidden md:block hover:opacity-70 transition-opacity"
+                href="/login"
+                className="hidden md:flex items-center gap-2 hover:opacity-70 transition-opacity"
               >
                 <User className="w-5 h-5" />
+                <span className="text-[10px] font-manrope font-black uppercase tracking-widest">Sign In</span>
               </Link>
             )}
 

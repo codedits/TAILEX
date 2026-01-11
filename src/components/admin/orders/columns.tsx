@@ -124,6 +124,23 @@ export const columns: ColumnDef<Order>[] = [
                         <DropdownMenuItem className="text-white focus:bg-white/10" asChild>
                             <Link href={`/admin/orders/${order.id}`}>View Details</Link>
                         </DropdownMenuItem>
+                        <DropdownMenuSeparator className="bg-white/10" />
+                        <DropdownMenuItem
+                            className="text-red-400 focus:bg-red-500/10 focus:text-red-400"
+                            onClick={async () => {
+                                if (confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
+                                    const { deleteOrderAction } = await import('@/app/admin/orders/actions');
+                                    const result = await deleteOrderAction(order.id);
+                                    if (result.success) {
+                                        window.location.reload();
+                                    } else {
+                                        alert(result.error || 'Failed to delete order');
+                                    }
+                                }
+                            }}
+                        >
+                            Delete Order
+                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             )

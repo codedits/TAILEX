@@ -102,6 +102,7 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
             // But we created a NEW API route for orders `/api/orders`. We should use it!
 
             const payload = {
+                email: email, // Validated in step 1 or from auth
                 items: orderItems,
                 phone: formData.get("phone") as string,
                 shipping_address: {
@@ -129,6 +130,10 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
 
             if (result.success) {
                 clearCart();
+                toast({
+                    title: "Order Placed!",
+                    description: "Your shipping address has been saved for next time."
+                });
                 router.push(`/account/orders/${result.orderId}`);
             } else {
                 toast({

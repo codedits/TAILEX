@@ -67,8 +67,41 @@ const defaultBenefitsConfig: BenefitsConfig = {
 const defaultFooterConfig: FooterConfig = {
     tagline: 'Timeless wardrobe essentials designed for everyday confidence.',
     columns: [
-        { title: 'Navigation', handle: 'footer-nav' },
-        { title: 'Info', handle: 'footer-info' }
+        {
+            title: 'Shop',
+            links: [
+                { label: 'All Products', url: '/shop' },
+                { label: 'New Arrivals', url: '/collection/new-arrivals' },
+                { label: 'Best Sellers', url: '/collection/best-sellers' },
+                { label: 'Accessories', url: '/collection/accessories' },
+            ]
+        },
+        {
+            title: 'Company',
+            links: [
+                { label: 'About Us', url: '/about' },
+                { label: 'Journal', url: '/news' },
+                { label: 'Careers', url: '/careers' },
+                { label: 'Contact', url: '/contact' },
+            ]
+        },
+        {
+            title: 'Account',
+            links: [
+                { label: 'Login', url: '/login' },
+                { label: 'Sign Up', url: '/register' },
+                { label: 'My Orders', url: '/account/orders' },
+                { label: 'Settings', url: '/account' },
+            ]
+        },
+        {
+            title: 'Legal',
+            links: [
+                { label: 'Privacy Policy', url: '/privacy' },
+                { label: 'Terms of Service', url: '/terms' },
+                { label: 'Cookie Policy', url: '/cookies' },
+            ]
+        }
     ],
     showSocial: true,
     copyright: '© {year} {brand}. All rights reserved.'

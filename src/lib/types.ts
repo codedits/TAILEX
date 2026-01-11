@@ -127,6 +127,14 @@ export type Customer = {
   last_name?: string | null
   phone?: string | null
 
+  // Single Address Fields
+  address1?: string | null
+  address2?: string | null
+  city?: string | null
+  province?: string | null
+  zip?: string | null
+  country?: string | null
+
   total_spent: number
   total_orders: number
 
@@ -142,32 +150,7 @@ export type Customer = {
   updated_at?: string
 
   // Relations
-  addresses?: CustomerAddress[]
   orders?: Order[]
-}
-
-export type CustomerAddress = {
-  id: string
-  customer_id: string
-
-  first_name?: string | null
-  last_name?: string | null
-  company?: string | null
-  address1: string
-  address2?: string | null
-  city: string
-  province?: string | null
-  province_code?: string | null
-  country: string
-  country_code: string
-  zip: string
-  phone?: string | null
-
-  is_default: boolean
-  address_type: 'shipping' | 'billing'
-
-  created_at?: string
-  updated_at?: string
 }
 
 // ==========================================
@@ -650,6 +633,8 @@ export type CreateOrderInput = {
   billing_address?: OrderAddress
   customer_note?: string
   discount_code?: string
+  payment_method?: string
+  payment_proof?: Record<string, unknown> | null
 }
 
 export type CreateReviewInput = {

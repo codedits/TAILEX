@@ -56,11 +56,27 @@ export async function POST(request: NextRequest) {
         }
 
         // 5. Send Email via Nodemailer
-        await EmailService.sendOTP(email, code);
+        try {
+            await EmailService.sendOTP(email, code);
+        } catch (emailError) {
+            console.error('Email sending failed:', emailError);
+
+            // In development mode without SMTP, still allow login by returning success
+            // The OTP is already in the database and was logged to console by EmailService
+            if (!process.env.SMTP_USER) {
+                console.log(`[DEV MODE] OTP for ${email}: ${code}`);
+                return NextResponse.json({
+                    success: true,
+                    message: 'OTP generated (check server console in dev mode)'
+                });
+            }
+
+            return NextResponse.json({ error: 'Failed to send OTP email. Please try again.' }, { status: 500 });
+        }
 
         return NextResponse.json({ success: true, message: 'OTP sent to your email' });
     } catch (error) {
         console.error('Send OTP Error:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to send OTP. Please try again.' }, { status: 500 });
     }
 }

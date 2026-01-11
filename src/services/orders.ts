@@ -131,7 +131,6 @@ export const OrderService = {
                     email: input.email,
                     phone: input.phone || null,
                     status: 'pending',
-                    payment_status: 'pending',
                     fulfillment_status: 'unfulfilled',
                     subtotal,
                     shipping_total: shippingTotal,
@@ -139,6 +138,10 @@ export const OrderService = {
                     total,
                     shipping_address: input.shipping_address,
                     billing_address: input.billing_address || input.shipping_address,
+                    payment_method: input.payment_method || 'card',
+                    payment_proof: input.payment_proof,
+                    // Map payment proof status for COD
+                    payment_status: (input.payment_method === 'COD' && input.payment_proof) ? 'proof_submitted' : 'pending'
                 })
                 .select()
                 .single();
@@ -179,27 +182,19 @@ export const OrderService = {
                         .eq('id', existingCustomer.id);
                 }
 
-                // 2. Save Address if it's the first one (Simple logic for now)
+                // 2. Update Customer Address (Single Address Model)
                 if (customerId) {
-                    const { count } = await supabase
-                        .from('customer_addresses')
-                        .select('*', { count: 'exact', head: true })
-                        .eq('customer_id', customerId);
-
-                    if (count === 0) {
-                        await supabase.from('customer_addresses').insert({
-                            customer_id: customerId,
-                            label: 'Home',
-                            first_name: input.shipping_address.first_name,
-                            last_name: input.shipping_address.last_name,
+                    await supabase
+                        .from('customers')
+                        .update({
                             address1: input.shipping_address.address1,
                             city: input.shipping_address.city,
-                            postal_code: input.shipping_address.zip,
+                            zip: input.shipping_address.zip,
                             country: input.shipping_address.country,
-                            phone: input.phone,
-                            is_default: true
-                        });
-                    }
+                            first_name: input.shipping_address.first_name, // Update name as well if needed
+                            last_name: input.shipping_address.last_name
+                        })
+                        .eq('id', customerId);
                 }
             }
             // --- UPSERT LOGIC END ---
@@ -319,6 +314,30 @@ export const OrderService = {
         if (updateError) throw new AppError(updateError.message, 'DB_ERROR');
         revalidatePath('/admin/orders');
         return updated as Order;
+    },
+
+    async deleteOrder(id: string): Promise<void> {
+        const supabase = await createAdminClient();
+
+        // First delete order items
+        const { error: itemsError } = await supabase
+            .from('order_items')
+            .delete()
+            .eq('order_id', id);
+
+        if (itemsError) {
+            console.error('Failed to delete order items:', itemsError);
+        }
+
+        // Then delete the order
+        const { error } = await supabase
+            .from('orders')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw new AppError(error.message, 'DB_ERROR');
+
+        revalidatePath('/admin/orders');
     }
 };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2, ArrowLeft, ArrowRight } from "lucide-react";
@@ -23,7 +23,14 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
-  const { sendOTP, verifyOTP } = useAuth();
+  const { sendOTP, verifyOTP, isAuthenticated, isLoading } = useAuth();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace('/account');
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();

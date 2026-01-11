@@ -10,4 +10,12 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// Gmail requires sending from the authenticated email address
+// Use a display name but keep the authenticated email as the actual sender
+export function getFromAddress(displayName: string = 'Tailex') {
+  const email = process.env.SMTP_USER;
+  if (!email) return undefined;
+  return `"${displayName}" <${email}>`;
+}
+
 export default transporter;
