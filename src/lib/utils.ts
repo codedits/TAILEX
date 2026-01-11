@@ -59,25 +59,17 @@ export interface CurrencyConfig {
   format?: "symbol amount" | "amount symbol";
 }
 
-let activeCurrency: CurrencyConfig = {
+export const DEFAULT_CURRENCY: CurrencyConfig = {
   code: "PKR",
   symbol: "PKR Rs.",
   format: "symbol amount",
 };
 
-export function setGlobalCurrency(config: CurrencyConfig) {
-  activeCurrency = {
-    ...activeCurrency,
-    ...config,
-  };
-}
-
-export function formatCurrency(amount: number, config?: CurrencyConfig): string {
-  const cfg = config || activeCurrency;
+export function formatCurrency(amount: number, config: CurrencyConfig = DEFAULT_CURRENCY): string {
   const formattedAmount = Math.round(amount).toLocaleString();
-  
-  return cfg.format === "amount symbol"
-    ? `${formattedAmount} ${cfg.symbol}`
-    : `${cfg.symbol} ${formattedAmount}`;
+
+  return config.format === "amount symbol"
+    ? `${formattedAmount} ${config.symbol}`
+    : `${config.symbol} ${formattedAmount}`;
 }
 

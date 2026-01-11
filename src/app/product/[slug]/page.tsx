@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ProductDetail from "@/components/product/ProductDetail";
-import { getNavigation, getBrandConfig, getFooterConfig, getSocialConfig } from "@/lib/theme";
+import { StoreConfigService } from "@/services/config";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -25,16 +25,13 @@ export default async function ProductPage({ params }: Props) {
   const supabase = await createClient();
 
   // Fetch product and all config in parallel
-  const [productResult, navItems, brand, footerConfig, socialConfig] = await Promise.all([
+  const [productResult, config] = await Promise.all([
     supabase
       .from("products")
       .select(`*, options:product_options(*), variants:product_variants(*)`)
       .eq("slug", slug)
       .single(),
-    getNavigation('main-menu'),
-    getBrandConfig(),
-    getFooterConfig(),
-    getSocialConfig()
+    StoreConfigService.getStoreConfig()
   ]);
 
   if (productResult.error || !productResult.data) {
@@ -43,6 +40,11 @@ export default async function ProductPage({ params }: Props) {
   }
 
   const typedProduct = productResult.data as Product;
+
+  const brand = config.brand;
+  const footerConfig = config.footer;
+  const socialConfig = config.social;
+  const navItemsList = config.navigation.main;
 
   // Fetch Related Products (excluding current product, same category preferred)
   const { data: relatedProducts } = await supabase
@@ -56,7 +58,7 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <Navbar brandName={brand.name} navItems={navItems} />
+      <Navbar brandName={brand.name} navItems={navItemsList} />
 
       <div className="pt-32 pb-20 px-6 md:px-12">
         {/* Breadcrumbs */}

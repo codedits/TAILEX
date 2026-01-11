@@ -129,7 +129,7 @@ export const columns: ColumnDef<Order>[] = [
                             className="text-red-400 focus:bg-red-500/10 focus:text-red-400"
                             onClick={async () => {
                                 if (confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
-                                    const { deleteOrderAction } = await import('@/app/admin/orders/actions');
+                                    const { deleteOrderAction } = await import('@/app/admin/(dashboard)/orders/actions');
                                     const result = await deleteOrderAction(order.id);
                                     if (result.success) {
                                         window.location.reload();

@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { Upload, Trash2, Crop as CropIcon } from 'lucide-react';
 import { ImageCropper } from '@/components/ui/image-cropper';
 import { StoreConfig } from '@/services/config';
+import { BenefitItem } from '@/lib/types';
 import { convertFileToWebP } from '@/lib/image-utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -341,8 +342,7 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                                     value={item.icon || 'truck'}
                                     onChange={(e) => {
                                         const newItems = [...(config.benefits?.items || [])];
-                                        // @ts-ignore
-                                        newItems[index] = { ...item, icon: e.target.value };
+                                        newItems[index] = { ...item, icon: e.target.value as BenefitItem['icon'] };
                                         setConfig({ ...config, benefits: { ...config.benefits!, items: newItems } });
                                     }}
                                 >
@@ -357,7 +357,7 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                                     value={item.text || ''}
                                     onChange={(e) => {
                                         const currentItems = config.benefits?.items || [];
-                                        const newItems: { icon: string; text: string }[] = [...currentItems];
+                                        const newItems: BenefitItem[] = [...currentItems];
                                         if (newItems[index]) {
                                             newItems[index] = { ...newItems[index], text: e.target.value };
                                             setConfig({

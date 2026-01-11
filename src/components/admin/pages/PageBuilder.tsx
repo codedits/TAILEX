@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { updatePage } from '@/app/admin/pages/actions';
+import { updatePage } from '@/app/admin/(dashboard)/pages/actions';
 import { Page } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

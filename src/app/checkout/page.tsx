@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import CheckoutWizard from "@/components/checkout/CheckoutWizard";
-
+export const dynamic = "force-dynamic";
 export default async function CheckoutPage() {
   const user = await getAuthUser();
   const supabase = await createAdminClient();

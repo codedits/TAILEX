@@ -91,12 +91,12 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                                         <div className="flex items-center gap-4 text-sm font-mono text-white/60">
                                             <span>Qty: {item.quantity}</span>
                                             <span>×</span>
-                                            <span>{formatCurrency(item.unit_price)}</span>
+                                            <span>{formatCurrency(item.unit_price, storeConfig.currency)}</span>
                                         </div>
                                     </div>
                                     <div className="text-right">
                                         <p className="text-white font-medium font-mono">
-                                            {formatCurrency(item.total_price)}
+                                            {formatCurrency(item.total_price, storeConfig.currency)}
                                         </p>
                                     </div>
                                 </div>

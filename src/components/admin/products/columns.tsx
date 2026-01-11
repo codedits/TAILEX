@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
 import { DeleteButton } from "@/components/admin/DeleteButton"
-import { deleteProduct } from "@/app/admin/products/actions"
+import { deleteProduct } from "@/app/admin/(dashboard)/products/actions"
 import { useFormatCurrency } from "@/context/StoreConfigContext"
 
 const PriceCell = ({ amount, saleAmount }: { amount: number, saleAmount?: number | null }) => {

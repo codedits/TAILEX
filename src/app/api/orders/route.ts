@@ -4,6 +4,9 @@ import { jwtVerify } from 'jose';
 import { EmailService } from '@/services/email';
 import { StoreConfigService } from '@/services/config';
 import { OrderService } from '@/services/orders';
+import { createOrderSchema } from '@/lib/validators';
+import { z } from 'zod';
+import { AppError } from '@/services/errors';
 
 const JWT_SECRET = new TextEncoder().encode(
     process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production'
@@ -34,21 +37,13 @@ export async function POST(request: NextRequest) {
         // Handle guest or authed checkout via token
         const tokenData = await getUserFromToken(request);
 
-        const input: any = {
-            email: body.email || tokenData?.email,
-            phone: body.phone,
-            items: body.items?.map((item: any) => ({
-                product_id: item.product_id,
-                variant_id: item.variant_id || null,
-                quantity: item.quantity
-            })) || [],
-            shipping_address: body.shipping_address,
-            billing_address: body.billing_address || body.shipping_address,
-            payment_method: body.payment_method,
-            payment_proof: body.payment_proof
-        };
+        // Pre-fill email from token if missing in body
+        if (!body.email && tokenData?.email) {
+            body.email = tokenData.email;
+        }
 
-        // Note: OrderService validation will catch missing fields.
+        // Zod Validation
+        const input = createOrderSchema.parse(body);
 
         const order = await OrderService.createOrder(input);
 
@@ -59,10 +54,17 @@ export async function POST(request: NextRequest) {
         });
 
     } catch (error: any) {
+        if (error instanceof z.ZodError) {
+            return NextResponse.json({ message: 'Validation Error', errors: error.errors }, { status: 400 });
+        }
+
         console.error('Orders POST Error:', error);
 
-        if (error.code === 'OUT_OF_STOCK' || error.message.includes('stock')) {
+        if (error.code === 'OUT_OF_STOCK' || error.message?.includes('stock')) {
             return NextResponse.json({ error: error.message }, { status: 400 });
+        }
+        if (error instanceof AppError) {
+            return NextResponse.json({ error: error.message }, { status: error.statusCode });
         }
 
         return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });

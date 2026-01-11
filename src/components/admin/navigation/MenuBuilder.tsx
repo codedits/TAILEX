@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { updateMenu } from '@/app/admin/navigation/actions';
+import { updateMenu } from '@/app/admin/(dashboard)/navigation/actions';
 import { MenuItem } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

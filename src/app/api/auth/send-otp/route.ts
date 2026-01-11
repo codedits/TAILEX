@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { EmailService } from '@/services/email';
+import { sendOtpSchema } from '@/lib/validators';
+import { z } from 'zod';
 
 // Generate 6-digit code
 function generateCode(): string {
@@ -9,16 +11,10 @@ function generateCode(): string {
 
 export async function POST(request: NextRequest) {
     try {
-        const { email } = await request.json();
+        const body = await request.json();
 
-        // 1. Validate Email
-        if (!email || typeof email !== 'string') {
-            return NextResponse.json({ error: 'Email is required' }, { status: 400 });
-        }
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
-        }
+        // Zod Validation
+        const { email } = sendOtpSchema.parse(body);
 
         const supabase = await createAdminClient();
 
@@ -76,6 +72,9 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({ success: true, message: 'OTP sent to your email' });
     } catch (error) {
+        if (error instanceof z.ZodError) {
+            return NextResponse.json({ message: 'Validation Error', errors: error.errors }, { status: 400 });
+        }
         console.error('Send OTP Error:', error);
         return NextResponse.json({ error: 'Failed to send OTP. Please try again.' }, { status: 500 });
     }

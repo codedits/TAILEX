@@ -13,16 +13,10 @@ import {
 import { calculateProductPrice } from '@/lib/logic/product-logic';
 import { revalidatePath } from 'next/cache';
 
-type StockAdjustment = {
-    productId: string;
-    variantId?: string | null;
-    from: number;
-    to: number;
-};
-
 export const OrderService = {
     async createOrder(input: CreateOrderInput): Promise<Order> {
         const supabase = await createAdminClient();
+        const user = await getAuthUser();
 
         // 1. Validate Input
         if (!input.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email)) {
@@ -32,30 +26,31 @@ export const OrderService = {
             throw AppError.badRequest('Order must contain at least one item');
         }
 
-        // 2. Fetch Products & Variants
+        // 2. Prepare Payload (Server-side validation of prices/stock is technically redundant if RPC checks stock, 
+        // but we still need to calculate prices securely to avoid trusting client input)
+        // Ideally we fetch products here just to calculate the price, but let the DB handle stock locking.
+
         const productIds = input.items.map(item => item.product_id);
         const { data: products, error: productsError } = await supabase
             .from('products')
             .select(`
-        id, title, price, sale_price, cover_image, sku, stock,
-        variants:product_variants(*)
-      `)
+                id, title, price, sale_price, cover_image, sku, stock,
+                variants:product_variants(*)
+            `)
             .in('id', productIds);
 
         if (productsError || !products) throw new AppError('Failed to fetch product data', 'DB_ERROR');
 
         const productMap = new Map(products.map(p => [p.id, p]));
-        const orderItems: any[] = [];
+        const orderItemsPayload = [];
         let subtotal = 0;
-        const stockAdjustments = new Map<string, StockAdjustment>();
 
-        // 3. Process Items (Price & Stock Check)
         for (const item of input.items) {
             const product = productMap.get(item.product_id);
             if (!product) throw AppError.badRequest(`Product not found: ${item.product_id}`);
 
+            // Calculate Price (Same logic as before)
             let unitPrice = 0;
-            let stockAvailable = product.stock || 0;
             let variantTitle = null;
             let sku = product.sku;
 
@@ -64,11 +59,8 @@ export const OrderService = {
                 const variant = variants.find(v => v.id === item.variant_id);
                 if (!variant) throw AppError.badRequest(`Variant ID ${item.variant_id} not found`);
 
-                const variantStock = variant.inventory_quantity ?? 0;
-                stockAvailable = variantStock;
                 variantTitle = variant.title;
                 sku = variant.sku || sku;
-
                 const vPrice = variant.price ?? product.price;
                 const vSalePrice = variant.sale_price ?? null;
                 unitPrice = (vSalePrice !== null && vSalePrice < vPrice) ? vSalePrice : vPrice;
@@ -77,27 +69,10 @@ export const OrderService = {
                 unitPrice = priceInfo.finalPrice;
             }
 
-            if (stockAvailable < item.quantity) {
-                throw AppError.badRequest(`Insufficient stock for "${product.title}"${variantTitle ? ' (' + variantTitle + ')' : ''}. Available: ${stockAvailable}`);
-            }
-
-            const adjustmentKey = `${product.id}:${item.variant_id || 'base'}`;
-            const existingAdjustment = stockAdjustments.get(adjustmentKey);
-            if (existingAdjustment) {
-                existingAdjustment.to -= item.quantity;
-            } else {
-                stockAdjustments.set(adjustmentKey, {
-                    productId: product.id,
-                    variantId: item.variant_id || null,
-                    from: stockAvailable,
-                    to: stockAvailable - item.quantity,
-                });
-            }
-
             const totalPrice = unitPrice * item.quantity;
             subtotal += totalPrice;
 
-            orderItems.push({
+            orderItemsPayload.push({
                 product_id: product.id,
                 variant_id: item.variant_id || null,
                 title: product.title,
@@ -111,113 +86,56 @@ export const OrderService = {
             });
         }
 
-        // 4. Calculate Totals (Simplified for now - can inject DiscountService later)
+        // Calculate Totals
         const shippingTotal = subtotal >= 100 ? 0 : 9.99;
         const taxTotal = 0;
         const total = subtotal + shippingTotal + taxTotal;
 
-        // 5. Create Order Logic
-        const user = await getAuthUser();
+        // 3. Call RPC Transaction
+        const payload = {
+            user_id: user?.id || null,
+            email: input.email,
+            phone: input.phone || null,
+            status: 'pending',
+            fulfillment_status: 'unfulfilled',
+            payment_status: (input.payment_method === 'COD' && input.payment_proof) ? 'proof_submitted' : 'pending',
+            subtotal,
+            shipping_total: shippingTotal,
+            tax_total: taxTotal,
+            total,
+            shipping_address: input.shipping_address,
+            billing_address: input.billing_address || input.shipping_address,
+            payment_method: input.payment_method || 'card',
+            payment_proof: input.payment_proof,
+            items: orderItemsPayload
+        };
 
-        const itemsWithOrderId = orderItems.map(item => ({ ...item, order_id: '' }));
-        let order: any;
+        const { data: order, error } = await supabase.rpc('create_order', { payload });
 
-        try {
-            const { data: createdOrder, error: orderError } = await supabase
-                .from('orders')
-                .insert({
-                    customer_id: user?.id || null,
-                    email: input.email,
-                    phone: input.phone || null,
-                    status: 'pending',
-                    fulfillment_status: 'unfulfilled',
-                    subtotal,
-                    shipping_total: shippingTotal,
-                    tax_total: taxTotal,
-                    total,
-                    shipping_address: input.shipping_address,
-                    billing_address: input.billing_address || input.shipping_address,
-                    payment_method: input.payment_method || 'card',
-                    payment_proof: input.payment_proof,
-                    // Map payment proof status for COD
-                    payment_status: (input.payment_method === 'COD' && input.payment_proof) ? 'proof_submitted' : 'pending'
-                })
-                .select()
-                .single();
-
-            if (orderError || !createdOrder) throw new AppError(orderError?.message || 'Failed to create order', 'DB_ERROR');
-            order = createdOrder;
-
-            // --- UPSERT LOGIC START ---
-            if (user) {
-                // 1. Upsert Customer Profile
-                const { data: existingCustomer } = await supabase
-                    .from('customers')
-                    .select('id, phone')
-                    .eq('user_id', user.id)
-                    .single();
-
-                let customerId = existingCustomer?.id;
-
-                if (!existingCustomer) {
-                    // Create new customer
-                    const { data: newCustomer } = await supabase
-                        .from('customers')
-                        .insert({
-                            user_id: user.id,
-                            email: input.email,
-                            first_name: input.shipping_address.first_name || '',
-                            last_name: input.shipping_address.last_name || '',
-                            phone: input.phone || null
-                        })
-                        .select('id')
-                        .single();
-                    customerId = newCustomer?.id;
-                } else if (input.phone && existingCustomer.phone !== input.phone) {
-                    // Update phone if provided and different
-                    await supabase
-                        .from('customers')
-                        .update({ phone: input.phone })
-                        .eq('id', existingCustomer.id);
-                }
-
-                // 2. Update Customer Address (Single Address Model)
-                if (customerId) {
-                    await supabase
-                        .from('customers')
-                        .update({
-                            address1: input.shipping_address.address1,
-                            city: input.shipping_address.city,
-                            zip: input.shipping_address.zip,
-                            country: input.shipping_address.country,
-                            first_name: input.shipping_address.first_name, // Update name as well if needed
-                            last_name: input.shipping_address.last_name
-                        })
-                        .eq('id', customerId);
-                }
-            }
-            // --- UPSERT LOGIC END ---
-
-            itemsWithOrderId.forEach(item => { item.order_id = order.id; });
-            const { error: itemsError } = await supabase.from('order_items').insert(itemsWithOrderId);
-            if (itemsError) throw new AppError(itemsError.message, 'DB_ERROR');
-
-            await applyStockAdjustments(supabase, Array.from(stockAdjustments.values()));
-        } catch (err) {
-            if (order?.id) {
-                await supabase.from('order_items').delete().eq('order_id', order.id);
-                await supabase.from('orders').delete().eq('id', order.id);
-            }
-            if (err instanceof AppError) throw err;
-            throw new AppError('Failed to create order', 'DB_ERROR');
+        if (error) {
+            console.error('Create Order RPC Error:', error);
+            throw new AppError(error.message || 'Failed to create order', 'DB_ERROR');
         }
 
-        // 8. Send Email Confirmation
-        const fullOrder = await OrderService.getOrder(order.id);
-        await EmailService.sendOrderConfirmation(input.email, fullOrder);
+        const createdOrder = order as Order;
+
+        // 4. Send Confirmation Email (Async / Fire-and-Forget)
+        // We do *not* await this promise to prevent blocking the response
+        Promise.resolve().then(async () => {
+            try {
+                // Fetch full order again? No, RPC returned the order row, but we need items joined potentially.
+                // Actually, email service needs items. The returned order from RPC is just the order row (see SQL)
+                // We should construct the Full Order object or fetch it.
+                // Fetching is safer to ensure we have checking.
+                const fullOrder = await OrderService.getOrder(createdOrder.id);
+                await EmailService.sendOrderConfirmation(input.email, fullOrder);
+            } catch (err) {
+                console.error('Background Email Failed:', err);
+            }
+        });
 
         revalidatePath('/admin/orders');
-        return fullOrder;
+        return createdOrder;
     },
 
     async updateStatus(orderId: string, updates: {
@@ -340,35 +258,4 @@ export const OrderService = {
     }
 };
 
-async function applyStockAdjustments(
-    supabase: Awaited<ReturnType<typeof createAdminClient>>,
-    adjustments: StockAdjustment[]
-) {
-    for (const adjustment of adjustments) {
-        if (adjustment.variantId) {
-            const { error, data } = await supabase
-                .from('product_variants')
-                .update({ inventory_quantity: adjustment.to })
-                .eq('id', adjustment.variantId)
-                .eq('inventory_quantity', adjustment.from)
-                .select('id')
-                .single();
 
-            if (error || !data) {
-                throw AppError.badRequest('Variant stock changed, please refresh and try again');
-            }
-        } else {
-            const { error, data } = await supabase
-                .from('products')
-                .update({ stock: adjustment.to })
-                .eq('id', adjustment.productId)
-                .eq('stock', adjustment.from)
-                .select('id')
-                .single();
-
-            if (error || !data) {
-                throw AppError.badRequest('Product stock changed, please refresh and try again');
-            }
-        }
-    }
-}

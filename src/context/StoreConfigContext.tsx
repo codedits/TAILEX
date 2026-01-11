@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { StoreConfig } from '@/services/config';
-import { setGlobalCurrency, formatCurrency as utilsFormatCurrency, CurrencyConfig } from '@/lib/utils';
+import { formatCurrency as utilsFormatCurrency, CurrencyConfig } from '@/lib/utils';
 
 interface StoreConfigContextType {
     config: StoreConfig;
@@ -10,11 +10,11 @@ interface StoreConfigContextType {
 
 const StoreConfigContext = createContext<StoreConfigContextType | undefined>(undefined);
 
-export function StoreConfigProvider({ 
-    children, 
-    initialConfig 
-}: { 
-    children: React.ReactNode; 
+export function StoreConfigProvider({
+    children,
+    initialConfig
+}: {
+    children: React.ReactNode;
     initialConfig: StoreConfig;
 }) {
     // We use a state only to allow client-side updates if needed (e.g. previewing in admin)
@@ -24,17 +24,10 @@ export function StoreConfigProvider({
     // Sync state with props when they change (critical for admin preview/navigation)
     useEffect(() => {
         setConfig(initialConfig);
-        if (typeof window !== 'undefined') {
-            setGlobalCurrency(initialConfig.currency);
-        }
     }, [initialConfig]);
 
-    // During SSR, we also want to set the global currency once for the current request
-    // Note: In Next.js App Router, this is safe because setGlobalCurrency updates a local variable
-    // in the current module instance which is request-scoped on the server.
-    if (typeof window === 'undefined') {
-        setGlobalCurrency(initialConfig.currency);
-    }
+    // During SSR, we no longer need to set a global variable.
+    // The currency is passed down via the Context to the useFormatCurrency hook consumers.
 
     return (
         <StoreConfigContext.Provider value={{ config }}>
@@ -57,7 +50,7 @@ export function useStoreConfig() {
  */
 export function useFormatCurrency() {
     const { currency } = useStoreConfig();
-    
+
     return useCallback((amount: number) => {
         return utilsFormatCurrency(amount, currency);
     }, [currency]);

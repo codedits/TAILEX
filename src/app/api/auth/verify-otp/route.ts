@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { SignJWT } from 'jose';
+import { verifyOtpSchema } from '@/lib/validators';
+import { z } from 'zod';
 
 const JWT_SECRET = new TextEncoder().encode(
     process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production'
@@ -8,15 +10,10 @@ const JWT_SECRET = new TextEncoder().encode(
 
 export async function POST(request: NextRequest) {
     try {
-        const { email, code } = await request.json();
+        const body = await request.json();
 
-        // 1. Validate Input
-        if (!email || !code) {
-            return NextResponse.json(
-                { error: 'Email and code are required' },
-                { status: 400 }
-            );
-        }
+        // Zod Validation
+        const { email, code } = verifyOtpSchema.parse(body);
 
         const supabase = await createAdminClient();
 
@@ -128,6 +125,9 @@ export async function POST(request: NextRequest) {
 
         return response;
     } catch (error) {
+        if (error instanceof z.ZodError) {
+            return NextResponse.json({ message: 'Validation Error', errors: error.errors }, { status: 400 });
+        }
         console.error('Verify OTP Error:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
