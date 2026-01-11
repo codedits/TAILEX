@@ -23,13 +23,13 @@ export const metadata: Metadata = {
     description: `Discover premium fashion essentials. Quality craftsmanship meets modern style.`,
     type: "website",
     url: baseUrl,
-    images: [`${baseUrl}/og-image.png`],
+    images: [`${baseUrl}/og.jpg`],
   },
   twitter: {
     card: "summary_large_image",
     title: `${SITE_NAME} | ${TAGLINE}`,
     description: `Discover premium fashion essentials. Quality craftsmanship meets modern style.`,
-    images: [`${baseUrl}/og-image.png`],
+    images: [`${baseUrl}/og.jpg`],
   },
 };
 
