@@ -55,7 +55,7 @@ const HeroSection = ({
             src={displayImage}
             alt="Hero background"
             fill
-            className="object-cover object-top"
+            className="object-cover object-top animate-ken-burns will-change-transform"
             priority
             quality={90}
             sizes="(max-width: 768px) 300vw, 150vw"

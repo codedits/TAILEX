@@ -5,6 +5,7 @@ import {
     getSocialConfig,
     getLatestPosts,
     getFeaturedCollections,
+    getCollectionsWithProducts,
     getFeaturedProducts,
     getBrandConfig,
     getHomepageLayout
@@ -54,7 +55,7 @@ export async function getHomeData(): Promise<HomeData> {
         getFooterConfig(),
         getSocialConfig(),
         getLatestPosts(3),
-        getFeaturedCollections(4),
+        getCollectionsWithProducts(4, 8),
         getFeaturedProducts(6),
         getBrandConfig(),
         getHomepageLayout(),

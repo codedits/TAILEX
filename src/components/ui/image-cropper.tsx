@@ -22,13 +22,15 @@ interface ImageCropperProps {
 
 export function ImageCropper({
   image,
-  aspect = 4 / 5,
+  aspect: initialAspect = 4 / 5,
   onCropComplete,
   onCancel,
 }: ImageCropperProps) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [aspect, setAspect] = useState<number | undefined>(initialAspect);
+  const [originalAspect, setOriginalAspect] = useState<number>(1);
 
   const onCropChange = (crop: { x: number; y: number }) => {
     setCrop(crop);
@@ -36,6 +38,10 @@ export function ImageCropper({
 
   const onZoomChange = (zoom: number) => {
     setZoom(zoom);
+  };
+
+  const onMediaLoaded = (mediaSize: { width: number; height: number }) => {
+    setOriginalAspect(mediaSize.width / mediaSize.height);
   };
 
   const onCropCompleteInternal = useCallback(
@@ -56,21 +62,70 @@ export function ImageCropper({
     }
   };
 
+  const handleSkip = async () => {
+    try {
+      const response = await fetch(image);
+      const blob = await response.blob();
+      onCropComplete(blob);
+    } catch (e) {
+      console.error("Failed to skip crop", e);
+      onCancel();
+    }
+  };
+
   return (
     <Dialog open={!!image} onOpenChange={(open) => !open && onCancel()}>
       <DialogContent className="sm:max-w-[600px] bg-black border-white/10 text-white">
         <DialogHeader>
           <DialogTitle>Crop Image</DialogTitle>
         </DialogHeader>
-        <div className="relative w-full h-[400px] bg-neutral-900 rounded-lg overflow-hidden border border-white/5 mt-4">
+
+        {/* Aspect Ratio Controls */}
+        <div className="flex items-center gap-2 py-2 overflow-x-auto">
+          <Button
+            variant={aspect === originalAspect ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setAspect(originalAspect)}
+            className="text-xs h-8 border border-white/10"
+          >
+            Original
+          </Button>
+          <Button
+            variant={aspect === 1 ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setAspect(1)}
+            className="text-xs h-8 border border-white/10"
+          >
+            Square (1:1)
+          </Button>
+          <Button
+            variant={aspect === 4 / 5 ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setAspect(4 / 5)}
+            className="text-xs h-8 border border-white/10"
+          >
+            Portrait (4:5)
+          </Button>
+          <Button
+            variant={aspect === 16 / 9 ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setAspect(16 / 9)}
+            className="text-xs h-8 border border-white/10"
+          >
+            Landscape (16:9)
+          </Button>
+        </div>
+
+        <div className="relative w-full h-[400px] bg-neutral-900 rounded-lg overflow-hidden border border-white/5 mt-2">
           <Cropper
             image={image}
             crop={crop}
             zoom={zoom}
-            aspect={aspect}
+            aspect={aspect || originalAspect}
             onCropChange={onCropChange}
             onCropComplete={onCropCompleteInternal}
             onZoomChange={onZoomChange}
+            onMediaLoaded={onMediaLoaded}
           />
         </div>
         <div className="space-y-4 py-4">
@@ -86,13 +141,20 @@ export function ImageCropper({
             />
           </div>
         </div>
-        <DialogFooter className="gap-2">
-          <Button variant="ghost" onClick={onCancel} className="hover:bg-white/10 text-white/70">
-            Cancel
-          </Button>
-          <Button onClick={handleDone} className="bg-white text-black hover:bg-white/90">
-            Apply Crop
-          </Button>
+        <DialogFooter className="gap-2 sm:justify-between">
+          <div className="flex gap-2">
+            <Button variant="ghost" onClick={handleSkip} className="hover:bg-white/10 text-white/70">
+              Skip (Use Original)
+            </Button>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="ghost" onClick={onCancel} className="hover:bg-white/10 text-white/70">
+              Cancel
+            </Button>
+            <Button onClick={handleDone} className="bg-white text-black hover:bg-white/90">
+              Apply Crop
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

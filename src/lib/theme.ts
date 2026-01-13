@@ -226,6 +226,45 @@ export const getFeaturedProducts = unstable_cache(
     { tags: ['products'], revalidate: 300 }
 )
 
+export const getCollectionsWithProducts = unstable_cache(
+    async (limit = 10, productLimit = 8) => {
+        try {
+            const supabase = getSupabase()
+
+            // 1. Get collections
+            const { data: collections } = await supabase
+                .from('collections')
+                .select('id, title, slug, image_url, description, is_visible, sort_order')
+                .eq('is_visible', true)
+                .order('sort_order', { ascending: true })
+                .limit(limit)
+
+            if (!collections) return []
+
+            // 2. Hydrate with products
+            const hydratedCollections = await Promise.all(
+                (collections as Collection[]).map(async (col) => {
+                    const { data: products } = await supabase
+                        .from('products')
+                        .select('id, title, slug, price, sale_price, cover_image, images, category_id, tags')
+                        .eq('category_id', col.id)
+                        .eq('status', 'active')
+                        .limit(productLimit)
+                        .order('created_at', { ascending: false })
+
+                    return { ...col, products: (products as Product[]) || [] }
+                })
+            )
+
+            return hydratedCollections
+        } catch {
+            return []
+        }
+    },
+    ['collections-with-products'],
+    { tags: ['collections', 'products'], revalidate: 300 }
+)
+
 // ==========================================
 // TYPED CONFIG GETTERS (with defaults)
 // ==========================================

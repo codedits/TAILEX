@@ -4,7 +4,7 @@ import { HomeData } from "@/lib/home-data";
 import HeroSection from "@/components/sections/HeroSection";
 import ProductGridSection from "@/components/sections/ProductGridSection";
 import OutlookSection from "@/components/sections/OutlookSection";
-import CategoryGrid from "@/components/collection/CategoryGrid";
+import CollectionShowcase from "@/components/collection/CollectionShowcase";
 import NewsSection from "@/components/sections/NewsSection";
 import Footer from "@/components/layout/Footer";
 import { HOMEPAGE_TEXT } from "@/config/homepage-text";
@@ -27,7 +27,7 @@ export default function HomeLayout({ data }: HomeLayoutProps) {
     const newsSection = sortedSections.find(s => s.type === 'news');
 
     return (
-        <div className="bg-background text-foreground min-h-screen">
+        <div className="text-foreground min-h-screen">
 
             {/* Wrapper for Hero + New Arrivals (Categories) - mimics framer-1u6vz46 */}
             <div className="relative flex flex-col items-center justify-center w-full overflow-visible">
@@ -40,14 +40,17 @@ export default function HomeLayout({ data }: HomeLayoutProps) {
                     />
                 )}
 
-                {categoriesSection?.enabled && (
-                    <CategoryGrid
-                        collections={collections}
-                        sectionTitle={categoriesSection.content?.title || HOMEPAGE_TEXT.categories.title}
-                        sectionDescription={categoriesSection.content?.description || HOMEPAGE_TEXT.categories.description}
-                        aspectRatio={parseFloat(data.categoryGrid?.aspectRatio || '0.8')}
+                {categoriesSection?.enabled && collections.map((collection) => (
+                    <CollectionShowcase
+                        key={collection.id}
+                        title={collection.title}
+                        description={collection.description || ""}
+                        coverImage={collection.image_url || ""}
+                        products={collection.products || []}
+                        collectionHref={`/collection/${collection.slug}`}
+                        className="mb-0"
                     />
-                )}
+                ))}
             </div>
 
             {/* Other Sections as siblings */}

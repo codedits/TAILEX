@@ -114,6 +114,7 @@ export type Collection = {
 
   // Virtual
   product_count?: number
+  products?: Product[]
 }
 
 // ==========================================
