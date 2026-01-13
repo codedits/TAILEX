@@ -129,6 +129,16 @@
   .mix-blend-difference {
     mix-blend-mode: difference;
   }
+
+  /* Hide scrollbar but keep scroll functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @layer components {
@@ -264,5 +274,95 @@
 
   .animate-ken-burns {
     animation: ken-burns 20s ease-out infinite alternate;
+  }
+
+  /* ============================================ */
+  /* Hero Entrance Animations - No JS Required   */
+  /* ============================================ */
+
+  .hero-image-animate {
+    animation: heroImageFadeScale 0.8s ease-out 0.2s both;
+  }
+
+  .hero-text-animate {
+    animation: heroTextFadeUp 0.6s ease-out 0.1s both;
+  }
+
+  .hero-text-animate-delay {
+    animation: heroTextFadeUp 0.6s ease-out 0.3s both;
+  }
+
+  .hero-text-animate-delay-2 {
+    animation: heroTextFadeUp 0.6s ease-out 0.5s both;
+  }
+
+  @keyframes heroImageFadeScale {
+    from {
+      opacity: 0;
+      transform: scale(1.1);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes heroTextFadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Section fade-in for Suspense streamed content */
+  .section-fade-in {
+    animation: sectionFadeIn 0.5s ease-out both;
+  }
+
+  @keyframes sectionFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Stagger utility for grid items */
+  .stagger-fade-in>* {
+    animation: sectionFadeIn 0.4s ease-out both;
+  }
+
+  .stagger-fade-in>*:nth-child(1) {
+    animation-delay: 0.05s;
+  }
+
+  .stagger-fade-in>*:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+
+  .stagger-fade-in>*:nth-child(3) {
+    animation-delay: 0.15s;
+  }
+
+  .stagger-fade-in>*:nth-child(4) {
+    animation-delay: 0.2s;
+  }
+
+  .stagger-fade-in>*:nth-child(5) {
+    animation-delay: 0.25s;
+  }
+
+  .stagger-fade-in>*:nth-child(6) {
+    animation-delay: 0.3s;
   }
 }

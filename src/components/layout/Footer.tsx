@@ -1,9 +1,7 @@
-"use client";
-
 import Link from "next/link";
-import { Instagram, Twitter, Facebook, Youtube, ArrowRight, ArrowUp } from "lucide-react";
-import { motion } from "framer-motion";
+import { Instagram, Twitter, Facebook, Youtube, ArrowRight } from "lucide-react";
 import { FooterConfig, SocialConfig } from "@/lib/types";
+import { ScrollToTopButton } from "./ScrollToTopButton";
 
 interface FooterProps {
   config?: FooterConfig;
@@ -12,39 +10,27 @@ interface FooterProps {
 }
 
 const defaultConfig: FooterConfig = {
-  // Config is now driven by theme.ts, this is just a fallback for typing/safety
   tagline: '',
   columns: [],
   showSocial: true,
   copyright: '© {year} {brand}. All rights reserved.'
 };
 
+/**
+ * Footer - Server Component
+ * 
+ * Optimized for streaming:
+ * - No "use client" - rendered on server
+ * - CSS animations instead of Framer Motion
+ * - Interactivity (scroll-to-top) in client island
+ * - Wrapped in Suspense by parent - streams last
+ */
 const Footer = ({
   config = defaultConfig,
   brandName = 'TAILEX',
   social = {}
 }: FooterProps) => {
   const currentYear = new Date().getFullYear();
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-  };
 
   // Parse copyright string
   const copyrightText = (config.copyright || '© {year} {brand}. All rights reserved.')
@@ -60,21 +46,15 @@ const Footer = ({
   ].filter(Boolean) as { name: string; href: string; Icon: typeof Facebook }[];
 
   return (
-    <footer className="bg-black text-white border-t border-white/10 font-sans relative overflow-hidden">
-      {/* Subtle Background Pattern (Optional) */}
+    <footer className="bg-black text-white border-t border-white/10 font-sans relative overflow-hidden section-fade-in">
+      {/* Subtle Background Pattern */}
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
-      <motion.div
-        className="max-w-[1920px] mx-auto px-6 md:px-12 pt-24 pb-12"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true }}
-        variants={containerVariants}
-      >
+      <div className="max-w-[1920px] mx-auto px-6 md:px-12 pt-24 pb-12">
         <div className="flex flex-col lg:flex-row justify-between gap-16 lg:gap-24 mb-24">
 
           {/* Brand Column */}
-          <motion.div variants={itemVariants} className="max-w-sm">
+          <div className="max-w-sm">
             <Link href="/" className="inline-block text-4xl font-light tracking-tighter mb-6 hover:opacity-80 transition-opacity">
               {brandName}
             </Link>
@@ -95,12 +75,12 @@ const Footer = ({
                 </button>
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Links Grid */}
           <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
             {(config.columns || []).map((column, idx) => (
-              <motion.div key={idx} variants={itemVariants} className="flex flex-col gap-6">
+              <div key={idx} className="flex flex-col gap-6">
                 <h4 className="font-medium text-xs text-white uppercase tracking-[0.2em]">
                   {column.title}
                 </h4>
@@ -116,13 +96,13 @@ const Footer = ({
                     </li>
                   ))}
                 </ul>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
 
         {/* Footer Bottom */}
-        <motion.div variants={itemVariants} className="flex flex-col md:flex-row justify-between items-end md:items-center pt-8 border-t border-white/5 gap-8">
+        <div className="flex flex-col md:flex-row justify-between items-end md:items-center pt-8 border-t border-white/5 gap-8">
           <div className="flex flex-col gap-4">
             <div className="flex gap-4">
               {socialLinks.map((link) => (
@@ -137,17 +117,11 @@ const Footer = ({
           </div>
 
           <div className="flex items-center gap-6">
-            <button
-              onClick={scrollToTop}
-              className="flex items-center gap-2 text-xs uppercase tracking-widest text-white/40 hover:text-white transition-colors group"
-            >
-              Back to Top
-              <ArrowUp className="w-3 h-3 group-hover:-translate-y-1 transition-transform" />
-            </button>
+            <ScrollToTopButton />
           </div>
-        </motion.div>
+        </div>
 
-      </motion.div>
+      </div>
     </footer>
   );
 };

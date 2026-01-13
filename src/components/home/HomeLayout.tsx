@@ -1,20 +1,34 @@
-"use client";
-
+import { Suspense } from "react";
 import { HomeData } from "@/lib/home-data";
 import HeroSection from "@/components/sections/HeroSection";
 import ProductGridSection from "@/components/sections/ProductGridSection";
-import OutlookSection from "@/components/sections/OutlookSection";
 import CollectionShowcase from "@/components/collection/CollectionShowcase";
-import NewsSection from "@/components/sections/NewsSection";
 import Footer from "@/components/layout/Footer";
 import { HOMEPAGE_TEXT } from "@/config/homepage-text";
+
+// Skeletons for Suspense fallbacks
+import { CollectionShowcaseSkeleton } from "@/components/skeletons/CollectionShowcaseSkeleton";
+import { ProductGridSkeleton } from "@/components/skeletons/ProductGridSkeleton";
+import { FooterSkeleton } from "@/components/skeletons/FooterSkeleton";
 
 interface HomeLayoutProps {
     data: HomeData;
 }
 
+/**
+ * HomeLayout - Server Component
+ * 
+ * Optimized homepage rendering strategy:
+ * - HeroSection: SSR immediate, ONLY priority image
+ * - First Collection: Suspense streamed, NO priority
+ * - Products: Suspense streamed
+ * - Remaining Collections: Suspense streamed
+ * - Footer: Suspense streamed LAST
+ * 
+ * All sections use CSS animations, zero blocking JS before FCP.
+ */
 export default function HomeLayout({ data }: HomeLayoutProps) {
-    const { layout, hero, brand, collections, products, benefits, posts, footer, social } = data;
+    const { layout, hero, brand, collections, products, footer, social } = data;
 
     // Render sections based on order
     const sortedSections = [...layout].sort((a, b) => a.order - b.order);
@@ -23,13 +37,18 @@ export default function HomeLayout({ data }: HomeLayoutProps) {
     const heroSection = sortedSections.find(s => s.type === 'hero');
     const categoriesSection = sortedSections.find(s => s.type === 'categories');
     const productSection = sortedSections.find(s => s.type === 'featured-products');
-    const outlookSection = sortedSections.find(s => s.type === 'outlook');
-    const newsSection = sortedSections.find(s => s.type === 'news');
+
+    // Split collections: first one renders sooner, rest are lazy
+    const firstCollection = collections[0];
+    const remainingCollections = collections.slice(1);
 
     return (
         <div className="text-foreground min-h-screen">
 
-            {/* Wrapper for Hero + New Arrivals (Categories) - mimics framer-1u6vz46 */}
+            {/* ============================================ */}
+            {/* CRITICAL ABOVE-FOLD: Hero Section (SSR)     */}
+            {/* ONLY priority image on entire page          */}
+            {/* ============================================ */}
             <div className="relative flex flex-col items-center justify-center w-full overflow-visible">
                 {heroSection?.enabled && (
                     <HeroSection
@@ -40,44 +59,71 @@ export default function HomeLayout({ data }: HomeLayoutProps) {
                     />
                 )}
 
-                {categoriesSection?.enabled && collections.map((collection) => (
-                    <CollectionShowcase
-                        key={collection.id}
-                        title={collection.title}
-                        description={collection.description || ""}
-                        coverImage={collection.image_url || ""}
-                        products={collection.products || []}
-                        collectionHref={`/collection/${collection.slug}`}
-                        className="mb-0"
-                    />
-                ))}
+                {/* ============================================ */}
+                {/* FIRST COLLECTION: Streamed via Suspense     */}
+                {/* NO priority image                            */}
+                {/* ============================================ */}
+                {categoriesSection?.enabled && firstCollection && (
+                    <Suspense fallback={<CollectionShowcaseSkeleton />}>
+                        <CollectionShowcase
+                            key={firstCollection.id}
+                            title={firstCollection.title}
+                            description={firstCollection.description || ""}
+                            coverImage={firstCollection.image_url || ""}
+                            products={firstCollection.products || []}
+                            collectionHref={`/collection/${firstCollection.slug}`}
+                            className="mb-0"
+                        />
+                    </Suspense>
+                )}
             </div>
 
-            {/* Other Sections as siblings */}
+            {/* ============================================ */}
+            {/* FEATURED PRODUCTS: Streamed via Suspense    */}
+            {/* ============================================ */}
             {productSection?.enabled && (
-                <div className="w-full">
-                    <ProductGridSection
-                        products={products}
-                        title={productSection.content?.title || HOMEPAGE_TEXT.featuredProducts.title}
-                        description={productSection.content?.description || HOMEPAGE_TEXT.featuredProducts.description}
-                    />
-                </div>
+                <Suspense fallback={<ProductGridSkeleton />}>
+                    <div className="w-full">
+                        <ProductGridSection
+                            products={products}
+                            title={productSection.content?.title || HOMEPAGE_TEXT.featuredProducts.title}
+                            description={productSection.content?.description || HOMEPAGE_TEXT.featuredProducts.description}
+                        />
+                    </div>
+                </Suspense>
             )}
 
-            {/* Outlook Section */}
-            {outlookSection?.enabled && (
-                <div className="w-full">
-
-                </div>
+            {/* ============================================ */}
+            {/* REMAINING COLLECTIONS: Streamed via Suspense */}
+            {/* ============================================ */}
+            {categoriesSection?.enabled && remainingCollections.length > 0 && (
+                <Suspense fallback={<CollectionShowcaseSkeleton />}>
+                    <div className="relative flex flex-col items-center justify-center w-full overflow-visible">
+                        {remainingCollections.map((collection) => (
+                            <CollectionShowcase
+                                key={collection.id}
+                                title={collection.title}
+                                description={collection.description || ""}
+                                coverImage={collection.image_url || ""}
+                                products={collection.products || []}
+                                collectionHref={`/collection/${collection.slug}`}
+                                className="mb-0"
+                            />
+                        ))}
+                    </div>
+                </Suspense>
             )}
 
-            {/* News Section */}
-
-            <Footer
-                config={footer}
-                brandName={brand.name}
-                social={social}
-            />
+            {/* ============================================ */}
+            {/* FOOTER: Streamed LAST via Suspense          */}
+            {/* ============================================ */}
+            <Suspense fallback={<FooterSkeleton />}>
+                <Footer
+                    config={footer}
+                    brandName={brand.name}
+                    social={social}
+                />
+            </Suspense>
         </div>
     );
 }
