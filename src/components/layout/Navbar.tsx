@@ -25,105 +25,78 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
   }, []);
 
   const navLinks = [
-    { name: "Collection", href: "/collection" },
-    { name: "Shop All", href: "/shop" },
-    { name: "About", href: "/about" },
+    { name: "HOME", href: "/" },
+    { name: "SHOP", href: "/shop" },
+    { name: "JOURNAL", href: "/news" },
+    { name: "ABOUT", href: "/about" },
   ];
 
   return (
     <>
       <CartSheet />
-      <motion.header
-        className="fixed top-0 left-0 right-0 z-50 mix-blend-difference text-white"
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${scrolled
+          ? "bg-white text-black border-neutral-200 shadow-sm"
+          : "bg-transparent text-white border-white/10"
+          }`}
       >
-        <div className="px-6 md:px-12 h-24 flex items-center">
-          {/* Logo */}
-          <Link
-            href="/"
-            className="text-2xl font-manrope font-black tracking-tighter uppercase z-50 relative hover:opacity-70 transition-opacity"
-          >
-            {brandName}
-          </Link>
+        <div className="px-6 md:px-8 py-4 w-full flex items-center justify-between relative">
 
-          {/* Desktop Nav - Left Aligned */}
-          <nav className="hidden md:flex items-center gap-8 ml-16">
-            {navLinks.map((link) => (
+          {/* Left Nav */}
+          <nav className="hidden md:flex items-center gap-8 flex-1">
+            {navLinks.map((item) => (
               <Link
-                key={link.name}
-                href={link.href}
-                className="text-xs font-manrope font-black uppercase tracking-widest hover:opacity-60 transition-opacity relative group"
+                key={item.name}
+                href={item.href}
+                className="text-[11px] font-medium uppercase tracking-widest hover:opacity-70 transition-opacity flex items-center gap-1"
               >
-                {link.name}
-                <span className="absolute -bottom-1 left-0 w-0 h-px bg-white transition-all duration-300 group-hover:w-full" />
+                {item.name}
               </Link>
             ))}
           </nav>
 
-          {/* Right Actions - Pushed to right */}
-          <div className="flex items-center gap-6 z-50 relative ml-auto">
+          {/* Center Logo (Desktop) / Left Logo (Mobile) */}
+          <div className="md:absolute md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2">
+            <Link
+              href="/"
+              className="text-2xl md:text-3xl font-bold tracking-tighter uppercase hover:opacity-80 transition-opacity"
+            >
+              TAILEX
+            </Link>
+          </div>
+
+          {/* Right Actions */}
+          <div className="flex items-center gap-6 flex-1 justify-end">
+
+            {/* Icons */}
             <SearchModal />
 
-            {isLoading ? (
-              <div className="w-5 h-5 rounded-full bg-white/20 animate-pulse hidden md:block" />
-            ) : isAuthenticated ? (
-              <div className="hidden md:block relative group">
-                <button className="hover:opacity-70 transition-opacity flex items-center gap-2">
-                  <User className="w-5 h-5" />
-                  <span className="text-[10px] font-manrope font-black uppercase tracking-widest">Account</span>
-                </button>
-                <div className="absolute right-0 top-full mt-2 w-40 bg-black border border-white/10 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                  <Link
-                    href="/account"
-                    className="block px-4 py-3 text-[10px] font-manrope font-black uppercase tracking-widest hover:bg-white/5 transition-colors"
-                  >
-                    My Account
-                  </Link>
-                  <Link
-                    href="/account/orders"
-                    className="block px-4 py-3 text-[10px] font-manrope font-black uppercase tracking-widest hover:bg-white/5 transition-colors"
-                  >
-                    Orders
-                  </Link>
-                  <form action="/api/auth/signout" method="POST" className="border-t border-white/10">
-                    <button
-                      type="submit"
-                      className="w-full text-left px-4 py-3 text-[10px] font-manrope font-black uppercase tracking-widest hover:bg-white/5 transition-colors text-red-400"
-                    >
-                      Sign Out
-                    </button>
-                  </form>
-                </div>
-              </div>
-            ) : (
-              <Link
-                href="/login"
-                className="hidden md:flex items-center gap-2 hover:opacity-70 transition-opacity"
-              >
-                <User className="w-5 h-5" />
-                <span className="text-[10px] font-manrope font-black uppercase tracking-widest">Sign In</span>
-              </Link>
-            )}
+            {/* Account */}
+            <Link href={isAuthenticated ? "/account" : "/login"} className="hover:opacity-70 transition-opacity">
+              <User className="w-5 h-5 stroke-[1.5]" />
+            </Link>
 
+            {/* Cart */}
             <button
-              className="relative group hover:opacity-70 transition-opacity flex items-center gap-2"
+              className="relative hover:opacity-70 transition-opacity"
               onClick={() => setIsCartOpen(true)}
             >
-              <ShoppingBag className="w-5 h-5" />
-              <span className="text-[10px] font-manrope font-black tracking-widest">({cartCount})</span>
+              <ShoppingBag className="w-5 h-5 stroke-[1.5]" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
+              )}
             </button>
 
+            {/* Mobile Menu Toggle */}
             <button
-              className="md:hidden hover:opacity-70 transition-opacity text-[10px] font-manrope font-black tracking-[0.3em]"
+              className="md:hidden hover:opacity-70 transition-opacity"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              {isMenuOpen ? "CLOSE" : "MENU"}
+              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
-      </motion.header>
+      </header>
 
       {/* Full Screen Menu Overlay */}
       <AnimatePresence>

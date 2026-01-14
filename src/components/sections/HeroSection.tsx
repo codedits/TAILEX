@@ -65,60 +65,36 @@ const HeroSection = ({
         </div>
       </div>
 
-      {/* Content Container - Text Independent, Paints First */}
+      {/* Content Container - Centered */}
       <div
-        className="relative flex flex-col md:flex-row items-center md:items-end justify-center md:justify-between w-full px-6 md:px-10 pb-10 gap-8 md:gap-0 z-10"
+        className="relative flex flex-col items-center justify-center w-full px-6 md:px-10 z-10 text-center"
         style={{
           height: '100vh',
           maxWidth: '1920px',
           margin: '0 auto'
         }}
       >
-        {/* Mobile View: Centered CTA only */}
-        <div className="flex flex-col items-center justify-center md:hidden w-full text-center">
-          <div className="mb-6 hero-text-animate">
-            <h2 className="text-white text-6xl font-normal tracking-tighter uppercase leading-none">
-              {displayHeading}
-            </h2>
-          </div>
-          <div className="hero-text-animate-delay">
-            <Button
-              asChild
-              variant="ctaHeroOutline"
-              size="xl"
-              className="px-12"
-            >
-              <Link href="/shop">
-                Shop Now
-              </Link>
-            </Button>
-          </div>
-        </div>
+        <div className="flex flex-col items-center justify-center hero-text-animate space-y-8">
 
-        {/* Desktop View: Brand Name - Bottom Left */}
-        <div className="z-10 hidden md:block hero-text-animate">
-          <h1
-            className="font-normal tracking-[-0.02em] text-white leading-[1.1]"
-            style={{
-              fontFamily: '"Manrope", "Manrope Placeholder", sans-serif',
-              fontSize: 'clamp(72px, 10vw, 110px)'
-            }}
-          >
-            {displayHeading}
-          </h1>
-        </div>
-
-        {/* Desktop View: Tagline - Bottom Right */}
-        <div className="z-10 text-right hidden md:block hero-text-animate-delay">
-          <p
-            className="text-white leading-[1.4] tracking-[0.02em] whitespace-pre-line"
-            style={{
-              fontFamily: '"Manrope", "Manrope Placeholder", sans-serif',
-              fontSize: 'clamp(28px, 3vw, 32px)'
-            }}
-          >
-            {displaySubheading}
+          {/* Subtitle */}
+          <p className="text-white/90 text-xs md:text-xs tracking-[0.2em] uppercase font-bold">
+            {subheading || "SS26 STATEMENT PIECES"}
           </p>
+
+          {/* Main Title */}
+          <h1 className="text-white text-5xl md:text-8xl font-medium tracking-tight">
+            {heading || "Bold by design"}
+          </h1>
+
+          {/* CTA Button */}
+          <div className="pt-4">
+            <Link
+              href="/shop"
+              className="inline-block px-8 py-3 rounded-full border border-white/50 text-white text-[10px] md:text-xs font-semibold tracking-[0.15em] hover:bg-white hover:text-black transition-all duration-300 uppercase"
+            >
+              Discover More
+            </Link>
+          </div>
         </div>
       </div>
 
