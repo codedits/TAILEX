@@ -56,7 +56,7 @@ const HeroSection = ({
             priority
             decoding="async"
             fetchPriority="high"
-            quality={80}
+            quality={95}
             sizes="100vw"
             aria-hidden="true"
           />
