@@ -71,7 +71,7 @@ export default function LoginPage() {
         {/* Placeholder Image - Replace with local asset in production */}
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1618331835717-801e976710b2?q=80&w=2500&auto=format&fit=crop")' }}
+          style={{ backgroundImage: 'url("/og.jpg")' }}
         >
           <div className="absolute inset-0 bg-black/20" /> {/* Subtle overlay */}
         </div>
