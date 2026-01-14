@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Product } from "@/lib/types";
-import { ProductCardServer } from "@/components/product/ProductCardServer";
+import ProductCard from "@/components/product/ProductCard";
 
 interface ProductGridSectionProps {
   products: Product[];
@@ -77,7 +77,7 @@ const ProductGridSection = ({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24 stagger-fade-in">
             {displayProducts.map((product) => (
               <div key={product.id} className="h-full">
-                <ProductCardServer {...product} />
+                <ProductCard {...product} />
               </div>
             ))}
           </div>
