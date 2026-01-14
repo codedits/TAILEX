@@ -57,7 +57,7 @@ const HeroSection = ({
             decoding="async"
             fetchPriority="high"
             quality={95}
-            sizes="100vw"
+            sizes="(max-width: 768px) 300vw, 100vw"
             aria-hidden="true"
           />
           {/* Subtle Overlay for Text Readability */}

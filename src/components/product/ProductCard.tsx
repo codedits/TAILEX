@@ -37,7 +37,7 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
         <Link href={href} className="absolute inset-0 z-10">
           <span className="sr-only">View {title}</span>
         </Link>
-        
+
         {/* Sale Badge - Red Square Top Left */}
         {isSale && (
           <div className="absolute top-0 left-0 z-20 bg-[#D03030] text-white text-[11px] font-bold px-2 py-1.5 leading-none shadow-sm">
@@ -83,13 +83,13 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
 
         {/* Circular Hover Icons (Cart & Search) */}
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2 opacity-0 translate-y-3 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
-          <button 
+          <button
             className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors shadow-lg"
             aria-label="Add to bag"
           >
             <ShoppingBag className="w-4 h-4 text-neutral-600" />
           </button>
-          <button 
+          <button
             className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors shadow-lg"
             aria-label="Quick view"
           >
@@ -108,18 +108,18 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
         </Link>
 
         {/* Price Section - Centered Price Line */}
-        <div className="mt-1.5 flex items-center justify-center gap-3 font-manrope text-xs md:text-sm">
+        <div className="mt-1.5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 font-manrope text-xs md:text-sm">
           {isSale ? (
             <>
-              <span className="text-neutral-500 line-through decoration-neutral-500/50">
+              <span className="text-neutral-500 line-through decoration-neutral-500/50 whitespace-nowrap">
                 {formatCurrency(price || 0)}
               </span>
-              <span className="text-[#D03030] font-bold">
+              <span className="text-[#D03030] font-bold whitespace-nowrap">
                 {formatCurrency(sale_price || 0)}
               </span>
             </>
           ) : (
-            <span className="text-neutral-800 font-medium">
+            <span className="text-neutral-800 font-medium whitespace-nowrap">
               {formatCurrency(price || 0)}
             </span>
           )}

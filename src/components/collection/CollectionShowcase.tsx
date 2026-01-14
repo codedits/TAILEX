@@ -49,14 +49,13 @@ export default function CollectionShowcase({
                         quality={80}
                         loading="lazy"
                     />
-                    {/* Gradients for text legibility */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/60 pointer-events-none" />
+
                 </div>
 
                 {/* Content - Text Independent of Image */}
-                <div className="absolute inset-x-0 bottom-0 top-0 flex flex-col items-center justify-center text-center px-4 md:px-6 text-white z-10 p-12">
+                <div className="absolute inset-x-0 bottom-0 top-0 flex flex-col items-center justify-center text-center px-4 md:px-6 text-white p-12">
                     <div className="space-y-6 max-w-4xl mx-auto">
-                        <h2 className="text-5xl sm:text-7xl md:text-6xl lg:text-7xl font-medium tracking-tight uppercase drop-shadow-lg font-display hero-text-animate">
+                        <h2 className="text-5xl sm:text-7xl md:text-6xl lg:text-7xl font-black tracking-tight uppercase mix-blend-difference font-display animate-in fade-in duration-1000 slide-in-from-bottom-4">
                             {title}
                         </h2>
                         {description && (
