@@ -30,7 +30,7 @@ export const CollectionShowcaseCarousel = ({
                 {products.map((product) => (
                     <div
                         key={product.id}
-                        className="flex-shrink-0 pl-4 md:pl-6 basis-[80%] sm:basis-[50%] md:basis-[40%] lg:basis-[30%] xl:basis-[25%]"
+                        className="flex-shrink-0 pl-2 md:pl-6 basis-[55%] sm:basis-[50%] md:basis-[40%] lg:basis-[30%] xl:basis-[25%]"
                     >
                         {/* 
                            Note: ProductCard is a client component with dynamic currency.
