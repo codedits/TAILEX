@@ -22,8 +22,8 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
   const imageSecondary = images?.filter(isValidImage).find(img => img !== imagePrimary) || imagePrimary;
   const href = `/product/${slug}`;
 
-  // Aggressive oversampling for high-DPI mobile screens
-  const sizes = "(max-width: 768px) 150vw, (max-width: 1200px) 50vw, 33vw";
+  // Standardized e-commerce grid sizes for optimal performance
+  const sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw";
 
   // Badges Logic
   const isSale = !!(sale_price && sale_price < price);
@@ -38,9 +38,9 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
           <span className="sr-only">View {title}</span>
         </Link>
 
-        {/* Sale Badge - Red Square Top Left */}
+        {/* Sale Badge - Black Square Top Left */}
         {isSale && (
-          <div className="absolute top-0 left-0 z-20 bg-[#D03030] text-white text-[11px] font-bold px-2 py-1.5 leading-none shadow-sm">
+          <div className="absolute top-0 left-0 z-20 bg-black text-white text-[11px] font-bold px-2 py-1.5 leading-none shadow-sm">
             -{discount}%
           </div>
         )}
@@ -114,7 +114,7 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
               <span className="text-neutral-500 line-through decoration-neutral-500/50 whitespace-nowrap">
                 {formatCurrency(price || 0)}
               </span>
-              <span className="text-[#D03030] font-bold whitespace-nowrap">
+              <span className="text-black font-bold whitespace-nowrap">
                 {formatCurrency(sale_price || 0)}
               </span>
             </>

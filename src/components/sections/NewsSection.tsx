@@ -138,7 +138,7 @@ const NewsSection = ({
                           fill
                           className="object-cover"
                           quality={80}
-                          sizes="(max-width: 768px) 150vw, 33vw"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         />
                       </motion.div>
                     </div>

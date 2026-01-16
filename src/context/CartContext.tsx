@@ -37,7 +37,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
-  // Initial load and validation
+  // Initial load and deferred validation
   useEffect(() => {
     setIsMounted(true);
     const savedCart = localStorage.getItem("cart");
@@ -46,44 +46,49 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const parsedItems: CartItem[] = JSON.parse(savedCart);
         setItems(parsedItems);
 
-        // Validate stale data with server
+        // Defer non-critical validation to after LCP (3 seconds)
+        // This prevents main-thread blocking during initial render
         if (parsedItems.length > 0) {
-          validateCartItems(parsedItems).then((result) => {
-            // Always update items to ensure prices are fresh, even if stock is fine
-            if (result.items.length > 0 || (parsedItems.length > 0 && result.items.length === 0)) {
-              const mappedItems = result.items.map((vi: CartValidationItem) => ({
-                id: vi.id,
-                name: vi.name,
-                price: vi.currentPrice,
-                image: vi.image,
-                quantity: vi.quantity,
-                size: vi.size,
-                color: vi.color,
-                slug: vi.slug
-              }));
+          const timeoutId = setTimeout(() => {
+            validateCartItems(parsedItems).then((result) => {
+              // Always update items to ensure prices are fresh, even if stock is fine
+              if (result.items.length > 0 || (parsedItems.length > 0 && result.items.length === 0)) {
+                const mappedItems = result.items.map((vi: CartValidationItem) => ({
+                  id: vi.id,
+                  name: vi.name,
+                  price: vi.currentPrice,
+                  image: vi.image,
+                  quantity: vi.quantity,
+                  size: vi.size,
+                  color: vi.color,
+                  slug: vi.slug
+                }));
 
-              const currentJson = JSON.stringify(parsedItems);
-              const newJson = JSON.stringify(mappedItems);
+                const currentJson = JSON.stringify(parsedItems);
+                const newJson = JSON.stringify(mappedItems);
 
-              if (currentJson !== newJson) {
-                setItems(mappedItems);
+                if (currentJson !== newJson) {
+                  setItems(mappedItems);
 
-                if (result.errors.length > 0) {
-                  toast({
-                    title: "Cart Updated",
-                    description: "Some items were sold out or changed price and have been updated.",
-                    variant: "destructive"
-                  });
-                } else if (result.items.length !== parsedItems.length) {
-                  toast({
-                    title: "Cart Updated",
-                    description: "Some unavailable items were removed.",
-                    variant: "destructive"
-                  });
+                  if (result.errors.length > 0) {
+                    toast({
+                      title: "Cart Updated",
+                      description: "Some items were sold out or changed price and have been updated.",
+                      variant: "destructive"
+                    });
+                  } else if (result.items.length !== parsedItems.length) {
+                    toast({
+                      title: "Cart Updated",
+                      description: "Some unavailable items were removed.",
+                      variant: "destructive"
+                    });
+                  }
                 }
               }
-            }
-          }).catch(console.error);
+            }).catch(console.error);
+          }, 3000); // Wait 3 seconds after mount
+
+          return () => clearTimeout(timeoutId);
         }
       } catch (e) {
         console.error("Failed to parse cart from local storage");

@@ -19,7 +19,7 @@ export const CollectionShowcaseCarousel = ({
     title
 }: CollectionShowcaseCarouselProps) => {
     const [emblaRef] = useEmblaCarousel({
-        dragFree: true,
+        dragFree: false,
         containScroll: "trimSnaps",
         align: "start",
     });
@@ -30,7 +30,7 @@ export const CollectionShowcaseCarousel = ({
                 {products.map((product) => (
                     <div
                         key={product.id}
-                        className="flex-shrink-0 pl-4 md:pl-6 basis-[45%] sm:basis-[50%] md:basis-[40%] lg:basis-[30%] xl:basis-[25%]"
+                        className="flex-shrink-0 pl-4 md:pl-6 basis-[80%] sm:basis-[50%] md:basis-[40%] lg:basis-[30%] xl:basis-[25%]"
                     >
                         {/* 
                            Note: ProductCard is a client component with dynamic currency.
@@ -40,7 +40,7 @@ export const CollectionShowcaseCarousel = ({
                 ))}
 
                 {/* "See More" Card */}
-                <div className="flex-shrink-0 pl-4 md:pl-6 basis-[45%] sm:basis-[50%] md:basis-[40%] lg:basis-[30%] xl:basis-[25%]">
+                <div className="flex-shrink-0 pl-4 md:pl-6 basis-[80%] sm:basis-[50%] md:basis-[40%] lg:basis-[30%] xl:basis-[25%]">
                     <Link
                         href={collectionHref}
                         className="group/seemore relative flex flex-col items-center justify-center w-full aspect-[3/4] bg-neutral-50 border border-neutral-100 hover:bg-neutral-100 transition-all duration-500 ease-out"

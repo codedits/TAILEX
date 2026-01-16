@@ -145,7 +145,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                     <div className="flex items-baseline gap-2">
                         {hasSale ? (
                             <>
-                                <span className="text-2xl font-bold text-[#D03030]">
+                                <span className="text-2xl font-bold text-black">
                                     {formatCurrency(currentSalePrice!)}
                                 </span>
                                 <span className="text-lg line-through text-neutral-400">
@@ -159,7 +159,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                         )}
                     </div>
                     {hasSale && (
-                        <span className="px-2 py-1 bg-[#D03030] text-white text-[10px] font-bold uppercase tracking-widest">
+                        <span className="px-2 py-1 bg-black text-white text-[10px] font-bold uppercase tracking-widest">
                             Sale
                         </span>
                     )}

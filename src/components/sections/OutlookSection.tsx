@@ -94,7 +94,7 @@ const OutlookSection = ({
                   fill
                   className="object-cover"
                   quality={90}
-                  sizes="(max-width: 768px) 150vw, 30vw"
+                  sizes="(max-width: 768px) 50vw, 30vw"
                   priority
                 />
               </div>
@@ -119,7 +119,7 @@ const OutlookSection = ({
                     fill
                     className="object-cover"
                     quality={90}
-                    sizes="(max-width: 768px) 150vw, 30vw"
+                    sizes="(max-width: 768px) 50vw, 30vw"
                   />
                 </div>
               </motion.div>
@@ -140,7 +140,7 @@ const OutlookSection = ({
                   fill
                   className="object-cover"
                   quality={90}
-                  sizes="(max-width: 768px) 150vw, 25vw"
+                  sizes="(max-width: 768px) 50vw, 25vw"
                 />
               </div>
             </motion.div>
@@ -162,7 +162,7 @@ const OutlookSection = ({
                   fill
                   className="object-cover"
                   quality={90}
-                  sizes="(max-width: 768px) 150vw, 35vw"
+                  sizes="(max-width: 768px) 50vw, 35vw"
                 />
               </div>
             </motion.div>

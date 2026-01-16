@@ -47,17 +47,16 @@ const HeroSection = ({
     >
       {/* Background Image Container - Decorative, loads async */}
       <div className="absolute inset-0 h-full w-full overflow-hidden z-0">
-        <div className="absolute inset-0 h-full w-full hero-image-animate">
+        <div className="absolute inset-0 h-full w-full bg-neutral-100 dark:bg-neutral-800">
           <Image
             src={displayImage}
-            alt=""
+            alt="" // If it's purely decorative, alt="" is fine with aria-hidden
             fill
             className="object-cover object-top animate-ken-burns will-change-transform"
             priority
-            decoding="async"
             fetchPriority="high"
-            quality={80}
-            sizes="(max-width: 768px) 300vw, 100vw"
+            quality={75} // Increased from 40 for the animation
+            sizes="100vw"
             aria-hidden="true"
           />
           {/* Subtle Overlay for Text Readability */}

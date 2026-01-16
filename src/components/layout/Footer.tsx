@@ -70,7 +70,7 @@ const Footer = ({
                   placeholder="Email Address"
                   className="bg-transparent border-b border-white/20 text-white placeholder:text-white/20 py-2 text-sm w-full focus:outline-none focus:border-white transition-colors"
                 />
-                <button className="text-white hover:text-white/70 transition-colors">
+                <button className="text-white hover:text-white/70 transition-colors" aria-label="Subscribe">
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -106,7 +106,14 @@ const Footer = ({
           <div className="flex flex-col gap-4">
             <div className="flex gap-4">
               {socialLinks.map((link) => (
-                <a key={link.name} href={link.href} target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-colors">
+                <a
+                  key={link.name}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/40 hover:text-white transition-colors"
+                  aria-label={`Visit our ${link.name} page`}
+                >
                   <link.Icon className="w-4 h-4" />
                 </a>
               ))}

@@ -96,6 +96,13 @@ export default async function RootLayout({
       style={dynamicStyles}
       className={`${theme} ${manrope.variable} ${inter.variable} ${playfair.variable} ${spaceMono.variable}`}
     >
+      <head>
+        {/* Preconnect to critical CDNs for faster resource loading */}
+        <link rel="preconnect" href="https://ipumyrjzquyglyesiuur.supabase.co" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://ipumyrjzquyglyesiuur.supabase.co" />
+        <link rel="preconnect" href="https://framerusercontent.com" />
+        <link rel="dns-prefetch" href="https://framerusercontent.com" />
+      </head>
       <body className={font.className}>
         <Providers initialConfig={config}>{children}</Providers>
       </body>
