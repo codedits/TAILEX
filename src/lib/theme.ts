@@ -140,7 +140,7 @@ export const getSiteConfig = unstable_cache(
         }
     },
     ['site-config-all'],
-    { tags: ['site_config'], revalidate: 300 } // 5 minutes
+    { tags: ['site_config'], revalidate: 3600 } // 1 hour
 )
 
 // Navigation menu fetcher
@@ -159,7 +159,7 @@ export const getNavigation = unstable_cache(
         }
     },
     ['navigation'],
-    { tags: ['navigation_menus'], revalidate: 300 }
+    { tags: ['navigation_menus'], revalidate: 3600 }
 )
 
 // Blog posts fetcher (for NewsSection)
@@ -179,7 +179,7 @@ export const getLatestPosts = unstable_cache(
         }
     },
     ['blog-posts-latest'],
-    { tags: ['blog_posts'], revalidate: 300 }
+    { tags: ['blog_posts'], revalidate: 3600 }
 )
 
 // ==========================================
@@ -203,7 +203,7 @@ export const getFeaturedCollections = unstable_cache(
         }
     },
     ['featured-collections'],
-    { tags: ['collections'], revalidate: 300 }
+    { tags: ['collections'], revalidate: 3600 }
 )
 
 export const getFeaturedProducts = unstable_cache(
@@ -223,7 +223,7 @@ export const getFeaturedProducts = unstable_cache(
         }
     },
     ['featured-products'],
-    { tags: ['products'], revalidate: 300 }
+    { tags: ['products'], revalidate: 3600 }
 )
 
 export const getCollectionsWithProducts = unstable_cache(
@@ -262,7 +262,7 @@ export const getCollectionsWithProducts = unstable_cache(
         }
     },
     ['collections-with-products'],
-    { tags: ['collections', 'products'], revalidate: 300 }
+    { tags: ['collections', 'products'], revalidate: 3600 }
 )
 
 // ==========================================
@@ -481,5 +481,5 @@ export const getHomepageLayout = unstable_cache(
         }
     },
     ['homepage-layout'],
-    { tags: ['site_config'], revalidate: 300 }
+    { tags: ['site_config'], revalidate: 3600 }
 )

@@ -1,7 +1,7 @@
 'use server'
 
 import { ProductService } from '@/services/products';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
 import type { Product, ProductVariant, ApiResponse, PaginatedResponse } from '@/lib/types';
 import { AppError } from '@/services/errors';
@@ -123,7 +123,9 @@ export async function createProduct(formData: FormData): Promise<ApiResponse<Pro
     revalidatePath('/admin/products');
     revalidatePath('/collection');
     revalidatePath('/');
-    
+    (revalidateTag as any)('products');
+    (revalidateTag as any)('collections');
+
     return { data: product };
   } catch (error) {
     return handleActionError(error);
@@ -150,7 +152,9 @@ export async function updateProduct(formData: FormData): Promise<ApiResponse<Pro
     revalidatePath(`/product/${productData.slug}`);
     revalidatePath('/collection');
     revalidatePath('/');
-    
+    (revalidateTag as any)('products');
+    (revalidateTag as any)('collections');
+
     return { data: product };
   } catch (error) {
     return handleActionError(error);
@@ -162,6 +166,8 @@ export async function deleteProduct(id: string): Promise<ApiResponse<null>> {
     await ProductService.deleteProduct(id);
     revalidatePath('/admin/products');
     revalidatePath('/collection');
+    (revalidateTag as any)('products');
+    (revalidateTag as any)('collections');
     return { message: 'Product deleted successfully' };
   } catch (error) {
     return handleActionError(error);
