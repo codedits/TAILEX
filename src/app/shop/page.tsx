@@ -53,7 +53,9 @@ export default async function ShopPage() {
         .select('*')
         .eq('status', 'active')
         .order('created_at', { ascending: false })
+        .limit(20)
         .then(res => (res.data || []) as Product[]);
+
 
     return (
         <main className="min-h-screen bg-background text-foreground">

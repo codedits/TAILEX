@@ -32,15 +32,25 @@ export const StatsService = {
             const supabase = await createAdminClient();
 
             // Parallel queries for speed
+            const now = new Date();
+            const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+
             const [
                 { data: orders },
                 { data: products },
                 { count: productCount }
             ] = await Promise.all([
-                supabase.from('orders').select('total, created_at').neq('status', 'cancelled'),
-                supabase.from('products').select('id, stock, status'),
+                // Fetch only last two months for change calculation
+                supabase.from('orders')
+                    .select('total, created_at')
+                    .neq('status', 'cancelled')
+                    .gte('created_at', firstDayLastMonth),
+                // Still need product status for counts, but maybe we can just count in DB?
+                // For now, let's limit the product fetch if it's too huge, or select only needed fields.
+                supabase.from('products').select('stock, status'),
                 supabase.from('products').select('*', { count: 'exact', head: true })
             ]);
+
 
             const safeOrders = orders || [];
             const safeProducts = products || [];
@@ -52,17 +62,16 @@ export const StatsService = {
             const activeProducts = safeProducts.filter(p => p.status === 'active').length;
             const lowStockCount = safeProducts.filter(p => (p.stock || 0) < 10 && p.status === 'active').length;
 
-            // Calculate "Change vs Last Month" (Simplified Mock Logic for now, or real logic below)
-            // Real Logic: Filter orders by date. 
-            const now = new Date();
+            // Calculate "Change vs Last Month" using already fetched data
             const firstDayCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-            const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            const firstDayLastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
             const currentMonthOrders = safeOrders.filter(o => new Date(o.created_at) >= firstDayCurrentMonth);
-            const lastMonthOrders = safeOrders.filter(o =>
-                new Date(o.created_at) >= firstDayLastMonth &&
-                new Date(o.created_at) < firstDayCurrentMonth
-            );
+            const lastMonthOrders = safeOrders.filter(o => {
+                const orderDate = new Date(o.created_at);
+                return orderDate >= firstDayLastMonthDate && orderDate < firstDayCurrentMonth;
+            });
+
 
             const currentRevenue = currentMonthOrders.reduce((s, o) => s + (o.total || 0), 0);
             const lastRevenue = lastMonthOrders.reduce((s, o) => s + (o.total || 0), 0);
@@ -92,12 +101,14 @@ export const StatsService = {
     getMonthlyRevenue: unstable_cache(
         async (): Promise<MonthlyRevenue[]> => {
             const supabase = await createAdminClient();
-            // Fetch all orders to aggregate (Optimizable: fetch only this year's orders)
+            const thisYear = new Date(new Date().getFullYear(), 0, 1).toISOString();
             const { data: orders } = await supabase
                 .from('orders')
                 .select('total, created_at')
                 .neq('status', 'cancelled')
+                .gte('created_at', thisYear)
                 .order('created_at', { ascending: true });
+
 
             if (!orders) return [];
 

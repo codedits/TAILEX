@@ -322,6 +322,8 @@ export async function getCollection(slug: string): Promise<ApiResponse<Collectio
       .eq('category_id', collection.id)
       .eq('status', 'active')
       .order('created_at', { ascending: false })
+      .limit(20)
+
 
     return {
       data: {

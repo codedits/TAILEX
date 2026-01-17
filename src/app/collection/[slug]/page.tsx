@@ -86,7 +86,9 @@ export default async function CollectionDetailPage({ params, searchParams }: Pro
         .eq('category_id', collection.id)
         .eq('status', 'active')
         .order('created_at', { ascending: false })
+        .limit(20)
         .then(res => (res.data || []) as Product[]) as Promise<Product[]>;
+
 
     // Use image_url as hero
     const heroImage = collection.image_url || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070';
