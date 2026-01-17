@@ -33,6 +33,7 @@ export const CollectionShowcaseCarousel = ({
                         <div
                             key={product.id}
                             className="flex-shrink-0 pl-2 md:pl-6 basis-[55%] sm:basis-[50%] md:basis-[40%] lg:basis-[30%] xl:basis-[25%] animate-product-reveal"
+                            data-reveal-animate
                         >
                             {/* 
                                Note: ProductCard is a client component with dynamic currency.
@@ -42,7 +43,7 @@ export const CollectionShowcaseCarousel = ({
                     ))}
 
                     {/* "See More" Card */}
-                    <div className="flex-shrink-0 pl-4 md:pl-6 basis-[80%] sm:basis-[50%] md:basis-[40%] lg:basis-[30%] xl:basis-[25%] animate-product-reveal">
+                    <div className="flex-shrink-0 pl-4 md:pl-6 basis-[80%] sm:basis-[50%] md:basis-[40%] lg:basis-[30%] xl:basis-[25%] animate-product-reveal" data-reveal-animate>
                         <Link
                             href={collectionHref}
                             className="group/seemore relative flex flex-col items-center justify-center w-full aspect-[3/4] bg-neutral-50 border border-neutral-100 hover:bg-neutral-100 transition-all duration-500 ease-out"

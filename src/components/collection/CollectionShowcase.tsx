@@ -45,7 +45,8 @@ export default function CollectionShowcase({
                         src={coverImage || "https://framerusercontent.com/images/BjQfJy7nQoVxvCYTFzwZxprDWiQ.jpg"}
                         alt={title}
                         fill
-                        className="object-cover animate-hero-rastah will-change-transform"
+                        className="object-cover hero-entrance-animate will-change-transform"
+                        data-reveal-animate
                         sizes="(max-width: 1024px) 100vw, 80vw"
                         quality={85}
                         loading="lazy"
@@ -56,15 +57,15 @@ export default function CollectionShowcase({
                 {/* Content - Text Independent of Image */}
                 <div className="absolute inset-x-0 bottom-0 top-0 flex flex-col items-center justify-center text-center px-4 md:px-6 text-white p-12">
                     <div className="space-y-6 max-w-4xl mx-auto">
-                        <h2 className="text-5xl sm:text-7xl md:text-6xl lg:text-7xl font-black tracking-tight uppercase mix-blend-difference font-display hero-text-animate-delay-1">
+                        <h2 className="text-5xl sm:text-7xl md:text-6xl lg:text-7xl font-black tracking-tight uppercase mix-blend-difference font-display hero-text-animate-delay-1" data-reveal-animate>
                             {title}
                         </h2>
                         {description && (
-                            <p className="text-lg sm:text-xl md:text-2xl font-light tracking-wide text-white/90 text-balance max-w-2xl mx-auto leading-relaxed drop-shadow-md hero-text-animate-delay-2">
+                            <p className="text-lg sm:text-xl md:text-2xl font-light tracking-wide text-white/90 text-balance max-w-2xl mx-auto leading-relaxed drop-shadow-md hero-text-animate-delay-2" data-reveal-animate>
                                 {description}
                             </p>
                         )}
-                        <div className="pt-8 hero-text-animate-delay-3">
+                        <div className="pt-8 hero-text-animate-delay-3" data-reveal-animate>
                             <Link
                                 href={collectionHref}
                                 className="inline-flex items-center gap-2 text-sm uppercase tracking-[0.2em] border-b border-white pb-1 hover:text-white/80 hover:border-white/80 transition-all font-medium"

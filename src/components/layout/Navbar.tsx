@@ -20,17 +20,8 @@ const MobileMenuOverlay = dynamic(() => import("./MobileMenuOverlay"), {
 
 const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navItems?: MenuItem[] }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const { cartCount, setIsCartOpen } = useCart();
   const { isAuthenticated, isLoading } = useAuth();
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const navLinks = [
     { name: "HOME", href: "/" },
@@ -43,10 +34,7 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
     <>
       <CartSheet />
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${scrolled
-          ? "bg-white text-black border-neutral-200 shadow-sm"
-          : "bg-transparent text-white border-white/10"
-          }`}
+        className="absolute top-0 left-0 right-0 z-50 transition-all duration-300 border-b bg-transparent text-white border-white/10 hover:bg-white hover:text-black hover:border-neutral-200 hover:shadow-sm"
       >
         <div className="px-6 md:px-8 py-4 w-full flex items-center justify-between relative">
 

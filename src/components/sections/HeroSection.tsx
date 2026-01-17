@@ -48,11 +48,11 @@ const HeroSection = ({
           src={displayImage}
           alt=""
           fill
-          className="object-cover object-top animate-hero-rastah"
+          className="object-cover object-top hero-entrance-animate"
           priority
           fetchPriority="high"
           decoding="sync"
-          quality={90}
+          quality={85}
           sizes="(max-width: 1024px) 100vw, 90vw"
           aria-hidden="true"
 
