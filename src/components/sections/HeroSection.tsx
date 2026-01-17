@@ -50,7 +50,8 @@ const HeroSection = ({
           priority
           fetchPriority="high"
           decoding="sync"
-          quality={90}
+          quality={100}
+          unoptimized={true} // Fetch directly from Framer CDN (faster than Next.js proxy)
           sizes="100vw"
           aria-hidden="true"
         />
