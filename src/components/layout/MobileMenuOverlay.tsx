@@ -28,7 +28,7 @@ export default function MobileMenuOverlay({ navLinks, onClose }: MobileMenuOverl
                         <Link
                             href={link.href}
                             onClick={onClose}
-                            className="text-6xl md:text-8xl font-black uppercase tracking-tighter hover:text-neutral-500 transition-colors"
+                            className="text-4xl md:text-6xl font-black uppercase tracking-tighter hover:text-neutral-500 transition-colors"
                         >
                             {link.name}
                         </Link>

@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { ShoppingBag, Menu, X, User } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { ShoppingCart, Menu, X, User } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/UserAuthContext";
@@ -22,11 +23,13 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { cartCount, setIsCartOpen } = useCart();
   const { isAuthenticated, isLoading } = useAuth();
+  const pathname = usePathname();
+  const isHome = pathname === "/";
 
   const navLinks = [
     { name: "HOME", href: "/" },
     { name: "SHOP", href: "/shop" },
-    { name: "JOURNAL", href: "/news" },
+    { name: "COLLECTIONS", href: "/collection" },
     { name: "ABOUT", href: "/about" },
   ];
 
@@ -34,7 +37,10 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
     <>
       <CartSheet />
       <header
-        className="absolute top-0 left-0 right-0 z-50 transition-all duration-300 border-b bg-transparent text-white border-white/10 hover:bg-white hover:text-black hover:border-neutral-200 hover:shadow-sm"
+        className={`absolute top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${isHome
+          ? "bg-transparent text-white border-white/10 hover:bg-white hover:text-black hover:border-neutral-200 hover:shadow-sm"
+          : "bg-white text-black border-neutral-200 shadow-sm"
+          }`}
       >
         <div className="px-6 md:px-8 py-6 w-full flex items-center justify-between relative">
 
@@ -82,7 +88,7 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
               onClick={() => setIsCartOpen(true)}
               aria-label={`Open cart${cartCount > 0 ? `, ${cartCount} items` : ''}`}
             >
-              <ShoppingBag className="w-5 h-5 stroke-[1.5]" />
+              <ShoppingCart className="w-5 h-5 stroke-[1.5]" />
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
               )}

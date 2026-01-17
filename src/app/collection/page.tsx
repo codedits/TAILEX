@@ -1,5 +1,6 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { CollectionCard } from "@/components/collection/CollectionCard";
 import CollectionBrowser from "@/components/collection/CollectionBrowser";
 import { createClient } from "@/lib/supabase/server";
 import { getNavigation, getBrandConfig, getFooterConfig, getSocialConfig } from "@/lib/theme";
@@ -56,64 +57,23 @@ export default async function CollectionPage() {
     <main className="min-h-screen bg-background">
       <Navbar brandName={brand.name} navItems={navItems} />
 
-      <div className="pt-32 pb-20 px-6 md:px-12">
-        {/* Breadcrumbs */}
+      <div className="pt-40 pb-24 px-6 md:px-12 max-w-[1440px] mx-auto">
+        {/* Minimal Header */}
         <div className="mb-12">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/">Home</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Shop All</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-
-        {/* Header */}
-        <div className="mb-16">
-          <h1 className="text-4xl md:text-6xl font-display font-medium tracking-tight mb-4">
-            The Collection
+          <h1 className="text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-400">
+            Collection
           </h1>
-          <p className="text-muted-foreground max-w-xl text-lg font-light">
-            Timeless pieces designed for the modern wardrobe. Quality craftsmanship meets contemporary silhouette.
-          </p>
         </div>
 
-        {/* Collections Grid - High-end store style */}
+        {/* Collections Grid - High-end editorial style */}
         {safeCollections.length > 0 && (
           <section className="mb-20">
-            <h2 className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground mb-8">
-              Browse by Collection
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {collectionsWithCounts.map((collection) => (
-                <Link
+                <CollectionCard
                   key={collection.id}
-                  href={`/collection/${collection.slug}`}
-                  className="group relative aspect-[4/5] overflow-hidden bg-muted"
-                >
-                  {collection.image_url ? (
-                    <Image
-                      src={collection.image_url}
-                      alt={collection.title}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
-                      sizes="(max-width: 768px) 50vw, 25vw"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-neutral-200 to-neutral-300 dark:from-neutral-800 dark:to-neutral-900" />
-                  )}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
-                  <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 bg-gradient-to-t from-black/60 to-transparent">
-                    <h3 className="text-white font-medium text-lg md:text-xl">{collection.title}</h3>
-                    <p className="text-white/70 text-sm mt-1">
-                      {collection.product_count} {collection.product_count === 1 ? 'piece' : 'pieces'}
-                    </p>
-                  </div>
-                </Link>
+                  collection={collection}
+                />
               ))}
             </div>
           </section>

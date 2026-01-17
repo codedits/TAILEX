@@ -28,11 +28,11 @@ export const CollectionShowcaseCarousel = ({
     return (
         <ScrollReveal className="overflow-hidden">
             <div className="cursor-grab active:cursor-grabbing" ref={emblaRef}>
-                <div className="flex gap-4 md:gap-6 touch-pan-y py-4 -ml-4 md:-ml-6 px-4 md:px-6 stagger-products">
+                <div className="flex touch-pan-y py-4 -ml-4 md:-ml-6 stagger-products">
                     {products.map((product) => (
                         <div
                             key={product.id}
-                            className="flex-shrink-0 pl-2 md:pl-6 basis-[55%] sm:basis-[50%] md:basis-[40%] lg:basis-[30%] xl:basis-[25%] animate-product-reveal"
+                            className="flex-shrink-0 pl-4 md:pl-6 basis-[50%] md:basis-[40%] lg:basis-[30%] xl:basis-[25%] animate-product-reveal"
                             data-reveal-animate
                         >
                             {/* 
@@ -43,7 +43,7 @@ export const CollectionShowcaseCarousel = ({
                     ))}
 
                     {/* "See More" Card */}
-                    <div className="flex-shrink-0 pl-4 md:pl-6 basis-[80%] sm:basis-[50%] md:basis-[40%] lg:basis-[30%] xl:basis-[25%] animate-product-reveal" data-reveal-animate>
+                    <div className="flex-shrink-0 pl-4 md:pl-6 basis-[50%] md:basis-[40%] lg:basis-[30%] xl:basis-[25%] animate-product-reveal" data-reveal-animate>
                         <Link
                             href={collectionHref}
                             className="group/seemore relative flex flex-col items-center justify-center w-full aspect-[3/4] bg-neutral-50 border border-neutral-100 hover:bg-neutral-100 transition-all duration-500 ease-out"
