@@ -46,7 +46,7 @@ const HeroSection = ({
           src={displayImage}
           alt=""
           fill
-          className="object-cover object-top"
+          className="object-cover object-top animate-hero-rastah"
           priority
           fetchPriority="high"
           decoding="sync"
@@ -69,20 +69,19 @@ const HeroSection = ({
           margin: '0 auto'
         }}
       >
-        <div className="flex flex-col items-center justify-center hero-text-animate space-y-8">
-
+        <div className="flex flex-col items-center justify-center space-y-8">
           {/* Subtitle */}
-          <p className="text-white/90 text-xs md:text-xs tracking-[0.2em] uppercase font-bold">
+          <p className="text-white/90 text-xs md:text-xs tracking-[0.2em] uppercase font-bold hero-text-animate-delay-1">
             {subheading || "SS26 STATEMENT PIECES"}
           </p>
 
           {/* Main Title */}
-          <h1 className="text-white text-5xl md:text-8xl font-medium tracking-tight">
+          <h1 className="text-white text-5xl md:text-8xl font-medium tracking-tight hero-text-animate-delay-2">
             {heading || "Bold by design"}
           </h1>
 
           {/* CTA Button */}
-          <div className="pt-4">
+          <div className="pt-4 hero-text-animate-delay-3">
             <Link
               href="/shop"
               className="inline-block px-8 py-3 rounded-full border border-white/50 text-white text-[10px] md:text-xs font-semibold tracking-[0.15em] hover:bg-white hover:text-black transition-all duration-300 uppercase"
@@ -91,6 +90,7 @@ const HeroSection = ({
             </Link>
           </div>
         </div>
+
       </div>
 
       {/* Transition Overlay - for scroll transition effect (CSS only) */}
