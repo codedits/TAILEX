@@ -106,7 +106,7 @@ export default async function CollectionDetailPage({ params, searchParams }: Pro
                         src={heroImage}
                         alt={collection.title}
                         fill
-                        className="object-cover transition-transform duration-[30s] ease-linear scale-105 hover:scale-110 motion-reduce:transition-none"
+                        className="object-cover transition-transform duration-[length:30s] ease-linear scale-105 hover:scale-110 motion-reduce:transition-none"
                         priority
                         sizes="100vw"
                         quality={95}

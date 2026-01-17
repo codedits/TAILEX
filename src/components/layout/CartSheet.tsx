@@ -23,7 +23,7 @@ export function CartSheet() {
       <Drawer open={isCartOpen} onOpenChange={setIsCartOpen}>
         <DrawerContent className="h-[85vh]">
           <DrawerHeader className="text-left">
-            <DrawerTitle className="text-2xl font-display uppercase tracking-wider">Your Cart</DrawerTitle>
+            <DrawerTitle className="text-2xl font-display uppercase tracking-wider">Your Bag</DrawerTitle>
           </DrawerHeader>
           <div className="flex-1 flex flex-col p-4 overflow-hidden">
             <CartContents onClose={() => setIsCartOpen(false)} />
@@ -37,7 +37,7 @@ export function CartSheet() {
     <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
       <SheetContent className="w-full sm:max-w-md flex flex-col">
         <SheetHeader>
-          <SheetTitle className="text-2xl font-display uppercase tracking-wider">Your Cart</SheetTitle>
+          <SheetTitle className="text-2xl font-display uppercase tracking-wider">Your Bag</SheetTitle>
         </SheetHeader>
         <CartContents onClose={() => setIsCartOpen(false)} />
       </SheetContent>

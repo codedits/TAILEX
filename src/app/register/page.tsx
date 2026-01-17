@@ -116,7 +116,7 @@ export default function RegisterPage() {
           </Link>
           <div className="space-y-4">
             <h2 className="text-5xl font-display uppercase tracking-widest font-bold text-white leading-tight">
-              Join the<br />Inner Circle
+              Join<br />TAILEX
             </h2>
             <p className="text-white/40 max-w-sm tracking-wide leading-relaxed uppercase text-xs">
               Exclusive access to new drops, private sales, and curated content.
@@ -186,7 +186,7 @@ export default function RegisterPage() {
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
                         <span className="flex items-center gap-2">
-                          Join Now <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                          Continue <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                         </span>
                       )}
                     </Button>
@@ -263,7 +263,7 @@ export default function RegisterPage() {
           <div className="pt-24 text-center lg:text-left">
             <div className="flex items-center justify-center lg:justify-start gap-2 mb-2">
               <UserPlus className="w-3 h-3 text-white/20" />
-              <span className="text-[8px] uppercase tracking-[0.4em] text-white/20 font-bold">New Member Registration</span>
+              <span className="text-[8px] uppercase tracking-[0.4em] text-white/20 font-bold">Account Registration</span>
             </div>
             <p className="text-[10px] text-white/10 tracking-widest">© 2026 TAILEX VISIONARY LABS. ALL RIGHTS RESERVED.</p>
           </div>

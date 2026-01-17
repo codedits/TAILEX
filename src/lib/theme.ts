@@ -36,14 +36,14 @@ const defaultThemeConfig: ThemeConfig = {
 
 const defaultBrandConfig: BrandConfigType = {
     name: 'TAILEX',
-    tagline: 'Premium Fashion',
+    tagline: 'Modern Essentials for the Discerning Member',
     announcement: '',
     showAnnouncement: false
 }
 
 const defaultHeroConfig: HeroConfig = {
     heading: 'Winter Collection',
-    subheading: 'Discover the new trends',
+    subheading: 'Precision tailoring meets daily life.',
     ctaText: 'Shop Now',
     ctaLink: '/shop'
 }
@@ -65,7 +65,7 @@ const defaultBenefitsConfig: BenefitsConfig = {
 }
 
 const defaultFooterConfig: FooterConfig = {
-    tagline: 'Timeless wardrobe essentials designed for everyday confidence.',
+    tagline: 'Curating the modern wardrobe through discipline and detail.',
     columns: [
         {
             title: 'Shop',
@@ -80,7 +80,7 @@ const defaultFooterConfig: FooterConfig = {
             title: 'Company',
             links: [
                 { label: 'About Us', url: '/about' },
-                { label: 'Journal', url: '/news' },
+                { label: 'The Journal', url: '/news' },
                 { label: 'Careers', url: '/careers' },
                 { label: 'Contact', url: '/contact' },
             ]
@@ -383,7 +383,7 @@ export const getHomepageLayout = unstable_cache(
                     order: 0,
                     content: {
                         heading: "Calder Co.",
-                        subheading: "Timeless Wardrobe.\nEveryday Power."
+                        subheading: "Defined by Detail.\nPrecision Form."
                     }
                 },
                 {
@@ -392,8 +392,8 @@ export const getHomepageLayout = unstable_cache(
                     enabled: true,
                     order: 1,
                     content: {
-                        title: "Everyday\nEssentials",
-                        description: "Explore our best-selling categories — from crisp polos and refined shirts to versatile jackets and relaxed-fit trousers, made to elevate your everyday wardrobe."
+                        title: "Modern\nEssentials",
+                        description: "The fundamentals, redefined. Explore our core categories, from precision-cut polos to relaxed tailoring."
                     }
                 },
                 {
@@ -402,8 +402,8 @@ export const getHomepageLayout = unstable_cache(
                     enabled: true,
                     order: 2,
                     content: {
-                        title: "Proven\nFavorites",
-                        description: "Icons that endure year after year — top-rated staples chosen again and again for their timeless fit, premium feel, and versatility."
+                        title: "The\nIcons",
+                        description: "Time-tested staples that define the TAILEX wardrobe. Versatile, enduring, and curated for daily life."
                     }
                 },
                 {
@@ -412,7 +412,7 @@ export const getHomepageLayout = unstable_cache(
                     enabled: true,
                     order: 3,
                     content: {
-                        title: "Style It\nYour Way"
+                        title: "Defined by\nDetail"
                     }
                 },
                 {
@@ -421,8 +421,8 @@ export const getHomepageLayout = unstable_cache(
                     enabled: true,
                     order: 4,
                     content: {
-                        title: "What's New at\nCalder Co.",
-                        description: "From new product drops to style tips — read our latest features, editorials, and brand announcements."
+                        title: "The Journal",
+                        description: "Stories of craftsmanship, style perspectives, and the latest from our studio."
                     }
                 },
             ]
@@ -444,8 +444,8 @@ export const getHomepageLayout = unstable_cache(
                     enabled: true,
                     order: 1,
                     content: {
-                        title: "Everyday\nEssentials",
-                        description: "Explore our best-selling categories — from crisp polos and refined shirts to versatile jackets and relaxed-fit trousers, made to elevate your everyday wardrobe."
+                        title: "Modern\nEssentials",
+                        description: "The fundamentals, redefined. Explore our core categories, from precision-cut polos to relaxed tailoring."
                     }
                 },
                 {
@@ -473,8 +473,8 @@ export const getHomepageLayout = unstable_cache(
                     enabled: true,
                     order: 4,
                     content: {
-                        title: "What's New at\nCalder Co.",
-                        description: "From new product drops to style tips — read our latest features, editorials, and brand announcements."
+                        title: "The Journal",
+                        description: "Stories of craftsmanship, style perspectives, and the latest from our studio."
                     }
                 }
             ]

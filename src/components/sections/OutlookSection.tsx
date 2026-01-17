@@ -19,7 +19,7 @@ const defaultImages = [
 ];
 
 const OutlookSection = ({
-  title = "Style It\nYour Way",
+  title = "Defined by\nDetail",
   images = defaultImages
 }: OutlookSectionProps) => {
   const containerRef = useRef<HTMLDivElement>(null);

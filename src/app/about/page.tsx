@@ -27,8 +27,8 @@ type PageContent = {
 // Default content fallback
 const defaultContent: PageContent = {
   title: "About Us",
-  heroTitle: "About TAILEX",
-  heroDescription: "Founded with a vision to create timeless menswear that transcends seasons and trends, TAILEX represents the intersection of quality craftsmanship and modern design.",
+  heroTitle: "The TAILEX Studio",
+  heroDescription: "Founded on the principle of intentional design, TAILEX creates pieces that bridge the gap between traditional craftsmanship and modern utility.",
   sections: [
     {
       id: "story",
@@ -39,7 +39,7 @@ const defaultContent: PageContent = {
     {
       id: "philosophy",
       type: "image-text",
-      title: "Our Philosophy",
+      title: "The Approach",
       content: "We design for the modern man who values substance over spectacle. Our pieces are meant to be the foundation of your wardrobe — versatile, enduring, and effortlessly refined.",
     }
   ]
@@ -47,7 +47,7 @@ const defaultContent: PageContent = {
 
 export default async function AboutPage() {
   const supabase = await createClient();
-  
+
   // Fetch page content and site config in parallel
   const [brand, navItems, footerConfig, socialConfig, pageResult] = await Promise.all([
     getBrandConfig(),
@@ -59,19 +59,19 @@ export default async function AboutPage() {
 
   // Use CMS content if available, otherwise defaults
   const pageData = pageResult.data;
-  const content: PageContent = pageData?.sections 
-    ? { 
-        title: pageData.title,
-        heroTitle: pageData.title,
-        heroDescription: pageData.content || defaultContent.heroDescription,
-        sections: pageData.sections as PageContent['sections']
-      }
+  const content: PageContent = pageData?.sections
+    ? {
+      title: pageData.title,
+      heroTitle: pageData.title,
+      heroDescription: pageData.content || defaultContent.heroDescription,
+      sections: pageData.sections as PageContent['sections']
+    }
     : { ...defaultContent, heroTitle: `About ${brand.name}` };
 
   return (
     <main className="min-h-screen bg-background">
       <Navbar brandName={brand.name} navItems={navItems} />
-      
+
       {/* Hero */}
       <section className="pt-32 pb-16 px-6 md:px-12">
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-4xl">

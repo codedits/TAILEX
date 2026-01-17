@@ -74,12 +74,12 @@ const HeroSection = ({
         <div className="flex flex-col items-center justify-center space-y-8">
           {/* Subtitle */}
           <p className="text-white/90 text-xs md:text-xs tracking-[0.2em] uppercase font-bold hero-text-animate-delay-1">
-            {subheading || "SS26 STATEMENT PIECES"}
+            {subheading || "SPRING/SUMMER '26"}
           </p>
 
           {/* Main Title */}
           <h1 className="text-white text-5xl md:text-8xl font-medium tracking-tight hero-text-animate-delay-2">
-            {heading || "Bold by design"}
+            {heading || "Defined by Detail"}
           </h1>
 
           {/* CTA Button */}
@@ -88,7 +88,7 @@ const HeroSection = ({
               href="/shop"
               className="inline-block px-8 py-3 rounded-full border border-white/50 text-white text-[10px] md:text-xs font-semibold tracking-[0.15em] hover:bg-white hover:text-black transition-all duration-300 uppercase"
             >
-              Discover More
+              View Collection
             </Link>
           </div>
         </div>

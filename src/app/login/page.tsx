@@ -109,8 +109,8 @@ export default function LoginPage() {
                 transition={{ duration: 0.3 }}
               >
                 <div className="mb-8">
-                  <h1 className="text-2xl font-semibold text-black mb-2">Welcome Back</h1>
-                  <p className="text-neutral-500 text-sm">Sign in to access your curated collection.</p>
+                  <h1 className="text-2xl font-semibold text-black mb-2">Welcome</h1>
+                  <p className="text-neutral-500 text-sm">Sign in to access your TAILEX account.</p>
                 </div>
 
                 <form onSubmit={handleSendOTP} className="space-y-6">
@@ -157,7 +157,7 @@ export default function LoginPage() {
                   >
                     <ArrowLeft className="w-4 h-4" /> Back to Email
                   </button>
-                  <h1 className="text-2xl font-semibold text-black mb-2">Check your Inbox</h1>
+                  <h1 className="text-2xl font-semibold text-black mb-2">Verification Pending</h1>
                   <p className="text-neutral-500 text-sm">
                     We've sent a 6-digit code to <span className="text-black font-medium">{email}</span>
                   </p>
@@ -187,7 +187,7 @@ export default function LoginPage() {
                     disabled={loading || otp.length !== 6}
                     className="w-full h-12 bg-black text-white hover:bg-neutral-800 font-medium rounded-lg text-sm uppercase tracking-wide transition-all"
                   >
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Verify Identity"}
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Complete Sign In"}
                   </Button>
                 </form>
 

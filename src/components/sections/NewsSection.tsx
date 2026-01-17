@@ -30,7 +30,7 @@ const NewsSection = ({
   const displayPosts = posts.slice(0, 3);
 
   // Build title with brand name
-  const title = sectionTitle || `What's New at\n${brandName}`;
+  const title = sectionTitle || `The Journal`;
 
   const containerVariants = {
     hidden: { opacity: 0 },

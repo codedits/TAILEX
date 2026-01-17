@@ -195,7 +195,7 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
                                             />
                                         </div>
                                         <Button type="submit" className="w-full" disabled={isProcessing}>
-                                            {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : "Continue to Shipping"}
+                                            {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : "Proceed"}
                                         </Button>
                                     </form>
                                 </div>
@@ -217,7 +217,7 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
                                 <div className="bg-neutral-900/50 p-6 rounded-lg border border-white/5">
                                     <div className="flex items-center justify-between mb-4">
                                         <h2 className="text-lg font-medium">Verify it's you</h2>
-                                        <button onClick={() => setStep('email')} className="text-xs text-neutral-400 hover:text-white underline">Change email</button>
+                                        <button onClick={() => setStep('email')} className="text-xs text-neutral-400 hover:text-white underline">Edit</button>
                                     </div>
                                     <p className="text-sm text-neutral-400 mb-6">
                                         We sent a secure code to <span className="text-white">{email}</span>
@@ -237,7 +237,7 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
                                             />
                                         </div>
                                         <Button type="submit" className="w-full" disabled={isProcessing}>
-                                            {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : "Verify & Continue"}
+                                            {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : "Continue"}
                                         </Button>
                                     </form>
                                 </div>
@@ -362,7 +362,7 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
                                     </div>
 
                                     <Button type="submit" variant="cta" size="xl" className="w-full" disabled={isProcessing}>
-                                        {isProcessing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : `PAY : ${formatCurrency(cartTotal + (step === 'details' ? 250 : 0))}`}
+                                        {isProcessing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : `CONFIRM ORDER : ${formatCurrency(cartTotal + (step === 'details' ? 250 : 0))}`}
                                     </Button>
                                 </form>
                             </motion.div>

@@ -18,7 +18,7 @@ export function CartContents({ onClose }: { onClose: () => void }) {
         return (
             <div className="flex-1 flex flex-col items-center justify-center space-y-4 min-h-[50vh]">
                 <ShoppingBag className="w-16 h-16 text-muted-foreground opacity-20" />
-                <p className="text-muted-foreground text-lg">Your cart is empty</p>
+                <p className="text-muted-foreground text-lg">Your bag is empty</p>
                 <Button
                     variant="outline"
                     onClick={onClose}
@@ -99,7 +99,7 @@ export function CartContents({ onClose }: { onClose: () => void }) {
                 </p>
                 <Button variant="cta" size="xl" className="w-full" asChild>
                     <Link href="/checkout" onClick={onClose}>
-                        Checkout
+                        Continue to Checkout
                     </Link>
                 </Button>
             </div>

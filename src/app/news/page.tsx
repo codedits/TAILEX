@@ -11,7 +11,7 @@ export const revalidate = 300; // 5 minutes - aggressive cache
 const fallbackArticles = [
   {
     id: '1',
-    title: "Spring 2025 Essentials",
+    title: "The Spring Edit: Foundation Pieces",
     slug: "spring-2025-essentials",
     excerpt: "Polos and relaxed tailoring for the new season. Discover our curated selection of lightweight fabrics and versatile silhouettes designed for warmer days.",
     featured_image: "https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?q=80&w=1400",
@@ -19,7 +19,7 @@ const fallbackArticles = [
   },
   {
     id: '2',
-    title: "Pop-up Experience",
+    title: "The Workshop: A New Perspective",
     slug: "pop-up-experience",
     excerpt: "A temporary space dedicated to craftsmanship. Visit our immersive retail experience featuring exclusive pieces and behind-the-scenes insights.",
     featured_image: "https://images.unsplash.com/photo-1495121605193-b116b5b09a3f?q=80&w=1400",
@@ -27,7 +27,7 @@ const fallbackArticles = [
   },
   {
     id: '3',
-    title: "Responsible Fabric & Design",
+    title: "On Craft and Materiality",
     slug: "responsible-fabric",
     excerpt: "Our sourcing process, from field to form. Learn about our commitment to sustainable practices and ethical manufacturing.",
     featured_image: "https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=1400",
@@ -37,7 +37,7 @@ const fallbackArticles = [
 
 export default async function NewsPage() {
   const supabase = await createClient();
-  
+
   const [navItems, brand, footerConfig, socialConfig, postsResult] = await Promise.all([
     getNavigation('main-menu'),
     getBrandConfig(),
@@ -51,29 +51,29 @@ export default async function NewsPage() {
   ]);
 
   // Use DB posts if available, otherwise fallback
-  const articles = (postsResult.data && postsResult.data.length > 0) 
-    ? postsResult.data 
+  const articles = (postsResult.data && postsResult.data.length > 0)
+    ? postsResult.data
     : fallbackArticles;
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
   };
 
   return (
     <main className="min-h-screen bg-background">
       <Navbar brandName={brand.name} navItems={navItems} />
-      
+
       {/* Hero */}
       <section className="pt-32 pb-16 px-6 md:px-12">
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <h1 className="section-title text-foreground mb-4">News & Stories</h1>
+          <h1 className="section-title text-foreground mb-4">Inside TAILEX</h1>
           <p className="text-muted-foreground font-body text-base md:text-lg max-w-xl">
-            From new product drops to style tips — read our latest features, editorials, and brand announcements.
+            Stories of craftsmanship, style perspectives, and the latest from our studio.
           </p>
         </div>
       </section>

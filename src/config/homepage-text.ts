@@ -1,17 +1,17 @@
 export const HOMEPAGE_TEXT = {
     categories: {
-        title: "WEAR\nTHE\nMOMENT",
-        description: "Explore our best-selling categories — from crisp polos and refined shirts to versatile jackets and relaxed-fit trousers."
+        title: "OBJECTS\nOF\nINTENT",
+        description: "The fundamentals, redefined. Explore our core categories, from precision-cut polos to relaxed tailoring."
     },
     featuredProducts: {
-        title: "PROVEN\nFAVORITES",
-        description: "Icons that endure year after year — top-rated staples chosen again and again for their timeless fit, premium feel, and versatility."
+        title: "THE\nICONS",
+        description: "Time-tested staples that define the TAILEX wardrobe. Versatile, enduring, and curated for daily life."
     },
     outlook: {
-        title: "Style It\nYour Way"
+        title: "Defined by\nDetail"
     },
     news: {
         // defaults to "What's New at {brand}" if strictly null, but here we set a default
-        description: "Stay in the loop — discover the latest drops, exclusive deals, and behind-the-scenes looks at Calder Co., all in one place."
+        description: "Stories of craftsmanship, style perspectives, and the latest from our studio."
     }
 };

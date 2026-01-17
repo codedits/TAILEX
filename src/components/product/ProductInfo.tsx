@@ -180,7 +180,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                         <span>{option.name}: <span className="text-neutral-500 font-medium">{selectedOptions[option.name]}</span></span>
                         {option.name.toLowerCase() === 'size' && (
                             <button className="flex items-center gap-1 hover:text-neutral-500 transition-colors underline underline-offset-4">
-                                <Ruler className="w-3 h-3" /> Size Guide
+                                <Ruler className="w-3 h-3" /> Find Your Fit
                             </button>
                         )}
                     </div>
@@ -236,7 +236,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                     disabled={isOutOfStock}
                     className="w-full h-12 rounded-none border-neutral-900 text-neutral-900 hover:bg-neutral-50 uppercase tracking-widest font-bold text-xs"
                 >
-                    Buy it Now
+                    Buy Now
                 </Button>
             </div>
 
