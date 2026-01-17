@@ -38,32 +38,26 @@ const HeroSection = ({
 
   return (
     <section
-      className="relative w-full overflow-visible"
-      style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 1
-      }}
+      className="relative w-full h-screen overflow-hidden"
     >
-      {/* Background Image Container - Decorative, loads async */}
-      <div className="absolute inset-0 h-full w-full overflow-hidden z-0">
-        <div className="absolute inset-0 h-full w-full bg-neutral-100 dark:bg-neutral-800">
-          <Image
-            src={displayImage}
-            alt="" // If it's purely decorative, alt="" is fine with aria-hidden
-            fill
-            className="object-cover object-top animate-ken-burns will-change-transform"
-            priority
-            fetchPriority="high"
-            decoding="sync"
-            quality={90} // High quality for LCP
-            sizes="100vw"
-            aria-hidden="true"
-          />
-          {/* Subtle Overlay for Text Readability */}
-          <div className="absolute inset-0 bg-black/20" />
-        </div>
+      {/* Background Image Container */}
+      <div className="absolute inset-0 h-full w-full bg-neutral-900">
+        <Image
+          src={displayImage}
+          alt=""
+          fill
+          className="object-cover object-top"
+          priority
+          fetchPriority="high"
+          decoding="sync"
+          quality={90}
+          sizes="100vw"
+          aria-hidden="true"
+        />
+        {/* Subtle Overlay for Text Readability */}
+        <div className="absolute inset-0 bg-black/20" />
       </div>
+
 
       {/* Content Container - Centered */}
       <div
@@ -109,7 +103,7 @@ const HeroSection = ({
           style={{ height: '50%', transform: 'translateY(-450px)' }}
         />
       </div>
-    </section>
+    </section >
   );
 };
 
