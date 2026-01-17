@@ -36,7 +36,7 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
       <header
         className="absolute top-0 left-0 right-0 z-50 transition-all duration-300 border-b bg-transparent text-white border-white/10 hover:bg-white hover:text-black hover:border-neutral-200 hover:shadow-sm"
       >
-        <div className="px-6 md:px-8 py-4 w-full flex items-center justify-between relative">
+        <div className="px-6 md:px-8 py-6 w-full flex items-center justify-between relative">
 
           {/* Left Nav */}
           <nav className="hidden md:flex items-center gap-8 flex-1">
