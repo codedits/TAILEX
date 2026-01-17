@@ -1,30 +1,31 @@
-import { DataTable } from '@/components/admin/ui/data-table';
-import { columns } from '@/components/admin/orders/columns';
+import { Suspense } from 'react';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { TableSkeleton } from '@/components/admin/ui/TableSkeleton';
+import { OrderTableClient } from '@/components/admin/orders/OrderTableClient';
 
-async function getOrders() {
+async function OrdersTable() {
   const supabase = await createAdminClient();
   const { data } = await supabase
     .from('orders')
     .select('*')
     .order('created_at', { ascending: false });
 
-  return data || [];
+  return <OrderTableClient orders={data || []} />;
 }
 
-export default async function AdminOrdersPage() {
-  const orders = await getOrders();
-
+export default function AdminOrdersPage() {
   return (
-    <div className="space-y-8 p-8 max-w-[1600px] mx-auto">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 max-w-[1600px] mx-auto">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h2 className="text-3xl font-light tracking-tight text-white">Orders</h2>
-          <p className="text-white/40 mt-1">Manage and track customer orders here.</p>
+          <h2 className="text-2xl md:text-3xl font-light tracking-tight text-white">Orders</h2>
+          <p className="text-white/40 mt-1 text-sm">Manage and track customer orders.</p>
         </div>
       </div>
 
-      <DataTable columns={columns} data={orders as any} filterColumn="email" filterPlaceholder="Filter by email..." />
+      <Suspense fallback={<TableSkeleton rows={8} />}>
+        <OrdersTable />
+      </Suspense>
     </div>
   );
 }

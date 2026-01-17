@@ -8,13 +8,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { 
-  LayoutDashboard, 
-  ShoppingBag, 
-  Settings, 
-  LogOut, 
-  Palette, 
-  FileText, 
+import {
+  LayoutDashboard,
+  ShoppingBag,
+  Settings,
+  LogOut,
+  Palette,
+  FileText,
   Navigation,
   Users
 } from "lucide-react"
@@ -36,7 +36,7 @@ export function AdminSidebar() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              
+
               <SidebarMenuItem>
                 <SidebarMenuButton asChild className="hover:bg-white/5 hover:text-white transition-colors duration-200 py-6 rounded-lg">
                   <Link href="/admin/theme">
@@ -111,20 +111,20 @@ export function AdminSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        
+
         <SidebarGroup className="mt-auto px-2 pb-4">
-             <SidebarGroupContent>
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                         <SidebarMenuButton asChild className="hover:bg-white/5 hover:text-white transition-colors py-6 rounded-lg">
-                            <Link href="/" className="flex w-full items-center gap-2">
-                                <LogOut className="w-4 h-4" />
-                                <span className="text-sm">Return to Store</span>
-                            </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu>
-             </SidebarGroupContent>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild className="hover:bg-white/5 hover:text-white transition-colors py-6 rounded-lg">
+                  <Link href="/" className="flex w-full items-center gap-2">
+                    <LogOut className="w-4 h-4" />
+                    <span className="text-sm">Return to Store</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
         </SidebarGroup>
 
       </SidebarContent>

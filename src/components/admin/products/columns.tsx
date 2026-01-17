@@ -15,7 +15,6 @@ import {
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
-import { DeleteButton } from "@/components/admin/DeleteButton"
 import { deleteProduct } from "@/app/admin/(dashboard)/products/actions"
 import { useFormatCurrency } from "@/context/StoreConfigContext"
 
@@ -135,20 +134,46 @@ export const columns: ColumnDef<Product>[] = [
             const product = row.original
 
             return (
-                <div className="flex items-center justify-end gap-2">
-                    <Button variant="ghost" size="icon" asChild className="h-8 w-8 hover:bg-white/10 text-white/60 hover:text-white rounded-lg">
-                        <Link href={`/admin/products/${product.id}`}>
-                            <Edit className="h-4 w-4" />
-                        </Link>
-                    </Button>
-                    {/* Note: DeleteButton needs to be compatible with cell context or tailored for it */}
-                    <DeleteButton
-                        id={product.id}
-                        onDelete={deleteProduct}
-                        itemName={product.title}
-                        className="h-8 w-8"
-                    />
-                </div>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-white/10 text-white/60">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-neutral-900 border-white/10">
+                        <DropdownMenuLabel className="text-white">Actions</DropdownMenuLabel>
+                        <DropdownMenuItem
+                            onClick={() => navigator.clipboard.writeText(product.id)}
+                            className="text-white focus:bg-white/10"
+                        >
+                            Copy Product ID
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator className="bg-white/10" />
+                        <DropdownMenuItem className="text-white focus:bg-white/10" asChild>
+                            <Link href={`/admin/products/${product.id}`}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit Product
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator className="bg-white/10" />
+                        <DropdownMenuItem
+                            className="text-red-400 focus:bg-red-500/10 focus:text-red-400"
+                            onClick={async () => {
+                                if (confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+                                    const result = await deleteProduct(product.id);
+                                    if ('message' in result) {
+                                        window.location.reload();
+                                    } else {
+                                        alert(result.error || 'Failed to delete product');
+                                    }
+                                }
+                            }}
+                        >
+                            Delete Product
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             )
         },
     },

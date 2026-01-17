@@ -10,10 +10,10 @@ import { UserAuthProvider } from "@/context/UserAuthContext";
 import { StoreConfigProvider } from "@/context/StoreConfigContext";
 import { StoreConfig } from "@/services/config";
 
-export function Providers({ 
+export function Providers({
   children,
   initialConfig
-}: { 
+}: {
   children: React.ReactNode;
   initialConfig: StoreConfig;
 }) {
