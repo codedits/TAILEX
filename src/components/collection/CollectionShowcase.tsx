@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { Product } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { CollectionShowcaseCarousel } from "./CollectionShowcaseCarousel";
+import { ScrollReveal } from "../animations/ScrollReveal";
 
 interface CollectionShowcaseProps {
     title: string;
@@ -38,32 +39,31 @@ export default function CollectionShowcase({
     return (
         <section className={cn("w-full flex flex-col relative z-10 section-fade-in", className)}>
             {/* Section 1: The Collection Hero */}
-            <div className="relative w-full h-screen min-h-[600px] overflow-hidden group bg-background">
-                <div className="absolute inset-0 h-full w-full hero-image-animate">
+            <ScrollReveal className="relative w-full h-screen min-h-[600px] overflow-hidden group bg-background">
+                <div className="absolute inset-0 h-full w-full">
                     <Image
                         src={coverImage || "https://framerusercontent.com/images/BjQfJy7nQoVxvCYTFzwZxprDWiQ.jpg"}
                         alt={title}
                         fill
-                        className="object-cover animate-ken-burns will-change-transform"
+                        className="object-cover animate-hero-rastah will-change-transform"
                         sizes="100vw"
                         quality={80}
                         loading="lazy"
                     />
-
                 </div>
 
                 {/* Content - Text Independent of Image */}
                 <div className="absolute inset-x-0 bottom-0 top-0 flex flex-col items-center justify-center text-center px-4 md:px-6 text-white p-12">
                     <div className="space-y-6 max-w-4xl mx-auto">
-                        <h2 className="text-5xl sm:text-7xl md:text-6xl lg:text-7xl font-black tracking-tight uppercase mix-blend-difference font-display animate-in fade-in duration-1000 slide-in-from-bottom-4">
+                        <h2 className="text-5xl sm:text-7xl md:text-6xl lg:text-7xl font-black tracking-tight uppercase mix-blend-difference font-display hero-text-animate-delay-1">
                             {title}
                         </h2>
                         {description && (
-                            <p className="text-lg sm:text-xl md:text-2xl font-light tracking-wide text-white/90 text-balance max-w-2xl mx-auto leading-relaxed drop-shadow-md hero-text-animate-delay">
+                            <p className="text-lg sm:text-xl md:text-2xl font-light tracking-wide text-white/90 text-balance max-w-2xl mx-auto leading-relaxed drop-shadow-md hero-text-animate-delay-2">
                                 {description}
                             </p>
                         )}
-                        <div className="pt-8 hero-text-animate-delay-2">
+                        <div className="pt-8 hero-text-animate-delay-3">
                             <Link
                                 href={collectionHref}
                                 className="inline-flex items-center gap-2 text-sm uppercase tracking-[0.2em] border-b border-white pb-1 hover:text-white/80 hover:border-white/80 transition-all font-medium"
@@ -73,7 +73,7 @@ export default function CollectionShowcase({
                         </div>
                     </div>
                 </div>
-            </div>
+            </ScrollReveal>
 
             {/* Section 2: The Product Grid Carousel */}
             <div className="relative w-full py-4 md:py-8 px-4 md:px-8 bg-background border-t border-neutral-100 z-20">
