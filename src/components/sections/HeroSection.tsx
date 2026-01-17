@@ -55,7 +55,8 @@ const HeroSection = ({
             className="object-cover object-top animate-ken-burns will-change-transform"
             priority
             fetchPriority="high"
-            quality={75} // Increased from 40 for the animation
+            decoding="sync"
+            quality={90} // High quality for LCP
             sizes="100vw"
             aria-hidden="true"
           />
