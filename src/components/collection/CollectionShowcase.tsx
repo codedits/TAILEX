@@ -46,9 +46,10 @@ export default function CollectionShowcase({
                         alt={title}
                         fill
                         className="object-cover animate-hero-rastah will-change-transform"
-                        sizes="100vw"
-                        quality={80}
+                        sizes="(max-width: 1024px) 100vw, 80vw"
+                        quality={85}
                         loading="lazy"
+
                     />
                 </div>
 

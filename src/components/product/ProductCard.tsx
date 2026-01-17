@@ -23,7 +23,8 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
   const href = `/product/${slug}`;
 
   // Standardized e-commerce grid sizes for optimal performance
-  const sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw";
+  const sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 300px";
+
 
   // Badges Logic
   const isSale = !!(sale_price && sale_price < price);
