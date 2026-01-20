@@ -40,7 +40,7 @@ const HeroSection = ({
 
   return (
     <section
-      className="relative w-full h-[110vh] overflow-hidden"
+      className="relative w-full h-[100dvh] overflow-hidden"
     >
       {/* Background Image Container */}
       <div className="absolute inset-0 h-full w-full bg-neutral-900">
@@ -66,7 +66,7 @@ const HeroSection = ({
       <div
         className="relative flex flex-col items-center justify-center w-full px-6 md:px-10 z-10 text-center"
         style={{
-          height: '110vh',
+          height: '100dvh',
           maxWidth: '1920px',
           margin: '0 auto'
         }}

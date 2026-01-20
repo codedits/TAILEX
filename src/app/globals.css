@@ -333,12 +333,10 @@
   @keyframes sectionFadeIn {
     from {
       opacity: 0;
-      transform: translateY(10px);
     }
 
     to {
       opacity: 1;
-      transform: translateY(0);
     }
   }
 
@@ -433,7 +431,7 @@
   0% {
     opacity: 0.01;
     /* Start slightly above 0 for browser rendering stability */
-    transform: scale(1.15);
+    transform: scale(1.05);
   }
 
   100% {

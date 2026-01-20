@@ -26,7 +26,7 @@ export const CollectionShowcaseCarousel = ({
     });
 
     return (
-        <ScrollReveal className="overflow-hidden">
+        <ScrollReveal threshold={0.1} className="overflow-hidden">
             <div className="cursor-grab active:cursor-grabbing" ref={emblaRef}>
                 <div className="flex touch-pan-y py-4 -ml-4 md:-ml-6 stagger-products">
                     {products.map((product) => (

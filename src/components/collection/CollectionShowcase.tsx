@@ -39,7 +39,7 @@ export default function CollectionShowcase({
     return (
         <section className={cn("w-full flex flex-col relative z-10 section-fade-in", className)}>
             {/* Section 1: The Collection Hero */}
-            <ScrollReveal className="relative w-full h-[110dvh] min-h-[600px] overflow-hidden group bg-background">
+            <ScrollReveal threshold={0.15} className="relative w-full h-[100dvh] min-h-[600px] overflow-hidden group bg-background">
                 <div className="absolute inset-0 h-full w-full">
                     <Image
                         src={coverImage || "https://framerusercontent.com/images/BjQfJy7nQoVxvCYTFzwZxprDWiQ.jpg"}

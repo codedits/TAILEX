@@ -8,7 +8,7 @@ export function CollectionShowcaseSkeleton() {
     return (
         <section className="w-full flex flex-col relative z-10">
             {/* Hero Image Placeholder */}
-            <div className="relative w-full h-screen min-h-[600px] overflow-hidden bg-neutral-100">
+            <div className="relative w-full h-[100dvh] min-h-[600px] overflow-hidden bg-neutral-100">
                 <Skeleton className="absolute inset-0 w-full h-full rounded-none" />
 
                 {/* Text Placeholder - Matches CollectionShowcase content layout */}
@@ -22,7 +22,7 @@ export function CollectionShowcaseSkeleton() {
             </div>
 
             {/* Product Grid Carousel Placeholder */}
-            <div className="relative w-full py-8 md:py-12 px-4 md:px-8 bg-background border-t border-neutral-100">
+            <div className="relative w-full py-4 md:py-8 px-4 md:px-8 bg-background border-t border-neutral-100">
                 <div className="mb-6 md:mb-8 flex justify-end items-center px-2">
                     <Skeleton className="h-4 w-32" />
                 </div>
