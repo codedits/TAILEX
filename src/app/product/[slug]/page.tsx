@@ -93,6 +93,7 @@ export default async function ProductPage({ params }: Props) {
     .from("products")
     .select("id, title, slug, price, sale_price, cover_image, images")
     .eq("status", "active")
+    .eq("category_id", typedProduct.category_id)
     .neq("id", typedProduct.id)
     .limit(4);
 

@@ -19,16 +19,14 @@ export default async function AsyncProductGrid({ productsPromise }: AsyncProduct
         );
     }
 
-    return (
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-4 md:gap-y-16 md:gap-x-8">
-            {products.map((product, index) => (
-                <ProductCard
-                    key={product.id}
-                    {...product}
-                    // Priority loading for LCP (first 2-3 items)
-                    priority={index < 3}
-                />
-            ))}
-        </div>
-    );
+    // Client component wrapper for animations needs to be separated or we can just use simple CSS animation class
+    // But since this is a server component, we can't directly use framer-motion here unless we make it client or wrap the grid.
+    // Let's create a Client Grid Wrapper defined below or imported.
+    // For simplicity in this file without creating new files unless necessary, let's keep it simple or make a small client wrapper.
+    // Actually, to follow the high-quality request, I should make a Client wrapper.
+
+    return <ProductGridClient products={products} />;
 }
+
+import { ProductGridClient } from "./ProductGridClient";
+
