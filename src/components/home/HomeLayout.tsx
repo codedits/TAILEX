@@ -6,6 +6,7 @@ import ProductGridSection from "@/components/sections/ProductGridSection";
 import CollectionShowcase from "@/components/collection/CollectionShowcase";
 import Footer from "@/components/layout/Footer";
 import { HOMEPAGE_TEXT } from "@/config/homepage-text";
+import { TrustBar } from "@/components/sections/TrustBar";
 
 // Skeletons for Suspense fallbacks
 import { CollectionShowcaseSkeleton } from "@/components/skeletons/CollectionShowcaseSkeleton";
@@ -59,6 +60,8 @@ export default function HomeLayout({ data }: HomeLayoutProps) {
                         brandName={brand.name}
                     />
                 )}
+
+                <TrustBar />
 
                 {/* ============================================ */}
                 {/* FIRST COLLECTION: Streamed via Suspense     */}

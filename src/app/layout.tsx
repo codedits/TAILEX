@@ -10,27 +10,54 @@ import { StoreConfigService } from "@/services/config";
 // ============================================
 // STATIC METADATA - No DB call, instant
 // ============================================
-const baseUrl = getBaseUrl();
-const SITE_NAME = 'TAILEX';
-const TAGLINE = 'Timeless Wardrobe, Everyday Power';
+const baseUrl = "https://tailex.studio";
+const SITE_NAME = 'Tailex';
+const TAGLINE = 'Premium Streetwear & Minimalist Clothing';
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
-  title: `${SITE_NAME} | ${TAGLINE}`,
-  description: `Discover premium fashion essentials at ${SITE_NAME}. Quality craftsmanship meets modern style.`,
-  keywords: ["fashion", "clothing", "premium clothing", "style", SITE_NAME.toLowerCase()],
+  title: {
+    default: `${SITE_NAME} | ${TAGLINE}`,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: `Shop ${SITE_NAME} for premium streetwear and minimalist clothing. Discover high-quality apparel designed for modern wardrobes. Experience Timeless Power.`,
+  keywords: ["Premium Streetwear", "Tailex", "Minimalist Clothing", "Apparel", "Fashion", "Streetwear Brand"],
+  alternates: {
+    canonical: "./",
+  },
   openGraph: {
     title: `${SITE_NAME} | ${TAGLINE}`,
-    description: `Discover premium fashion essentials. Quality craftsmanship meets modern style.`,
+    description: `Shop ${SITE_NAME} for premium streetwear and minimalist clothing. High-quality apparel designed for modern wardrobes.`,
     type: "website",
     url: baseUrl,
-    images: [`${baseUrl}/og.jpg`],
+    siteName: SITE_NAME,
+    locale: "en_US",
+    images: [
+      {
+        url: `${baseUrl}/og-image.jpg`,
+        width: 1200,
+        height: 630,
+        alt: `${SITE_NAME} - Premium Streetwear`,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: `${SITE_NAME} | ${TAGLINE}`,
-    description: `Discover premium fashion essentials. Quality craftsmanship meets modern style.`,
-    images: [`${baseUrl}/og.jpg`],
+    description: `Shop ${SITE_NAME} for premium streetwear and minimalist clothing. High-quality apparel designed for modern wardrobes.`,
+    images: [`${baseUrl}/og-image.jpg`],
+    creator: "@tailexstudio",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
@@ -103,6 +130,29 @@ export default async function RootLayout({
         <link rel="dns-prefetch" href="https://ipumyrjzquyglyesiuur.supabase.co" />
         <link rel="preconnect" href="https://framerusercontent.com" />
         <link rel="dns-prefetch" href="https://framerusercontent.com" />
+        
+        {/* Organization Schema */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "Tailex",
+              "url": "https://tailex.studio",
+              "logo": "https://tailex.studio/logo.png",
+              "sameAs": [
+                "https://instagram.com/tailexstudio",
+                "https://twitter.com/tailexstudio"
+              ],
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "email": "hello@tailex.studio",
+                "contactType": "Customer Service"
+              }
+            })
+          }}
+        />
       </head>
       <body className={font.className}>
         <Providers initialConfig={config}>

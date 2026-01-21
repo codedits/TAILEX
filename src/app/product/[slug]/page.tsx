@@ -101,6 +101,32 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <main className="min-h-screen bg-background text-foreground">
+      {/* Product Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            "name": typedProduct.title,
+            "image": [typedProduct.cover_image, ...(typedProduct.images || [])],
+            "description": typedProduct.description,
+            "sku": typedProduct.id,
+            "brand": {
+              "@type": "Brand",
+              "name": "Tailex"
+            },
+            "offers": {
+              "@type": "Offer",
+              "url": `https://tailex.studio/product/${typedProduct.slug}`,
+              "priceCurrency": "USD",
+              "price": typedProduct.sale_price || typedProduct.price,
+              "availability": "https://schema.org/InStock",
+              "itemCondition": "https://schema.org/NewCondition"
+            }
+          })
+        }}
+      />
       <Navbar brandName={brand.name} navItems={navItemsList} />
 
       <div className="pt-32 pb-20 px-6 md:px-12">

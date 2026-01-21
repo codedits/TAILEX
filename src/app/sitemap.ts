@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 import { createClient } from '@/lib/supabase/server';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://tailex.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://tailex.studio';
   const supabase = await createClient();
 
   // Fetch all active products
