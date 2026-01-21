@@ -37,9 +37,9 @@ export default function CollectionShowcase({
     const carouselProducts = products.slice(0, 8);
 
     return (
-        <section className={cn("w-full flex flex-col relative z-10 section-fade-in", className)}>
+        <section className={cn("w-full flex flex-col relative z-10 section-fade-in overflow-x-hidden", className)}>
             {/* Section 1: The Collection Hero */}
-            <ScrollReveal threshold={0.15} className="relative w-full h-[100dvh] min-h-[600px] overflow-hidden group bg-background">
+            <ScrollReveal threshold={0.15} className="relative w-full h-[70vh] md:h-[115vh] overflow-hidden group bg-background">
                 <div className="absolute inset-0 h-full w-full">
                     <Image
                         src={coverImage || "https://framerusercontent.com/images/BjQfJy7nQoVxvCYTFzwZxprDWiQ.jpg"}
@@ -78,7 +78,7 @@ export default function CollectionShowcase({
             </ScrollReveal>
 
             {/* Section 2: The Product Grid Carousel */}
-            <div className="relative w-full py-4 md:py-8 px-4 md:px-8 bg-background border-t border-neutral-100 z-20">
+            <div className="relative w-full py-4 md:py-8 px-4 md:px-8 bg-background border-t border-neutral-100 z-20 overflow-x-hidden">
                 <div className="mb-4 md:mb-6 flex justify-end items-center px-2">
                     {/* Desktop "See All" Link */}
                     <Link href={collectionHref} className="hidden md:flex items-center gap-2 text-sm font-medium hover:opacity-60 transition-opacity">

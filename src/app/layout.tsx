@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { manrope, inter, playfair, spaceMono, getFont } from "@/lib/fonts";
 import "./globals.css";
 import { Providers } from "@/components/layout/Providers";
+import { SmoothScroll } from "@/components/layout/SmoothScroll";
 import { getBaseUrl, hexToHslValues } from "@/lib/utils";
 import { StoreConfigService } from "@/services/config";
 
@@ -104,7 +105,11 @@ export default async function RootLayout({
         <link rel="dns-prefetch" href="https://framerusercontent.com" />
       </head>
       <body className={font.className}>
-        <Providers initialConfig={config}>{children}</Providers>
+        <Providers initialConfig={config}>
+          <SmoothScroll>
+            {children}
+          </SmoothScroll>
+        </Providers>
       </body>
     </html>
   );

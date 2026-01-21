@@ -91,7 +91,7 @@ export default async function CollectionDetailPage({ params, searchParams }: Pro
         .then(res => (res.data || []) as Product[]) as Promise<Product[]>;
 
     return (
-        <main className="min-h-screen bg-background text-foreground selection:bg-black selection:text-white font-sans">
+        <main className="min-h-screen bg-background text-foreground selection:bg-black selection:text-white font-sans overflow-x-hidden">
             <Navbar brandName={brand.name} navItems={navItems} />
 
             <div className="pt-32 pb-24 px-6 md:px-12">
@@ -137,7 +137,7 @@ export default async function CollectionDetailPage({ params, searchParams }: Pro
                 </div>
 
                 {/* Product Grid - Full Width */}
-                <div className="min-h-[50vh]">
+                <div className="min-h-[50vh] overflow-x-hidden">
                     <Suspense fallback={
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-4 md:gap-y-16 md:gap-x-8">
                             {Array.from({ length: 8 }).map((_, i) => (

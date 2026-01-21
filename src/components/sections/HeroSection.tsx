@@ -40,7 +40,7 @@ const HeroSection = ({
 
   return (
     <section
-      className="relative w-full h-[100dvh] overflow-hidden"
+      className="relative w-full h-[100vh] overflow-hidden"
     >
       {/* Background Image Container */}
       <div className="absolute inset-0 h-full w-full bg-neutral-900">
@@ -48,7 +48,7 @@ const HeroSection = ({
           src={displayImage}
           alt=""
           fill
-          className="object-cover object-top hero-entrance-animate"
+          className="object-cover object-top hero-entrance-animate will-change-transform"
           priority
           fetchPriority="high"
           decoding="sync"
@@ -64,9 +64,8 @@ const HeroSection = ({
 
       {/* Content Container - Centered */}
       <div
-        className="relative flex flex-col items-center justify-center w-full px-6 md:px-10 z-10 text-center"
+        className="relative flex flex-col items-center justify-center w-full px-6 md:px-10 z-10 text-center h-[100vh]"
         style={{
-          height: '100dvh',
           maxWidth: '1920px',
           margin: '0 auto'
         }}

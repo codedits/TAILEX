@@ -43,7 +43,7 @@ export default function HomeLayout({ data }: HomeLayoutProps) {
     const remainingCollections = collections.slice(1);
 
     return (
-        <div className="text-foreground min-h-screen">
+        <div className="text-foreground min-h-screen overflow-x-hidden">
 
             {/* ============================================ */}
             {/* CRITICAL ABOVE-FOLD: Hero Section (SSR)     */}
@@ -79,6 +79,26 @@ export default function HomeLayout({ data }: HomeLayoutProps) {
             </div>
 
             {/* ============================================ */}
+            {/* REMAINING COLLECTIONS: Streamed via Suspense */}
+            {/* ============================================ */}
+            {categoriesSection?.enabled && remainingCollections.length > 0 && (
+                <div className="relative flex flex-col items-center justify-center w-full overflow-visible">
+                    {remainingCollections.map((collection) => (
+                        <Suspense key={collection.id} fallback={<CollectionShowcaseSkeleton />}>
+                            <CollectionShowcase
+                                title={collection.title}
+                                description={collection.description || ""}
+                                coverImage={collection.image_url || ""}
+                                products={collection.products || []}
+                                collectionHref={`/collection/${collection.slug}`}
+                                className="mb-0"
+                            />
+                        </Suspense>
+                    ))}
+                </div>
+            )}
+
+            {/* ============================================ */}
             {/* FEATURED PRODUCTS: Streamed via Suspense    */}
             {/* ============================================ */}
             {productSection?.enabled && (
@@ -89,27 +109,6 @@ export default function HomeLayout({ data }: HomeLayoutProps) {
                             title={productSection.content?.title || HOMEPAGE_TEXT.featuredProducts.title}
                             description={productSection.content?.description || HOMEPAGE_TEXT.featuredProducts.description}
                         />
-                    </div>
-                </Suspense>
-            )}
-
-            {/* ============================================ */}
-            {/* REMAINING COLLECTIONS: Streamed via Suspense */}
-            {/* ============================================ */}
-            {categoriesSection?.enabled && remainingCollections.length > 0 && (
-                <Suspense fallback={<CollectionShowcaseSkeleton />}>
-                    <div className="relative flex flex-col items-center justify-center w-full overflow-visible">
-                        {remainingCollections.map((collection) => (
-                            <CollectionShowcase
-                                key={collection.id}
-                                title={collection.title}
-                                description={collection.description || ""}
-                                coverImage={collection.image_url || ""}
-                                products={collection.products || []}
-                                collectionHref={`/collection/${collection.slug}`}
-                                className="mb-0"
-                            />
-                        ))}
                     </div>
                 </Suspense>
             )}
