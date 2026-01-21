@@ -37,9 +37,9 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
     <>
       <CartSheet />
       <header
-        className={`absolute top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${isHome
-          ? "bg-transparent text-white border-white/10 hover:bg-white hover:text-black hover:border-neutral-200 hover:shadow-sm"
-          : "bg-white text-black border-neutral-200 shadow-sm"
+        className={`left-0 right-0 z-50 transition-all duration-300 border-b ${isHome
+          ? "absolute top-full bg-transparent text-white border-white/10 hover:bg-white hover:text-black hover:border-neutral-200 hover:shadow-sm"
+          : "relative bg-white text-black border-neutral-200 shadow-sm"
           }`}
       >
         <div className="px-6 md:px-8 py-6 w-full flex items-center justify-between relative">

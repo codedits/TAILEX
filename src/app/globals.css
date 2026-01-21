@@ -108,7 +108,6 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-body);
-    overflow-x: hidden;
   }
 
   /* Lenis smooth scrolling support */
@@ -181,6 +180,10 @@
   .hero-title {
     font-family: var(--font-display);
     @apply text-5xl md:text-7xl lg:text-8xl font-normal tracking-tight;
+  }
+
+  .script-font {
+    font-family: var(--font-manrope), sans-serif;
   }
 
   .section-title {

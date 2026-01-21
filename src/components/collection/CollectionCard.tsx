@@ -21,7 +21,7 @@ export const CollectionCard = ({ collection }: CollectionCardProps) => {
                     alt={collection.title}
                     fill
                     className="object-cover transition-transform duration-1000 ease-out group-hover:scale-110"
-                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                    sizes="(max-width: 1920px) 50vw, (max-width: 1200px) 33vw, 25vw"
                     quality={85}
                 />
             ) : (

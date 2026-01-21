@@ -59,7 +59,7 @@ export default async function ShopPage() {
 
 
     return (
-        <main className="min-h-screen bg-background text-foreground overflow-x-hidden">
+        <main className="min-h-screen bg-background text-foreground overflow-visible">
             <Navbar brandName={brand.name} navItems={navItems} />
 
             <div className="pt-32 pb-24 px-6 md:px-12">
@@ -98,7 +98,7 @@ export default async function ShopPage() {
                 </div>
 
                 {/* Product Grid - Full Width */}
-                <div className="min-h-[50vh] overflow-x-hidden">
+                <div className="min-h-[50vh]">
                     <Suspense fallback={
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-8 gap-x-4 md:gap-y-16 md:gap-x-8">
                             {Array.from({ length: 8 }).map((_, i) => (

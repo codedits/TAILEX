@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { HomeData } from "@/lib/home-data";
 import HeroSection from "@/components/sections/HeroSection";
+import { TopCollectionStrip } from "@/components/sections/TopCollectionStrip";
 import ProductGridSection from "@/components/sections/ProductGridSection";
 import CollectionShowcase from "@/components/collection/CollectionShowcase";
 import Footer from "@/components/layout/Footer";
@@ -43,7 +44,7 @@ export default function HomeLayout({ data }: HomeLayoutProps) {
     const remainingCollections = collections.slice(1);
 
     return (
-        <div className="text-foreground min-h-screen overflow-x-hidden">
+        <div className="text-foreground min-h-screen">
 
             {/* ============================================ */}
             {/* CRITICAL ABOVE-FOLD: Hero Section (SSR)     */}

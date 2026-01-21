@@ -10,10 +10,11 @@ import { useTransition, useState, useRef } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { ImageCropper } from "@/components/ui/image-cropper";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { convertFileToWebP } from '@/lib/image-utils';
 
 export function CollectionForm({ initialData }: { initialData?: any }) {
+    const router = useRouter();
     const [isPending, startTransition] = useTransition();
     const searchParams = useSearchParams();
     const aspectRatio = parseFloat(searchParams.get('ratio') || '0.8');
@@ -89,8 +90,15 @@ export function CollectionForm({ initialData }: { initialData?: any }) {
                         toast.success(initialData?.id ? "Collection updated" : "Collection created", {
                             description: `${formData.get('title')} has been saved.`
                         });
+
+                        // Redirect after a short delay
+                        setTimeout(() => {
+                            router.push('/admin/collections');
+                            router.refresh();
+                        }, 1000);
                     }
                 } catch (err) {
+                    console.error("Submission error:", err);
                     toast.error("Unexpected error", {
                         description: "Please try again later"
                     });

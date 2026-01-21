@@ -58,7 +58,7 @@ const HeroSection = ({
 
         />
         {/* Subtle Overlay for Text Readability */}
-        <div className="absolute inset-0 bg-black/20" />
+        <div className="absolute inset-0 bg-black/30" />
       </div>
 
 
@@ -87,7 +87,7 @@ const HeroSection = ({
               href="/shop"
               className="inline-block px-8 py-3 rounded-full border border-white/50 text-white text-[10px] md:text-xs font-semibold tracking-[0.15em] hover:bg-white hover:text-black transition-all duration-300 uppercase"
             >
-              View Collection
+              Shop Now
             </Link>
           </div>
         </div>

@@ -13,10 +13,10 @@ export function CollectionShowcaseSkeleton() {
 
                 {/* Text Placeholder - Matches CollectionShowcase content layout */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 md:px-6 p-12">
-                    <div className="space-y-6 max-w-4xl mx-auto">
-                        <Skeleton className="h-16 w-64 mx-auto" />
-                        <Skeleton className="h-6 w-96 max-w-full mx-auto" />
-                        <Skeleton className="h-4 w-32 mx-auto mt-8" />
+                    <div className="space-y-6 max-w-4xl">
+                        <Skeleton className="h-16 w-[350px] max-w-full mx-auto opacity-40" />
+                        <Skeleton className="h-5 w-80 max-w-full mx-auto" />
+                        <Skeleton className="h-3 w-24 mx-auto mt-8" />
                     </div>
                 </div>
             </div>

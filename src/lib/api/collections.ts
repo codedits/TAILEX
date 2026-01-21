@@ -137,11 +137,9 @@ export async function createCollection(formData: FormData): Promise<ApiResponse<
     revalidatePath('/admin/collections')
     revalidatePath('/collection')
     revalidatePath('/')
-    redirect('/admin/collections')
+
+    return { data: data as Collection }
   } catch (error) {
-    if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
-      throw error
-    }
     return { error: error instanceof Error ? error.message : 'An unexpected error occurred' }
   }
 }
@@ -224,11 +222,9 @@ export async function updateCollection(formData: FormData): Promise<ApiResponse<
     revalidatePath(`/admin/collections/${id}`)
     revalidatePath('/collection')
     revalidatePath('/')
-    redirect('/admin/collections')
+
+    return { data: data as Collection }
   } catch (error) {
-    if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
-      throw error
-    }
     return { error: error instanceof Error ? error.message : 'An unexpected error occurred' }
   }
 }

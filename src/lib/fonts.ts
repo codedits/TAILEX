@@ -2,6 +2,7 @@
 import { Manrope, Inter, Playfair_Display, Space_Mono } from 'next/font/google'
 
 export const manrope = Manrope({
+  weight: ['200', '300', '400', '500', '600', '700', '800'],
   subsets: ['latin'],
   variable: '--font-manrope',
   display: 'swap',
@@ -32,7 +33,8 @@ const fonts = {
   playfair,
   'space mono': spaceMono,
   spacemono: spaceMono,
-  mono: spaceMono
+  mono: spaceMono,
+  script: manrope
 }
 
 export function getFont(fontName: string) {
