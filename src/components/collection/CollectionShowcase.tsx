@@ -48,7 +48,7 @@ export default function CollectionShowcase({
                         className="object-cover hero-entrance-animate will-change-transform"
                         data-reveal-animate
                         sizes="(max-width: 1024px) 100vw, 80vw"
-                        quality={85}
+                        quality={90}
                         loading="lazy"
 
                     />
