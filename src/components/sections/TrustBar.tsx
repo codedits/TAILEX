@@ -30,16 +30,15 @@ const trustItems = [
 
 export function TrustBar() {
   return (
-    <div className="w-full bg-background border-y border-border py-12 px-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 md:gap-12">
+    <div className="w-full bg-black text-white border-y border-white/10 py-4 px-2">
+      <div className="max-w-7xl mx-auto overflow-x-auto no-scrollbar">
+        <div className="flex flex-row items-center justify-between md:justify-around w-full min-w-max md:min-w-0">
           {trustItems.map((item, index) => (
-            <div key={index} className="flex flex-col items-center text-center space-y-3">
-              <item.icon className="w-6 h-6 text-primary" strokeWidth={1.5} />
-              <div className="space-y-1">
-                <h3 className="text-sm font-medium tracking-tight uppercase">{item.title}</h3>
-                <p className="text-xs text-muted-foreground">{item.description}</p>
-              </div>
+            <div key={index} className="flex items-center space-x-2 px-3 md:px-0">
+              <item.icon className="w-3.5 h-3.5 text-white/70 shrink-0" strokeWidth={1.5} />
+              <span className="text-[9px] md:text-[10px] font-medium tracking-[0.15em] uppercase text-white/90 whitespace-nowrap">
+                {item.title}
+              </span>
             </div>
           ))}
         </div>

@@ -92,7 +92,18 @@
     --input: 0 0% 14.9%;
     --ring: 0 0% 83.1%;
     --cta: 0 0% 98%;
+    --cta: 0 0% 98%;
     --cta-foreground: 0 0% 9%;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 
