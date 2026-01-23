@@ -7,126 +7,80 @@ import Image from "next/image";
 import style1 from "@/assets/style-1.jpg";
 import style2 from "@/assets/style-2.jpg";
 
-// Make this page dynamic to fetch from CMS
-export const revalidate = 300; // 5 minutes - aggressive cache
-
-// Page content type for CMS
-type PageContent = {
-  title: string;
-  heroTitle?: string;
-  heroDescription?: string;
-  sections?: {
-    id: string;
-    type: string;
-    title?: string;
-    content?: string;
-    image?: string;
-  }[];
-};
-
-// Default content fallback
-const defaultContent: PageContent = {
-  title: "About Us",
-  heroTitle: "The TAILEX Studio",
-  heroDescription: "Founded on the principle of intentional design, TAILEX creates pieces that bridge the gap between traditional craftsmanship and modern utility.",
-  sections: [
-    {
-      id: "story",
-      type: "text-image",
-      title: "Our Story",
-      content: "What began as a small atelier focused on perfecting the essential wardrobe has grown into a global brand trusted by discerning customers worldwide.\n\nEvery piece in our collection is designed with intention — to be worn, loved, and passed down. We believe in buying less but buying better.\n\nOur commitment to quality means sourcing the finest materials from ethical suppliers and working with skilled artisans who share our passion for detail.",
-    },
-    {
-      id: "philosophy",
-      type: "image-text",
-      title: "The Approach",
-      content: "We design for the modern man who values substance over spectacle. Our pieces are meant to be the foundation of your wardrobe — versatile, enduring, and effortlessly refined.",
-    }
-  ]
-};
+export const revalidate = 300;
 
 export default async function AboutPage() {
-  const supabase = await createClient();
-
-  // Fetch page content and site config in parallel
-  const [brand, navItems, footerConfig, socialConfig, pageResult] = await Promise.all([
+  const [brand, navItems, footerConfig, socialConfig] = await Promise.all([
     getBrandConfig(),
     getNavigation('main-menu'),
     getFooterConfig(),
     getSocialConfig(),
-    supabase.from('pages').select('*').eq('slug', 'about').maybeSingle()
   ]);
 
-  // Use CMS content if available, otherwise defaults
-  const pageData = pageResult.data;
-  const content: PageContent = pageData?.sections
-    ? {
-      title: pageData.title,
-      heroTitle: pageData.title,
-      heroDescription: pageData.content || defaultContent.heroDescription,
-      sections: pageData.sections as PageContent['sections']
-    }
-    : { ...defaultContent, heroTitle: `About ${brand.name}` };
-
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background selection:bg-black selection:text-white">
       <Navbar brandName={brand.name} navItems={navItems} />
 
-      {/* Hero */}
-      <section className="pt-32 pb-16 px-6 md:px-12">
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-4xl">
-          <h1 className="section-title text-foreground mb-6">{content.heroTitle}</h1>
-          <p className="text-muted-foreground font-body text-lg md:text-xl leading-relaxed">
-            {content.heroDescription}
+      {/* Hero Section */}
+      <section className="relative h-[80vh] md:h-[90vh] w-full overflow-hidden flex items-center justify-center">
+        <div className="absolute inset-0 z-0">
+          <Image
+            src={style1}
+            alt="Tailex Aesthetic"
+            fill
+            className="object-cover object-top opacity-90"
+            priority
+          />
+          <div className="absolute inset-0 bg-black/20" />
+        </div>
+
+        <div className="relative z-10 container mx-auto px-6 text-center">
+          <h1 className="font-display text-5xl md:text-7xl lg:text-9xl text-white tracking-tighter mix-blend-difference animate-in fade-in slide-in-from-bottom-8 duration-1000">
+            TAILEX
+          </h1>
+          <p className="mt-6 text-white/90 font-body text-lg md:text-2xl tracking-wide uppercase max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
+            Premium. Diverse. Tailored.
           </p>
         </div>
       </section>
 
-      {/* Story Section */}
-      <section className="px-6 md:px-12 pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center mb-20">
-          <div className="animate-in fade-in slide-in-from-left-4 duration-700">
-            <h2 className="font-display text-2xl md:text-3xl text-foreground mb-6">
-              {content.sections?.[0]?.title || "Our Story"}
+      {/* Brand Statement Section */}
+      <section className="py-24 md:py-32 px-6 bg-background">
+        <div className="container mx-auto max-w-7xl">
+          <div className="text-center space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000 view-animate">
+            <span className="inline-block h-px w-20 bg-foreground/30 mb-8" />
+            <h2 className="font-display font-bold text-4xl md:text-4xl lg:text-6xl leading-[1.1] text-foreground tracking-tight max-w-[1400px] mx-auto">
+              Tailex is a Pakistani brand for premium and diverse apparel, tailored selectively to match your interest.
             </h2>
-            <div className="space-y-4 font-body text-muted-foreground leading-relaxed">
-              {(content.sections?.[0]?.content || defaultContent.sections?.[0]?.content || '')
-                .split('\n\n')
-                .map((paragraph, idx) => (
-                  <p key={idx}>{paragraph}</p>
-                ))}
-            </div>
-          </div>
-          <div className="animate-in fade-in slide-in-from-right-4 duration-700 aspect-[4/5] overflow-hidden relative">
-            <Image
-              src={content.sections?.[0]?.image || style1}
-              alt={`${brand.name} craftsmanship`}
-              fill
-              className="object-cover"
-            />
+            <p className="font-body text-muted-foreground text-lg md:text-xl leading-relaxed max-w-3xl mx-auto">
+              We believe in the power of individual expression. Our collections are curated not just to be worn, but to be experienced. Blending traditional craftsmanship with contemporary aesthetics, we offer a wardrobe that speaks to the modern individual.
+            </p>
           </div>
         </div>
+      </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
-          <div className="animate-in fade-in slide-in-from-left-4 duration-700 delay-150 aspect-[4/5] overflow-hidden md:order-1 relative">
+      {/* Visual Grid / Values */}
+      <section className="pb-24 px-6 md:px-12 bg-background">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 max-w-7xl mx-auto">
+          <div className="relative aspect-[3/4] md:aspect-[4/5] overflow-hidden group">
             <Image
-              src={content.sections?.[1]?.image || style2}
-              alt={`${brand.name} lifestyle`}
+              src={style2}
+              alt="Quality Craftsmanship"
               fill
-              className="object-cover"
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
-          </div>
-          <div className="animate-in fade-in slide-in-from-right-4 duration-700 delay-150 md:order-2">
-            <h2 className="font-display text-2xl md:text-3xl text-foreground mb-6">
-              {content.sections?.[1]?.title || "Our Philosophy"}
-            </h2>
-            <div className="space-y-4 font-body text-muted-foreground leading-relaxed">
-              {(content.sections?.[1]?.content || defaultContent.sections?.[1]?.content || '')
-                .split('\n\n')
-                .map((paragraph, idx) => (
-                  <p key={idx}>{paragraph}</p>
-                ))}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-8 md:p-12">
+              <h3 className="text-white font-display text-3xl mb-2">Heritage</h3>
+              <p className="text-white/80 font-body">Rooted in Pakistani textile excellence.</p>
             </div>
+          </div>
+
+          <div className="flex flex-col justify-center bg-secondary/30 p-12 md:p-20 aspect-[3/4] md:aspect-[4/5]">
+            <h3 className="font-display text-3xl md:text-4xl mb-6 text-foreground">Selective Curation</h3>
+            <p className="font-body text-muted-foreground text-lg leading-relaxed mb-8">
+              Every fabric, stitch, and silhouette is chosen with intention. We don't just make clothes; we craft experiences tailored to your unique taste.
+            </p>
+            <div className="h-px w-full bg-foreground/10" />
           </div>
         </div>
       </section>

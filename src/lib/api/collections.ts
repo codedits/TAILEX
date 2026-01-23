@@ -67,6 +67,30 @@ async function uploadImage(file: File): Promise<string> {
   return publicUrl
 }
 
+async function deleteImageFromStorage(url: string) {
+  if (!url) return
+  try {
+    const supabase = await createAdminClient()
+
+    // Extract filename from URL
+    // Standard Supabase public URL: https://[project-ref].supabase.co/storage/v1/object/public/[bucket]/[filename]
+    const parts = url.split('/')
+    const fileName = parts[parts.length - 1]
+
+    if (fileName) {
+      const { error } = await supabase.storage
+        .from('collections')
+        .remove([fileName])
+
+      if (error) {
+        console.error(`Failed to delete image ${fileName} from storage:`, error.message)
+      }
+    }
+  } catch (err) {
+    console.error('Error in deleteImageFromStorage:', err)
+  }
+}
+
 // ==========================================
 // CREATE COLLECTION
 // ==========================================
@@ -190,9 +214,11 @@ export async function updateCollection(formData: FormData): Promise<ApiResponse<
     const imageFile = formData.get('imageFile') as File
 
     let imageUrl: string | null = existingImage || null
+    let oldImageUrl: string | null = null
 
     if (imageFile && imageFile.size > 0) {
       try {
+        oldImageUrl = existingImage || null
         imageUrl = await uploadImage(imageFile)
       } catch (error) {
         return { error: 'Primary image upload failed' }
@@ -218,6 +244,11 @@ export async function updateCollection(formData: FormData): Promise<ApiResponse<
       return { error: error.message }
     }
 
+    // If we successfully updated with a new image, delete the old one
+    if (oldImageUrl && imageUrl !== oldImageUrl) {
+      await deleteImageFromStorage(oldImageUrl)
+    }
+
     revalidatePath('/admin/collections')
     revalidatePath(`/admin/collections/${id}`)
     revalidatePath('/collection')
@@ -237,6 +268,13 @@ export async function deleteCollection(id: string): Promise<ApiResponse<null>> {
   try {
     const supabase = await createAdminClient()
 
+    // Fetch the collection first to get the image URL
+    const { data: collection } = await supabase
+      .from('collections')
+      .select('image_url')
+      .eq('id', id)
+      .single()
+
     const { error } = await supabase
       .from('collections')
       .delete()
@@ -244,6 +282,11 @@ export async function deleteCollection(id: string): Promise<ApiResponse<null>> {
 
     if (error) {
       return { error: error.message }
+    }
+
+    // If deletion from DB was successful, delete the image from storage
+    if (collection?.image_url) {
+      await deleteImageFromStorage(collection.image_url)
     }
 
     revalidatePath('/admin/collections')
