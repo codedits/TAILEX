@@ -1,37 +1,42 @@
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { getBrandConfig, getNavigation, getFooterConfig, getSocialConfig } from "@/lib/theme";
+import { getBrandConfig, getNavigation, getFooterConfig, getSocialConfig, getHeroConfig, getHomepageLayout } from "@/lib/theme";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Image from "next/image";
-import style1 from "@/assets/style-1.jpg";
 import style2 from "@/assets/style-2.jpg";
 
 export const revalidate = 300;
 
 export default async function AboutPage() {
-  const [brand, navItems, footerConfig, socialConfig] = await Promise.all([
+  const [brand, navItems, footerConfig, socialConfig, heroConfig, layout] = await Promise.all([
     getBrandConfig(),
     getNavigation('main-menu'),
     getFooterConfig(),
     getSocialConfig(),
+    getHeroConfig(),
+    getHomepageLayout()
   ]);
+
+  // Determine Hero Image (Same logic as Homepage)
+  const heroSection = layout.find(s => s.type === 'hero');
+  const heroImage = heroSection?.content?.image || heroConfig.image || "https://framerusercontent.com/images/T0Z10o3Yaf4JPrk9f5lhcmJJwno.jpg";
 
   return (
     <main className="min-h-screen bg-background selection:bg-black selection:text-white">
       <Navbar brandName={brand.name} navItems={navItems} />
 
-      {/* Hero Section */}
+      {/* Hero Section (Static Structure with Dynamic Home Image) */}
       <section className="relative h-[80vh] md:h-[90vh] w-full overflow-hidden flex items-center justify-center">
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 bg-black">
           <Image
-            src={style1}
+            src={heroImage}
             alt="Tailex Aesthetic"
             fill
-            className="object-cover object-top opacity-90"
+            className="object-cover object-top"
             priority
           />
-          <div className="absolute inset-0 bg-black/20" />
+          <div className="absolute inset-0 bg-black/60" />
         </div>
 
         <div className="relative z-10 container mx-auto px-6 text-center">

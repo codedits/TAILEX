@@ -20,7 +20,7 @@ export default async function ContactPage() {
         <main className="min-h-screen bg-background text-foreground selection:bg-black selection:text-white">
             <Navbar brandName={brand.name} navItems={navItems} />
 
-            <div className="pt-32 pb-24 px-6 md:px-12">
+            <div className="pt-24 pb-24 px-6 md:px-12">
                 <div className="max-w-6xl mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
 

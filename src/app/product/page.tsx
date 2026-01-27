@@ -26,9 +26,9 @@ export default async function ProductPage() {
   return (
     <main className="min-h-screen bg-background text-foreground">
       <Navbar brandName={brand.name} navItems={navItems} />
-      
+
       {/* Hero Banner */}
-      <section className="pt-32 pb-16 px-6 md:px-12">
+      <section className="pt-24 pb-16 px-6 md:px-12">
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
           <h1 className="section-title text-foreground mb-4">All Products</h1>
           <p className="text-muted-foreground font-body text-base md:text-lg max-w-xl">

@@ -21,7 +21,7 @@ export default async function CareersPage() {
         <main className="min-h-screen bg-background text-foreground selection:bg-black selection:text-white">
             <Navbar brandName={brand.name} navItems={navItems} />
 
-            <div className="pt-32 pb-24 px-6 md:px-12">
+            <div className="pt-24 pb-24 px-6 md:px-12">
                 <div className="max-w-4xl mx-auto space-y-16">
 
                     <header className="space-y-6">

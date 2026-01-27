@@ -94,7 +94,7 @@ export default async function CollectionDetailPage({ params, searchParams }: Pro
         <main className="min-h-screen bg-background text-foreground selection:bg-black selection:text-white font-sans overflow-visible">
             <Navbar brandName={brand.name} navItems={navItems} />
 
-            <div className="pt-32 pb-24 px-6 md:px-12">
+            <div className="pt-24 pb-24 px-6 md:px-12">
                 {/* Breadcrumbs */}
                 <div className="mb-8 hidden md:block">
                     <Breadcrumb>

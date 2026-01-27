@@ -129,26 +129,7 @@ export default async function ProductPage({ params }: Props) {
       />
       <Navbar brandName={brand.name} navItems={navItemsList} />
 
-      <div className="pt-32 pb-20 px-6 md:px-12">
-        {/* Breadcrumbs */}
-        <div className="mb-8">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/">Home</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/product">Products</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{typedProduct.title}</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-
+      <div className="pt-24 pb-20 px-6 md:px-12">
         <ProductDetail product={typedProduct} relatedProducts={safeRelated} />
       </div>
 
