@@ -59,6 +59,10 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  icons: {
+    icon: '/tailexicon.svg',
+    apple: '/tailexicon.svg',
+  },
 };
 
 // ============================================
@@ -130,7 +134,7 @@ export default async function RootLayout({
         <link rel="dns-prefetch" href="https://ipumyrjzquyglyesiuur.supabase.co" />
         <link rel="preconnect" href="https://framerusercontent.com" />
         <link rel="dns-prefetch" href="https://framerusercontent.com" />
-        
+
         {/* Organization Schema */}
         <script
           type="application/ld+json"
