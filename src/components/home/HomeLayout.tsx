@@ -7,6 +7,7 @@ import CollectionShowcase from "@/components/collection/CollectionShowcase";
 import Footer from "@/components/layout/Footer";
 import { HOMEPAGE_TEXT } from "@/config/homepage-text";
 import { TrustBar } from "@/components/sections/TrustBar";
+import Featuring from "@/components/sections/Featuring";
 
 // Skeletons for Suspense fallbacks
 import { CollectionShowcaseSkeleton } from "@/components/skeletons/CollectionShowcaseSkeleton";
@@ -116,6 +117,13 @@ export default function HomeLayout({ data }: HomeLayoutProps) {
                     </div>
                 </Suspense>
             )}
+
+            {/* ============================================ */}
+            {/* FEATURING: Client Component                 */}
+            {/* ============================================ */}
+            <div className="w-full">
+                <Featuring />
+            </div>
 
             {/* ============================================ */}
             {/* FOOTER: Streamed LAST via Suspense          */}

@@ -3,7 +3,10 @@ import { createClient } from "@/lib/supabase/server";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ProductDetail from "@/components/product/ProductDetail";
+import Featuring from "@/components/sections/Featuring";
+import RelatedProducts from "@/components/product/RelatedProducts";
 import { StoreConfigService } from "@/services/config";
+import Link from "next/link";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -130,7 +133,23 @@ export default async function ProductPage({ params }: Props) {
       <Navbar brandName={brand.name} navItems={navItemsList} />
 
       <div className="pt-24 pb-20 px-6 md:px-12">
-        <ProductDetail product={typedProduct} relatedProducts={safeRelated} />
+        <ProductDetail product={typedProduct} />
+      </div>
+
+      <div className="w-full mb-20">
+        <Featuring />
+      </div>
+
+      <div className="max-w-[1400px] mx-auto px-6 md:px-12 mb-32">
+        <div className="flex items-end justify-between mb-12">
+          <h2 className="text-2xl lg:text-3xl font-manrope font-black tracking-tight uppercase">
+            You May Also Like
+          </h2>
+          <Link href="/shop" className="text-xs font-manrope font-bold uppercase tracking-widest underline underline-offset-8">
+            View all
+          </Link>
+        </div>
+        <RelatedProducts products={safeRelated} />
       </div>
 
       <Footer config={footerConfig} brandName={brand.name} social={socialConfig} />

@@ -100,22 +100,21 @@ export default async function OrderDetailPage({ params }: Props) {
                     {/* Status Message */}
                     <FadeInView delay={0.1}>
                         {(order.admin_message || ['processing', 'shipped'].includes(order.status)) && (
-                            <div className="bg-neutral-50 border border-neutral-200 p-10 rounded-2xl relative overflow-hidden">
+                            <div className="bg-neutral-50 border border-neutral-200 p-6 md:p-10 rounded-2xl relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-10 opacity-[0.03]">
                                     <Package className="w-48 h-48" />
                                 </div>
                                 <div className="relative z-10">
                                     <h3 className="text-xl font-bold text-black mb-4">
-                                        {order.status === 'processing' ? 'We are tailoring your order' :
-                                            order.status === 'shipped' ? 'Your package is on the way' :
+                                        {order.status === 'processing' ? 'Order Processing' :
+                                            order.status === 'shipped' ? 'Shipment Details' :
                                                 'Order Update'}
                                     </h3>
-                                    <p className="text-neutral-600 font-medium text-base leading-relaxed mb-8 max-w-lg">
-                                        {order.admin_message ? order.admin_message :
-                                            order.status === 'processing'
-                                                ? 'Our team is carefully preparing each item. You will receive an automated shipping notification shortly.'
-                                                : 'Your order has left our boutique and is currently with the courier.'}
-                                    </p>
+                                    {order.admin_message && (
+                                        <p className="text-neutral-600 font-medium text-base leading-relaxed mb-8 max-w-lg">
+                                            {order.admin_message}
+                                        </p>
+                                    )}
 
                                     {order.tracking_number && (
                                         <div className="flex flex-col sm:flex-row items-center gap-6 bg-white p-6 rounded-xl border border-neutral-200 shadow-sm">

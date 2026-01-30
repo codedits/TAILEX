@@ -2,17 +2,12 @@
 
 import Link from "next/link";
 import { Product } from "@/lib/types";
-import ReviewsSection from "@/components/sections/ReviewsSection";
-import RelatedProducts from "@/components/product/RelatedProducts";
 import ProductGallery from "@/components/product/ProductGallery";
 import ProductInfo from "@/components/product/ProductInfo";
-
 export default function ProductDetail({
-  product,
-  relatedProducts
+  product
 }: {
-  product: Product,
-  relatedProducts: Product[]
+  product: Product
 }) {
   // Construct image list
   const validImages = [product.cover_image, ...(product.images || [])].filter((img): img is string => !!img && img.trim().length > 0);
@@ -42,24 +37,6 @@ export default function ProductDetail({
             <ProductInfo product={product} />
           </div>
         </div>
-      </div>
-
-      {/* Review Section */}
-      <div className="mt-32 border-t border-neutral-100 pt-20">
-        <ReviewsSection productId={product.id} />
-      </div>
-
-      {/* Recommended Section */}
-      <div className="mt-32 mb-20">
-        <div className="flex items-end justify-between mb-12">
-          <h2 className="text-2xl lg:text-3xl font-manrope font-black tracking-tight uppercase">
-            You May Also Like
-          </h2>
-          <Link href="/shop" className="text-xs font-manrope font-bold uppercase tracking-widest underline underline-offset-8">
-            View all
-          </Link>
-        </div>
-        <RelatedProducts products={relatedProducts} />
       </div>
     </div>
   );
