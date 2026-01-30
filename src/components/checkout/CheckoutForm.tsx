@@ -50,7 +50,7 @@ export default function CheckoutForm({ user }: CheckoutFormProps) {
                     address1: formData.get("address") as string,
                     city: formData.get("city") as string,
                     zip: formData.get("postalCode") as string,
-                    country: "US"
+                    country: "Pakistan"
                 },
                 billing_address: {
                     first_name: formData.get("firstName") as string,
@@ -58,7 +58,7 @@ export default function CheckoutForm({ user }: CheckoutFormProps) {
                     address1: formData.get("address") as string,
                     city: formData.get("city") as string,
                     zip: formData.get("postalCode") as string,
-                    country: "US"
+                    country: "Pakistan"
                 },
                 payment_status: "paid", // Simulation
                 fulfillment_status: "unfulfilled",

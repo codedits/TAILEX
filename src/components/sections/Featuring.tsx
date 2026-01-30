@@ -31,7 +31,7 @@ export default function Featuring() {
         <section className="w-full min-h-screen flex flex-col lg:flex-row font-sans bg-black overflow-hidden">
 
             {/* LEFT COLUMN: HERO */}
-            <div className="lg:w-1/2 relative min-h-[90dvh] lg:h-screen flex flex-col justify-between p-8 md:p-10 lg:p-14 overflow-hidden">
+            <div className="lg:w-1/2 relative min-h-[90svh] lg:h-screen flex flex-col justify-between p-8 md:p-10 lg:p-14 overflow-hidden">
                 <div className="absolute inset-0">
                     <Image
                         src="/images/featured/Highfashion_studio_portrait_2k_202601310016.jpeg"
@@ -98,7 +98,7 @@ export default function Featuring() {
             <div className="lg:w-1/2 flex flex-col h-auto lg:h-screen">
 
                 {/* TOP HALF: LIGHT */}
-                <div className="min-h-[50dvh] lg:h-[50%] relative overflow-hidden p-8 lg:p-12 flex flex-col justify-between">
+                <div className="min-h-[50svh] lg:h-[50%] relative overflow-hidden p-8 lg:p-12 flex flex-col justify-between">
                     <div className="absolute inset-0">
                         <Image
                             src="/images/featured/Highfashion_studio_portrait_2k_202601310026.jpeg"
@@ -178,7 +178,7 @@ export default function Featuring() {
                 </div>
 
                 {/* BOTTOM HALF: DARK */}
-                <div className="min-h-[50dvh] lg:h-[50%] relative flex items-center justify-center overflow-hidden p-8 text-center">
+                <div className="min-h-[50svh] lg:h-[50%] relative flex items-center justify-center overflow-hidden p-8 text-center">
                     <Image
                         src="/images/featured/Dramatic_cinematic_studio_2k_202601211907.jpeg"
                         alt="Texture"

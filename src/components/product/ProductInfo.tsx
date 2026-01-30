@@ -244,7 +244,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             <div className="grid grid-cols-2 gap-4 py-6 text-[10px] uppercase font-bold tracking-widest text-neutral-500">
                 <div className="flex items-center gap-3">
                     <Truck className="w-4 h-4 text-neutral-900" />
-                    <span>Free Shipping Over $100</span>
+                    <span>Free Shipping Nationwide</span>
                 </div>
                 <div className="flex items-center gap-3">
                     <ShieldCheck className="w-4 h-4 text-neutral-900" />
@@ -267,7 +267,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                         Shipping & Returns
                     </AccordionTrigger>
                     <AccordionContent className="text-sm text-neutral-600 leading-relaxed pb-4">
-                        Free standard shipping on all orders over $100. Returns accepted within 30 days of delivery.
+                        Free standard shipping on all orders. Returns accepted within 30 days of delivery.
                     </AccordionContent>
                 </AccordionItem>
             </Accordion>

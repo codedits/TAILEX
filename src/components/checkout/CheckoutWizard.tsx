@@ -111,8 +111,8 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
                     city: formData.get("city") as string,
                     postal_code: formData.get("postalCode") as string, // Note: payload expects zip or postal_code? API Route uses schema "shipping_address"
                     zip: formData.get("postalCode") as string,
-                    country: "US",
-                    country_code: "US"
+                    country: "Pakistan",
+                    country_code: "PK"
                 },
                 payment_method: "card", // Default for now
                 user_name: `${formData.get("firstName")} ${formData.get("lastName")}`,
