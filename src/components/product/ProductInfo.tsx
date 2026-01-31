@@ -132,7 +132,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
             {/* Header */}
-            <div className="space-y-4">
+            <div className="space-y-4 hidden lg:block">
                 <div className="flex justify-between items-start">
                     <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                         {product.vendor || "TAILEX Standard"}
@@ -150,29 +150,44 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                 <h1 className="text-4xl md:text-5xl font-black tracking-tight text-neutral-900 leading-[1.1]">
                     {product.title}
                 </h1>
+            </div>
 
-                <div className="flex items-center gap-3">
-                    <div className="flex items-baseline gap-2">
-                        {hasSale ? (
-                            <>
-                                <span className="text-2xl font-bold text-black">
-                                    {formatCurrency(currentSalePrice!)}
-                                </span>
-                                <span className="text-lg line-through text-neutral-400">
+            {/* Price & Favorites (Always visible on mobile, under carousel) */}
+            <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-baseline gap-2">
+                            {hasSale ? (
+                                <>
+                                    <span className="text-2xl font-bold text-black">
+                                        {formatCurrency(currentSalePrice!)}
+                                    </span>
+                                    <span className="text-lg line-through text-neutral-400">
+                                        {formatCurrency(currentPrice)}
+                                    </span>
+                                </>
+                            ) : (
+                                <span className="text-2xl font-bold text-neutral-900">
                                     {formatCurrency(currentPrice)}
                                 </span>
-                            </>
-                        ) : (
-                            <span className="text-2xl font-bold text-neutral-900">
-                                {formatCurrency(currentPrice)}
+                            )}
+                        </div>
+                        {hasSale && (
+                            <span className="px-2 py-1 bg-black text-white text-[10px] font-bold uppercase tracking-widest">
+                                Sale
                             </span>
                         )}
                     </div>
-                    {hasSale && (
-                        <span className="px-2 py-1 bg-black text-white text-[10px] font-bold uppercase tracking-widest">
-                            Sale
-                        </span>
-                    )}
+
+                    {/* Mobile Favorites/Share */}
+                    <div className="flex gap-1 lg:hidden">
+                        <button onClick={toggleFavorite} className="p-2 hover:bg-neutral-100 rounded-full transition-colors">
+                            <Heart className={cn("w-5 h-5", isFavorite ? "fill-black text-black" : "text-neutral-600")} />
+                        </button>
+                        <button className="p-2 hover:bg-neutral-100 rounded-full transition-colors">
+                            <Share2 className="w-5 h-5 text-neutral-600" />
+                        </button>
+                    </div>
                 </div>
             </div>
 

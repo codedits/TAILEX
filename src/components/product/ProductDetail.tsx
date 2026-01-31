@@ -26,6 +26,16 @@ export default function ProductDetail({
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+        {/* Mobile Header (Vendor + Title) */}
+        <div className="lg:hidden space-y-2 mb-2">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+            {product.vendor || "TAILEX Standard"}
+          </p>
+          <h1 className="text-3xl font-black tracking-tight text-neutral-900 leading-tight">
+            {product.title}
+          </h1>
+        </div>
+
         {/* Left Column: Media Gallery */}
         <div className="lg:col-span-7">
           <ProductGallery images={distinctImages} title={product.title} />

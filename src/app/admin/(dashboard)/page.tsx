@@ -18,7 +18,7 @@ export default async function AdminDashboard() {
   ]);
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="space-y-8">
       <div className="flex items-center justify-between space-y-2">
         <div>
           <h2 className="text-3xl font-light tracking-tight text-white mb-1">

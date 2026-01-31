@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { MoreHorizontal, ChevronDown, ChevronUp } from "lucide-react"
 import { useFormatCurrency } from "@/context/StoreConfigContext"
 import { cn } from "@/lib/utils"
-import { motion, AnimatePresence } from "framer-motion"
 
 interface MobileProductCardProps {
     product: Product
@@ -47,7 +46,7 @@ export function MobileProductCard({
     return (
         <div
             className={cn(
-                "rounded-xl border border-white/10 bg-neutral-900/40 backdrop-blur-xl overflow-hidden transition-all",
+                "rounded-xl border border-white/10 bg-neutral-900/40 overflow-hidden transition-all",
                 isSelected && "ring-2 ring-white/30"
             )}
         >
@@ -134,46 +133,43 @@ export function MobileProductCard({
                 </button>
             </div>
 
-            {/* Expanded Details */}
-            <AnimatePresence>
-                {expanded && (
-                    <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="overflow-hidden"
-                    >
-                        <div className="px-4 pb-4 pt-0 space-y-3 border-t border-white/5">
-                            {/* Stock Info */}
-                            <div className="flex items-center justify-between py-2">
-                                <span className="text-white/40 text-sm">Stock</span>
-                                <span className={cn("font-mono font-medium", getStockColor(product.stock ?? 0))}>
-                                    {product.stock ?? 0} units
+            {/* Expanded Details - CSS Transition */}
+            <div
+                className={cn(
+                    "grid transition-all duration-200 ease-out",
+                    expanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                )}
+            >
+                <div className="overflow-hidden">
+                    <div className="px-4 pb-4 pt-0 space-y-3 border-t border-white/5">
+                        {/* Stock Info */}
+                        <div className="flex items-center justify-between py-2">
+                            <span className="text-white/40 text-sm">Stock</span>
+                            <span className={cn("font-mono font-medium", getStockColor(product.stock ?? 0))}>
+                                {product.stock ?? 0} units
+                            </span>
+                        </div>
+
+                        {/* Category Info */}
+                        {product.category && (
+                            <div className="flex items-center justify-between py-2 border-t border-white/5">
+                                <span className="text-white/40 text-sm">Category</span>
+                                <span className="text-white/80 text-sm">{product.category}</span>
+                            </div>
+                        )}
+
+                        {/* Created Date */}
+                        {product.created_at && (
+                            <div className="flex items-center justify-between py-2 border-t border-white/5">
+                                <span className="text-white/40 text-sm">Added</span>
+                                <span className="text-white/60 text-sm">
+                                    {new Date(product.created_at).toLocaleDateString()}
                                 </span>
                             </div>
-
-                            {/* Category Info */}
-                            {product.category && (
-                                <div className="flex items-center justify-between py-2 border-t border-white/5">
-                                    <span className="text-white/40 text-sm">Category</span>
-                                    <span className="text-white/80 text-sm">{product.category}</span>
-                                </div>
-                            )}
-
-                            {/* Created Date */}
-                            {product.created_at && (
-                                <div className="flex items-center justify-between py-2 border-t border-white/5">
-                                    <span className="text-white/40 text-sm">Added</span>
-                                    <span className="text-white/60 text-sm">
-                                        {new Date(product.created_at).toLocaleDateString()}
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                        )}
+                    </div>
+                </div>
+            </div>
         </div>
     )
 }

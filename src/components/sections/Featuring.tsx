@@ -3,6 +3,18 @@
 import Image from "next/image";
 import { motion, Variants } from "framer-motion";
 
+// Default fallback images from public folder
+const DEFAULT_IMAGES = {
+    hero: "/images/featured/Highfashion_studio_portrait_2k_202601310016.jpeg",
+    topRight: "/images/featured/Highfashion_studio_portrait_2k_202601310026.jpeg",
+    bottomRight: "/images/featured/Dramatic_cinematic_studio_2k_202601211907.jpeg",
+};
+
+interface FeaturingProps {
+    /** Product images to use instead of defaults. Falls back to static images if not provided. */
+    images?: string[];
+}
+
 const container: Variants = {
     hidden: { opacity: 1 },
     visible: {
@@ -26,7 +38,12 @@ const child: Variants = {
     }
 };
 
-export default function Featuring() {
+export default function Featuring({ images }: FeaturingProps) {
+    // Use product images if provided, otherwise use defaults
+    const heroImage = images?.[0] || DEFAULT_IMAGES.hero;
+    const topRightImage = images?.[1] || DEFAULT_IMAGES.topRight;
+    const bottomRightImage = images?.[2] || DEFAULT_IMAGES.bottomRight;
+
     return (
         <section className="w-full min-h-screen flex flex-col lg:flex-row font-sans bg-black overflow-hidden">
 
@@ -34,7 +51,7 @@ export default function Featuring() {
             <div className="lg:w-1/2 relative min-h-[90svh] lg:h-screen flex flex-col justify-between p-8 md:p-10 lg:p-14 overflow-hidden">
                 <div className="absolute inset-0">
                     <Image
-                        src="/images/featured/Highfashion_studio_portrait_2k_202601310016.jpeg"
+                        src={heroImage}
                         alt="Tailex Model"
                         fill
                         className="object-cover object-center opacity-100"
@@ -101,7 +118,7 @@ export default function Featuring() {
                 <div className="min-h-[50svh] lg:h-[50%] relative overflow-hidden p-8 lg:p-12 flex flex-col justify-between">
                     <div className="absolute inset-0">
                         <Image
-                            src="/images/featured/Highfashion_studio_portrait_2k_202601310026.jpeg"
+                            src={topRightImage}
                             alt="Urban Context"
                             fill
                             className="object-cover object-center opacity-100"
@@ -180,7 +197,7 @@ export default function Featuring() {
                 {/* BOTTOM HALF: DARK */}
                 <div className="min-h-[50svh] lg:h-[50%] relative flex items-center justify-center overflow-hidden p-8 text-center">
                     <Image
-                        src="/images/featured/Dramatic_cinematic_studio_2k_202601211907.jpeg"
+                        src={bottomRightImage}
                         alt="Texture"
                         fill
                         className="object-cover opacity-80"

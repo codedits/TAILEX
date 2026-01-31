@@ -20,10 +20,18 @@ export function SearchModal() {
   const [query, setQuery] = React.useState("");
   const [results, setResults] = React.useState<{ products: any[]; collections: any[] }>({ products: [], collections: [] });
   const [loading, setLoading] = React.useState(false);
+  const [hasSearched, setHasSearched] = React.useState(false);
   const router = useRouter();
   const supabase = createClient();
   const inputRef = React.useRef<HTMLInputElement>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
+
+  // Reset hasSearched when query changes to prevent stale empty state
+  React.useEffect(() => {
+    if (query.trim() === "") {
+      setHasSearched(false);
+    }
+  }, [query]);
 
   // Close when clicking outside
   React.useEffect(() => {
@@ -71,14 +79,14 @@ export function SearchModal() {
         const [productsRes, collectionsRes] = await Promise.all([
           supabase
             .from('products')
-            .select('title, slug, cover_image, category, description, product_type')
+            .select('*')
             .or(`title.ilike.%${query.trim()}%,description.ilike.%${query.trim()}%,product_type.ilike.%${query.trim()}%`)
             .eq('status', 'active')
             .limit(5),
           supabase
             .from('collections')
             .select('title, slug')
-            .ilike('title', `%${query}%`)
+            .ilike('title', `%${query.trim()}%`)
             .eq('is_visible', true)
             .limit(3)
         ]);
@@ -87,6 +95,7 @@ export function SearchModal() {
           products: productsRes.data || [],
           collections: collectionsRes.data || []
         });
+        setHasSearched(true);
       } catch (error) {
         console.error('Search error:', error);
       } finally {
@@ -104,7 +113,7 @@ export function SearchModal() {
   }, []);
 
   return (
-    <div ref={containerRef} className={cn("flex items-center", open ? "absolute inset-x-4 z-50 md:static md:inset-auto" : "relative")}>
+    <div ref={containerRef} className={cn("flex items-center", open ? "absolute inset-x-4 z-[100] md:static md:inset-auto" : "relative z-10")}>
       <AnimatePresence mode="wait">
         {!open ? (
           <motion.button
@@ -125,7 +134,7 @@ export function SearchModal() {
             animate={{ width: "100%", opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="flex items-center w-full md:max-w-[300px] bg-white md:bg-neutral-50 rounded-full border border-neutral-200 overflow-visible shadow-lg md:shadow-none"
+            className="flex items-center w-full md:max-w-[300px] bg-white md:bg-neutral-50 rounded-full border border-neutral-200 overflow-visible shadow-lg md:shadow-none z-[110]"
           >
             <div className="flex items-center w-full px-3 h-10 relative">
               <Search className="h-4 w-4 text-neutral-400 shrink-0 mr-2" />
@@ -162,13 +171,24 @@ export function SearchModal() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
-                  className="absolute top-full right-0 left-0 md:left-auto md:w-[400px] mt-2 bg-white rounded-xl shadow-2xl border border-neutral-100 overflow-hidden z-50 p-2"
+                  className="absolute top-full right-0 left-0 md:left-auto md:w-[400px] mt-2 bg-white rounded-xl shadow-2xl border border-neutral-100 overflow-hidden z-[120] p-2"
                 >
                   <Command className="border-none" shouldFilter={false}>
                     <CommandList className="max-h-[300px] overflow-y-auto custom-scrollbar">
-                      <CommandEmpty className="py-6 text-center text-sm text-neutral-500">
-                        {loading ? "Searching..." : "No results found."}
-                      </CommandEmpty>
+                      {loading ? (
+                        <div className="py-6 text-center text-sm text-neutral-500 flex items-center justify-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>Searching...</span>
+                        </div>
+                      ) : (hasSearched && results.products.length === 0 && results.collections.length === 0) ? (
+                        <div className="py-6 text-center text-sm text-neutral-500">
+                          No results found.
+                        </div>
+                      ) : !hasSearched && query.trim() !== "" ? (
+                        <div className="py-6 text-center text-sm text-neutral-500">
+                          Press enter to search...
+                        </div>
+                      ) : null}
 
                       {results.collections.length > 0 && (
                         <CommandGroup heading="Collections" className="text-xs font-bold text-neutral-400 uppercase tracking-widest px-2 py-1.5">
@@ -224,7 +244,7 @@ export function SearchModal() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 md:hidden top-[var(--header-height,80px)]"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] md:hidden"
           onClick={() => setOpen(false)}
         />
       )}

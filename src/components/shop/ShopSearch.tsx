@@ -35,7 +35,7 @@ export default function ShopSearch() {
                 // Actually, isSearching serves as a visual cue.
                 setTimeout(() => setIsSearching(false), 500);
             }
-        }, 1000); // 1 second debounce
+        }, 300); // 300ms debounce
 
         return () => clearTimeout(timer);
     }, [query, router, searchParams]);

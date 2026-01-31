@@ -8,7 +8,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <SidebarProvider>
         <AdminSidebar />
         <main className="w-full bg-black text-white min-h-screen font-sans">
-          <div className="flex items-center gap-4 p-4 border-b border-white/10 bg-black/50 backdrop-blur-md sticky top-0 z-50">
+          <div className="flex items-center gap-4 p-4 border-b border-white/10 bg-black/80 sticky top-0 z-50">
             <SidebarTrigger className="hover:bg-white/10" />
             <div className="h-4 w-[1px] bg-white/20" />
             <h1 className="font-medium text-sm tracking-tight text-white/90 flex-1">Admin Dashboard</h1>

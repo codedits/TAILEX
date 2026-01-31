@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { MoreHorizontal, ChevronDown, ChevronUp, Package } from "lucide-react"
 import { useFormatCurrency } from "@/context/StoreConfigContext"
 import { cn } from "@/lib/utils"
-import { motion, AnimatePresence } from "framer-motion"
 
 interface MobileOrderCardProps {
     order: Order
@@ -33,7 +32,7 @@ export function MobileOrderCard({ order, onActionClick }: MobileOrderCardProps) 
     }
 
     return (
-        <div className="rounded-xl border border-white/10 bg-neutral-900/40 backdrop-blur-xl overflow-hidden">
+        <div className="rounded-xl border border-white/10 bg-neutral-900/40 overflow-hidden">
             <div className="p-4">
                 <div className="flex items-start justify-between gap-3">
                     {/* Order Info */}
@@ -95,54 +94,51 @@ export function MobileOrderCard({ order, onActionClick }: MobileOrderCardProps) 
                 </button>
             </div>
 
-            {/* Expanded Details */}
-            <AnimatePresence>
-                {expanded && (
-                    <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="overflow-hidden"
-                    >
-                        <div className="px-4 pb-4 pt-0 space-y-3 border-t border-white/5">
-                            {/* Shipping Address */}
-                            {order.shipping_address && (
-                                <div className="py-2">
-                                    <span className="text-white/40 text-xs block mb-1">Shipping To</span>
-                                    <span className="text-white/80 text-sm">
-                                        {typeof order.shipping_address === 'object'
-                                            ? `${(order.shipping_address as any).city || ''}, ${(order.shipping_address as any).country || ''}`
-                                            : String(order.shipping_address)
-                                        }
-                                    </span>
-                                </div>
-                            )}
-
-                            {/* Items Preview */}
-                            {order.items && Array.isArray(order.items) && order.items.length > 0 && (
-                                <div className="py-2 border-t border-white/5">
-                                    <span className="text-white/40 text-xs block mb-2">Items ({order.items.length})</span>
-                                    <div className="space-y-2">
-                                        {order.items.slice(0, 3).map((item: any, idx: number) => (
-                                            <div key={idx} className="flex items-center gap-3">
-                                                <Package className="h-4 w-4 text-white/30" />
-                                                <span className="text-white/70 text-sm flex-1 truncate">
-                                                    {item.title || item.product_title || 'Product'}
-                                                </span>
-                                                <span className="text-white/50 text-xs">×{item.quantity}</span>
-                                            </div>
-                                        ))}
-                                        {order.items.length > 3 && (
-                                            <p className="text-white/40 text-xs">+{order.items.length - 3} more items</p>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </motion.div>
+            {/* Expanded Details - CSS Transition */}
+            <div
+                className={cn(
+                    "grid transition-all duration-200 ease-out",
+                    expanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
                 )}
-            </AnimatePresence>
+            >
+                <div className="overflow-hidden">
+                    <div className="px-4 pb-4 pt-0 space-y-3 border-t border-white/5">
+                        {/* Shipping Address */}
+                        {order.shipping_address && (
+                            <div className="py-2">
+                                <span className="text-white/40 text-xs block mb-1">Shipping To</span>
+                                <span className="text-white/80 text-sm">
+                                    {typeof order.shipping_address === 'object'
+                                        ? `${(order.shipping_address as any).city || ''}, ${(order.shipping_address as any).country || ''}`
+                                        : String(order.shipping_address)
+                                    }
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Items Preview */}
+                        {order.items && Array.isArray(order.items) && order.items.length > 0 && (
+                            <div className="py-2 border-t border-white/5">
+                                <span className="text-white/40 text-xs block mb-2">Items ({order.items.length})</span>
+                                <div className="space-y-2">
+                                    {order.items.slice(0, 3).map((item: any, idx: number) => (
+                                        <div key={idx} className="flex items-center gap-3">
+                                            <Package className="h-4 w-4 text-white/30" />
+                                            <span className="text-white/70 text-sm flex-1 truncate">
+                                                {item.title || item.product_title || 'Product'}
+                                            </span>
+                                            <span className="text-white/50 text-xs">×{item.quantity}</span>
+                                        </div>
+                                    ))}
+                                    {order.items.length > 3 && (
+                                        <p className="text-white/40 text-xs">+{order.items.length - 3} more items</p>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
         </div>
     )
 }
