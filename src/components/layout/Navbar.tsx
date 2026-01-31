@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import { ShoppingCart, Menu, X, User } from "lucide-react";
+import { ShoppingCart, Menu, X, User, Search } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/UserAuthContext";
@@ -71,6 +71,7 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
           <div className="flex items-center gap-6 flex-1 justify-end">
 
             {/* Icons */}
+            {/* Search */}
             <SearchModal />
 
             {/* Account */}

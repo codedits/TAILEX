@@ -23,8 +23,9 @@ export const metadata = {
     description: "Browse our complete collection of premium fashion items.",
 };
 
-export default async function ShopPage() {
+export default async function ShopPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
     const supabase = await createClient();
+    const { q } = await searchParams;
 
     // Parallel Fetching
     const configPromises = Promise.all([
@@ -49,10 +50,17 @@ export default async function ShopPage() {
     const allCollections = (collectionsListResult.data || []) as Collection[];
 
     // Fetch All Products (Streamed)
-    const productsPromise = supabase
+    let productsQuery = supabase
         .from('products')
         .select('*')
-        .eq('status', 'active')
+        .eq('status', 'active');
+
+    if (q) {
+        const trimmedQ = q.trim();
+        productsQuery = productsQuery.or(`title.ilike.%${trimmedQ}%,description.ilike.%${trimmedQ}%,product_type.ilike.%${trimmedQ}%`);
+    }
+
+    const productsPromise = productsQuery
         .order('created_at', { ascending: false })
         .limit(20)
         .then(res => (res.data || []) as Product[]);
@@ -62,7 +70,7 @@ export default async function ShopPage() {
         <main className="min-h-screen bg-background text-foreground overflow-visible">
             <Navbar brandName={brand.name} navItems={navItems} />
 
-            <div className="pt-24 pb-24 px-6 md:px-12">
+            <div className="pt-14 pb-24 px-6 md:px-12">
                 {/* Breadcrumbs */}
                 <div className="mb-8">
                     <Breadcrumb>
@@ -81,14 +89,18 @@ export default async function ShopPage() {
                 <div className="flex flex-col md:flex-row justify-between items-end mb-16 fade-in-up">
                     <div className="w-full md:w-2/3">
                         <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4 block">
-                            Fall / Winter 2025
+                            {q ? 'Search Results' : 'Fall / Winter 2025'}
                         </span>
                         <h1 className="text-5xl md:text-7xl font-display font-medium tracking-tight mb-6 text-foreground">
-                            Shop All
+                            {q ? `"${q}"` : 'Shop All'}
                         </h1>
                         <p className="text-muted-foreground max-w-lg text-lg font-light leading-relaxed">
-                            Discover our complete collection of thoughtfully designed pieces, crafted for the modern individual.
+                            {q
+                                ? `Showing results for your search.`
+                                : 'Discover our complete collection of thoughtfully designed pieces, crafted for the modern individual.'}
                         </p>
+
+
                     </div>
                 </div>
 
