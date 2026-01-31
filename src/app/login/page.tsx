@@ -65,37 +65,38 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex">
-      {/* Left Column - Editorial Image (Desktop Only) */}
-      <div className="hidden lg:flex w-1/2 bg-neutral-100 relative overflow-hidden">
-        {/* Placeholder Image - Replace with local asset in production */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: 'url("/og.jpg")' }}
+    <div className="min-h-screen relative flex items-center justify-center overflow-hidden font-inter">
+      {/* Background Video */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-black/60 z-10" /> {/* Dark Overlay */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover"
         >
-          <div className="absolute inset-0 bg-black/20" /> {/* Subtle overlay */}
-        </div>
-        <div className="relative z-10 m-12 mt-auto text-white">
-          <blockquote className="text-3xl font-light font-serif leading-tight mb-4">
-            "Style is a way to say who you are without having to speak."
-          </blockquote>
-          <p className="text-sm uppercase tracking-widest opacity-80">— Rachel Zoe</p>
-        </div>
+          <source src="https://grainient.b-cdn.net/%40Grainient-Freebies/8358807-uhd_4096_2160_25fps.mp4" type="video/mp4" />
+        </video>
       </div>
 
-      {/* Right Column - Login Form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center px-4 md:px-8 lg:px-24 py-12">
-        <div className="w-full max-w-md space-y-8 md:space-y-12">
-
+      {/* Glass Card */}
+      <div className="relative z-20 w-full max-w-md px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl p-8 md:p-12 shadow-2xl"
+        >
           {/* Header */}
-          <div className="text-center">
+          <div className="text-center mb-10">
             <Link href="/" className="inline-block hover:opacity-70 transition-opacity">
-              <span className="text-3xl font-black tracking-tighter text-black uppercase">
+              <span className="text-3xl font-black tracking-tighter text-white uppercase">
                 TAILEX
               </span>
             </Link>
-            <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-400 mt-4 font-medium">
-              A New Era of Wardrobe Essence
+            <p className="text-[10px] uppercase tracking-[0.3em] text-white/60 mt-4 font-medium">
+              Access Your Profile
             </p>
           </div>
 
@@ -108,21 +109,21 @@ export default function LoginPage() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                <div className="mb-8">
-                  <h1 className="text-2xl font-semibold text-black mb-2">Welcome</h1>
-                  <p className="text-neutral-500 text-sm">Sign in to access your TAILEX account.</p>
+                <div className="mb-8 text-center">
+                  <h1 className="text-2xl font-bold text-white mb-2">Welcome Back</h1>
+                  <p className="text-white/60 text-sm">Enter your email to sign in.</p>
                 </div>
 
                 <form onSubmit={handleSendOTP} className="space-y-6">
                   <div className="space-y-2">
-                    <label htmlFor="email" className="text-xs font-medium uppercase tracking-wider text-black">Email Address</label>
+                    <label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-white/80">Email Address</label>
                     <Input
                       id="email"
                       type="email"
                       placeholder="name@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="h-12 bg-neutral-50 border-neutral-200 text-black placeholder:text-neutral-400 focus:border-black focus:ring-1 focus:ring-black transition-all rounded-lg"
+                      className="h-12 bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-white/40 focus:ring-1 focus:ring-white/40 transition-all rounded-lg"
                       required
                       autoFocus
                     />
@@ -130,13 +131,13 @@ export default function LoginPage() {
                   <Button
                     type="submit"
                     disabled={loading || !email}
-                    className="w-full h-12 bg-black text-white hover:bg-neutral-800 font-medium rounded-lg text-sm uppercase tracking-wide transition-all"
+                    className="w-full h-12 bg-white text-black hover:bg-white/90 font-bold rounded-lg text-sm uppercase tracking-wide transition-all"
                   >
                     {loading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
                       <span className="flex items-center justify-center gap-2">
-                        Continue with Email <ArrowRight className="w-4 h-4" />
+                        Get Login Code <ArrowRight className="w-4 h-4" />
                       </span>
                     )}
                   </Button>
@@ -150,16 +151,16 @@ export default function LoginPage() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                <div className="mb-8">
+                <div className="mb-8 text-center">
                   <button
                     onClick={() => setStep("email")}
-                    className="text-sm text-neutral-400 hover:text-black flex items-center gap-2 mb-6 transition-colors"
+                    className="text-xs font-bold uppercase tracking-wider text-white/60 hover:text-white flex items-center justify-center gap-2 mb-6 transition-colors mx-auto"
                   >
-                    <ArrowLeft className="w-4 h-4" /> Back to Email
+                    <ArrowLeft className="w-3 h-3" /> Change Email
                   </button>
-                  <h1 className="text-2xl font-semibold text-black mb-2">Verification Pending</h1>
-                  <p className="text-neutral-500 text-sm">
-                    We've sent a 6-digit code to <span className="text-black font-medium">{email}</span>
+                  <h1 className="text-2xl font-bold text-white mb-2">Check Your Inbox</h1>
+                  <p className="text-white/60 text-sm">
+                    We've sent a code to <span className="text-white font-bold">{email}</span>
                   </p>
                 </div>
 
@@ -175,7 +176,7 @@ export default function LoginPage() {
                           <InputOTPSlot
                             key={i}
                             index={i}
-                            className="w-12 h-14 border border-neutral-200 bg-white text-lg font-medium text-black focus:border-black focus:ring-1 focus:ring-black rounded-lg shadow-sm"
+                            className="w-10 h-14 md:w-12 md:h-16 border border-white/10 bg-white/5 text-xl font-medium text-white focus:border-white/40 focus:ring-1 focus:ring-white/40 rounded-lg shadow-sm"
                           />
                         ))}
                       </InputOTPGroup>
@@ -185,24 +186,24 @@ export default function LoginPage() {
                   <Button
                     type="submit"
                     disabled={loading || otp.length !== 6}
-                    className="w-full h-12 bg-black text-white hover:bg-neutral-800 font-medium rounded-lg text-sm uppercase tracking-wide transition-all"
+                    className="w-full h-12 bg-white text-black hover:bg-white/90 font-bold rounded-lg text-sm uppercase tracking-wide transition-all"
                   >
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Complete Sign In"}
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Verify & Sign In"}
                   </Button>
                 </form>
 
-                <p className="text-center text-xs text-neutral-400 mt-6">
-                  Didn't receive the code? <button type="button" onClick={handleSendOTP} className="text-black underline underline-offset-2 hover:opacity-70">Resend</button>
+                <p className="text-center text-xs text-white/40 mt-6">
+                  No code? <button type="button" onClick={handleSendOTP} className="text-white underline underline-offset-2 hover:opacity-80 font-bold">Resend</button>
                 </p>
               </motion.div>
             )}
           </AnimatePresence>
+        </motion.div>
 
-          <div className="pt-8 border-t border-neutral-100 text-center">
-            <p className="text-neutral-400 text-xs">
-              By signing in, you agree to our <Link href="/terms" className="text-black underline">Terms</Link> and <Link href="/privacy" className="text-black underline">Privacy Policy</Link>.
-            </p>
-          </div>
+        <div className="mt-8 text-center">
+          <p className="text-white/30 text-[10px] uppercase tracking-wider">
+            Protected by Tailex Security
+          </p>
         </div>
       </div>
     </div>

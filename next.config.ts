@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
+  // Increase timeout for static generation (fixes 500 errors on build)
+  staticPageGenerationTimeout: 120,
+
   // Server Actions config
   experimental: {
     serverActions: {
