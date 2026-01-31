@@ -13,3 +13,17 @@ export async function deleteOrderAction(orderId: string) {
         return { error: error.message || 'Failed to delete order' };
     }
 }
+export async function updateOrderStatusAction(orderId: string, status: string, paymentStatus?: string) {
+    try {
+        await OrderService.updateStatus(orderId, {
+            status: status as any,
+            payment_status: paymentStatus as any
+        });
+        revalidatePath(`/admin/orders/${orderId}`);
+        revalidatePath('/admin/orders');
+        return { success: true };
+    } catch (error: any) {
+        console.error('Update Order Status Error:', error);
+        return { error: error.message || 'Failed to update order status' };
+    }
+}

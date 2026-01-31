@@ -10,6 +10,8 @@ import { UserAuthProvider } from "@/context/UserAuthContext";
 import { StoreConfigProvider } from "@/context/StoreConfigContext";
 import { StoreConfig } from "@/services/config";
 import { DiscountPopup } from "@/components/layout/DiscountPopup";
+import { QuickViewProvider } from "@/context/QuickViewContext";
+import { WhatsAppButton } from "@/components/layout/WhatsAppButton";
 
 export function Providers({
   children,
@@ -25,15 +27,18 @@ export function Providers({
       <StoreConfigProvider initialConfig={initialConfig}>
         <UserAuthProvider>
           <CartProvider>
-            <TooltipProvider>
-              {children}
-              <Toaster />
-              <Sonner />
-              <DiscountPopup />
-            </TooltipProvider>
+            <QuickViewProvider>
+              <TooltipProvider>
+                {children}
+                <Toaster />
+                <Sonner />
+                <DiscountPopup />
+              </TooltipProvider>
+            </QuickViewProvider>
           </CartProvider>
         </UserAuthProvider>
       </StoreConfigProvider>
     </QueryClientProvider>
   );
 }
+

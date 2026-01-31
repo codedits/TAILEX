@@ -147,14 +147,26 @@ export default function OrderList({ initialOrders }: { initialOrders: Order[] })
                             )}
 
                             <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-8 border-t border-neutral-50">
-                                <div className="flex -space-x-3 self-start sm:self-center">
+                                <div className="flex -space-x-4 self-start sm:self-center pl-2">
                                     {order.items?.slice(0, 5).map((item, i) => (
-                                        <div key={i} className="w-12 h-12 rounded-full border-[3px] border-white bg-neutral-50 overflow-hidden relative shadow-sm flex items-center justify-center group-hover:scale-105 transition-transform duration-500" style={{ zIndex: 10 - i }}>
-                                            <span className="text-[10px] font-bold text-neutral-400">{item.quantity}x</span>
+                                        <div
+                                            key={i}
+                                            className="w-14 h-14 rounded-full border-[3px] border-white bg-neutral-100 overflow-hidden relative shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-500"
+                                            style={{ zIndex: 10 - i }}
+                                        >
+                                            {item.image_url ? (
+                                                <img
+                                                    src={item.image_url}
+                                                    alt={item.title}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <Package className="w-5 h-5 text-neutral-300" />
+                                            )}
                                         </div>
                                     ))}
                                     {order.items && order.items.length > 5 && (
-                                        <div className="w-12 h-12 rounded-full border-[3px] border-white bg-black flex items-center justify-center text-[10px] font-bold text-white shadow-sm" style={{ zIndex: 0 }}>
+                                        <div className="w-14 h-14 rounded-full border-[3px] border-white bg-black flex items-center justify-center text-xs font-bold text-white shadow-sm" style={{ zIndex: 0 }}>
                                             +{order.items.length - 5}
                                         </div>
                                     )}

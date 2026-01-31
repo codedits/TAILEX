@@ -98,7 +98,8 @@ export const OrderService = {
             phone: input.phone || null,
             status: 'pending',
             fulfillment_status: 'unfulfilled',
-            payment_status: (input.payment_method === 'COD' && input.payment_proof) ? 'proof_submitted' : 'pending',
+            payment_status: input.payment_method === 'COD' ? 'cod_pending' :
+                (['bank_transfer', 'easypaisa', 'jazzcash'].includes(input.payment_method || '') ? 'pending_verification' : 'pending'),
             subtotal,
             shipping_total: shippingTotal,
             tax_total: taxTotal,
@@ -106,7 +107,9 @@ export const OrderService = {
             shipping_address: input.shipping_address,
             billing_address: input.billing_address || input.shipping_address,
             payment_method: input.payment_method || 'card',
-            payment_proof: input.payment_proof,
+            payment_proof_url: input.payment_proof_url,
+            transaction_id: input.transaction_id,
+            payment_proof: input.payment_proof, // Legacy or for extra metadata
             items: orderItemsPayload
         };
 

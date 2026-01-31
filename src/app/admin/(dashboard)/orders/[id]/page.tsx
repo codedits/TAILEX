@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Truck, Package, CreditCard, Calendar, Mail, MapPin } from "lucide-react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { PaymentVerificationCard } from "@/components/admin/orders/payment-verification-card";
 
 interface Props {
     params: Promise<{ id: string }>;
@@ -170,11 +171,11 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                         {order.shipping_address ? (
                             <div className="text-sm text-white/70 leading-relaxed">
                                 <p className="text-white font-medium mb-1">
-                                    {order.shipping_address.firstName} {order.shipping_address.lastName}
+                                    {order.shipping_address.first_name} {order.shipping_address.last_name}
                                 </p>
                                 <p>{order.shipping_address.address1}</p>
                                 {order.shipping_address.address2 && <p>{order.shipping_address.address2}</p>}
-                                <p>{order.shipping_address.city}, {order.shipping_address.state} {order.shipping_address.postalCode}</p>
+                                <p>{order.shipping_address.city}, {order.shipping_address.postal_code}</p>
                                 <p className="uppercase text-xs mt-2 tracking-wide opacity-60">{order.shipping_address.country}</p>
                             </div>
                         ) : (
@@ -182,17 +183,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                         )}
                     </div>
 
-                    <div className="bg-neutral-900 border border-white/5 rounded-lg p-6">
-                        <h3 className="text-sm font-medium uppercase tracking-widest text-white/80 mb-4 flex items-center gap-2">
-                            <CreditCard className="w-4 h-4 text-white/40" /> Payment
-                        </h3>
-                        <div className="flex items-center justify-between p-3 bg-white/5 rounded">
-                            <span className="text-sm text-white/60 uppercase text-xs tracking-wider">Status</span>
-                            <Badge variant={order.payment_status === 'paid' ? 'default' : 'secondary'} className="uppercase text-[10px]">
-                                {order.payment_status}
-                            </Badge>
-                        </div>
-                    </div>
+                    <PaymentVerificationCard order={order} />
 
                 </div>
             </div>

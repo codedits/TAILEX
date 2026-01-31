@@ -159,8 +159,9 @@ export type Customer = {
 // ==========================================
 
 export type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded'
-export type PaymentStatus = 'pending' | 'authorized' | 'paid' | 'partially_refunded' | 'refunded' | 'voided' | 'failed'
+export type PaymentStatus = 'pending' | 'authorized' | 'paid' | 'partially_refunded' | 'refunded' | 'voided' | 'failed' | 'pending_verification' | 'cod_pending' | 'proof_submitted'
 export type FulfillmentStatus = 'unfulfilled' | 'partial' | 'fulfilled'
+export type PaymentMethodType = 'COD' | 'bank_transfer' | 'easypaisa' | 'jazzcash' | 'card'
 
 export type Order = {
   id: string
@@ -189,7 +190,9 @@ export type Order = {
   shipped_at?: string | null
   delivered_at?: string | null
 
-  payment_method?: string | null
+  payment_method?: PaymentMethodType | null
+  payment_proof_url?: string | null
+  transaction_id?: string | null
   payment_reference?: string | null
 
   discount_codes?: DiscountApplication[]
@@ -645,7 +648,9 @@ export type CreateOrderInput = {
   billing_address?: OrderAddress
   customer_note?: string
   discount_code?: string
-  payment_method?: string
+  payment_method?: PaymentMethodType
+  payment_proof_url?: string
+  transaction_id?: string
   payment_proof?: Record<string, unknown> | null
 }
 

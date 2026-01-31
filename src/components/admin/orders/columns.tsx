@@ -77,8 +77,30 @@ export const columns: ColumnDef<Order>[] = [
             if (status === 'cancelled') color = "bg-red-500/10 text-red-400 border-red-500/20";
 
             return (
-                <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${color} uppercase tracking-wide`}>
+                <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium border ${color} uppercase tracking-wide`}>
                     {status}
+                </div>
+            )
+        },
+    },
+    {
+        accessorKey: "payment_status",
+        header: "Payment",
+        cell: ({ row }) => {
+            const status = row.getValue<string>("payment_status")
+            const method = row.original.payment_method || 'card'
+
+            let color = "bg-neutral-500/10 text-neutral-400 border-neutral-500/20";
+            if (status === 'paid') color = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+            if (status === 'pending_verification') color = "bg-amber-500/10 text-amber-400 border-amber-500/20";
+            if (status === 'cod_pending') color = "bg-blue-500/10 text-blue-400 border-blue-500/20";
+
+            return (
+                <div className="flex flex-col gap-1">
+                    <span className="text-[10px] uppercase text-white/60 tracking-wider font-mono">{method.replace('_', ' ')}</span>
+                    <div className={`w-fit inline-flex items-center px-2 py-0.5 rounded-sm text-[9px] font-medium border ${color} uppercase tracking-wide`}>
+                        {status.replace('_', ' ')}
+                    </div>
                 </div>
             )
         },

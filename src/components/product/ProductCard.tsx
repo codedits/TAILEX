@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingBag, Search } from "lucide-react";
+import { ShoppingBag, Eye } from "lucide-react";
 import { Product } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useFormatCurrency } from "@/context/StoreConfigContext";
+import { useQuickView } from "@/context/QuickViewContext";
+import { useCart } from "@/context/CartContext";
 
 interface ProductCardProps extends Product {
   priority?: boolean;
@@ -14,7 +16,10 @@ interface ProductCardProps extends Product {
 
 const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
   const formatCurrency = useFormatCurrency();
-  const { title, price, images, slug, cover_image, sale_price, tags } = product;
+  const { openQuickView } = useQuickView();
+  const { addItem } = useCart();
+
+  const { title, price, images, slug, cover_image, sale_price, tags, stock } = product;
 
   const isValidImage = (img: any): img is string => typeof img === 'string' && img.trim().length > 0;
 
@@ -25,11 +30,38 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
   // Standardized e-commerce grid sizes for optimal performance
   const sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 300px";
 
-
   // Badges Logic
   const isSale = !!(sale_price && sale_price < price);
   const isNew = tags?.some(t => t.toLowerCase() === 'new');
   const discount = isSale ? Math.round(((price - (sale_price as number)) / price) * 100) : 0;
+  const isLowStock = stock !== undefined && stock > 0 && stock <= 5;
+
+  const handleQuickView = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openQuickView(product as Product);
+  };
+
+  const handleQuickAdd = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // For products without options, add directly
+    if (!product.options?.length) {
+      addItem({
+        id: product.id,
+        productId: product.id,
+        name: title,
+        price: sale_price || price,
+        image: imagePrimary,
+        size: "",
+        quantity: 1,
+        slug: slug,
+      } as any, true);
+    } else {
+      // Has options, open quick view for selection
+      openQuickView(product as Product);
+    }
+  };
 
   return (
     <div className="product-card group relative flex flex-col w-full">
@@ -50,6 +82,13 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
         {isNew && !isSale && (
           <div className="absolute top-0 left-0 z-20 bg-white text-black border border-black/10 text-[11px] font-bold px-2 py-1.5 leading-none shadow-sm uppercase tracking-tighter">
             New
+          </div>
+        )}
+
+        {/* Low Stock Badge - Top Right */}
+        {isLowStock && (
+          <div className="absolute top-0 right-0 z-20 bg-red-500 text-white text-[10px] font-bold px-2 py-1.5 leading-none">
+            Only {stock} left
           </div>
         )}
 
@@ -82,19 +121,21 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
           )}
         </div>
 
-        {/* Circular Hover Icons (Cart & Search) */}
+        {/* Circular Hover Icons (Cart & Quick View) */}
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2 opacity-0 translate-y-3 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
           <button
-            className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors shadow-lg"
+            onClick={handleQuickAdd}
+            className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-black hover:text-white transition-colors shadow-lg"
             aria-label="Add to bag"
           >
-            <ShoppingBag className="w-4 h-4 text-neutral-600" />
+            <ShoppingBag className="w-4 h-4" />
           </button>
           <button
-            className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors shadow-lg"
+            onClick={handleQuickView}
+            className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-black hover:text-white transition-colors shadow-lg"
             aria-label="Quick view"
           >
-            <Search className="w-4 h-4 text-neutral-600" />
+            <Eye className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -131,3 +172,4 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
 };
 
 export default ProductCard;
+

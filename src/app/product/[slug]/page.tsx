@@ -136,10 +136,6 @@ export default async function ProductPage({ params }: Props) {
         <ProductDetail product={typedProduct} />
       </div>
 
-      <div className="w-full mb-20">
-        <Featuring />
-      </div>
-
       <div className="max-w-[1400px] mx-auto px-6 md:px-12 mb-32">
         <div className="flex items-end justify-between mb-12">
           <h2 className="text-2xl lg:text-3xl font-manrope font-black tracking-tight uppercase">
@@ -150,6 +146,10 @@ export default async function ProductPage({ params }: Props) {
           </Link>
         </div>
         <RelatedProducts products={safeRelated} />
+      </div>
+
+      <div className="w-full mb-20">
+        <Featuring />
       </div>
 
       <Footer config={footerConfig} brandName={brand.name} social={socialConfig} />

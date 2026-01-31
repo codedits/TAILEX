@@ -6,19 +6,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "@/hooks/use-toast";
-import { createOrderAction } from "@/actions/order";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, Loader2, Lock } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { CheckCircle, Loader2, ChevronRight, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/context/UserAuthContext";
-import { formatCurrency as utilsFormatCurrency, cn } from "@/lib/utils";
 import { useFormatCurrency } from "@/context/StoreConfigContext";
 import type { AuthUser } from "@/lib/auth";
+import { ShippingMethodStep } from "./shipping-method-step";
+import { PaymentMethodStep } from "./payment-method-step";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { addressSchema } from "@/lib/validators";
 
 interface CheckoutWizardProps {
     user: AuthUser | null;
@@ -26,40 +28,76 @@ interface CheckoutWizardProps {
     savedAddress?: any;
 }
 
-type CheckoutStep = 'email' | 'otp' | 'details' | 'success';
+type CheckoutStep = 'email' | 'otp' | 'address' | 'shipping' | 'payment' | 'success';
+
+// Extend address schema for form
+const formSchema = addressSchema.extend({
+    email: z.string().email(),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 export default function CheckoutWizard({ user: initialUser, customer, savedAddress }: CheckoutWizardProps) {
     const formatCurrency = useFormatCurrency();
     const { items, cartTotal, clearCart } = useCart();
-    const { sendOTP, verifyOTP, user: authUser } = useAuth(); // ADDED
-    const [step, setStep] = useState<CheckoutStep>(initialUser ? 'details' : 'email');
+    const { sendOTP, verifyOTP, user: authUser } = useAuth();
+
+    // State
+    const [step, setStep] = useState<CheckoutStep>(initialUser ? 'address' : 'email');
     const [email, setEmail] = useState(initialUser?.email || '');
     const [isProcessing, setIsProcessing] = useState(false);
     const [otp, setOtp] = useState("");
 
-    // Merge initial user (server) with auth context user (client)
-    const activeUser = authUser || (initialUser as any);
+    // Wizard Data State
+    const [shippingAddress, setShippingAddress] = useState<FormData | null>(null);
+    const [shippingMethod, setShippingMethod] = useState("standard");
+    const [paymentMethod, setPaymentMethod] = useState("COD");
 
+    // Payment Proof State
+    const [proofFile, setProofFile] = useState<File | null>(null);
+    const [transactionId, setTransactionId] = useState("");
+
+    const activeUser = authUser || (initialUser as any);
     const router = useRouter();
 
-    // If user logs in externally or prop changes
+    // React Hook Form
+    const form = useForm<FormData>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            first_name: savedAddress?.first_name || customer?.first_name || "",
+            last_name: savedAddress?.last_name || customer?.last_name || "",
+            address1: savedAddress?.address1 || "",
+            city: savedAddress?.city || "",
+            zip: savedAddress?.postal_code || "",
+            country: "Pakistan",
+            country_code: "PK",
+            phone: customer?.phone || savedAddress?.phone || "",
+            email: activeUser?.email || "",
+        }
+    });
+
     useEffect(() => {
         if (activeUser) {
-            setStep('details');
+            if (step === 'email' || step === 'otp') setStep('address');
             setEmail(activeUser.email || '');
+            form.setValue("email", activeUser.email || "");
         }
     }, [activeUser]);
+
+    // Derived Totals
+    const shippingCost = shippingMethod === "express" ? 450 : 250;
+    const finalTotal = cartTotal + shippingCost;
+
+    // --- HANDLERS ---
 
     const handleSendOTP = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsProcessing(true);
-
         const result = await sendOTP(email);
         setIsProcessing(false);
-
         if (result.success) {
             setStep('otp');
-            toast({ title: "Code sent", description: "Please checks your email inbox." });
+            toast({ title: "Code sent", description: "Please check your inbox." });
         } else {
             toast({ title: "Error", description: result.error, variant: "destructive" });
         }
@@ -68,341 +106,319 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
     const handleVerifyOTP = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsProcessing(true);
-
         const result = await verifyOTP(email, otp);
-
         if (result.success) {
-            // Context handles the state update and toast
-            setStep('details');
+            setStep('address');
             setIsProcessing(false);
         } else {
             setIsProcessing(false);
-            toast({ title: "Invalid Code", description: "Please try again.", variant: "destructive" });
+            toast({ title: "Invalid Code", description: "Try again.", variant: "destructive" });
         }
     };
 
-    const handleCheckout = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+    const onAddressSubmit = (data: FormData) => {
+        setShippingAddress(data);
+        setStep('shipping');
+    };
+
+    const uploadPaymentProof = async (): Promise<string | null> => {
+        if (!proofFile) return null;
+
+        const formData = new FormData();
+        formData.append('file', proofFile);
+
+        const res = await fetch('/api/upload/payment-proof', {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!res.ok) throw new Error("Failed to upload proof");
+
+        const data = await res.json();
+        return data.url; // Assuming API returns public URL
+    };
+
+    const handlePlaceOrder = async () => {
         setIsProcessing(true);
-
-        const formData = new FormData(e.currentTarget);
-
-        // Construct order items
-        const orderItems = items.map(item => ({
-            product_id: item.productId || item.id,
-            variant_id: item.variantId,
-            quantity: item.quantity,
-            price: item.price
-        }));
-
         try {
-            // Ideally use the API route here too, but for speed keeping the server action if it works with the DB
-            // However, the action likely uses `products` table which is fine.
-            // But we created a NEW API route for orders `/api/orders`. We should use it!
+            // 1. Upload Proof if needed
+            let proofUrl = null;
+            if (paymentMethod !== 'COD') {
+                if (!proofFile) {
+                    toast({ title: "Proof Missing", description: "Please upload payment receipt", variant: "destructive" });
+                    setIsProcessing(false);
+                    return;
+                }
+                proofUrl = await uploadPaymentProof();
+            }
+
+            // 2. Prepare Payload
+            const orderItems = items.map(item => ({
+                product_id: item.productId || item.id,
+                variant_id: item.variantId,
+                quantity: item.quantity,
+                price: item.price
+            }));
 
             const payload = {
-                email: email, // Validated in step 1 or from auth
+                email: email || shippingAddress?.email,
                 items: orderItems,
-                phone: formData.get("phone") as string,
-                shipping_address: {
-                    first_name: formData.get("firstName") as string,
-                    last_name: formData.get("lastName") as string,
-                    address1: formData.get("address") as string,
-                    city: formData.get("city") as string,
-                    postal_code: formData.get("postalCode") as string, // Note: payload expects zip or postal_code? API Route uses schema "shipping_address"
-                    zip: formData.get("postalCode") as string,
-                    country: "Pakistan",
-                    country_code: "PK"
-                },
-                payment_method: "card", // Default for now
-                user_name: `${formData.get("firstName")} ${formData.get("lastName")}`,
-                address: formData.get("address") as string
+                shipping_address: shippingAddress,
+                billing_address: shippingAddress, // Simple version
+                phone: shippingAddress?.phone,
+                payment_method: paymentMethod,
+                payment_proof_url: proofUrl,
+                transaction_id: transactionId,
+                payment_status: paymentMethod === 'COD' ? 'cod_pending' : 'pending_verification'
             };
 
+            // 3. API Call
             const response = await fetch('/api/orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
-                credentials: 'include'
             });
 
             const result = await response.json();
 
             if (result.success) {
                 clearCart();
-                toast({
-                    title: "Order Placed!",
-                    description: "Your shipping address has been saved for next time."
-                });
                 router.push(`/account/orders/${result.orderId}`);
             } else {
-                toast({
-                    title: "Order failed",
-                    description: result.error,
-                    variant: "destructive"
-                });
+                toast({ title: "Order Failed", description: result.error || "Unknown error", variant: "destructive" });
             }
+
         } catch (err) {
-            toast({ title: "Error", description: "Something went wrong.", variant: "destructive" });
+            console.error(err);
+            toast({ title: "Error", description: "Something went wrong processing your order.", variant: "destructive" });
         } finally {
             setIsProcessing(false);
         }
     };
 
-    // ... rest of render logic
+    // --- RENDER ---
+
     if (items.length === 0) {
         return (
             <div className="pt-32 pb-20 px-6 md:px-12 flex flex-col items-center justify-center min-h-[60vh]">
                 <h1 className="text-3xl font-display mb-4">Your cart is empty</h1>
-                <Button asChild variant="outline">
-                    <Link href="/shop">Continue Shopping</Link>
-                </Button>
+                <Button asChild variant="outline"><Link href="/shop">Continue Shopping</Link></Button>
             </div>
         );
     }
 
     return (
         <div className="pt-32 pb-20 px-6 md:px-12 max-w-7xl mx-auto">
-
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24">
 
-                {/* LEFT COLUMN: WIZARD */}
+                {/* LEFT: WIZARD */}
                 <div>
+                    {/* BREADCRUMBS */}
+                    <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-neutral-400 mb-8 font-medium">
+                        <span className={step === 'address' ? "text-black" : ""}>Information</span>
+                        <ChevronRight className="w-3 h-3" />
+                        <span className={step === 'shipping' ? "text-black" : ""}>Shipping</span>
+                        <ChevronRight className="w-3 h-3" />
+                        <span className={step === 'payment' ? "text-black" : ""}>Payment</span>
+                    </div>
+
                     <h1 className="text-4xl font-display mb-8">Checkout</h1>
 
                     <AnimatePresence mode="wait">
-                        {/* STEP 1: EMAIL */}
+
+                        {/* 1. EMAIL */}
                         {step === 'email' && (
-                            <motion.div
-                                key="email"
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -20 }}
-                                className="space-y-6"
-                            >
+                            <motion.div key="email" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                                 <div className="p-8 border border-black/10 bg-white shadow-sm">
-                                    <h2 className="text-sm font-semibold tracking-[0.2em] uppercase mb-8 border-b border-black/5 pb-4">Contact Information</h2>
+                                    <h2 className="text-sm font-semibold tracking-[0.2em] uppercase mb-8 border-b border-black/5 pb-4">Contact</h2>
                                     <form onSubmit={handleSendOTP} className="space-y-6">
                                         <div className="space-y-2">
-                                            <Label htmlFor="email" className="text-[10px] tracking-[0.1em] uppercase text-neutral-500">Email address</Label>
+                                            <Label htmlFor="email" className="text-[10px] tracking-[0.1em] uppercase text-neutral-500">Email</Label>
                                             <Input
-                                                id="email"
-                                                type="email"
-                                                placeholder="YOU@EXAMPLE.COM"
-                                                required
-                                                value={email}
-                                                onChange={(e) => setEmail(e.target.value)}
+                                                id="email" type="email" required
+                                                value={email} onChange={(e) => setEmail(e.target.value)}
                                                 className="rounded-none border-black/20 focus:border-black h-12 uppercase text-xs tracking-widest"
                                             />
                                         </div>
                                         <Button type="submit" variant="cta" size="xl" className="w-full text-xs" disabled={isProcessing}>
-                                            {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : "PROCEED TO VERIFICATION"}
+                                            {isProcessing ? <Loader2 className="animate-spin w-4 h-4" /> : "CONTINUE"}
                                         </Button>
                                     </form>
                                 </div>
-                                <p className="text-[10px] text-neutral-400 text-center tracking-widest uppercase">
-                                    A specialized code will be sent to verify your identity.
-                                </p>
                             </motion.div>
                         )}
 
-                        {/* STEP 2: OTP */}
+                        {/* 2. OTP */}
                         {step === 'otp' && (
-                            <motion.div
-                                key="otp"
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -20 }}
-                                className="space-y-6"
-                            >
+                            <motion.div key="otp" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                                 <div className="p-8 border border-black/10 bg-white shadow-sm">
-                                    <div className="flex items-center justify-between mb-8 border-b border-black/5 pb-4">
-                                        <h2 className="text-sm font-semibold tracking-[0.2em] uppercase">Verify it's you</h2>
-                                        <button onClick={() => setStep('email')} className="text-[10px] tracking-widest uppercase text-neutral-400 hover:text-black underline">Edit Email</button>
-                                    </div>
-                                    <p className="text-xs text-neutral-500 mb-8 tracking-wide">
-                                        Security code sent to <span className="text-black font-semibold">{email.toUpperCase()}</span>
-                                    </p>
+                                    <h2 className="text-sm font-semibold tracking-[0.2em] uppercase mb-8 border-b border-black/5 pb-4">Verify</h2>
+                                    <p className="text-xs text-neutral-500 mb-8">Code sent to <b>{email}</b></p>
                                     <form onSubmit={handleVerifyOTP} className="space-y-6">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="otp" className="text-[10px] tracking-[0.1em] uppercase text-neutral-500">Security Code</Label>
-                                            <Input
-                                                id="otp"
-                                                type="text"
-                                                placeholder="••••••"
-                                                required
-                                                value={otp}
-                                                onChange={(e) => setOtp(e.target.value)}
-                                                className="text-center tracking-[0.8em] text-xl font-mono h-14 rounded-none border-black/20 focus:border-black"
-                                                maxLength={6}
-                                            />
-                                        </div>
+                                        <Input
+                                            value={otp} onChange={(e) => setOtp(e.target.value)}
+                                            className="text-center tracking-[0.8em] text-xl font-mono h-14 rounded-none border-black/20"
+                                            placeholder="••••••" maxLength={6}
+                                        />
                                         <Button type="submit" variant="cta" size="xl" className="w-full text-xs" disabled={isProcessing}>
-                                            {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : "CONTINUE TO CHECKOUT"}
+                                            {isProcessing ? <Loader2 className="animate-spin w-4 h-4" /> : "VERIFY"}
                                         </Button>
                                     </form>
                                 </div>
                             </motion.div>
                         )}
 
-                        {/* STEP 3: DETAILS FORM */}
-                        {step === 'details' && (
-                            <motion.div
-                                key="details"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="space-y-12"
-                            >
-                                <div className="flex items-center gap-3 text-[10px] tracking-[0.2em] uppercase text-neutral-600 bg-neutral-100 p-4 border border-black/5">
-                                    <CheckCircle className="w-4 h-4" />
-                                    <span>Authenticated : {activeUser?.email}</span>
-                                </div>
-
-                                <form onSubmit={handleCheckout} className="space-y-12">
-                                    {/* Shipping Address */}
-                                    <div className="space-y-8">
-                                        <h2 className="text-sm font-semibold tracking-[0.3em] uppercase border-b border-black/5 pb-4">Shipping Details</h2>
-                                        <div className="grid grid-cols-2 gap-6">
-                                            <div className="space-y-2 col-span-2 md:col-span-1">
-                                                <Label htmlFor="firstName" className="text-[10px] tracking-[0.1em] uppercase text-neutral-500">First name</Label>
-                                                <Input
-                                                    id="firstName"
-                                                    name="firstName"
-                                                    required
-                                                    defaultValue={savedAddress?.first_name || customer?.first_name || ''}
-                                                    className="rounded-none border-black/20 focus:border-black h-12 uppercase text-xs"
-                                                />
-                                            </div>
-                                            <div className="space-y-2 col-span-2 md:col-span-1">
-                                                <Label htmlFor="lastName" className="text-[10px] tracking-[0.1em] uppercase text-neutral-500">Last name</Label>
-                                                <Input
-                                                    id="lastName"
-                                                    name="lastName"
-                                                    required
-                                                    defaultValue={savedAddress?.last_name || customer?.last_name || ''}
-                                                    className="rounded-none border-black/20 focus:border-black h-12 uppercase text-xs"
-                                                />
-                                            </div>
+                        {/* 3. ADDRESS */}
+                        {step === 'address' && (
+                            <motion.div key="address" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }}>
+                                {activeUser && (
+                                    <div className="flex items-center gap-3 text-[10px] tracking-[0.2em] uppercase text-neutral-600 bg-neutral-100 p-4 border border-black/5 mb-8">
+                                        <CheckCircle className="w-4 h-4" />
+                                        <span>Logged in as {activeUser.email}</span>
+                                    </div>
+                                )}
+                                <form onSubmit={form.handleSubmit(onAddressSubmit)} className="space-y-6">
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div className="col-span-2 md:col-span-1 space-y-2">
+                                            <Label className="text-[10px] uppercase text-neutral-500">First Name</Label>
+                                            <Input {...form.register("first_name")} className="rounded-none h-12 text-xs border-black/20" />
+                                            {form.formState.errors.first_name && <p className="text-xs text-red-500">{form.formState.errors.first_name.message}</p>}
                                         </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="address" className="text-[10px] tracking-[0.1em] uppercase text-neutral-500">Shipping Address</Label>
-                                            <Input
-                                                id="address"
-                                                name="address"
-                                                placeholder="HOUSE NO, STREET, AREA"
-                                                required
-                                                minLength={5}
-                                                defaultValue={savedAddress?.address1 || ''}
-                                                className="rounded-none border-black/20 focus:border-black h-12 uppercase text-xs"
-                                            />
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-6">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="city" className="text-[10px] tracking-[0.1em] uppercase text-neutral-500">City</Label>
-                                                <Input
-                                                    id="city"
-                                                    name="city"
-                                                    required
-                                                    minLength={2}
-                                                    defaultValue={savedAddress?.city || ''}
-                                                    className="rounded-none border-black/20 focus:border-black h-12 uppercase text-xs"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="postalCode" className="text-[10px] tracking-[0.1em] uppercase text-neutral-500">Postal code</Label>
-                                                <Input
-                                                    id="postalCode"
-                                                    name="postalCode"
-                                                    required
-                                                    defaultValue={savedAddress?.postal_code || ''}
-                                                    className="rounded-none border-black/20 focus:border-black h-12 uppercase text-xs"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="phone" className="text-[10px] tracking-[0.1em] uppercase text-neutral-500">Phone (For courier contact)</Label>
-                                            <Input
-                                                id="phone"
-                                                name="phone"
-                                                type="tel"
-                                                placeholder="+92 300 0000000"
-                                                defaultValue={customer?.phone || savedAddress?.phone || ''}
-                                                className="rounded-none border-black/20 focus:border-black h-12 text-xs"
-                                            />
+                                        <div className="col-span-2 md:col-span-1 space-y-2">
+                                            <Label className="text-[10px] uppercase text-neutral-500">Last Name</Label>
+                                            <Input {...form.register("last_name")} className="rounded-none h-12 text-xs border-black/20" />
+                                            {form.formState.errors.last_name && <p className="text-xs text-red-500">{form.formState.errors.last_name.message}</p>}
                                         </div>
                                     </div>
-
-                                    {/* Payment Method */}
-                                    <div className="space-y-6">
-                                        <h2 className="text-sm font-semibold tracking-[0.3em] uppercase border-b border-black/5 pb-4">Payment Method</h2>
-                                        <div className="border border-black/10 p-6 bg-neutral-50 flex items-center justify-between">
-                                            <div className="space-y-1">
-                                                <span className="text-[10px] tracking-[0.2em] font-semibold uppercase text-neutral-900 leading-none">Cash on Delivery</span>
-                                                <p className="text-[9px] tracking-widest text-neutral-500 uppercase">Pay when you receive your order</p>
-                                            </div>
-                                            <div className="w-2 h-2 bg-black rounded-full shadow-[0_0_0_4px_white,0_0_0_5px_black]"></div>
+                                    <div className="space-y-2">
+                                        <Label className="text-[10px] uppercase text-neutral-500">Address</Label>
+                                        <Input {...form.register("address1")} className="rounded-none h-12 text-xs border-black/20" placeholder="Street address" />
+                                        {form.formState.errors.address1 && <p className="text-xs text-red-500">{form.formState.errors.address1.message}</p>}
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <Label className="text-[10px] uppercase text-neutral-500">City</Label>
+                                            <Input {...form.register("city")} className="rounded-none h-12 text-xs border-black/20" />
+                                            {form.formState.errors.city && <p className="text-xs text-red-500">{form.formState.errors.city.message}</p>}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-[10px] uppercase text-neutral-500">Postal Code</Label>
+                                            <Input {...form.register("zip")} className="rounded-none h-12 text-xs border-black/20" />
+                                            {form.formState.errors.zip && <p className="text-xs text-red-500">{form.formState.errors.zip.message}</p>}
                                         </div>
                                     </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-[10px] uppercase text-neutral-500">Phone</Label>
+                                        <Input {...form.register("phone")} className="rounded-none h-12 text-xs border-black/20" placeholder="+92..." />
+                                        {form.formState.errors.phone && <p className="text-xs text-red-500">{form.formState.errors.phone.message}</p>}
+                                    </div>
 
-                                    <Button type="submit" variant="cta" size="xl" className="w-full" disabled={isProcessing}>
-                                        {isProcessing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : `PLACE ORDER • ${formatCurrency(cartTotal + (step === 'details' ? 250 : 0))}`}
-                                    </Button>
+                                    <Button type="submit" variant="cta" size="xl" className="w-full text-xs">CONTINUE TO SHIPPING</Button>
                                 </form>
                             </motion.div>
                         )}
-                    </AnimatePresence>
 
+                        {/* 4. SHIPPING */}
+                        {step === 'shipping' && (
+                            <motion.div key="shipping" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                                <div className="space-y-8">
+                                    <div className="border border-black/5 p-4 text-xs space-y-2 bg-neutral-50/50">
+                                        <div className="flex justify-between border-b border-black/5 pb-2">
+                                            <span className="text-neutral-500">Contact</span>
+                                            <span>{email || shippingAddress?.email}</span>
+                                        </div>
+                                        <div className="flex justify-between border-b border-black/5 pb-2">
+                                            <span className="text-neutral-500">Ship to</span>
+                                            <span className="text-right truncate max-w-[200px]">{shippingAddress?.address1}, {shippingAddress?.city}</span>
+                                        </div>
+                                        <div className="pt-2 text-[10px] uppercase tracking-widest text-neutral-400 cursor-pointer hover:text-black underline" onClick={() => setStep('address')}>
+                                            Change
+                                        </div>
+                                    </div>
+
+                                    <ShippingMethodStep selectedMethod={shippingMethod} onSelect={setShippingMethod} />
+
+                                    <div className="flex gap-4">
+                                        <Button variant="outline" className="flex-1" onClick={() => setStep('address')}>
+                                            <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                                        </Button>
+                                        <Button variant="cta" className="flex-[2]" onClick={() => setStep('payment')}>
+                                            CONTINUE TO PAYMENT
+                                        </Button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {/* 5. PAYMENT */}
+                        {step === 'payment' && (
+                            <motion.div key="payment" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                                <div className="space-y-8">
+                                    <PaymentMethodStep
+                                        selectedMethod={paymentMethod}
+                                        onSelect={setPaymentMethod}
+                                        proofFile={proofFile}
+                                        setProofFile={setProofFile}
+                                        transactionId={transactionId}
+                                        setTransactionId={setTransactionId}
+                                    />
+
+                                    <div className="flex gap-4">
+                                        <Button variant="outline" className="flex-1" onClick={() => setStep('shipping')} disabled={isProcessing}>
+                                            <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                                        </Button>
+                                        <Button
+                                            variant="cta"
+                                            size="xl"
+                                            className="flex-[2] text-xs"
+                                            onClick={handlePlaceOrder}
+                                            disabled={isProcessing || (paymentMethod !== 'COD' && !proofFile)}
+                                        >
+                                            {isProcessing ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : `PAY ${formatCurrency(finalTotal)}`}
+                                        </Button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+
+                    </AnimatePresence>
                 </div>
 
-                {/* RIGHT COLUMN: SUMMARY */}
-                {/* Order Summary (Reuse existing design) */}
-                <div className="bg-secondary/20 p-8 rounded-lg h-fit">
-                    <h2 className="text-xl font-manrope font-black uppercase tracking-widest mb-6 border-b border-foreground/10 pb-4">Order Summary</h2>
-                    <div className="space-y-6">
+                {/* RIGHT: SUMMARY */}
+                <div className="bg-neutral-50 p-8 h-fit sticky top-32 border border-neutral-100 hidden lg:block">
+                    <h2 className="text-xl font-manrope font-black uppercase tracking-widest mb-6 border-b border-black/5 pb-4">Order Summary</h2>
+                    <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                         {items.map((item) => (
                             <div key={`${item.id}-${item.size}`} className="flex gap-4">
-                                <div className="relative w-16 h-20 bg-secondary/30 flex-shrink-0 overflow-hidden rounded-none border border-foreground/5">
-                                    {item.image ? (
-                                        <Image
-                                            src={item.image}
-                                            alt={item.name}
-                                            fill
-                                            className="object-cover"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full bg-neutral-200" />
-                                    )}
-                                    <span className="absolute top-0 right-0 bg-foreground text-background text-[10px] font-manrope font-black w-5 h-5 flex items-center justify-center">
+                                <div className="relative w-14 h-16 bg-white border border-neutral-200">
+                                    {item.image && <Image src={item.image} alt={item.name} fill className="object-cover" />}
+                                    <span className="absolute -top-2 -right-2 bg-black text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full">
                                         {item.quantity}
                                     </span>
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className="font-manrope font-black text-[11px] uppercase tracking-widest">{item.name}</h3>
-                                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Size: {item.size}</p>
+                                    <h3 className="font-bold text-[11px] uppercase tracking-wide">{item.name}</h3>
+                                    <p className="text-[10px] text-neutral-500">{item.size}</p>
                                 </div>
-                                <p className="font-manrope font-black text-sm">{formatCurrency(item.price * item.quantity)}</p>
+                                <p className="text-xs font-bold">{formatCurrency(item.price * item.quantity)}</p>
                             </div>
                         ))}
                     </div>
-
-                    <Separator className="my-6 opacity-30" />
-
-                    <div className="space-y-3">
-                        <div className="flex justify-between text-[11px] uppercase tracking-widest font-manrope font-black">
-                            <span className="text-muted-foreground/60">Subtotal</span>
+                    <Separator className="my-6 bg-black/5" />
+                    <div className="space-y-2 text-xs uppercase tracking-wide">
+                        <div className="flex justify-between text-neutral-500">
+                            <span>Subtotal</span>
                             <span>{formatCurrency(cartTotal)}</span>
                         </div>
-                        <div className="flex justify-between text-[11px] uppercase tracking-widest font-manrope font-black">
-                            <span className="text-muted-foreground/60">Shipping</span>
-                            {step === 'details' ? <span>{formatCurrency(250)}</span> : <span className="text-neutral-400 font-medium italic">Calculated next step</span>}
+                        <div className="flex justify-between text-neutral-500">
+                            <span>Shipping</span>
+                            <span>{step === 'shipping' || step === 'payment' ? formatCurrency(shippingCost) : "Calculated next step"}</span>
                         </div>
                     </div>
-
-                    <Separator className="my-6 opacity-30" />
-
-                    <div className="flex justify-between items-center">
-                        <span className="font-manrope font-black uppercase tracking-widest text-xs">Total</span>
-                        <span className="font-manrope font-black text-3xl">{formatCurrency(cartTotal + (step === 'details' ? 250 : 0))}</span>
+                    <Separator className="my-6 bg-black/10" />
+                    <div className="flex justify-between items-center text-lg font-bold">
+                        <span>Total</span>
+                        <span>{formatCurrency(step === 'shipping' || step === 'payment' ? finalTotal : cartTotal)}</span>
                     </div>
                 </div>
 

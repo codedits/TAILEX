@@ -24,6 +24,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/context/CartContext";
 import { Product } from "@/lib/types";
 import { useRouter } from "next/navigation";
+import { StickyAddToCart } from "./StickyAddToCart";
+import { SizeGuideModal } from "./SizeGuideModal";
 
 interface ProductInfoProps {
     product: Product;
@@ -37,6 +39,8 @@ export default function ProductInfo({ product }: ProductInfoProps) {
     const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
     const [quantity, setQuantity] = useState(1);
     const [isFavorite, setIsFavorite] = useState(false);
+    const [isPending, setIsPending] = useState(false);
+    const [showSizeGuide, setShowSizeGuide] = useState(false);
 
     const { toast } = useToast();
     const { addItem } = useCart();
@@ -92,6 +96,9 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             return false;
         }
 
+        // Optimistic: Set pending state immediately
+        setIsPending(true);
+
         const variantId = selectedVariant?.id;
         const uniqueId = variantId ? `${product.id}-${variantId}` : product.id;
         const image = selectedVariant?.image_url || product.cover_image || "";
@@ -107,6 +114,9 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             quantity: quantity,
             slug: product.slug,
         } as any, openCart);
+
+        // Reset pending state after a brief delay for visual feedback
+        setTimeout(() => setIsPending(false), 400);
 
         if (!openCart) return true; // For Buy Now logic
         return true;
@@ -179,7 +189,10 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                     <div className="flex justify-between items-center text-xs uppercase tracking-widest font-bold text-neutral-900">
                         <span>{option.name}: <span className="text-neutral-500 font-medium">{selectedOptions[option.name]}</span></span>
                         {option.name.toLowerCase() === 'size' && (
-                            <button className="flex items-center gap-1 hover:text-neutral-500 transition-colors underline underline-offset-4">
+                            <button
+                                onClick={() => setShowSizeGuide(true)}
+                                className="flex items-center gap-1 hover:text-neutral-500 transition-colors underline underline-offset-4"
+                            >
                                 <Ruler className="w-3 h-3" /> Find Your Fit
                             </button>
                         )}
@@ -220,10 +233,10 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                     {/* Add to Cart */}
                     <Button
                         onClick={() => handleAddToCart(true)}
-                        disabled={isOutOfStock}
-                        className="flex-1 h-full rounded-none bg-neutral-900 text-white hover:bg-neutral-800 uppercase tracking-widest font-bold text-xs"
+                        disabled={isOutOfStock || isPending}
+                        className="flex-1 h-full rounded-none bg-neutral-900 text-white hover:bg-neutral-800 uppercase tracking-widest font-bold text-xs transition-transform active:scale-95 disabled:opacity-70"
                     >
-                        {isOutOfStock ? "Sold Out" : "Add to Bag"}
+                        {isPending ? "Adding..." : isOutOfStock ? "Sold Out" : "Add to Bag"}
                     </Button>
                 </div>
 
@@ -271,6 +284,22 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                     </AccordionContent>
                 </AccordionItem>
             </Accordion>
+
+            {/* Mobile Sticky Add to Cart */}
+            <StickyAddToCart
+                productName={product.title}
+                price={currentPrice}
+                salePrice={currentSalePrice}
+                isOutOfStock={isOutOfStock === true}
+                onAddToCart={() => handleAddToCart(true)}
+                isPending={isPending}
+            />
+
+            {/* Size Guide Modal */}
+            <SizeGuideModal
+                isOpen={showSizeGuide}
+                onClose={() => setShowSizeGuide(false)}
+            />
         </div>
     );
 }
