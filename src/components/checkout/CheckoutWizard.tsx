@@ -180,27 +180,28 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
                                 exit={{ opacity: 0, x: -20 }}
                                 className="space-y-6"
                             >
-                                <div className="bg-neutral-900/50 p-6 rounded-lg border border-white/5">
-                                    <h2 className="text-lg font-medium mb-4">Contact Information</h2>
-                                    <form onSubmit={handleSendOTP} className="space-y-4">
+                                <div className="p-8 border border-black/10 bg-white shadow-sm">
+                                    <h2 className="text-sm font-semibold tracking-[0.2em] uppercase mb-8 border-b border-black/5 pb-4">Contact Information</h2>
+                                    <form onSubmit={handleSendOTP} className="space-y-6">
                                         <div className="space-y-2">
-                                            <Label htmlFor="email">Email address</Label>
+                                            <Label htmlFor="email" className="text-[10px] tracking-[0.1em] uppercase text-neutral-500">Email address</Label>
                                             <Input
                                                 id="email"
                                                 type="email"
-                                                placeholder="you@example.com"
+                                                placeholder="YOU@EXAMPLE.COM"
                                                 required
                                                 value={email}
                                                 onChange={(e) => setEmail(e.target.value)}
+                                                className="rounded-none border-black/20 focus:border-black h-12 uppercase text-xs tracking-widest"
                                             />
                                         </div>
-                                        <Button type="submit" className="w-full" disabled={isProcessing}>
-                                            {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : "Proceed"}
+                                        <Button type="submit" variant="cta" size="xl" className="w-full text-xs" disabled={isProcessing}>
+                                            {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : "PROCEED TO VERIFICATION"}
                                         </Button>
                                     </form>
                                 </div>
-                                <p className="text-sm text-neutral-500 text-center">
-                                    We'll send you a specialized code to verify your identity.
+                                <p className="text-[10px] text-neutral-400 text-center tracking-widest uppercase">
+                                    A specialized code will be sent to verify your identity.
                                 </p>
                             </motion.div>
                         )}
@@ -214,30 +215,30 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
                                 exit={{ opacity: 0, x: -20 }}
                                 className="space-y-6"
                             >
-                                <div className="bg-neutral-900/50 p-6 rounded-lg border border-white/5">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h2 className="text-lg font-medium">Verify it's you</h2>
-                                        <button onClick={() => setStep('email')} className="text-xs text-neutral-400 hover:text-white underline">Edit</button>
+                                <div className="p-8 border border-black/10 bg-white shadow-sm">
+                                    <div className="flex items-center justify-between mb-8 border-b border-black/5 pb-4">
+                                        <h2 className="text-sm font-semibold tracking-[0.2em] uppercase">Verify it's you</h2>
+                                        <button onClick={() => setStep('email')} className="text-[10px] tracking-widest uppercase text-neutral-400 hover:text-black underline">Edit Email</button>
                                     </div>
-                                    <p className="text-sm text-neutral-400 mb-6">
-                                        We sent a secure code to <span className="text-white">{email}</span>
+                                    <p className="text-xs text-neutral-500 mb-8 tracking-wide">
+                                        Security code sent to <span className="text-black font-semibold">{email.toUpperCase()}</span>
                                     </p>
-                                    <form onSubmit={handleVerifyOTP} className="space-y-4">
+                                    <form onSubmit={handleVerifyOTP} className="space-y-6">
                                         <div className="space-y-2">
-                                            <Label htmlFor="otp">Security Code</Label>
+                                            <Label htmlFor="otp" className="text-[10px] tracking-[0.1em] uppercase text-neutral-500">Security Code</Label>
                                             <Input
                                                 id="otp"
                                                 type="text"
-                                                placeholder="123456"
+                                                placeholder="••••••"
                                                 required
                                                 value={otp}
                                                 onChange={(e) => setOtp(e.target.value)}
-                                                className="text-center tracking-[0.5em] text-lg font-mono"
+                                                className="text-center tracking-[0.8em] text-xl font-mono h-14 rounded-none border-black/20 focus:border-black"
                                                 maxLength={6}
                                             />
                                         </div>
-                                        <Button type="submit" className="w-full" disabled={isProcessing}>
-                                            {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : "Continue"}
+                                        <Button type="submit" variant="cta" size="xl" className="w-full text-xs" disabled={isProcessing}>
+                                            {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : "CONTINUE TO CHECKOUT"}
                                         </Button>
                                     </form>
                                 </div>
@@ -250,119 +251,101 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
                                 key="details"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="space-y-8"
+                                className="space-y-12"
                             >
-                                <div className="flex items-center gap-3 text-sm text-green-500 bg-green-500/10 p-3 rounded border border-green-500/20">
+                                <div className="flex items-center gap-3 text-[10px] tracking-[0.2em] uppercase text-neutral-600 bg-neutral-100 p-4 border border-black/5">
                                     <CheckCircle className="w-4 h-4" />
-                                    <span>Signed in as {activeUser?.email}</span>
+                                    <span>Authenticated : {activeUser?.email}</span>
                                 </div>
 
-                                {/* RETURNING USER "1-CLICK" SUMMARY */}
-                                {savedAddress && (
-                                    <div className="bg-neutral-900 border border-white/10 rounded-lg p-6 mb-8">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div>
-                                                <h3 className="text-white font-medium">Shipping To</h3>
-                                                <p className="text-white/60 text-sm mt-1">{savedAddress.first_name} {savedAddress.last_name}</p>
-                                                <p className="text-white/60 text-sm">{savedAddress.address1}</p>
-                                                <p className="text-white/60 text-sm">{savedAddress.city}, {savedAddress.postal_code}</p>
-                                            </div>
-                                            <Button variant="ghost" size="sm" className="text-xs h-auto py-1" onClick={() => {
-                                                // A real app might toggle a generic 'isEditing' state. 
-                                                // For now we just rely on the form below to 'Edit'.
-                                                // Actually, let's just make the inputs below show this data.
-                                            }}>
-                                                Verify Details Below
-                                            </Button>
-                                        </div>
-                                    </div>
-                                )}
-
-                                <form onSubmit={handleCheckout} className="space-y-8">
+                                <form onSubmit={handleCheckout} className="space-y-12">
                                     {/* Shipping Address */}
-                                    <div className="space-y-4">
-                                        <h2 className="text-xl font-medium uppercase tracking-wide">Shipping Address</h2>
-                                        <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-8">
+                                        <h2 className="text-sm font-semibold tracking-[0.3em] uppercase border-b border-black/5 pb-4">Shipping Details</h2>
+                                        <div className="grid grid-cols-2 gap-6">
                                             <div className="space-y-2 col-span-2 md:col-span-1">
-                                                <Label htmlFor="firstName">First name</Label>
+                                                <Label htmlFor="firstName" className="text-[10px] tracking-[0.1em] uppercase text-neutral-500">First name</Label>
                                                 <Input
                                                     id="firstName"
                                                     name="firstName"
                                                     required
                                                     defaultValue={savedAddress?.first_name || customer?.first_name || ''}
+                                                    className="rounded-none border-black/20 focus:border-black h-12 uppercase text-xs"
                                                 />
                                             </div>
                                             <div className="space-y-2 col-span-2 md:col-span-1">
-                                                <Label htmlFor="lastName">Last name</Label>
+                                                <Label htmlFor="lastName" className="text-[10px] tracking-[0.1em] uppercase text-neutral-500">Last name</Label>
                                                 <Input
                                                     id="lastName"
                                                     name="lastName"
                                                     required
                                                     defaultValue={savedAddress?.last_name || customer?.last_name || ''}
+                                                    className="rounded-none border-black/20 focus:border-black h-12 uppercase text-xs"
                                                 />
                                             </div>
                                         </div>
                                         <div className="space-y-2">
-                                            <Label htmlFor="address">Address</Label>
+                                            <Label htmlFor="address" className="text-[10px] tracking-[0.1em] uppercase text-neutral-500">Shipping Address</Label>
                                             <Input
                                                 id="address"
                                                 name="address"
-                                                placeholder="123 Main St"
+                                                placeholder="HOUSE NO, STREET, AREA"
                                                 required
                                                 minLength={5}
                                                 defaultValue={savedAddress?.address1 || ''}
+                                                className="rounded-none border-black/20 focus:border-black h-12 uppercase text-xs"
                                             />
                                         </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="phone">Phone Number (Optional)</Label>
-                                            <Input
-                                                id="phone"
-                                                name="phone"
-                                                type="tel"
-                                                placeholder="+1 (555) 000-0000"
-                                                defaultValue={customer?.phone || savedAddress?.phone || ''}
-                                            />
-                                            <p className="text-[10px] text-neutral-500">For shipping updates only.</p>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-2 gap-6">
                                             <div className="space-y-2">
-                                                <Label htmlFor="city">City</Label>
+                                                <Label htmlFor="city" className="text-[10px] tracking-[0.1em] uppercase text-neutral-500">City</Label>
                                                 <Input
                                                     id="city"
                                                     name="city"
                                                     required
                                                     minLength={2}
                                                     defaultValue={savedAddress?.city || ''}
+                                                    className="rounded-none border-black/20 focus:border-black h-12 uppercase text-xs"
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <Label htmlFor="postalCode">Postal code</Label>
+                                                <Label htmlFor="postalCode" className="text-[10px] tracking-[0.1em] uppercase text-neutral-500">Postal code</Label>
                                                 <Input
                                                     id="postalCode"
                                                     name="postalCode"
                                                     required
                                                     defaultValue={savedAddress?.postal_code || ''}
+                                                    className="rounded-none border-black/20 focus:border-black h-12 uppercase text-xs"
                                                 />
                                             </div>
                                         </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="phone" className="text-[10px] tracking-[0.1em] uppercase text-neutral-500">Phone (For courier contact)</Label>
+                                            <Input
+                                                id="phone"
+                                                name="phone"
+                                                type="tel"
+                                                placeholder="+92 300 0000000"
+                                                defaultValue={customer?.phone || savedAddress?.phone || ''}
+                                                className="rounded-none border-black/20 focus:border-black h-12 text-xs"
+                                            />
+                                        </div>
                                     </div>
 
-                                    <Separator />
-
-                                    {/* Payment */}
-                                    <div className="space-y-4">
-                                        <h2 className="text-xl font-medium uppercase tracking-wide">Payment</h2>
-                                        <div className="border border-white/10 rounded-lg p-4 bg-neutral-900/50 flex items-center justify-between">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-5 bg-white rounded-sm"></div>
-                                                <span className="text-sm">•••• 4242</span>
+                                    {/* Payment Method */}
+                                    <div className="space-y-6">
+                                        <h2 className="text-sm font-semibold tracking-[0.3em] uppercase border-b border-black/5 pb-4">Payment Method</h2>
+                                        <div className="border border-black/10 p-6 bg-neutral-50 flex items-center justify-between">
+                                            <div className="space-y-1">
+                                                <span className="text-[10px] tracking-[0.2em] font-semibold uppercase text-neutral-900 leading-none">Cash on Delivery</span>
+                                                <p className="text-[9px] tracking-widest text-neutral-500 uppercase">Pay when you receive your order</p>
                                             </div>
-                                            <Link href="#" className="text-xs text-neutral-400 underline">Change</Link>
+                                            <div className="w-2 h-2 bg-black rounded-full shadow-[0_0_0_4px_white,0_0_0_5px_black]"></div>
                                         </div>
                                     </div>
 
                                     <Button type="submit" variant="cta" size="xl" className="w-full" disabled={isProcessing}>
-                                        {isProcessing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : `CONFIRM ORDER : ${formatCurrency(cartTotal + (step === 'details' ? 250 : 0))}`}
+                                        {isProcessing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : `PLACE ORDER • ${formatCurrency(cartTotal + (step === 'details' ? 250 : 0))}`}
                                     </Button>
                                 </form>
                             </motion.div>

@@ -9,6 +9,7 @@ import { CartProvider } from "@/context/CartContext";
 import { UserAuthProvider } from "@/context/UserAuthContext";
 import { StoreConfigProvider } from "@/context/StoreConfigContext";
 import { StoreConfig } from "@/services/config";
+import { DiscountPopup } from "@/components/layout/DiscountPopup";
 
 export function Providers({
   children,
@@ -28,6 +29,7 @@ export function Providers({
               {children}
               <Toaster />
               <Sonner />
+              <DiscountPopup />
             </TooltipProvider>
           </CartProvider>
         </UserAuthProvider>
@@ -35,4 +37,3 @@ export function Providers({
     </QueryClientProvider>
   );
 }
-

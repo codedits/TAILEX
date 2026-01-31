@@ -16,9 +16,11 @@ import {
   Palette,
   FileText,
   Navigation,
-  Users
+  Users,
+  Tag
 } from "lucide-react"
 import Link from "next/link"
+
 
 export function AdminSidebar() {
   return (
@@ -108,7 +110,17 @@ export function AdminSidebar() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild className="hover:bg-white/5 hover:text-white transition-colors duration-200 py-6 rounded-lg">
+                  <Link href="/admin/discount">
+                    <Tag className="w-4 h-4" />
+                    <span className="text-sm">Discount Popup</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
+
           </SidebarGroupContent>
         </SidebarGroup>
 

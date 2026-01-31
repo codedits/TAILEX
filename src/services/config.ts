@@ -1,7 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { AppError } from './errors';
 import { unstable_cache } from 'next/cache';
-import { HomepageSection, FooterConfig, SocialConfig, BenefitsConfig } from '@/lib/types';
+import { HomepageSection, FooterConfig, SocialConfig, BenefitsConfig, GlobalDiscountConfig } from '@/lib/types';
 
 export type StoreConfig = {
     brand: { name: string; tagline: string; announcement: string; showAnnouncement: boolean; logoUrl?: string };
@@ -22,6 +22,7 @@ export type StoreConfig = {
     benefits: BenefitsConfig;
     categoryGrid: { aspectRatio: string };
     homepageLayout: HomepageSection[];
+    globalDiscount: GlobalDiscountConfig;
 };
 
 export const StoreConfigService = {
@@ -59,6 +60,14 @@ export const StoreConfigService = {
             const defaultCurrency = { code: 'PKR', symbol: 'Rs.' };
             const defaultHero = { heading: '', subheading: '', image: '', ctaText: '', ctaLink: '' };
             const defaultBenefits = { enabled: true, items: [] };
+            const defaultGlobalDiscount: GlobalDiscountConfig = {
+                enabled: false,
+                title: '',
+                percentage: 0,
+                imageUrl: '',
+                delaySeconds: 5,
+                showOncePerSession: true
+            };
 
             const defaultFooter: FooterConfig = {
                 tagline: 'Timeless wardrobe essentials.',
@@ -76,6 +85,7 @@ export const StoreConfigService = {
             const hero = { ...defaultHero, ...dbConfig.hero };
             const benefits = { ...defaultBenefits, ...dbConfig.benefits };
             const social = { ...defaultSocial, ...dbConfig.social };
+            const globalDiscount = { ...defaultGlobalDiscount, ...dbConfig.global_discount };
 
             // Footer Logic: Merge DB footer config with defaults AND inject navigation items if needed
             const dbFooter = dbConfig.footer || {};
@@ -99,7 +109,8 @@ export const StoreConfigService = {
                 hero,
                 benefits,
                 categoryGrid,
-                homepageLayout
+                homepageLayout,
+                globalDiscount
             };
         },
         ['store-config'],

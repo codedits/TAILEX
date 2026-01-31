@@ -562,9 +562,20 @@ export type HomepageConfig = {
   sections: HomepageSection[]
 }
 
+// Global Discount Popup Config
+export type GlobalDiscountConfig = {
+  enabled: boolean
+  title: string
+  percentage: number
+  imageUrl: string
+  delaySeconds: number
+  showOncePerSession: boolean
+}
+
 // ==========================================
 // SHIPPING
 // ==========================================
+
 
 export type ShippingZone = {
   id: string
