@@ -649,8 +649,8 @@ export type CreateOrderInput = {
   customer_note?: string
   discount_code?: string
   payment_method?: PaymentMethodType
-  payment_proof_url?: string
-  transaction_id?: string
+  payment_proof_url?: string | null
+  transaction_id?: string | null
   payment_proof?: Record<string, unknown> | null
 }
 
