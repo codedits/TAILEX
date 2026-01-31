@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 
 
 
@@ -14,10 +17,9 @@ type HeroSectionProps = {
 };
 
 /**
- * HeroSection - Server Component
+ * HeroSection - Client Component (Converted for Image Error Handling)
  * 
  * Optimized for FCP/LCP:
- * - No "use client" - zero blocking JS
  * - CSS animations instead of Framer Motion
  * - Hero text structurally independent from image (text paints first)
  * - ONLY priority image on the entire page
@@ -30,9 +32,17 @@ const HeroSection = ({
   brandName = "TAILEX"
 }: HeroSectionProps) => {
   // Safe default image
-  const displayImage = (typeof image === 'string' && image.trim().length > 0)
-    ? image
-    : "https://framerusercontent.com/images/T0Z10o3Yaf4JPrk9f5lhcmJJwno.jpg";
+  const defaultImage = "https://framerusercontent.com/images/T0Z10o3Yaf4JPrk9f5lhcmJJwno.jpg";
+
+  const [imgSrc, setImgSrc] = useState<string>(
+    (typeof image === 'string' && image.trim().length > 0) ? image : defaultImage
+  );
+
+  useEffect(() => {
+    if (typeof image === 'string' && image.trim().length > 0) {
+      setImgSrc(image);
+    }
+  }, [image]);
 
   // Default text - use brand name as main heading
   const displayHeading = heading || brandName;
@@ -42,11 +52,11 @@ const HeroSection = ({
     <section
       className="relative w-full h-[100vh] overflow-hidden"
     >
-      {/* Background Image Container */}
+      /* Background Image Container */
       <div className="absolute inset-0 h-full w-full bg-neutral-900">
         <Image
-          src={displayImage}
-          alt=""
+          src={imgSrc}
+          alt={heading || "Hero Image"}
           fill
           className="object-cover object-top hero-entrance-animate will-change-transform"
           priority
@@ -55,7 +65,9 @@ const HeroSection = ({
           quality={85}
           sizes="(max-width: 1024px) 100vw, 90vw"
           aria-hidden="true"
-
+          onError={() => {
+            setImgSrc("https://framerusercontent.com/images/T0Z10o3Yaf4JPrk9f5lhcmJJwno.jpg");
+          }}
         />
         {/* Subtle Overlay for Text Readability */}
         <div className="absolute inset-0 bg-black/30" />

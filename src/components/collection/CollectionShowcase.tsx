@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
@@ -5,6 +7,7 @@ import { Product } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { CollectionShowcaseCarousel } from "./CollectionShowcaseCarousel";
 import { ScrollReveal } from "../animations/ScrollReveal";
+import { useState } from "react";
 
 interface CollectionShowcaseProps {
     title: string;
@@ -16,10 +19,9 @@ interface CollectionShowcaseProps {
 }
 
 /**
- * CollectionShowcase - Server Component
+ * CollectionShowcase
  * 
  * Optimized for FCP/LCP:
- * - No "use client" - zero blocking JS
  * - CSS animations instead of Framer Motion
  * - NO priority image (only hero gets priority)
  * - Lazy loaded images with blur placeholder
@@ -35,14 +37,15 @@ export default function CollectionShowcase({
 }: CollectionShowcaseProps) {
     // Limit products for initial render
     const carouselProducts = products.slice(0, 8);
+    const [imgSrc, setImgSrc] = useState(coverImage || "https://framerusercontent.com/images/BjQfJy7nQoVxvCYTFzwZxprDWiQ.jpg");
 
     return (
         <section className={cn("w-full flex flex-col relative z-10 section-fade-in", className)}>
             {/* Section 1: The Collection Hero */}
             <ScrollReveal threshold={0.15} className="relative w-full h-[70vh] md:h-[115vh] overflow-hidden group bg-background">
-                <div className="absolute inset-0 h-full w-full">
+                <div className="absolute inset-0 h-full w-full bg-neutral-900">
                     <Image
-                        src={coverImage || "https://framerusercontent.com/images/BjQfJy7nQoVxvCYTFzwZxprDWiQ.jpg"}
+                        src={imgSrc}
                         alt={title}
                         fill
                         className="object-cover hero-entrance-animate will-change-transform"
@@ -50,7 +53,7 @@ export default function CollectionShowcase({
                         sizes="(max-width: 1920px) 100vw, 80vw"
                         quality={90}
                         loading="lazy"
-
+                        onError={() => setImgSrc("https://framerusercontent.com/images/BjQfJy7nQoVxvCYTFzwZxprDWiQ.jpg")}
                     />
                 </div>
 
