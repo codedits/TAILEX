@@ -11,7 +11,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
     return (
         <>
             {/* Command Palette Trigger in Header */}
-            <div className="p-4 border-b border-white/10 bg-black/50 backdrop-blur-md sticky top-0 z-50 flex items-center justify-between shadow-sm">
+            <div className="p-4 border-b border-white/5 bg-black/50 backdrop-blur-md sticky top-0 z-50 flex items-center justify-between shadow-sm">
                 <div className="flex items-center">
                     <h1 className="font-medium text-sm tracking-tight text-white/90">Admin Dashboard</h1>
                 </div>

@@ -2,19 +2,19 @@ import { Order } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
 
 export function getOrderUpdateHtml(order: Order, currency: string, siteUrl: string, adminMessage?: string): string {
-    const getAbsoluteUrl = (url: string | null | undefined) => {
-        if (!url) return null;
-        if (url.startsWith('http://') || url.startsWith('https://')) return url;
-        return `${siteUrl}${url.startsWith('/') ? '' : '/'}${url}`;
-    };
+  const getAbsoluteUrl = (url: string | null | undefined) => {
+    if (!url) return null;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return `${siteUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
 
-    const currencyConfig = { code: currency, symbol: currency === 'PKR' ? 'Rs.' : '$', format: 'symbol amount' as const };
-    const fmt = (amount: number) => formatCurrency(amount, currencyConfig);
+  const currencyConfig = { code: currency, symbol: currency === 'PKR' ? 'Rs.' : '$', format: 'symbol amount' as const };
+  const fmt = (amount: number) => formatCurrency(amount, currencyConfig);
 
-    // Build items list with product details
-    const itemsList = order.items?.map(item => {
-        const imageUrl = getAbsoluteUrl(item.image_url);
-        return `
+  // Build items list with product details
+  const itemsList = order.items?.map(item => {
+    const imageUrl = getAbsoluteUrl(item.image_url);
+    return `
         <tr>
           <td style="padding: 16px 0; border-bottom: 1px solid #eee;">
             <table cellpadding="0" cellspacing="0" border="0">
@@ -33,20 +33,20 @@ export function getOrderUpdateHtml(order: Order, currency: string, siteUrl: stri
           </td>
         </tr>
       `;
-    }).join('') || '';
+  }).join('') || '';
 
-    // Status-specific styling
-    const statusColors: Record<string, { bg: string; text: string; border: string }> = {
-        pending: { bg: '#FEF3C7', text: '#92400E', border: '#FCD34D' },
-        processing: { bg: '#DBEAFE', text: '#1E40AF', border: '#60A5FA' },
-        shipped: { bg: '#D1FAE5', text: '#065F46', border: '#34D399' },
-        delivered: { bg: '#D1FAE5', text: '#065F46', border: '#10B981' },
-        cancelled: { bg: '#FEE2E2', text: '#991B1B', border: '#F87171' },
-        refunded: { bg: '#E5E7EB', text: '#374151', border: '#9CA3AF' },
-    };
-    const statusStyle = statusColors[order.status] || statusColors.pending;
+  // Status-specific styling
+  const statusColors: Record<string, { bg: string; text: string; border: string }> = {
+    pending: { bg: '#FEF3C7', text: '#92400E', border: '#FCD34D' },
+    processing: { bg: '#DBEAFE', text: '#1E40AF', border: '#60A5FA' },
+    shipped: { bg: '#D1FAE5', text: '#065F46', border: '#34D399' },
+    delivered: { bg: '#D1FAE5', text: '#065F46', border: '#10B981' },
+    cancelled: { bg: '#FEE2E2', text: '#991B1B', border: '#F87171' },
+    refunded: { bg: '#E5E7EB', text: '#374151', border: '#9CA3AF' },
+  };
+  const statusStyle = statusColors[order.status] || statusColors.pending;
 
-    return `
+  return `
         <!DOCTYPE html>
         <html>
           <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 40px 20px;">
@@ -68,7 +68,7 @@ export function getOrderUpdateHtml(order: Order, currency: string, siteUrl: stri
               <!-- Order Info -->
               <div style="padding: 0 40px 30px; text-align: center;">
                 <p style="font-size: 14px; color: #666; margin: 0;">
-                  Order <strong style="color: #000;">#${order.order_number || order.id.slice(0, 8)}</strong> has been updated.
+                  Update for Order <strong style="color: #000;">#${order.order_number || order.id.slice(0, 8)}</strong>
                 </p>
               </div>
 

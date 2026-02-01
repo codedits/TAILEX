@@ -22,9 +22,8 @@ async function getUserFromToken(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const tokenData = await getUserFromToken(request);
-        if (!tokenData) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
+        // Allow guest uploads for payment proofs
+        const userId = tokenData?.userId || 'guest';
 
         const formData = await request.formData();
         const file = formData.get('file') as File | null;
@@ -56,7 +55,7 @@ export async function POST(request: NextRequest) {
         // Generate unique filename
         const timestamp = Date.now();
         const extension = file.name.split('.').pop() || 'jpg';
-        const filename = `${tokenData.userId}/${timestamp}.${extension}`;
+        const filename = `${userId}/${timestamp}.${extension}`;
 
         // Upload to Supabase Storage
         const { data, error } = await supabase.storage

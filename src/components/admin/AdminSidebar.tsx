@@ -24,7 +24,7 @@ import Link from "next/link"
 
 export function AdminSidebar() {
   return (
-    <Sidebar className="border-r border-white/10 bg-black">
+    <Sidebar className="border-r border-white/5 bg-black">
       <SidebarContent className="bg-black text-white/70">
         <SidebarGroup>
           <SidebarGroupLabel className="text-white/40 text-[10px] uppercase tracking-[0.2em] font-medium px-4 py-6">Store Admin</SidebarGroupLabel>

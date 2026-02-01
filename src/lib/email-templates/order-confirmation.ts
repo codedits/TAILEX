@@ -2,7 +2,7 @@ import { Order } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
 
 export function getOrderConfirmationHtml(order: Order, currency: string, siteUrl: string): string {
-    const itemsList = order.items?.map(item => `
+  const itemsList = order.items?.map(item => `
     <div style="border-bottom: 1px solid #eaeaea; padding: 15px 0; display: flex; justify-content: space-between;">
        <div style="flex: 1;">
           <span style="display: block; font-size: 14px; color: #000; font-weight: 500;">${item.title}</span>
@@ -14,17 +14,17 @@ export function getOrderConfirmationHtml(order: Order, currency: string, siteUrl
     </div>
   `).join('') || '';
 
-    // Note: We duplicate simple currency formatting logic or reuse the one from utils. 
-    // Ideally, formatCurrency should take just the Order's currency code if simple, or the config object.
-    // The 'currency' param passed here is likely just the code or symbol. 
-    // Let's assume for this template we use the passed currency string to format or strict Utils call.
-    // Only issue: formatCurrency in utils needs a config object. 
-    // We'll construct a temp config object here to keep template pure-ish.
+  // Note: We duplicate simple currency formatting logic or reuse the one from utils. 
+  // Ideally, formatCurrency should take just the Order's currency code if simple, or the config object.
+  // The 'currency' param passed here is likely just the code or symbol. 
+  // Let's assume for this template we use the passed currency string to format or strict Utils call.
+  // Only issue: formatCurrency in utils needs a config object. 
+  // We'll construct a temp config object here to keep template pure-ish.
 
-    const currencyConfig = { code: currency, symbol: currency === 'PKR' ? 'Rs.' : '$', format: 'symbol amount' as const };
-    const fmt = (amount: number) => formatCurrency(amount, currencyConfig);
+  const currencyConfig = { code: currency, symbol: currency === 'PKR' ? 'Rs.' : '$', format: 'symbol amount' as const };
+  const fmt = (amount: number) => formatCurrency(amount, currencyConfig);
 
-    return `
+  return `
     <!DOCTYPE html>
     <html>
       <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 40px 0;">
@@ -34,8 +34,8 @@ export function getOrderConfirmationHtml(order: Order, currency: string, siteUrl
           </div>
 
           <div style="margin-bottom: 40px; text-align: center;">
-            <h2 style="font-size: 18px; font-weight: 400; color: #000; margin-bottom: 10px;">Order Confirmed</h2>
-            <p style="font-size: 14px; color: #666; margin: 0;">Order #${order.id.slice(0, 8)}</p>
+            <p style="font-size: 14px; color: #666; margin-bottom: 8px;">Thank you for your order</p>
+            <h2 style="font-size: 20px; font-weight: 400; color: #000; margin: 0;">Order #${order.order_number || order.id.slice(0, 8)}</h2>
           </div>
 
           <div style="margin-bottom: 40px;">

@@ -120,7 +120,7 @@ export function PaymentMethodStep({
                         : "border-neutral-200"
                 )}>
                     <div className="flex items-start">
-                        <RadioGroupItem value="COD" id="pay-cod" className="mt-1" />
+                        <RadioGroupItem value="COD" id="pay-cod" className="mt-1 border-neutral-400 text-black" />
                         <Label htmlFor="pay-cod" className="flex-1 ml-4 cursor-pointer">
                             <div className="flex items-center gap-3 mb-1">
                                 <Banknote className="w-4 h-4" />
@@ -141,7 +141,7 @@ export function PaymentMethodStep({
                         : "border-neutral-200 hover:bg-neutral-50"
                 )}>
                     <div className="flex items-start">
-                        <RadioGroupItem value="bank_transfer" id="pay-bank" className="mt-1" />
+                        <RadioGroupItem value="bank_transfer" id="pay-bank" className="mt-1 border-neutral-400 text-black" />
                         <Label htmlFor="pay-bank" className="flex-1 ml-4 cursor-pointer w-full">
                             <div className="flex items-center gap-3 mb-1">
                                 <Building2 className="w-4 h-4" />
@@ -163,7 +163,7 @@ export function PaymentMethodStep({
                         : "border-neutral-200 hover:bg-neutral-50"
                 )}>
                     <div className="flex items-start">
-                        <RadioGroupItem value="easypaisa" id="pay-easy" className="mt-1" />
+                        <RadioGroupItem value="easypaisa" id="pay-easy" className="mt-1 border-neutral-400 text-black" />
                         <Label htmlFor="pay-easy" className="flex-1 ml-4 cursor-pointer w-full">
                             <div className="flex items-center gap-3 mb-1">
                                 <Smartphone className="w-4 h-4 text-green-600" />
@@ -182,7 +182,7 @@ export function PaymentMethodStep({
                         : "border-neutral-200 hover:bg-neutral-50"
                 )}>
                     <div className="flex items-start">
-                        <RadioGroupItem value="jazzcash" id="pay-jazz" className="mt-1" />
+                        <RadioGroupItem value="jazzcash" id="pay-jazz" className="mt-1 border-neutral-400 text-black" />
                         <Label htmlFor="pay-jazz" className="flex-1 ml-4 cursor-pointer w-full">
                             <div className="flex items-center gap-3 mb-1">
                                 <Smartphone className="w-4 h-4 text-red-600" />

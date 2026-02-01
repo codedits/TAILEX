@@ -91,9 +91,9 @@ export const OrderService = {
         const taxTotal = 0;
         const total = subtotal + shippingTotal + taxTotal;
 
-        // 3. Call RPC Transaction
-        const payload = {
-            user_id: user?.id || null,
+        // 3. Insert Order Direct (Avoiding RPC to ensure new columns are saved)
+        const orderPayload = {
+            customer_id: user?.id || null,
             email: input.email,
             phone: input.phone || null,
             status: 'pending',
@@ -106,30 +106,47 @@ export const OrderService = {
             total,
             shipping_address: input.shipping_address,
             billing_address: input.billing_address || input.shipping_address,
-            payment_method: input.payment_method || 'card',
+            payment_method: input.payment_method, // Ensure this matches ENUM or TEXT in DB
             payment_proof_url: input.payment_proof_url,
             transaction_id: input.transaction_id,
-            payment_proof: input.payment_proof, // Legacy or for extra metadata
-            items: orderItemsPayload
+            // payment_proof: input.payment_proof // Legacy, removing to avoid confusion
+            order_number: Math.floor(100000 + Math.random() * 900000), // Manual generation if DB default doesn't exist
+            source: 'web'
         };
 
-        const { data: order, error } = await supabase.rpc('create_order', { payload });
+        const { data: orderData, error: orderError } = await supabase
+            .from('orders')
+            .insert(orderPayload)
+            .select()
+            .single();
 
-        if (error) {
-            console.error('Create Order RPC Error:', error);
-            throw new AppError(error.message || 'Failed to create order', 'DB_ERROR');
+        if (orderError) {
+            console.error('Create Order Insert Error:', orderError);
+            throw new AppError(orderError.message || 'Failed to create order', 'DB_ERROR');
         }
 
-        const createdOrder = order as Order;
+        const createdOrder = orderData as Order;
 
-        // 4. Send Confirmation Email (Async / Fire-and-Forget)
+        // 4. Insert Items
+        const itemsToInsert = orderItemsPayload.map(item => ({
+            order_id: createdOrder.id,
+            ...item
+        }));
+
+        const { error: itemsError } = await supabase
+            .from('order_items')
+            .insert(itemsToInsert);
+
+        if (itemsError) {
+            console.error('Create Order Items Insert Error:', itemsError);
+            // Verify if we should rollback (delete order) - for now just throw
+            throw new AppError(itemsError.message || 'Failed to create order items', 'DB_ERROR');
+        }
+
+        // 5. Send Confirmation Email (Async / Fire-and-Forget)
         // We do *not* await this promise to prevent blocking the response
         Promise.resolve().then(async () => {
             try {
-                // Fetch full order again? No, RPC returned the order row, but we need items joined potentially.
-                // Actually, email service needs items. The returned order from RPC is just the order row (see SQL)
-                // We should construct the Full Order object or fetch it.
-                // Fetching is safer to ensure we have checking.
                 const fullOrder = await OrderService.getOrder(createdOrder.id);
                 await EmailService.sendOrderConfirmation(input.email, fullOrder);
             } catch (err) {

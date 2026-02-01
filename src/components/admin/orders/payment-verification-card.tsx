@@ -80,13 +80,14 @@ export function PaymentVerificationCard({ order }: PaymentVerificationCardProps)
 
                 <div className="space-y-2">
                     <span className="text-[10px] uppercase text-white/40 tracking-wider">Payment Proof</span>
-                    {order.payment_proof_url ? (
-                        <div className="relative aspect-video w-full bg-black rounded border border-white/10 overflow-hidden group">
+                    {order.payment_proof_url && order.payment_proof_url.length > 5 ? (
+                        <div className="relative aspect-video w-full h-64 sm:h-80 bg-black rounded border border-white/10 overflow-hidden group">
                             <Image
                                 src={order.payment_proof_url}
                                 alt="Payment Proof"
                                 fill
-                                className="object-contain" // Contain to show full receipt
+                                className="object-contain bg-black/50" // Darken bg to see boundaries
+                                unoptimized={true} // Skip Next.js optimization to avoid processing issues
                             />
                             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                 <Button variant="secondary" size="sm" asChild>

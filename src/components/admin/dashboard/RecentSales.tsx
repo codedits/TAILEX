@@ -25,7 +25,7 @@ export function RecentSales({ sales }: RecentSaleProps) {
 
             {sales.map((sale) => (
                 <div key={sale.id} className="flex items-center p-2 rounded-lg hover:bg-white/5 transition-colors group">
-                    <Avatar className="h-9 w-9 border border-white/10">
+                    <Avatar className="h-9 w-9 border border-white/5">
                         <AvatarImage src={sale.avatarUrl || "/avatars/01.png"} alt="Avatar" />
                         <AvatarFallback className="bg-white/5 text-white/60">{sale.customerName.charAt(0)}</AvatarFallback>
                     </Avatar>

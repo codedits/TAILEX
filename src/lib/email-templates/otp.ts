@@ -1,5 +1,5 @@
 export function getOtpEmailHtml(otp: string): string {
-    return `
+  return `
     <!DOCTYPE html>
     <html>
       <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 40px 0;">
@@ -8,17 +8,16 @@ export function getOtpEmailHtml(otp: string): string {
             <h1 style="font-size: 24px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; margin: 0; color: #000;">TAILEX</h1>
           </div>
           
-          <p style="font-size: 14px; color: #666; margin-bottom: 20px; line-height: 1.6;">Welcome back.</p>
-          <p style="font-size: 14px; color: #666; margin-bottom: 30px; line-height: 1.6;">
-            Use the code below to complete your secure sign-in. This code allows you to access your personal dashboard and order history.
+          <p style="font-size: 14px; color: #666; margin-bottom: 24px; line-height: 1.6;">
+            You requested a secure sign-in code for your TAILEX account. Use the code below to complete your login.
           </p>
 
           <div style="background-color: #000; color: #fff; padding: 20px; text-align: center; font-size: 32px; letter-spacing: 8px; font-family: monospace; margin-bottom: 30px;">
             ${otp}
           </div>
 
-          <p style="font-size: 12px; color: #999; text-align: center; margin-top: 40px;">
-            This code expires in 10 minutes. If you did not request this, please ignore this email.
+          <p style="font-size: 11px; color: #999; text-align: center; margin-top: 40px;">
+            This code expires in 10 minutes. If you did not request this access, please ignore this email.
           </p>
         </div>
       </body>
