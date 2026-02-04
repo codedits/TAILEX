@@ -16,7 +16,7 @@ export default function ProductDetail({
   return (
     <div className="max-w-[1400px] mx-auto animate-in fade-in duration-700">
       {/* Breadcrumbs */}
-      <nav className="flex items-center gap-3 text-[10px] font-manrope font-black uppercase tracking-[0.3em] text-muted-foreground mb-8 md:mb-12">
+      <nav className="flex items-center gap-3 text-[10px] font-manrope font-black uppercase tracking-[0.3em] text-muted-foreground mb-4 md:mb-12 px-6 md:px-0 py-4 md:py-0">
         <Link href="/" className="hover:text-foreground transition-colors">Studio</Link>
         <span className="opacity-30">/</span>
         <Link href="/shop" className="hover:text-foreground transition-colors">Catalog</Link>
@@ -25,9 +25,14 @@ export default function ProductDetail({
       </nav>
 
       {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
-        {/* Mobile Header (Vendor + Title) */}
-        <div className="lg:hidden space-y-2 mb-2">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-16">
+        {/* Left Column: Media Gallery - ON TOP for mobile */}
+        <div className="lg:col-span-7 order-1">
+          <ProductGallery images={distinctImages} title={product.title} />
+        </div>
+
+        {/* Mobile Header (Vendor + Title) - BELOW gallery on mobile */}
+        <div className="lg:hidden space-y-2 order-2 px-6">
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
             {product.vendor || "TAILEX Standard"}
           </p>
@@ -36,13 +41,8 @@ export default function ProductDetail({
           </h1>
         </div>
 
-        {/* Left Column: Media Gallery */}
-        <div className="lg:col-span-7">
-          <ProductGallery images={distinctImages} title={product.title} />
-        </div>
-
         {/* Right Column: Information (Sticky) */}
-        <div className="lg:col-span-5 relative">
+        <div className="lg:col-span-5 relative order-3 px-6 md:px-0">
           <div className="sticky top-32">
             <ProductInfo product={product} />
           </div>

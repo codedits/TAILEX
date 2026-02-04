@@ -100,6 +100,11 @@ export default async function RootLayout({
 
   const font = getFont(fontName.toLowerCase());
 
+  // Hero Images
+  const defaultHeroImage = "https://framerusercontent.com/images/T0Z10o3Yaf4JPrk9f5lhcmJJwno.jpg";
+  const heroImage = config.hero.image || defaultHeroImage;
+  const mobileHeroImage = config.hero.mobileImage;
+
   // Map Brand colors to shadcn HSL variables
   const hslPrimary = hexToHslValues(primaryColor);
   const hslBackground = hexToHslValues(config.theme.backgroundColor || '#ffffff');
@@ -135,11 +140,21 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://framerusercontent.com" />
         <link rel="dns-prefetch" href="https://framerusercontent.com" />
 
-        {/* Preload Hero Image for instant LCP */}
+        {/* Preload Hero Image for instant LCP - Responsive */}
+        {mobileHeroImage && (
+          <link
+            rel="preload"
+            as="image"
+            href={mobileHeroImage}
+            media="(max-width: 768px)"
+            fetchPriority="high"
+          />
+        )}
         <link
           rel="preload"
           as="image"
-          href="https://framerusercontent.com/images/T0Z10o3Yaf4JPrk9f5lhcmJJwno.jpg"
+          href={heroImage}
+          media={mobileHeroImage ? "(min-width: 769px)" : undefined}
           fetchPriority="high"
         />
 

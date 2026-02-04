@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, ExternalLink } from "lucide-react";
 import { TableSkeleton } from "@/components/admin/ui/TableSkeleton";
 import { CollectionTableClient } from "@/components/admin/collections/CollectionTableClient";
 import { StoreConfigService } from "@/services/config";
@@ -37,16 +37,26 @@ export default async function CollectionsPage() {
             Organize your products into logical groups.
           </p>
         </div>
-        <Button
-          asChild
-          className="bg-white text-black hover:bg-white/90 rounded-full px-6 font-medium"
-        >
-          <Link href={`/admin/collections/new?ratio=${aspectRatio}`}>
-            <Plus className="mr-2 h-4 w-4" />
-            <span className="hidden sm:inline">Create Collection</span>
-            <span className="sm:hidden">Create</span>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/"
+            target="_blank"
+            className="flex items-center gap-1.5 px-3 py-2 text-sm text-white/50 hover:text-white hover:bg-white/5 rounded-full transition-colors"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">View Homepage</span>
           </Link>
-        </Button>
+          <Button
+            asChild
+            className="bg-white text-black hover:bg-white/90 rounded-full px-6 font-medium"
+          >
+            <Link href={`/admin/collections/new?ratio=${aspectRatio}`}>
+              <Plus className="mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">Create Collection</span>
+              <span className="sm:hidden">Create</span>
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <Suspense fallback={<TableSkeleton rows={6} />}>

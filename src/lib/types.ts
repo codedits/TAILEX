@@ -486,6 +486,7 @@ export type HeroConfig = {
   ctaText?: string
   ctaLink?: string
   overlayOpacity?: number
+  mobileImage?: string
 }
 
 export type ThemeConfig = {

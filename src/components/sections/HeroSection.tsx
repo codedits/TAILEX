@@ -5,6 +5,7 @@ type HeroSectionProps = {
   heading?: string;
   subheading?: string;
   image?: string;
+  mobileImage?: string;
   ctaText?: string;
   ctaLink?: string;
   brandName?: string;
@@ -18,12 +19,14 @@ const HeroSection = ({
   heading,
   subheading,
   image,
+  mobileImage,
   brandName = "TAILEX",
   overlayOpacity = 0.3
 }: HeroSectionProps) => {
   // Safe default image
   const defaultImage = "https://framerusercontent.com/images/T0Z10o3Yaf4JPrk9f5lhcmJJwno.jpg";
   const heroImage = image?.trim() || defaultImage;
+  const heroMobileImage = mobileImage?.trim();
 
   // Default text - use brand name as main heading
   const displayHeading = heading || brandName;
@@ -35,20 +38,37 @@ const HeroSection = ({
     >
       {/* Background Image Container */}
       <div className="absolute inset-0 h-full w-full bg-neutral-900">
-        <Image
-          src={heroImage}
-          alt={displayHeading || "Hero Image"}
-          fill
-          className="object-cover object-top hero-entrance-animate will-change-transform"
-          priority
-          fetchPriority="high"
-          decoding="async"
-          quality={85}
-          sizes="100vw"
-          placeholder="blur"
-          blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMCAxMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzE3MTcxNyIvPjwvc3ZnPg=="
-          aria-hidden="true"
-        />
+        <picture>
+          {/* Mobile portrait */}
+          {heroMobileImage && (
+            <source
+              media="(max-width: 768px)"
+              srcSet={heroMobileImage}
+            />
+          )}
+
+          {/* Desktop landscape */}
+          <source
+            media="(min-width: 769px)"
+            srcSet={heroImage}
+          />
+
+          <Image
+            src={heroImage}
+            alt={displayHeading || "Hero Image"}
+            fill
+            className="object-cover object-top hero-entrance-animate will-change-transform"
+            priority
+            fetchPriority="high"
+            decoding="async"
+            quality={85}
+            sizes="100vw"
+            placeholder="blur"
+            blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMCAxMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzE3MTcxNyIvPjwvc3ZnPg=="
+            aria-hidden="true"
+          />
+        </picture>
+
         {/* Subtle Overlay for Text Readability */}
         <div
           className="absolute inset-0 bg-black transition-opacity duration-700 ease-in-out"
@@ -101,3 +121,4 @@ const HeroSection = ({
 };
 
 export default HeroSection;
+

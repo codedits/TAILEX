@@ -1,7 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, ExternalLink } from "lucide-react";
 import { Suspense } from "react";
 import { TableSkeleton } from "@/components/admin/ui/TableSkeleton";
 import { ProductTableClient } from "@/components/admin/products/ProductTableClient";
@@ -28,16 +28,26 @@ export default function ProductsPage() {
             Manage your store&apos;s private inventory.
           </p>
         </div>
-        <Button
-          asChild
-          className="bg-white text-black hover:bg-white/90 rounded-full px-6 font-medium"
-        >
-          <Link href="/admin/products/new">
-            <Plus className="mr-2 h-4 w-4" />
-            <span className="hidden sm:inline">Add Product</span>
-            <span className="sm:hidden">Add</span>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/shop"
+            target="_blank"
+            className="flex items-center gap-1.5 px-3 py-2 text-sm text-white/50 hover:text-white hover:bg-white/5 rounded-full transition-colors"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">View Shop</span>
           </Link>
-        </Button>
+          <Button
+            asChild
+            className="bg-white text-black hover:bg-white/90 rounded-full px-6 font-medium"
+          >
+            <Link href="/admin/products/new">
+              <Plus className="mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">Add Product</span>
+              <span className="sm:hidden">Add</span>
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <Suspense fallback={<TableSkeleton rows={8} />}>

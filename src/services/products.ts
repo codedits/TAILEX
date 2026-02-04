@@ -131,12 +131,36 @@ export const ProductService = {
         const supabase = await createAdminClient();
         if (!id) throw AppError.badRequest('Product ID is required');
 
+        // Fetch product first to get image URLs
+        const { data: product } = await supabase
+            .from('products')
+            .select('images')
+            .eq('id', id)
+            .single();
+
+        // Delete from database
         const { error } = await supabase
             .from('products')
             .delete()
             .eq('id', id);
 
         if (error) throw new AppError(error.message, 'DB_ERROR', 500);
+
+        // Delete all associated images from storage
+        if (product?.images && Array.isArray(product.images)) {
+            for (const imageUrl of product.images) {
+                if (!imageUrl) continue;
+                try {
+                    // Extract filename from URL
+                    const parts = imageUrl.split('/');
+                    const fileName = `products/${parts[parts.length - 1]}`;
+                    await supabase.storage.from('products').remove([fileName]);
+                } catch (err) {
+                    console.error('Failed to delete product image:', err);
+                    // Continue deleting other images even if one fails
+                }
+            }
+        }
     },
 
     async createProduct(data: Partial<Product>, imageFiles: File[]): Promise<Product> {
@@ -149,7 +173,7 @@ export const ProductService = {
                 .select('id')
                 .eq('slug', data.slug)
                 .maybeSingle();
-            
+
             if (existsError && existsError.code !== 'PGRST116') {
                 throw new AppError('Failed to validate product slug', 'DB_ERROR', 500);
             }
@@ -191,7 +215,7 @@ export const ProductService = {
                 .eq('slug', data.slug)
                 .neq('id', id)
                 .maybeSingle();
-            
+
             if (existsError && existsError.code !== 'PGRST116') {
                 throw new AppError('Failed to validate product slug', 'DB_ERROR', 500);
             }
@@ -279,8 +303,8 @@ export const ProductService = {
 
             // Calculate final price
             const salePrice = product.sale_price;
-            const finalPrice = (salePrice !== null && salePrice !== undefined && salePrice < product.price) 
-                ? salePrice 
+            const finalPrice = (salePrice !== null && salePrice !== undefined && salePrice < product.price)
+                ? salePrice
                 : product.price;
 
             validatedItems.push({

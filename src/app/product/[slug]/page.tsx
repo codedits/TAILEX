@@ -132,7 +132,7 @@ export default async function ProductPage({ params }: Props) {
       />
       <Navbar brandName={brand.name} navItems={navItemsList} />
 
-      <div className="pt-24 pb-20 px-6 md:px-12">
+      <div className="pt-0 md:pt-8 pb-20 px-0 md:px-12">
         <ProductDetail product={typedProduct} />
       </div>
 

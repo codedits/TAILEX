@@ -1,12 +1,19 @@
 'use server'
 
 import { StoreConfigService } from '@/services/config';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 
 export async function updateStoreConfigAction(key: string, value: any) {
     try {
         await StoreConfigService.updateConfig(key, value);
-        revalidatePath('/', 'layout'); // Revalidate everything as config might affect navbar/footer
+
+        // Revalidate the cached config
+        (revalidateTag as any)('site_config');
+        (revalidateTag as any)('navigation_menus');
+
+        // Revalidate pages that use config
+        revalidatePath('/', 'layout');
+
         return { success: true };
     } catch (error: any) {
         console.error('Update Store Config Error:', error);

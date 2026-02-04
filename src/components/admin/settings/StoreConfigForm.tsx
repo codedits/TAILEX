@@ -27,6 +27,9 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
     const [heroFile, setHeroFile] = useState<File | null>(null);
     const [tempCropImage, setTempCropImage] = useState<string | null>(null);
 
+    const [mobileHeroFile, setMobileHeroFile] = useState<File | null>(null);
+    const [tempMobileCropImage, setTempMobileCropImage] = useState<string | null>(null);
+
     const handleSave = async (section: keyof StoreConfig) => {
         setIsSaving(true);
         let currentConfig = { ...config };
@@ -60,6 +63,33 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                 setHeroFile(null); // Clear file input
             } else {
                 toast.error(uploadRes.error || 'Failed to upload image');
+                setIsSaving(false);
+                return;
+            }
+        }
+
+        // Handle File Upload for Mobile Hero
+        if (section === 'hero' && mobileHeroFile) {
+            const formData = new FormData();
+
+            try {
+                const webpFile = await convertFileToWebP(mobileHeroFile, 0.85);
+                formData.append('file', webpFile);
+            } catch {
+                formData.append('file', mobileHeroFile);
+            }
+
+            const uploadRes = await uploadSiteAsset(formData);
+
+            if (uploadRes.success && uploadRes.url) {
+                currentConfig = {
+                    ...currentConfig,
+                    hero: { ...currentConfig.hero, mobileImage: uploadRes.url }
+                };
+                setConfig(currentConfig);
+                setMobileHeroFile(null);
+            } else {
+                toast.error(uploadRes.error || 'Failed to upload mobile image');
                 setIsSaving(false);
                 return;
             }
@@ -287,6 +317,79 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                                 className="text-sm text-muted-foreground"
                             />
                         </div>
+
+                        <div className="space-y-4 pt-4 border-t border-white/10">
+                            <Label>Mobile Hero Image (Portrait)</Label>
+                            <p className="text-xs text-muted-foreground mb-2">Recommended: 1080x1920 (9:16 Aspect Ratio)</p>
+
+                            {(config.hero?.mobileImage || mobileHeroFile) ? (
+                                <div className="relative w-full h-80 max-w-xs mx-auto rounded-xl overflow-hidden border border-white/10 group">
+                                    <img
+                                        src={mobileHeroFile ? URL.createObjectURL(mobileHeroFile) : config.hero?.mobileImage}
+                                        alt="Mobile Hero Preview"
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                                        <Button
+                                            type="button"
+                                            variant="secondary"
+                                            size="icon"
+                                            className="rounded-full w-10 h-10"
+                                            onClick={() => setTempMobileCropImage(mobileHeroFile ? URL.createObjectURL(mobileHeroFile) : config.hero?.mobileImage || null)}
+                                        >
+                                            <CropIcon className="w-4 h-4" />
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="destructive"
+                                            size="icon"
+                                            className="rounded-full w-10 h-10"
+                                            onClick={async () => {
+                                                if (mobileHeroFile) {
+                                                    setMobileHeroFile(null);
+                                                } else if (config.hero?.mobileImage) {
+                                                    if (confirm('Are you sure you want to delete this image?')) {
+                                                        await deleteSiteAsset(config.hero.mobileImage);
+                                                        setConfig({ ...config, hero: { ...config.hero, mobileImage: '' } });
+                                                        toast.success('Image deleted');
+                                                    }
+                                                }
+                                            }}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <label className="flex flex-col items-center justify-center w-full max-w-xs mx-auto h-64 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-white/30 transition-all bg-black/20 hover:bg-white/5">
+                                    <Upload className="w-8 h-8 text-white/40 mb-2" />
+                                    <span className="text-sm text-white/40 font-light text-center px-4">Drop mobile image or click</span>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            if (e.target.files?.[0]) {
+                                                const file = e.target.files[0];
+                                                setTempMobileCropImage(URL.createObjectURL(file));
+                                            }
+                                        }}
+                                    />
+                                </label>
+                            )}
+
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground uppercase tracking-wider">OR</span>
+                                <div className="h-px bg-white/10 flex-1" />
+                            </div>
+
+                            <Input
+                                value={config.hero?.mobileImage || ''}
+                                onChange={(e) => setConfig({ ...config, hero: { ...config.hero, mobileImage: e.target.value } })}
+                                placeholder="Paste mobile image URL..."
+                                className="text-sm text-muted-foreground"
+                            />
+                        </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label>CTA Text</Label>
@@ -445,6 +548,18 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                         setTempCropImage(null);
                     }}
                     onCancel={() => setTempCropImage(null)}
+                />
+            )}
+            {tempMobileCropImage && (
+                <ImageCropper
+                    image={tempMobileCropImage}
+                    aspect={9 / 16} // Mobile Portrait
+                    onCropComplete={(blob) => {
+                        const file = new File([blob], 'hero-mobile.webp', { type: 'image/webp' });
+                        setMobileHeroFile(file);
+                        setTempMobileCropImage(null);
+                    }}
+                    onCancel={() => setTempMobileCropImage(null)}
                 />
             )}
         </Tabs>
