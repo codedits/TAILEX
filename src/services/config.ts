@@ -18,7 +18,25 @@ export type StoreConfig = {
     footer: FooterConfig;
     social: SocialConfig;
     currency: { code: string; symbol: string };
-    hero: { heading: string; subheading?: string; image?: string; mobileImage?: string; ctaText?: string; ctaLink?: string; overlayOpacity?: number };
+    hero: {
+        heading?: string;
+        subheading?: string;
+        image?: string;
+        mobileImage?: string;
+        ctaText?: string;
+        ctaLink?: string;
+        overlayOpacity?: number;
+        slides?: Array<{
+            id: string;
+            image: string;
+            mobileImage?: string;
+            heading?: string;
+            subheading?: string;
+            ctaText?: string;
+            ctaLink?: string;
+        }>;
+        autoPlayInterval?: number;
+    };
     benefits: BenefitsConfig;
     categoryGrid: { aspectRatio: string };
     homepageLayout: HomepageSection[];

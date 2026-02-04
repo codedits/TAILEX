@@ -76,7 +76,7 @@ export default function ProductGallery({ images, title }: ProductGalleryProps) {
             </div>
 
             {/* Main Image Area */}
-            <div className="relative w-[calc(100%+3rem)] -mx-6 md:w-full md:mx-0 aspect-[3/4] md:aspect-[3/4] lg:aspect-[4/5] bg-[#F1F1F1] overflow-hidden group">
+            <div className="relative w-full aspect-[3/4] md:aspect-[3/4] lg:aspect-[4/5] bg-[#F1F1F1] overflow-hidden group">
 
                 {/* Mobile Carousel View */}
                 <div className="md:hidden h-full" ref={emblaRef}>

@@ -55,12 +55,14 @@ export default function HomeLayout({ data }: HomeLayoutProps) {
             <div className="relative flex flex-col items-center justify-center w-full overflow-visible">
                 {heroSection?.enabled && (
                     <HeroSection
-                        heading={heroSection.content?.heading || brand.name}
+                        heading={heroSection.content?.heading || hero.heading || brand.name}
                         subheading={heroSection.content?.subheading || hero.subheading}
                         image={heroSection.content?.image || hero.image}
                         mobileImage={heroSection.content?.mobileImage || hero.mobileImage}
                         brandName={brand.name}
                         overlayOpacity={heroSection.content?.overlayOpacity ?? hero.overlayOpacity}
+                        slides={hero.slides}
+                        autoPlayInterval={hero.autoPlayInterval}
                     />
                 )}
 
