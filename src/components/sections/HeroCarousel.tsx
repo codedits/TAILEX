@@ -150,8 +150,10 @@ const HeroCarousel = ({
                                             fill
                                             className="object-cover object-top"
                                             priority={index === 0}
-                                            quality={90}
+                                            quality={85}
                                             sizes="100vw"
+                                            placeholder="blur"
+                                            blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMCAxMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzE3MTcxNyIvPjwvc3ZnPg=="
                                             onError={() => handleImageError(slide.id)}
                                         />
                                     </picture>
