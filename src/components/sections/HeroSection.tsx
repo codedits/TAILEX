@@ -1,11 +1,5 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
-
-
 
 type HeroSectionProps = {
   heading?: string;
@@ -17,13 +11,14 @@ type HeroSectionProps = {
 };
 
 /**
- * HeroSection - Client Component (Converted for Image Error Handling)
+ * HeroSection - Server Component
  * 
  * Optimized for FCP/LCP:
- * - CSS animations instead of Framer Motion
- * - Hero text structurally independent from image (text paints first)
+ * - Server Component for zero hydration delay
+ * - placeholder="blur" for instant visual feedback
  * - ONLY priority image on the entire page
  * - Explicit decoding="async" and fetchPriority="high"
+ * - CSS animations instead of Framer Motion
  */
 const HeroSection = ({
   heading,
@@ -33,16 +28,7 @@ const HeroSection = ({
 }: HeroSectionProps) => {
   // Safe default image
   const defaultImage = "https://framerusercontent.com/images/T0Z10o3Yaf4JPrk9f5lhcmJJwno.jpg";
-
-  const [imgSrc, setImgSrc] = useState<string>(
-    (typeof image === 'string' && image.trim().length > 0) ? image : defaultImage
-  );
-
-  useEffect(() => {
-    if (typeof image === 'string' && image.trim().length > 0) {
-      setImgSrc(image);
-    }
-  }, [image]);
+  const heroImage = image?.trim() || defaultImage;
 
   // Default text - use brand name as main heading
   const displayHeading = heading || brandName;
@@ -52,22 +38,21 @@ const HeroSection = ({
     <section
       className="relative w-full h-[100vh] overflow-hidden"
     >
-      /* Background Image Container */
+      {/* Background Image Container */}
       <div className="absolute inset-0 h-full w-full bg-neutral-900">
         <Image
-          src={imgSrc}
-          alt={heading || "Hero Image"}
+          src={heroImage}
+          alt={displayHeading || "Hero Image"}
           fill
           className="object-cover object-top hero-entrance-animate will-change-transform"
           priority
           fetchPriority="high"
-          decoding="sync"
+          decoding="async"
           quality={85}
-          sizes="(max-width: 1024px) 100vw, 90vw"
+          sizes="100vw"
+          placeholder="blur"
+          blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMCAxMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzE3MTcxNyIvPjwvc3ZnPg=="
           aria-hidden="true"
-          onError={() => {
-            setImgSrc("https://framerusercontent.com/images/T0Z10o3Yaf4JPrk9f5lhcmJJwno.jpg");
-          }}
         />
         {/* Subtle Overlay for Text Readability */}
         <div className="absolute inset-0 bg-black/30" />
@@ -90,7 +75,7 @@ const HeroSection = ({
 
           {/* Main Title */}
           <h1 className="text-white text-5xl md:text-8xl font-medium tracking-tight hero-text-animate-delay-2">
-            {heading || "Defined by Detail"}
+            {displayHeading}
           </h1>
 
           {/* CTA Button */}

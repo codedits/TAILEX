@@ -135,6 +135,14 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://framerusercontent.com" />
         <link rel="dns-prefetch" href="https://framerusercontent.com" />
 
+        {/* Preload Hero Image for instant LCP */}
+        <link
+          rel="preload"
+          as="image"
+          href="https://framerusercontent.com/images/T0Z10o3Yaf4JPrk9f5lhcmJJwno.jpg"
+          fetchPriority="high"
+        />
+
         {/* Organization Schema */}
         <script
           type="application/ld+json"
