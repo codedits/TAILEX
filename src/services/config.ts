@@ -18,7 +18,7 @@ export type StoreConfig = {
     footer: FooterConfig;
     social: SocialConfig;
     currency: { code: string; symbol: string };
-    hero: { heading: string; subheading?: string; image?: string; ctaText?: string; ctaLink?: string };
+    hero: { heading: string; subheading?: string; image?: string; ctaText?: string; ctaLink?: string; overlayOpacity?: number };
     benefits: BenefitsConfig;
     categoryGrid: { aspectRatio: string };
     homepageLayout: HomepageSection[];
@@ -58,7 +58,7 @@ export const StoreConfigService = {
                 mode: 'light' as const
             };
             const defaultCurrency = { code: 'PKR', symbol: 'Rs.' };
-            const defaultHero = { heading: '', subheading: '', image: '', ctaText: '', ctaLink: '' };
+            const defaultHero = { heading: '', subheading: '', image: '', ctaText: '', ctaLink: '', overlayOpacity: 0.3 };
             const defaultBenefits = { enabled: true, items: [] };
             const defaultGlobalDiscount: GlobalDiscountConfig = {
                 enabled: false,

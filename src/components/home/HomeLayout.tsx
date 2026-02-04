@@ -59,6 +59,7 @@ export default function HomeLayout({ data }: HomeLayoutProps) {
                         subheading={heroSection.content?.subheading || hero.subheading}
                         image={heroSection.content?.image || hero.image}
                         brandName={brand.name}
+                        overlayOpacity={heroSection.content?.overlayOpacity ?? hero.overlayOpacity}
                     />
                 )}
 

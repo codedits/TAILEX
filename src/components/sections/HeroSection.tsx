@@ -8,23 +8,18 @@ type HeroSectionProps = {
   ctaText?: string;
   ctaLink?: string;
   brandName?: string;
+  overlayOpacity?: number;
 };
 
 /**
  * HeroSection - Server Component
- * 
- * Optimized for FCP/LCP:
- * - Server Component for zero hydration delay
- * - placeholder="blur" for instant visual feedback
- * - ONLY priority image on the entire page
- * - Explicit decoding="async" and fetchPriority="high"
- * - CSS animations instead of Framer Motion
  */
 const HeroSection = ({
   heading,
   subheading,
   image,
-  brandName = "TAILEX"
+  brandName = "TAILEX",
+  overlayOpacity = 0.3
 }: HeroSectionProps) => {
   // Safe default image
   const defaultImage = "https://framerusercontent.com/images/T0Z10o3Yaf4JPrk9f5lhcmJJwno.jpg";
@@ -55,17 +50,16 @@ const HeroSection = ({
           aria-hidden="true"
         />
         {/* Subtle Overlay for Text Readability */}
-        <div className="absolute inset-0 bg-black/30" />
+        <div
+          className="absolute inset-0 bg-black transition-opacity duration-700 ease-in-out"
+          style={{ opacity: overlayOpacity }}
+        />
       </div>
 
 
       {/* Content Container - Centered */}
       <div
-        className="relative flex flex-col items-center justify-center w-full px-6 md:px-10 z-10 text-center h-[100vh]"
-        style={{
-          maxWidth: '1920px',
-          margin: '0 auto'
-        }}
+        className="relative flex flex-col items-center justify-center w-full px-6 md:px-10 z-10 text-center h-[100vh] max-w-[1920px] mx-auto"
       >
         <div className="flex flex-col items-center justify-center space-y-8">
           {/* Subtitle */}

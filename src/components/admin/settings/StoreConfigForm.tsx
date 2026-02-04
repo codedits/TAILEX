@@ -14,6 +14,7 @@ import { StoreConfig } from '@/services/config';
 import { BenefitItem } from '@/lib/types';
 import { convertFileToWebP } from '@/lib/image-utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
 
 interface StoreConfigFormProps {
     initialConfig: StoreConfig;
@@ -304,6 +305,27 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                                 />
                             </div>
                         </div>
+
+                        <div className="space-y-4 pt-4 border-t border-white/10">
+                            <div className="flex items-center justify-between">
+                                <Label>Overlay Opacity</Label>
+                                <span className="text-sm text-muted-foreground">
+                                    {Math.round((config.hero?.overlayOpacity ?? 0.3) * 100)}%
+                                </span>
+                            </div>
+                            <Slider
+                                value={[config.hero?.overlayOpacity ?? 0.3]}
+                                min={0}
+                                max={0.9} // Don't allow full black, it looks broken
+                                step={0.05}
+                                onValueChange={(vals) => setConfig({ ...config, hero: { ...config.hero, overlayOpacity: vals[0] } })}
+                                className="w-full"
+                            />
+                            <p className="text-[0.8rem] text-muted-foreground">
+                                Controls the darkness of the layer on top of the image to make text readable.
+                            </p>
+                        </div>
+
                         <Button onClick={() => handleSave('hero')} disabled={isSaving}>
                             {isSaving ? 'Saving...' : 'Save Hero Settings'}
                         </Button>
