@@ -24,6 +24,9 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
     const [config, setConfig] = useState(initialConfig);
     const [isSaving, setIsSaving] = useState(false);
 
+    // Track images queued for deletion (deleted only after successful save)
+    const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+
     const [heroFile, setHeroFile] = useState<File | null>(null);
     const [tempCropImage, setTempCropImage] = useState<string | null>(null);
 
@@ -34,21 +37,17 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
         setIsSaving(true);
         let currentConfig = { ...config };
 
-
-
-        // ...
-
         // Handle File Upload for Hero
         if (section === 'hero' && heroFile) {
             const formData = new FormData();
 
             try {
                 toast.loading('Optimizing image...');
-                const webpFile = await convertFileToWebP(heroFile, 0.9); // High quality for hero
+                const webpFile = await convertFileToWebP(heroFile, 0.9);
                 formData.append('file', webpFile);
             } catch (error) {
                 console.error('WebP conversion failed', error);
-                formData.append('file', heroFile); // Fallback
+                formData.append('file', heroFile);
             }
 
             toast.loading('Uploading image...');
@@ -59,8 +58,8 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                     ...currentConfig,
                     hero: { ...currentConfig.hero, image: uploadRes.url }
                 };
-                setConfig(currentConfig); // Update local state with new URL
-                setHeroFile(null); // Clear file input
+                setConfig(currentConfig);
+                setHeroFile(null);
             } else {
                 toast.error(uploadRes.error || 'Failed to upload image');
                 setIsSaving(false);
@@ -101,9 +100,24 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
         if (result.success) {
             toast.dismiss();
             toast.success(`${section.charAt(0).toUpperCase() + section.slice(1)} settings saved`);
+
+            // SAFE DELETION: Only delete images AFTER successful DB update
+            if (section === 'hero' && imagesToDelete.length > 0) {
+                for (const url of imagesToDelete) {
+                    await deleteSiteAsset(url);
+                }
+                setImagesToDelete([]); // Clear queue
+            }
         } else {
             toast.dismiss();
             toast.error(result.error || 'Failed to save settings');
+        }
+    };
+
+    // Queue image for deletion (doesn't actually delete until save)
+    const queueImageForDeletion = (url: string | undefined) => {
+        if (url) {
+            setImagesToDelete(prev => [...prev, url]);
         }
     };
 
@@ -111,12 +125,10 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
         <Tabs defaultValue="brand" className="space-y-4">
             <TabsList>
                 <TabsTrigger value="brand">Brand & Identity</TabsTrigger>
-                {/* Theme moved to /admin/theme */}
                 <TabsTrigger value="hero">Hero</TabsTrigger>
                 <TabsTrigger value="categoryGrid">Collections</TabsTrigger>
                 <TabsTrigger value="benefits">Benefits</TabsTrigger>
                 <TabsTrigger value="currency">Currency</TabsTrigger>
-                {/* Navigation moved to /admin/navigation */}
             </TabsList>
 
             <TabsContent value="brand">
@@ -271,15 +283,14 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                                             variant="destructive"
                                             size="icon"
                                             className="rounded-full w-10 h-10"
-                                            onClick={async () => {
+                                            onClick={() => {
+                                                // SAFE: Queue for deletion, don't delete immediately
                                                 if (heroFile) {
                                                     setHeroFile(null);
-                                                } else if (config.hero?.image) {
-                                                    if (confirm('Are you sure you want to delete this image?')) {
-                                                        await deleteSiteAsset(config.hero!.image!);
-                                                        setConfig({ ...config, hero: { ...config.hero, image: '' } });
-                                                        toast.success('Image deleted');
-                                                    }
+                                                } else {
+                                                    queueImageForDeletion(config.hero?.image);
+                                                    setConfig({ ...config, hero: { ...config.hero, image: '' } });
+                                                    toast.info('Image will be deleted when you save');
                                                 }
                                             }}
                                         >
@@ -344,15 +355,14 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                                             variant="destructive"
                                             size="icon"
                                             className="rounded-full w-10 h-10"
-                                            onClick={async () => {
+                                            onClick={() => {
+                                                // SAFE: Queue for deletion, don't delete immediately
                                                 if (mobileHeroFile) {
                                                     setMobileHeroFile(null);
-                                                } else if (config.hero?.mobileImage) {
-                                                    if (confirm('Are you sure you want to delete this image?')) {
-                                                        await deleteSiteAsset(config.hero.mobileImage);
-                                                        setConfig({ ...config, hero: { ...config.hero, mobileImage: '' } });
-                                                        toast.success('Image deleted');
-                                                    }
+                                                } else {
+                                                    queueImageForDeletion(config.hero?.mobileImage);
+                                                    setConfig({ ...config, hero: { ...config.hero, mobileImage: '' } });
+                                                    toast.info('Image will be deleted when you save');
                                                 }
                                             }}
                                         >
@@ -419,7 +429,7 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                             <Slider
                                 value={[config.hero?.overlayOpacity ?? 0.3]}
                                 min={0}
-                                max={0.9} // Don't allow full black, it looks broken
+                                max={0.9}
                                 step={0.05}
                                 onValueChange={(vals) => setConfig({ ...config, hero: { ...config.hero, overlayOpacity: vals[0] } })}
                                 className="w-full"
@@ -428,6 +438,12 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                                 Controls the darkness of the layer on top of the image to make text readable.
                             </p>
                         </div>
+
+                        {imagesToDelete.length > 0 && (
+                            <p className="text-xs text-amber-500">
+                                ⚠️ {imagesToDelete.length} image(s) will be deleted when you save.
+                            </p>
+                        )}
 
                         <Button onClick={() => handleSave('hero')} disabled={isSaving}>
                             {isSaving ? 'Saving...' : 'Save Hero Settings'}
@@ -541,7 +557,7 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
             {tempCropImage && (
                 <ImageCropper
                     image={tempCropImage}
-                    aspect={16 / 9} // Hero is usually wide
+                    aspect={16 / 9}
                     onCropComplete={(blob) => {
                         const file = new File([blob], 'hero.webp', { type: 'image/webp' });
                         setHeroFile(file);
@@ -553,7 +569,7 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
             {tempMobileCropImage && (
                 <ImageCropper
                     image={tempMobileCropImage}
-                    aspect={9 / 16} // Mobile Portrait
+                    aspect={9 / 16}
                     onCropComplete={(blob) => {
                         const file = new File([blob], 'hero-mobile.webp', { type: 'image/webp' });
                         setMobileHeroFile(file);

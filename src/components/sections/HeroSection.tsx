@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import Image from "next/image";
 import Link from "next/link";
 
@@ -12,8 +15,11 @@ type HeroSectionProps = {
   overlayOpacity?: number;
 };
 
+// Reliable default image (external CDN, always available)
+const DEFAULT_HERO_IMAGE = "https://framerusercontent.com/images/T0Z10o3Yaf4JPrk9f5lhcmJJwno.jpg";
+
 /**
- * HeroSection - Server Component
+ * HeroSection - Client Component (for error handling)
  */
 const HeroSection = ({
   heading,
@@ -23,14 +29,25 @@ const HeroSection = ({
   brandName = "TAILEX",
   overlayOpacity = 0.3
 }: HeroSectionProps) => {
-  // Safe default image
-  const defaultImage = "https://framerusercontent.com/images/T0Z10o3Yaf4JPrk9f5lhcmJJwno.jpg";
-  const heroImage = image?.trim() || defaultImage;
-  const heroMobileImage = mobileImage?.trim();
+  // Use state for fallback handling
+  const [heroImage, setHeroImage] = useState(image?.trim() || DEFAULT_HERO_IMAGE);
+  const [heroMobileImage, setHeroMobileImage] = useState(mobileImage?.trim() || '');
+  const [imageError, setImageError] = useState(false);
 
-  // Default text - use brand name as main heading
+  // Default text
   const displayHeading = heading || brandName;
   const displaySubheading = subheading || "Timeless Wardrobe.\nEveryday Power.";
+
+  // Handle image load error - fallback to default
+  const handleImageError = () => {
+    console.warn('Hero image failed to load, using fallback');
+    setImageError(true);
+    setHeroImage(DEFAULT_HERO_IMAGE);
+    setHeroMobileImage(''); // Clear mobile image if main fails
+  };
+
+  // Use default if configured image matches exactly the failing pattern
+  const effectiveImage = imageError ? DEFAULT_HERO_IMAGE : heroImage;
 
   return (
     <section
@@ -39,8 +56,8 @@ const HeroSection = ({
       {/* Background Image Container */}
       <div className="absolute inset-0 h-full w-full bg-neutral-900">
         <picture>
-          {/* Mobile portrait */}
-          {heroMobileImage && (
+          {/* Mobile portrait - only if available and not errored */}
+          {heroMobileImage && !imageError && (
             <source
               media="(max-width: 768px)"
               srcSet={heroMobileImage}
@@ -50,11 +67,11 @@ const HeroSection = ({
           {/* Desktop landscape */}
           <source
             media="(min-width: 769px)"
-            srcSet={heroImage}
+            srcSet={effectiveImage}
           />
 
           <Image
-            src={heroImage}
+            src={effectiveImage}
             alt={displayHeading || "Hero Image"}
             fill
             className="object-cover object-top hero-entrance-animate will-change-transform"
@@ -66,6 +83,8 @@ const HeroSection = ({
             placeholder="blur"
             blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMCAxMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzE3MTcxNyIvPjwvc3ZnPg=="
             aria-hidden="true"
+            onError={handleImageError}
+            unoptimized={effectiveImage.includes('supabase.co')} // Bypass Vercel optimization for Supabase images
           />
         </picture>
 
@@ -121,4 +140,3 @@ const HeroSection = ({
 };
 
 export default HeroSection;
-
