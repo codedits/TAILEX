@@ -133,30 +133,43 @@ const HeroCarousel = ({
                         return (
                             <SwiperSlide key={`${slide.id}-${index}`}>
                                 <div className="relative w-full h-full">
-                                    <picture>
-                                        {slide.mobileImage && !imageErrors.has(slide.id) && (
-                                            <source
-                                                media="(max-width: 768px)"
-                                                srcSet={slide.mobileImage}
+                                    {/* Mobile Image (Optimized) */}
+                                    {slide.mobileImage && !imageErrors.has(slide.id) && (
+                                        <div className="md:hidden absolute inset-0">
+                                            <Image
+                                                src={slide.mobileImage}
+                                                alt={slide.heading || brandName}
+                                                fill
+                                                className="object-cover object-top"
+                                                priority={index === 0}
+                                                loading={index === 0 ? "eager" : "lazy"}
+                                                fetchPriority={index === 0 ? "high" : "auto"}
+                                                quality={85}
+                                                sizes="100vw"
+                                                placeholder="blur"
+                                                blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMCAxMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzE3MTcxNyIvPjwvc3ZnPg=="
+                                                onError={() => handleImageError(slide.id)}
                                             />
-                                        )}
-                                        <source
-                                            media="(min-width: 769px)"
-                                            srcSet={effectiveImage}
-                                        />
+                                        </div>
+                                    )}
+
+                                    {/* Desktop Image (Optimized) */}
+                                    <div className={`absolute inset-0 ${slide.mobileImage && !imageErrors.has(slide.id) ? 'hidden md:block' : ''}`}>
                                         <Image
                                             src={effectiveImage}
                                             alt={slide.heading || brandName}
                                             fill
                                             className="object-cover object-top"
                                             priority={index === 0}
+                                            loading={index === 0 ? "eager" : "lazy"}
+                                            fetchPriority={index === 0 ? "high" : "auto"}
                                             quality={85}
                                             sizes="100vw"
                                             placeholder="blur"
                                             blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMCAxMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzE3MTcxNyIvPjwvc3ZnPg=="
                                             onError={() => handleImageError(slide.id)}
                                         />
-                                    </picture>
+                                    </div>
                                     <div
                                         className="absolute inset-0 bg-black transition-opacity duration-700"
                                         style={{ opacity: overlayOpacity }}
