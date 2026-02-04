@@ -5,9 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay } from 'swiper/modules';
+import { Autoplay, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/autoplay';
+import 'swiper/css/pagination';
 
 export type HeroSlide = {
     id: string;
@@ -110,13 +111,19 @@ const HeroCarousel = ({
             {/* Swiper Slider - Background Images */}
             <div className="absolute inset-0 h-full w-full z-0">
                 <Swiper
-                    modules={[Autoplay]}
+                    modules={[Autoplay, Pagination]}
                     slidesPerView={1}
                     loop={slides.length > 1}
-                    speed={800} // Smooth slide transition
+                    speed={800}
                     autoplay={{
                         delay: autoPlayInterval,
                         disableOnInteraction: false,
+                    }}
+                    pagination={{
+                        clickable: true,
+                        el: '.hero-pagination',
+                        bulletClass: 'inline-block w-2 h-2 rounded-full bg-white/40 mx-1 cursor-pointer transition-all duration-300',
+                        bulletActiveClass: '!bg-white !w-6',
                     }}
                     onSlideChange={(swiper) => setCurrentIndex(swiper.realIndex)}
                     className="h-full w-full"
@@ -224,6 +231,11 @@ const HeroCarousel = ({
                         )}
                     </AnimatePresence>
                 </div>
+
+                {/* Swiper Pagination Bullets */}
+                {slides.length > 1 && (
+                    <div className="hero-pagination absolute bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center" />
+                )}
             </div>
         </section>
     );
