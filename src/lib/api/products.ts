@@ -123,8 +123,8 @@ export async function createProduct(formData: FormData): Promise<ApiResponse<Pro
     revalidatePath('/admin/products');
     revalidatePath('/collection');
     revalidatePath('/');
-    (revalidateTag as any)('products');
-    (revalidateTag as any)('collections');
+    (revalidateTag as any)('products', 'max');
+    (revalidateTag as any)('collections', 'max');
 
     return { data: product };
   } catch (error) {
@@ -152,8 +152,8 @@ export async function updateProduct(formData: FormData): Promise<ApiResponse<Pro
     revalidatePath(`/product/${productData.slug}`);
     revalidatePath('/collection');
     revalidatePath('/');
-    (revalidateTag as any)('products');
-    (revalidateTag as any)('collections');
+    (revalidateTag as any)('products', 'max');
+    (revalidateTag as any)('collections', 'max');
 
     return { data: product };
   } catch (error) {
@@ -166,8 +166,8 @@ export async function deleteProduct(id: string): Promise<ApiResponse<null>> {
     await ProductService.deleteProduct(id);
     revalidatePath('/admin/products');
     revalidatePath('/collection');
-    (revalidateTag as any)('products');
-    (revalidateTag as any)('collections');
+    (revalidateTag as any)('products', 'max');
+    (revalidateTag as any)('collections', 'max');
     return { message: 'Product deleted successfully' };
   } catch (error) {
     return handleActionError(error);

@@ -8,8 +8,8 @@ export async function updateStoreConfigAction(key: string, value: any) {
         await StoreConfigService.updateConfig(key, value);
 
         // Revalidate the cached config
-        (revalidateTag as any)('site_config');
-        (revalidateTag as any)('navigation_menus');
+        (revalidateTag as any)('site_config', 'max');
+        (revalidateTag as any)('navigation_menus', 'max');
 
         // Revalidate pages that use config
         revalidatePath('/', 'layout');
