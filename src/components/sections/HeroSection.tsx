@@ -84,7 +84,6 @@ const HeroSection = ({
             blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMCAxMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzE3MTcxNyIvPjwvc3ZnPg=="
             aria-hidden="true"
             onError={handleImageError}
-            unoptimized={effectiveImage.includes('supabase.co')} // Bypass Vercel optimization for Supabase images
           />
         </picture>
 

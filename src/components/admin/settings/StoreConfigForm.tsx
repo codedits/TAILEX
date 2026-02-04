@@ -36,13 +36,14 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
     const handleSave = async (section: keyof StoreConfig) => {
         setIsSaving(true);
         let currentConfig = { ...config };
+        let toastId = undefined; // Track toast ID for updates
 
         // Handle File Upload for Hero
         if (section === 'hero' && heroFile) {
             const formData = new FormData();
+            toastId = toast.loading('Optimizing image...'); // Start loading toast
 
             try {
-                toast.loading('Optimizing image...');
                 const webpFile = await convertFileToWebP(heroFile, 0.9);
                 formData.append('file', webpFile);
             } catch (error) {
@@ -50,7 +51,7 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                 formData.append('file', heroFile);
             }
 
-            toast.loading('Uploading image...');
+            toast.loading('Uploading image...', { id: toastId }); // Update message
             const uploadRes = await uploadSiteAsset(formData);
 
             if (uploadRes.success && uploadRes.url) {
@@ -61,7 +62,7 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                 setConfig(currentConfig);
                 setHeroFile(null);
             } else {
-                toast.error(uploadRes.error || 'Failed to upload image');
+                toast.error(uploadRes.error || 'Failed to upload image', { id: toastId });
                 setIsSaving(false);
                 return;
             }
@@ -70,6 +71,9 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
         // Handle File Upload for Mobile Hero
         if (section === 'hero' && mobileHeroFile) {
             const formData = new FormData();
+            // Start or update toast
+            if (!toastId) toastId = toast.loading('Optimizing mobile image...');
+            else toast.loading('Optimizing mobile image...', { id: toastId });
 
             try {
                 const webpFile = await convertFileToWebP(mobileHeroFile, 0.85);
@@ -78,6 +82,7 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                 formData.append('file', mobileHeroFile);
             }
 
+            toast.loading('Uploading mobile image...', { id: toastId });
             const uploadRes = await uploadSiteAsset(formData);
 
             if (uploadRes.success && uploadRes.url) {
@@ -88,29 +93,31 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                 setConfig(currentConfig);
                 setMobileHeroFile(null);
             } else {
-                toast.error(uploadRes.error || 'Failed to upload mobile image');
+                toast.error(uploadRes.error || 'Failed to upload mobile image', { id: toastId });
                 setIsSaving(false);
                 return;
             }
         }
 
+        // If no file upload happened yet, start saving toast
+        if (!toastId) toastId = toast.loading('Saving settings...');
+        else toast.loading('Saving settings...', { id: toastId });
+
         const result = await updateStoreConfigAction(section, currentConfig[section]);
         setIsSaving(false);
 
         if (result.success) {
-            toast.dismiss();
-            toast.success(`${section.charAt(0).toUpperCase() + section.slice(1)} settings saved`);
+            toast.success(`${section.charAt(0).toUpperCase() + section.slice(1)} settings saved`, { id: toastId });
 
-            // SAFE DELETION: Only delete images AFTER successful DB update
+            // SAFE DELETION
             if (section === 'hero' && imagesToDelete.length > 0) {
                 for (const url of imagesToDelete) {
                     await deleteSiteAsset(url);
                 }
-                setImagesToDelete([]); // Clear queue
+                setImagesToDelete([]);
             }
         } else {
-            toast.dismiss();
-            toast.error(result.error || 'Failed to save settings');
+            toast.error(result.error || 'Failed to save settings', { id: toastId });
         }
     };
 

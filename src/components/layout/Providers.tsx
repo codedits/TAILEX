@@ -31,7 +31,7 @@ export function Providers({
               <TooltipProvider>
                 {children}
                 <Toaster />
-                <Sonner />
+                <Sonner position="top-center" />
                 <DiscountPopup />
               </TooltipProvider>
             </QuickViewProvider>
