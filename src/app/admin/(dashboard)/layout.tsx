@@ -12,8 +12,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <AdminSidebar />
         <main className="w-full bg-[#F6F6F7] text-gray-900 min-h-screen font-sans">
           {/* Top Bar */}
-        <div className="flex items-center gap-4 px-4 py-3 border-b border-border bg-white sticky top-0 z-50">
-
+          <div className="flex items-center gap-4 px-4 py-3 border-b border-border bg-white sticky top-0 z-50">
+            <SidebarTrigger className="text-gray-900 hover:bg-gray-100 rounded-lg" />
             <div className="h-5 w-px bg-gray-200 hidden sm:block" />
 
             {/* Breadcrumbs */}
@@ -30,29 +30,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </kbd>
             </div>
 
-          {/* Right Actions */}
-          <div className="flex items-center gap-2">
-            <button className="p-2 text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
-              <Bell className="w-5 h-5" />
-            </button>
-            <Link
-              href="/"
-              target="_blank"
-              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <ExternalLink className="w-4 h-4" />
-              <span className="hidden sm:inline">View Store</span>
-            </Link>
+            {/* Right Actions */}
+            <div className="flex items-center gap-2">
+              <button className="p-2 text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+                <Bell className="w-5 h-5" />
+              </button>
+              <Link
+                href="/"
+                target="_blank"
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <ExternalLink className="w-4 h-4" />
+                <span className="hidden sm:inline">View Store</span>
+              </Link>
+            </div>
           </div>
-        </div>
 
-        {/* Main Content */}
-        <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
-          {children}
-        </div>
-        <CommandPalette />
-      </main>
-    </SidebarProvider>
+          {/* Main Content */}
+          <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
+            {children}
+          </div>
+          <CommandPalette />
+        </main>
+      </SidebarProvider>
     </div>
   )
 }
