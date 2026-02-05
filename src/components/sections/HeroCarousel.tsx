@@ -140,7 +140,7 @@ const HeroCarousel = ({
                                                 src={slide.mobileImage}
                                                 alt={slide.heading || brandName}
                                                 fill
-                                                className="object-cover object-top"
+                                                className="object-cover object-top hero-entrance-animate will-change-transform"
                                                 priority={index === 0}
                                                 loading={index === 0 ? "eager" : "lazy"}
                                                 fetchPriority={index === 0 ? "high" : "auto"}
@@ -159,7 +159,7 @@ const HeroCarousel = ({
                                             src={effectiveImage}
                                             alt={slide.heading || brandName}
                                             fill
-                                            className="object-cover object-top"
+                                            className="object-cover object-top hero-entrance-animate will-change-transform"
                                             priority={index === 0}
                                             loading={index === 0 ? "eager" : "lazy"}
                                             fetchPriority={index === 0 ? "high" : "auto"}
