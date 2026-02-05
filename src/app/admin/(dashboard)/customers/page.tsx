@@ -23,70 +23,70 @@ export default async function CustomersPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-            <h2 className="text-2xl font-semibold tracking-tight text-white mb-1">Customers</h2>
-            <p className="text-white/50 text-sm">View and manage your customer base.</p>
+          <h2 className="text-2xl font-semibold tracking-tight text-gray-900 mb-1">Customers</h2>
+          <p className="text-gray-500 text-sm">View and manage your customer base.</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-[#0A0A0A] border border-white/10 rounded-2xl p-6">
+        <div className="bg-white border border-border rounded-2xl p-6 shadow-sm">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center">
-              <Users className="w-6 h-6 text-white/50" />
+            <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center border border-gray-100">
+              <Users className="w-6 h-6 text-gray-500" />
             </div>
             <div>
-              <p className="text-white/40 text-xs uppercase tracking-wider">Total Customers</p>
-              <p className="text-2xl font-semibold text-white">{customers?.length || 0}</p>
+              <p className="text-gray-500 text-xs uppercase tracking-wider">Total Customers</p>
+              <p className="text-2xl font-semibold text-gray-900">{customers?.length || 0}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="border border-white/10 rounded-2xl bg-[#0A0A0A] overflow-hidden">
+      <div className="border border-border rounded-2xl bg-white overflow-hidden shadow-sm">
         <Table>
-          <TableHeader className="bg-white/[0.02]">
-            <TableRow className="border-white/10 hover:bg-transparent">
-              <TableHead className="text-white/40 font-medium px-6 py-4">Customer</TableHead>
-              <TableHead className="text-white/40 font-medium px-4">Email</TableHead>
-              <TableHead className="text-white/40 font-medium px-4 text-center">Orders</TableHead>
-              <TableHead className="text-white/40 font-medium px-4 text-right">Total Spent</TableHead>
+          <TableHeader className="bg-gray-50/50">
+            <TableRow className="border-gray-100 hover:bg-transparent">
+              <TableHead className="text-gray-500 font-medium px-6 py-4">Customer</TableHead>
+              <TableHead className="text-gray-500 font-medium px-4">Email</TableHead>
+              <TableHead className="text-gray-500 font-medium px-4 text-center">Orders</TableHead>
+              <TableHead className="text-gray-500 font-medium px-4 text-right">Total Spent</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {customers && customers.length > 0 ? (
               customers.map((customer) => (
-                <TableRow key={customer.id} className="border-white/5 hover:bg-white/[0.02] transition-colors">
+                <TableRow key={customer.id} className="border-gray-50 hover:bg-gray-50 transition-colors">
                   <TableCell className="px-6 py-4">
                     <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-white/5 rounded-full border border-white/10 flex items-center justify-center text-white/50 uppercase font-medium">
-                          {customer.first_name?.[0] || customer.email?.[0] || '?'}
-                        </div>
-                        <span className="font-medium text-white">
-                          {customer.first_name && customer.last_name 
-                            ? `${customer.first_name} ${customer.last_name}` 
-                            : customer.email}
-                        </span>
+                      <div className="w-10 h-10 bg-gray-50 rounded-full border border-border flex items-center justify-center text-gray-500 uppercase font-medium">
+                        {customer.first_name?.[0] || customer.email?.[0] || '?'}
+                      </div>
+                      <span className="font-medium text-gray-900">
+                        {customer.first_name && customer.last_name
+                          ? `${customer.first_name} ${customer.last_name}`
+                          : customer.email}
+                      </span>
                     </div>
                   </TableCell>
-                  <TableCell className="px-4 text-white/70 text-sm">
+                  <TableCell className="px-4 text-gray-600 text-sm">
                     <div className="flex items-center gap-2">
-                      <Mail className="w-4 h-4 text-white/30" />
+                      <Mail className="w-4 h-4 text-gray-400" />
                       {customer.email}
                     </div>
                   </TableCell>
                   <TableCell className="px-4 text-center">
-                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-white/5 text-white/70">
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
                       {customer.total_orders || 0}
                     </span>
                   </TableCell>
-                  <TableCell className="px-4 text-right font-mono text-white">
+                  <TableCell className="px-4 text-right font-mono text-gray-900">
                     {formatCurrency(customer.total_spent || 0, storeConfig.currency)}
                   </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={4} className="h-48 text-center text-white/30 text-sm">
+                <TableCell colSpan={4} className="h-48 text-center text-gray-400 text-sm">
                   No customers yet.
                 </TableCell>
               </TableRow>
@@ -97,3 +97,4 @@ export default async function CustomersPage() {
     </div>
   );
 }
+

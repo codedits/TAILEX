@@ -90,19 +90,19 @@ export function ResponsiveDataTable<TData, TValue>({
                             onChange={(event) =>
                                 table.getColumn(filterColumn)?.setFilterValue(event.target.value)
                             }
-                            className="bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:border-white/20 focus:ring-0"
+                            className="bg-white border border-input rounded-lg h-10 text-gray-900 placeholder:text-gray-500 focus:ring-1 focus:ring-ring transition-all"
                         />
                     </div>
                 </div>
                 {isDesktop && (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white">
+                            <Button variant="outline" className="bg-white border border-input rounded-lg h-10 text-gray-900 hover:bg-gray-100 hover:text-black font-medium transition-all">
                                 <SlidersHorizontal className="mr-2 h-4 w-4" />
                                 View
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-neutral-900 border-white/10">
+                        <DropdownMenuContent align="end" className="bg-white border-border">
                             {table
                                 .getAllColumns()
                                 .filter((column) => column.getCanHide())
@@ -110,7 +110,7 @@ export function ResponsiveDataTable<TData, TValue>({
                                     return (
                                         <DropdownMenuCheckboxItem
                                             key={column.id}
-                                            className="capitalize text-white focus:bg-white/10"
+                                            className="capitalize text-gray-700 focus:bg-gray-100"
                                             checked={column.getIsVisible()}
                                             onCheckedChange={(value) => column.toggleVisibility(!!value)}
                                         >
@@ -125,20 +125,20 @@ export function ResponsiveDataTable<TData, TValue>({
 
             {/* Desktop: Table View */}
             {isDesktop ? (
-                <div className="rounded-xl border border-white/10 bg-neutral-900/40 backdrop-blur-xl overflow-hidden">
+                <div className="rounded-xl border border-border bg-white shadow-none overflow-hidden">
                     <div className="overflow-x-auto">
                         <Table>
-                            <TableHeader className="bg-white/5 sticky top-0 z-10">
+                            <TableHeader className="bg-gray-50 border-b border-border sticky top-0 z-10">
                                 {table.getHeaderGroups().map((headerGroup) => (
-                                    <TableRow key={headerGroup.id} className="border-white/5 hover:bg-transparent">
+                                    <TableRow key={headerGroup.id} className="border-border hover:bg-transparent">
                                         {headerGroup.headers.map((header, index) => {
                                             return (
                                                 <TableHead
                                                     key={header.id}
                                                     className={cn(
-                                                        "text-white/60 font-medium h-12",
+                                                        "text-gray-500 font-medium h-12",
                                                         // First column (after checkbox) is sticky
-                                                        index === 1 && "sticky left-0 bg-neutral-900/95 backdrop-blur-sm z-[5]"
+                                                        index === 1 && "sticky left-0 bg-gray-50 z-[5]"
                                                     )}
                                                 >
                                                     {header.isPlaceholder
@@ -159,15 +159,15 @@ export function ResponsiveDataTable<TData, TValue>({
                                         <TableRow
                                             key={row.id}
                                             data-state={row.getIsSelected() && "selected"}
-                                            className="border-white/5 hover:bg-white/5 transition-colors group"
+                                            className="border-gray-100 hover:bg-gray-50 transition-colors group"
                                         >
                                             {row.getVisibleCells().map((cell, index) => (
                                                 <TableCell
                                                     key={cell.id}
                                                     className={cn(
-                                                        "text-white/80 py-3",
+                                                        "text-gray-700 py-3",
                                                         // First column (after checkbox) is sticky
-                                                        index === 1 && "sticky left-0 bg-neutral-900/95 backdrop-blur-sm z-[5] group-hover:bg-neutral-800/95"
+                                                        index === 1 && "sticky left-0 bg-white z-[5] group-hover:bg-gray-50"
                                                     )}
                                                 >
                                                     {flexRender(
@@ -182,7 +182,7 @@ export function ResponsiveDataTable<TData, TValue>({
                                     <TableRow>
                                         <TableCell
                                             colSpan={columns.length}
-                                            className="h-24 text-center text-white/40"
+                                            className="h-24 text-center text-gray-500"
                                         >
                                             No results.
                                         </TableCell>
@@ -202,8 +202,8 @@ export function ResponsiveDataTable<TData, TValue>({
                                     renderMobileCard(row)
                                 ) : (
                                     // Fallback if no custom card renderer provided
-                                    <div className="rounded-xl border border-white/10 bg-neutral-900/40 p-4">
-                                        <p className="text-white/60 text-sm">
+                                    <div className="rounded-xl border border-border bg-white p-4">
+                                        <p className="text-gray-500 text-sm">
                                             No mobile card renderer provided
                                         </p>
                                     </div>
@@ -211,7 +211,7 @@ export function ResponsiveDataTable<TData, TValue>({
                             </div>
                         ))
                     ) : (
-                        <div className="rounded-xl border border-white/10 bg-neutral-900/40 p-8 text-center text-white/40">
+                        <div className="rounded-xl border border-border bg-white p-8 text-center text-gray-500">
                             No results.
                         </div>
                     )}
@@ -220,12 +220,12 @@ export function ResponsiveDataTable<TData, TValue>({
 
             {/* Pagination - Same for both views */}
             <div className="flex items-center justify-between gap-4 flex-wrap">
-                <div className="text-sm text-white/40 order-2 md:order-1">
+                <div className="text-sm text-gray-500 order-2 md:order-1">
                     {table.getFilteredSelectedRowModel().rows.length} of{" "}
                     {table.getFilteredRowModel().rows.length} row(s) selected.
                 </div>
                 <div className="flex items-center gap-2 order-1 md:order-2 w-full md:w-auto justify-between md:justify-end">
-                    <div className="text-sm text-white/40 hidden md:block">
+                    <div className="text-sm text-gray-500 hidden md:block">
                         Page {table.getState().pagination.pageIndex + 1} of{" "}
                         {table.getPageCount()}
                     </div>
@@ -235,7 +235,7 @@ export function ResponsiveDataTable<TData, TValue>({
                             size="sm"
                             onClick={() => table.previousPage()}
                             disabled={!table.getCanPreviousPage()}
-                            className="bg-white/5 border-white/10 text-white hover:bg-white/10 disabled:opacity-30"
+                            className="bg-white border border-border rounded-lg text-gray-900 font-medium hover:bg-gray-100 transition-all disabled:opacity-30"
                         >
                             <ChevronLeft className="h-4 w-4 md:mr-1" />
                             <span className="hidden md:inline">Previous</span>
@@ -245,7 +245,7 @@ export function ResponsiveDataTable<TData, TValue>({
                             size="sm"
                             onClick={() => table.nextPage()}
                             disabled={!table.getCanNextPage()}
-                            className="bg-white/5 border-white/10 text-white hover:bg-white/10 disabled:opacity-30"
+                            className="bg-white border border-border rounded-lg text-gray-900 font-medium hover:bg-gray-100 transition-all disabled:opacity-30"
                         >
                             <span className="hidden md:inline">Next</span>
                             <ChevronRight className="h-4 w-4 md:ml-1" />
@@ -256,3 +256,4 @@ export function ResponsiveDataTable<TData, TValue>({
         </div>
     )
 }
+

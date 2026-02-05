@@ -53,3 +53,4 @@ export function CardSkeleton({ count = 5, className }: CardSkeletonProps) {
         </div>
     )
 }
+

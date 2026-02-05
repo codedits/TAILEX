@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { Instagram, Twitter, Facebook, Youtube, ArrowRight } from "lucide-react";
+import { Instagram, Twitter, Facebook, Youtube } from "lucide-react";
 import { FooterConfig, SocialConfig } from "@/lib/types";
 import { ScrollToTopButton } from "./ScrollToTopButton";
+import { NewsletterForm } from "./NewsletterForm";
 
 interface FooterProps {
   config?: FooterConfig;
@@ -62,19 +63,7 @@ const Footer = ({
               {config.tagline}
             </p>
 
-            <div className="mt-8 pt-8 border-t border-white/10">
-              <p className="text-xs uppercase tracking-widest text-white/40 mb-4">Newsletter</p>
-              <div className="flex gap-2">
-                <input
-                  type="email"
-                  placeholder="Email Address"
-                  className="bg-transparent border-b border-white/20 text-white placeholder:text-white/20 py-2 text-sm w-full focus:outline-none focus:border-white transition-colors"
-                />
-                <button className="text-white hover:text-white/70 transition-colors" aria-label="Subscribe">
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
+            <NewsletterForm />
           </div>
 
           {/* Links Grid */}

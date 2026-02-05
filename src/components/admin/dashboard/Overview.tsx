@@ -11,44 +11,44 @@ export function Overview({ data }: { data: any[] }) {
             <AreaChart data={data}>
                 <defs>
                     <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#fff" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#fff" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.2} />
+                        <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
                     </linearGradient>
                 </defs>
                 <XAxis
                     dataKey="name"
-                    stroke="#ffffff20"
-                    fontSize={10}
+                    stroke="#E5E7EB"
+                    fontSize={11}
                     tickLine={false}
                     axisLine={false}
-                    tick={{ fill: "#ffffff50" }}
+                    tick={{ fill: "#6B7280" }}
                     dy={10}
                 />
                 <YAxis
-                    stroke="#ffffff20"
-                    fontSize={10}
+                    stroke="#E5E7EB"
+                    fontSize={11}
                     tickLine={false}
                     axisLine={false}
                     tickFormatter={(value) => formatCurrency(value)}
-                    tick={{ fill: "#ffffff50" }}
+                    tick={{ fill: "#6B7280" }}
                     width={80}
                 />
                 <Tooltip
                     contentStyle={{
-                        backgroundColor: "rgba(0,0,0,0.8)",
-                        backdropFilter: "blur(10px)",
-                        border: "1px solid rgba(255,255,255,0.1)",
+                        backgroundColor: "#fff",
+                        border: "1px solid #E5E7EB",
                         borderRadius: "8px",
-                        boxShadow: "0 4px 20px rgba(0,0,0,0.5)"
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
                     }}
-                    itemStyle={{ color: "#fff", fontSize: "12px" }}
+                    itemStyle={{ color: "#111827", fontSize: "12px" }}
+                    labelStyle={{ color: "#6B7280", fontSize: "11px", marginBottom: "4px" }}
                     formatter={(value: number) => [formatCurrency(value), "Revenue"]}
-                    cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }}
+                    cursor={{ stroke: '#E5E7EB', strokeWidth: 1 }}
                 />
                 <Area
                     type="monotone"
                     dataKey="total"
-                    stroke="#fff"
+                    stroke="#3B82F6"
                     strokeWidth={2}
                     fillOpacity={1}
                     fill="url(#colorTotal)"
@@ -57,3 +57,5 @@ export function Overview({ data }: { data: any[] }) {
         </ResponsiveContainer>
     )
 }
+
+

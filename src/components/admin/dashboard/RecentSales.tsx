@@ -20,22 +20,22 @@ type RecentSaleProps = {
 export function RecentSales({ sales }: RecentSaleProps) {
     const formatCurrency = useFormatCurrency();
     return (
-        <div className="space-y-8">
-            {sales.length === 0 && <p className="text-sm text-neutral-500">No sales yet.</p>}
+        <div className="space-y-4">
+            {sales.length === 0 && <p className="text-sm text-gray-500">No sales yet.</p>}
 
             {sales.map((sale) => (
-                <div key={sale.id} className="flex items-center p-2 rounded-lg hover:bg-white/5 transition-colors group">
-                    <Avatar className="h-9 w-9 border border-white/5">
+                <div key={sale.id} className="flex items-center p-2 rounded-lg hover:bg-gray-50 transition-colors group">
+                    <Avatar className="h-9 w-9 border border-gray-100">
                         <AvatarImage src={sale.avatarUrl || "/avatars/01.png"} alt="Avatar" />
-                        <AvatarFallback className="bg-white/5 text-white/60">{sale.customerName.charAt(0)}</AvatarFallback>
+                        <AvatarFallback className="bg-gray-100 text-gray-600">{sale.customerName.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div className="ml-4 space-y-1">
-                        <p className="text-sm font-medium leading-none text-white/80 group-hover:text-white transition-colors">{sale.customerName}</p>
-                        <p className="text-xs text-white/40 font-mono">
+                        <p className="text-sm font-medium leading-none text-gray-900">{sale.customerName}</p>
+                        <p className="text-xs text-gray-500">
                             {sale.customerEmail}
                         </p>
                     </div>
-                    <div className="ml-auto font-mono text-sm font-medium text-white/60 group-hover:text-white transition-colors">
+                    <div className="ml-auto text-sm font-medium text-gray-900">
                         +{formatCurrency(sale.amount)}
                     </div>
                 </div>
@@ -43,3 +43,5 @@ export function RecentSales({ sales }: RecentSaleProps) {
         </div>
     )
 }
+
+

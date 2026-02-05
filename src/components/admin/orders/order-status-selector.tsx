@@ -46,19 +46,20 @@ export function OrderStatusSelector({ orderId, currentStatus }: Props) {
 
     return (
         <div className="flex items-center gap-2">
-            {loading && <Loader2 className="w-3 h-3 animate-spin text-white/40" />}
+            {loading && <Loader2 className="w-3 h-3 animate-spin text-gray-400" />}
             <Select value={status} onValueChange={handleStatusChange} disabled={loading}>
-                <SelectTrigger className="w-[160px] h-9 text-xs uppercase tracking-widest bg-neutral-900 border-white/10 hover:bg-neutral-800">
+                <SelectTrigger className="w-[160px] h-9 text-xs uppercase tracking-widest bg-white text-gray-900 border-2 border-black hover:bg-gray-50 focus:ring-0 shadow-sm">
                     <SelectValue placeholder="Status" />
                 </SelectTrigger>
-                <SelectContent className="bg-neutral-900 border-white/10 text-white">
-                    <SelectItem value="pending" className="text-xs uppercase tracking-wider focus:bg-white/10 focus:text-white">Pending</SelectItem>
-                    <SelectItem value="processing" className="text-xs uppercase tracking-wider focus:bg-white/10 focus:text-white">Processing</SelectItem>
-                    <SelectItem value="shipped" className="text-xs uppercase tracking-wider focus:bg-white/10 focus:text-white">Shipped</SelectItem>
-                    <SelectItem value="delivered" className="text-xs uppercase tracking-wider focus:bg-white/10 focus:text-white">Delivered</SelectItem>
-                    <SelectItem value="cancelled" className="text-xs uppercase tracking-wider focus:bg-white/10 focus:text-white text-red-500">Cancelled</SelectItem>
+                <SelectContent className="bg-white border-black text-gray-900">
+                    <SelectItem value="pending" className="text-xs uppercase tracking-wider focus:bg-gray-100 focus:text-gray-900 text-gray-700">Pending</SelectItem>
+                    <SelectItem value="processing" className="text-xs uppercase tracking-wider focus:bg-gray-100 focus:text-gray-900 text-gray-700">Processing</SelectItem>
+                    <SelectItem value="shipped" className="text-xs uppercase tracking-wider focus:bg-gray-100 focus:text-gray-900 text-gray-700">Shipped</SelectItem>
+                    <SelectItem value="delivered" className="text-xs uppercase tracking-wider focus:bg-gray-100 focus:text-gray-900 text-gray-700">Delivered</SelectItem>
+                    <SelectItem value="cancelled" className="text-xs uppercase tracking-wider focus:bg-gray-100 focus:text-gray-900 text-red-600">Cancelled</SelectItem>
                 </SelectContent>
             </Select>
         </div>
     );
 }
+

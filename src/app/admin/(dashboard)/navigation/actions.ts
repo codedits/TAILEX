@@ -42,3 +42,4 @@ export async function updateMenu(id: string, data: any) {
     revalidatePath(`/admin/navigation/${id}`)
     return { success: true }
 }
+

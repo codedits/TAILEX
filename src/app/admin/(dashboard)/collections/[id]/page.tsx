@@ -8,7 +8,7 @@ export default async function EditCollectionPage({ params }: { params: { id: str
     // Safest is to await it if it's a promise, but TS might complain if it isn't.
     // In strict Next.js 15, `params` is a promise.
     const { id } = await params;
-    
+
     const supabase = await createAdminClient();
     const { data: collection } = await supabase.from('collections').select('*').eq('id', id).single();
 
@@ -19,10 +19,10 @@ export default async function EditCollectionPage({ params }: { params: { id: str
     return (
         <div className="max-w-5xl mx-auto space-y-8">
             <div>
-                <h2 className="text-2xl font-semibold tracking-tight text-white mb-1">Edit Collection</h2>
-                <p className="text-white/50 text-sm">Update collection details and visibility.</p>
+                <h2 className="text-2xl font-semibold tracking-tight text-gray-900 mb-1">Edit Collection</h2>
+                <p className="text-gray-500 text-sm">Update collection details and visibility.</p>
             </div>
-             <div className="bg-[#0A0A0A] p-8 rounded-2xl shadow-2xl border border-white/10">
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-border">
                 <CollectionForm initialData={collection} />
             </div>
         </div>

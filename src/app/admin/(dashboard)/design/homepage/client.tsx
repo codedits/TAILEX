@@ -42,22 +42,22 @@ export function HomepageBuilderClient({ initialSections }: HomepageBuilderClient
                 {sections.map((section) => (
                     <Reorder.Item key={section.id} value={section}>
                         <div className={cn(
-                            "flex items-center justify-between p-4 bg-[#0A0A0A] border border-white/10 rounded-xl select-none",
-                            !section.enabled && "opacity-50"
+                            "flex items-center justify-between p-4 bg-white border border-border rounded-xl select-none shadow-sm transition-all hover:border-input",
+                            !section.enabled && "opacity-50 bg-gray-50"
                         )}>
                             <div className="flex items-center gap-4">
-                                <div className="cursor-grab active:cursor-grabbing p-1 hover:bg-white/5 rounded">
-                                    <GripVertical className="bg-transparent text-white/30" />
+                                <div className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded text-gray-400">
+                                    <GripVertical className="bg-transparent" />
                                 </div>
                                 <div>
-                                    <h3 className="font-medium text-white capitalize">{section.id.replace('-', ' ')}</h3>
-                                    <p className="text-xs text-white/40 font-mono mt-0.5 uppercase tracking-wider">{section.type}</p>
+                                    <h3 className="font-medium text-gray-900 capitalize">{section.id.replace('-', ' ')}</h3>
+                                    <p className="text-xs text-gray-500 font-mono mt-0.5 uppercase tracking-wider">{section.type}</p>
                                 </div>
                             </div>
 
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-xs text-white/50">{section.enabled ? "Visible" : "Hidden"}</span>
+                                    <span className="text-xs text-gray-500">{section.enabled ? "Visible" : "Hidden"}</span>
                                     <Switch
                                         checked={section.enabled}
                                         onCheckedChange={(checked) => toggleSection(section.id, checked)}
@@ -69,11 +69,12 @@ export function HomepageBuilderClient({ initialSections }: HomepageBuilderClient
                 ))}
             </Reorder.Group>
 
-            <div className="flex justify-end pt-4 border-t border-white/10">
-                <Button onClick={handleSave} disabled={isSaving} className="bg-white text-black hover:bg-white/90 rounded-full px-8">
+            <div className="flex justify-end pt-4 border-t border-border">
+                <Button onClick={handleSave} disabled={isSaving} className="bg-gray-900 text-white hover:bg-gray-800 rounded-full px-8 shadow-lg">
                     {isSaving ? "Saving..." : "Save Layout"}
                 </Button>
             </div>
         </div>
     );
 }
+

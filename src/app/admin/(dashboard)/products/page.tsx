@@ -18,28 +18,28 @@ async function ProductsTable() {
 
 export default function ProductsPage() {
   return (
-    <div className="space-y-8 p-4 md:p-8 max-w-[1600px] mx-auto">
+    <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-2xl md:text-3xl font-light tracking-tight text-white mb-1">
-            Catalog
-          </h2>
-          <p className="text-white/50 text-sm">
-            Manage your store&apos;s private inventory.
+          <h1 className="text-2xl font-semibold text-gray-900">
+            Products
+          </h1>
+          <p className="text-gray-500 text-sm">
+            Manage your store&apos;s inventory.
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Link
             href="/shop"
             target="_blank"
-            className="flex items-center gap-1.5 px-3 py-2 text-sm text-white/50 hover:text-white hover:bg-white/5 rounded-full transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <ExternalLink className="w-3.5 h-3.5" />
+            <ExternalLink className="w-4 h-4" />
             <span className="hidden sm:inline">View Shop</span>
           </Link>
           <Button
             asChild
-            className="bg-white text-black hover:bg-white/90 rounded-full px-6 font-medium"
+            className="bg-gray-900 text-white hover:bg-gray-800 rounded-lg px-4 font-medium"
           >
             <Link href="/admin/products/new">
               <Plus className="mr-2 h-4 w-4" />
@@ -56,4 +56,5 @@ export default function ProductsPage() {
     </div>
   );
 }
+
 

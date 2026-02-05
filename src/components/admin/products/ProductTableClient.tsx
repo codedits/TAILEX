@@ -98,3 +98,4 @@ export function ProductTableClient({ products }: ProductTableClientProps) {
         </>
     )
 }
+

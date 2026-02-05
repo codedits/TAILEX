@@ -56,12 +56,17 @@ export type Product = {
   updated_at?: string
   published_at?: string | null
 
+  // Review Stats (computed fields for display)
+  review_count?: number
+  average_rating?: number
+
   // Relations (when joined)
   variants?: ProductVariant[]
   options?: ProductOption[]
   collection?: Collection
   reviews?: Review[]
 }
+
 
 export type ProductVariant = {
   id: string

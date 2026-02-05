@@ -3,16 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { User, Package, LogOut, LayoutDashboard, ShoppingBag } from "lucide-react";
-
-const menuItems = [
-    { label: "Overview", href: "/account", icon: LayoutDashboard },
-    { label: "Orders & Returns", href: "/account/orders", icon: Package },
-    { label: "Profile & Settings", href: "/account/profile", icon: User }, // Redirects to /account usually, but good to have explicit link if we split
-];
+import { User, Package, LogOut, LayoutDashboard, ShoppingBag, Heart } from "lucide-react";
+import { useWishlist } from "@/context/WishlistContext";
 
 export function AccountSidebar() {
     const pathname = usePathname();
+    const { wishlistCount } = useWishlist();
 
     return (
         <aside className="w-full lg:w-64 shrink-0 space-y-8 lg:border-r lg:border-neutral-100 lg:pr-8 mb-8 lg:mb-0">
@@ -45,6 +41,24 @@ export function AccountSidebar() {
                 >
                     <Package className="w-4 h-4" />
                     Orders
+                </Link>
+
+                <Link
+                    href="/account/wishlist"
+                    className={cn(
+                        "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all whitespace-nowrap",
+                        pathname === "/account/wishlist"
+                            ? "bg-black text-white shadow-md"
+                            : "text-neutral-500 hover:bg-neutral-50 hover:text-black"
+                    )}
+                >
+                    <Heart className="w-4 h-4" />
+                    Wishlist
+                    {wishlistCount > 0 && (
+                        <span className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                            {wishlistCount}
+                        </span>
+                    )}
                 </Link>
             </nav>
 

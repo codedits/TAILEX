@@ -120,3 +120,4 @@ export async function deleteHeroImage() {
   
   return { success: true }
 }
+

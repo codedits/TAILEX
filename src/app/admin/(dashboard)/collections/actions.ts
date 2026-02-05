@@ -13,3 +13,4 @@ export async function updateCollection(formData: FormData) {
 export async function deleteCollection(id: string) {
   return api.deleteCollection(id)
 }
+

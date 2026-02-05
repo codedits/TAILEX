@@ -27,27 +27,27 @@ export function MobileProductCard({
     const getStatusColor = (status: string) => {
         switch (status) {
             case "active":
-                return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                return "bg-green-100 text-green-700 border-green-200"
             case "archived":
-                return "bg-red-500/10 text-red-400 border-red-500/20"
+                return "bg-red-100 text-red-700 border-red-200"
             case "draft":
-                return "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                return "bg-amber-100 text-amber-700 border-amber-200"
             default:
-                return "bg-neutral-500/10 text-neutral-400 border-neutral-500/20"
+                return "bg-gray-100 text-gray-600 border-border"
         }
     }
 
     const getStockColor = (stock: number) => {
-        if (stock === 0) return "text-red-400"
-        if (stock < 10) return "text-amber-400"
-        return "text-white/60"
+        if (stock === 0) return "text-red-600"
+        if (stock < 10) return "text-amber-600"
+        return "text-gray-600"
     }
 
     return (
         <div
             className={cn(
-                "rounded-xl border border-white/10 bg-neutral-900/40 overflow-hidden transition-all",
-                isSelected && "ring-2 ring-white/30"
+                "rounded-xl border border-border bg-white overflow-hidden transition-all shadow-sm",
+                isSelected && "ring-2 ring-gray-400"
             )}
         >
             {/* Main Card Content */}
@@ -59,11 +59,11 @@ export function MobileProductCard({
                             <img
                                 src={product.cover_image}
                                 alt={product.title}
-                                className="w-16 h-16 object-cover rounded-lg border border-white/10"
+                                className="w-16 h-16 object-cover rounded-lg border border-border"
                             />
                         ) : (
-                            <div className="w-16 h-16 bg-white/5 rounded-lg border border-white/10 flex items-center justify-center">
-                                <span className="text-white/20 text-xs">No Image</span>
+                            <div className="w-16 h-16 bg-gray-100 rounded-lg border border-border flex items-center justify-center">
+                                <span className="text-gray-400 text-xs">No Image</span>
                             </div>
                         )}
                     </div>
@@ -72,15 +72,15 @@ export function MobileProductCard({
                     <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
-                                <h3 className="font-medium text-white truncate">{product.title}</h3>
-                                <p className="text-white/40 text-xs font-mono mt-0.5">
+                                <h3 className="font-medium text-gray-900 truncate">{product.title}</h3>
+                                <p className="text-gray-500 text-xs font-mono mt-0.5">
                                     {product.sku || "NO SKU"}
                                 </p>
                             </div>
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 flex-shrink-0 hover:bg-white/10 text-white/60"
+                                className="h-8 w-8 flex-shrink-0 hover:bg-gray-100 text-gray-500"
                                 onClick={(e) => {
                                     e.stopPropagation()
                                     onActionClick(product)
@@ -93,11 +93,11 @@ export function MobileProductCard({
                         {/* Price and Status Row */}
                         <div className="flex items-center justify-between mt-3">
                             <div className="flex flex-col">
-                                <span className="font-mono text-white/90 font-medium">
+                                <span className="font-mono text-gray-900 font-medium">
                                     {formatCurrency(product.price)}
                                 </span>
                                 {product.sale_price && (
-                                    <span className="text-emerald-400 text-xs font-mono">
+                                    <span className="text-green-600 text-xs font-mono">
                                         {formatCurrency(product.sale_price)}
                                     </span>
                                 )}
@@ -117,7 +117,7 @@ export function MobileProductCard({
                 {/* Expand Button */}
                 <button
                     onClick={() => setExpanded(!expanded)}
-                    className="w-full mt-3 pt-3 border-t border-white/5 flex items-center justify-center gap-2 text-white/40 text-sm hover:text-white/60 transition-colors"
+                    className="w-full mt-3 pt-3 border-t border-gray-100 flex items-center justify-center gap-2 text-gray-500 text-sm hover:text-gray-700 transition-colors"
                 >
                     {expanded ? (
                         <>
@@ -141,10 +141,10 @@ export function MobileProductCard({
                 )}
             >
                 <div className="overflow-hidden">
-                    <div className="px-4 pb-4 pt-0 space-y-3 border-t border-white/5">
+                    <div className="px-4 pb-4 pt-0 space-y-3 border-t border-gray-100">
                         {/* Stock Info */}
                         <div className="flex items-center justify-between py-2">
-                            <span className="text-white/40 text-sm">Stock</span>
+                            <span className="text-gray-500 text-sm">Stock</span>
                             <span className={cn("font-mono font-medium", getStockColor(product.stock ?? 0))}>
                                 {product.stock ?? 0} units
                             </span>
@@ -152,17 +152,17 @@ export function MobileProductCard({
 
                         {/* Category Info */}
                         {product.category && (
-                            <div className="flex items-center justify-between py-2 border-t border-white/5">
-                                <span className="text-white/40 text-sm">Category</span>
-                                <span className="text-white/80 text-sm">{product.category}</span>
+                            <div className="flex items-center justify-between py-2 border-t border-gray-100">
+                                <span className="text-gray-500 text-sm">Category</span>
+                                <span className="text-gray-700 text-sm">{product.category}</span>
                             </div>
                         )}
 
                         {/* Created Date */}
                         {product.created_at && (
-                            <div className="flex items-center justify-between py-2 border-t border-white/5">
-                                <span className="text-white/40 text-sm">Added</span>
-                                <span className="text-white/60 text-sm">
+                            <div className="flex items-center justify-between py-2 border-t border-gray-100">
+                                <span className="text-gray-500 text-sm">Added</span>
+                                <span className="text-gray-600 text-sm">
                                     {new Date(product.created_at).toLocaleDateString()}
                                 </span>
                             </div>
@@ -173,3 +173,5 @@ export function MobileProductCard({
         </div>
     )
 }
+
+

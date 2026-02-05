@@ -76,13 +76,13 @@ export function DiscountForm({ initialConfig }: DiscountFormProps) {
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             {/* Enable/Disable Toggle */}
-            <Card className="bg-neutral-900/40 backdrop-blur-xl border-white/5 rounded-xl">
+            <Card className="bg-white border-border rounded-xl shadow-sm">
                 <CardHeader>
-                    <CardTitle className="text-white font-light tracking-tight flex items-center gap-3">
-                        <Eye className="w-5 h-5 text-white/60" />
+                    <CardTitle className="text-gray-900 font-light tracking-tight flex items-center gap-3">
+                        <Eye className="w-5 h-5 text-gray-500" />
                         Popup Status
                     </CardTitle>
-                    <CardDescription className="text-white/40">
+                    <CardDescription className="text-gray-500">
                         Enable or disable the discount popup for visitors.
                     </CardDescription>
                 </CardHeader>
@@ -92,7 +92,7 @@ export function DiscountForm({ initialConfig }: DiscountFormProps) {
                             checked={config.enabled}
                             onCheckedChange={(checked) => setConfig({ ...config, enabled: checked })}
                         />
-                        <Label className="text-white/70">
+                        <Label className="text-gray-700">
                             {config.enabled ? 'Popup is Active' : 'Popup is Disabled'}
                         </Label>
                     </div>
@@ -100,34 +100,34 @@ export function DiscountForm({ initialConfig }: DiscountFormProps) {
             </Card>
 
             {/* Discount Details */}
-            <Card className="bg-neutral-900/40 backdrop-blur-xl border-white/5 rounded-xl">
+            <Card className="bg-white border-border rounded-xl shadow-sm">
                 <CardHeader>
-                    <CardTitle className="text-white font-light tracking-tight flex items-center gap-3">
-                        <Percent className="w-5 h-5 text-white/60" />
+                    <CardTitle className="text-gray-900 font-light tracking-tight flex items-center gap-3">
+                        <Percent className="w-5 h-5 text-gray-500" />
                         Discount Details
                     </CardTitle>
-                    <CardDescription className="text-white/40">
+                    <CardDescription className="text-gray-500">
                         Configure the discount title and percentage to display.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="space-y-2">
-                        <Label className="text-white/60 text-xs font-medium uppercase tracking-widest">
+                        <Label className="text-gray-500 text-xs font-medium uppercase tracking-widest">
                             Discount Title
                         </Label>
                         <Input
                             value={config.title}
                             onChange={(e) => setConfig({ ...config, title: e.target.value })}
                             placeholder="e.g. New Year Sale"
-                            className="bg-black/50 border-white/10 text-white"
+                            className="bg-white border-border text-gray-900 rounded-xl h-12"
                         />
-                        <p className="text-[10px] text-white/30">
+                        <p className="text-[10px] text-gray-400">
                             This will be displayed as the main heading in the popup.
                         </p>
                     </div>
 
                     <div className="space-y-2">
-                        <Label className="text-white/60 text-xs font-medium uppercase tracking-widest">
+                        <Label className="text-gray-500 text-xs font-medium uppercase tracking-widest">
                             Discount Percentage
                         </Label>
                         <div className="flex items-center gap-2">
@@ -137,40 +137,40 @@ export function DiscountForm({ initialConfig }: DiscountFormProps) {
                                 max="100"
                                 value={config.percentage}
                                 onChange={(e) => setConfig({ ...config, percentage: parseInt(e.target.value) || 0 })}
-                                className="bg-black/50 border-white/10 text-white w-32"
+                                className="bg-white border-border text-gray-900 w-32 rounded-xl h-12"
                             />
-                            <span className="text-white/60 text-lg font-bold">%</span>
+                            <span className="text-gray-500 text-lg font-bold">%</span>
                         </div>
                     </div>
                 </CardContent>
             </Card>
 
             {/* Popup Image */}
-            <Card className="bg-neutral-900/40 backdrop-blur-xl border-white/5 rounded-xl">
+            <Card className="bg-white border-border rounded-xl shadow-sm">
                 <CardHeader>
-                    <CardTitle className="text-white font-light tracking-tight flex items-center gap-3">
-                        <Upload className="w-5 h-5 text-white/60" />
+                    <CardTitle className="text-gray-900 font-light tracking-tight flex items-center gap-3">
+                        <Upload className="w-5 h-5 text-gray-500" />
                         Popup Image
                     </CardTitle>
-                    <CardDescription className="text-white/40">
+                    <CardDescription className="text-gray-500">
                         Upload an attractive image to display in the popup.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {imagePreview ? (
-                        <div className="relative w-full max-w-md h-48 rounded-xl overflow-hidden border border-white/10 group">
+                        <div className="relative w-full max-w-md h-48 rounded-xl overflow-hidden border border-border group">
                             <Image
                                 src={imagePreview}
                                 alt="Discount Preview"
                                 fill
                                 className="object-cover"
                             />
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <div className="absolute inset-0 bg-white/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
                                 <Button
                                     type="button"
                                     variant="destructive"
                                     size="icon"
-                                    className="rounded-full"
+                                    className="rounded-full shadow-lg"
                                     onClick={handleDeleteImage}
                                     disabled={isPending}
                                 >
@@ -179,10 +179,10 @@ export function DiscountForm({ initialConfig }: DiscountFormProps) {
                             </div>
                         </div>
                     ) : (
-                        <label className="flex flex-col items-center justify-center w-full max-w-md h-48 border-2 border-dashed border-white/20 rounded-xl cursor-pointer hover:border-white/40 transition-colors bg-black/30 hover:bg-white/5">
-                            <Upload className="w-8 h-8 text-white/40 mb-2" />
-                            <span className="text-sm text-white/40">Drop image or click to upload</span>
-                            <span className="text-[10px] text-white/20 mt-1">
+                        <label className="flex flex-col items-center justify-center w-full max-w-md h-48 border-2 border-dashed border-input rounded-xl cursor-pointer hover:border-gray-400 transition-colors bg-gray-50 hover:bg-gray-100">
+                            <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                            <span className="text-sm text-gray-500">Drop image or click to upload</span>
+                            <span className="text-[10px] text-gray-400 mt-1">
                                 PNG, JPG, WebP • Recommended: 400x400
                             </span>
                             <input
@@ -197,19 +197,19 @@ export function DiscountForm({ initialConfig }: DiscountFormProps) {
             </Card>
 
             {/* Timing Settings */}
-            <Card className="bg-neutral-900/40 backdrop-blur-xl border-white/5 rounded-xl">
+            <Card className="bg-white border-border rounded-xl shadow-sm">
                 <CardHeader>
-                    <CardTitle className="text-white font-light tracking-tight flex items-center gap-3">
-                        <Clock className="w-5 h-5 text-white/60" />
+                    <CardTitle className="text-gray-900 font-light tracking-tight flex items-center gap-3">
+                        <Clock className="w-5 h-5 text-gray-500" />
                         Display Settings
                     </CardTitle>
-                    <CardDescription className="text-white/40">
+                    <CardDescription className="text-gray-500">
                         Control when and how the popup appears.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="space-y-2">
-                        <Label className="text-white/60 text-xs font-medium uppercase tracking-widest">
+                        <Label className="text-gray-500 text-xs font-medium uppercase tracking-widest">
                             Delay (seconds)
                         </Label>
                         <div className="flex items-center gap-2">
@@ -219,9 +219,9 @@ export function DiscountForm({ initialConfig }: DiscountFormProps) {
                                 max="60"
                                 value={config.delaySeconds}
                                 onChange={(e) => setConfig({ ...config, delaySeconds: parseInt(e.target.value) || 5 })}
-                                className="bg-black/50 border-white/10 text-white w-32"
+                                className="bg-white border-border text-gray-900 w-32 rounded-xl h-12"
                             />
-                            <span className="text-white/40 text-sm">seconds after page load</span>
+                            <span className="text-gray-500 text-sm">seconds after page load</span>
                         </div>
                     </div>
 
@@ -231,8 +231,8 @@ export function DiscountForm({ initialConfig }: DiscountFormProps) {
                             onCheckedChange={(checked) => setConfig({ ...config, showOncePerSession: checked })}
                         />
                         <div>
-                            <Label className="text-white/70">Show once per session</Label>
-                            <p className="text-[10px] text-white/30">
+                            <Label className="text-gray-700">Show once per session</Label>
+                            <p className="text-[10px] text-gray-400">
                                 If enabled, the popup won't appear again after user closes it (until they return in a new session).
                             </p>
                         </div>
@@ -245,7 +245,7 @@ export function DiscountForm({ initialConfig }: DiscountFormProps) {
                 <Button
                     type="submit"
                     disabled={isPending}
-                    className="bg-white text-black hover:bg-white/90 rounded-full px-8 py-6 font-semibold transition-all shadow-xl disabled:opacity-50"
+                    className="bg-gray-900 text-white hover:bg-gray-800 rounded-full px-8 py-6 font-semibold transition-all shadow-xl disabled:opacity-50"
                 >
                     {isPending ? 'Saving...' : 'Save Discount Settings'}
                 </Button>
@@ -253,3 +253,4 @@ export function DiscountForm({ initialConfig }: DiscountFormProps) {
         </form>
     );
 }
+

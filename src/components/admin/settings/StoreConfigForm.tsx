@@ -243,7 +243,7 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                                 id="show-announcement"
                                 checked={config.brand.showAnnouncement || false}
                                 onChange={(e) => setConfig({ ...config, brand: { ...config.brand, showAnnouncement: e.target.checked } })}
-                                className="rounded border-gray-300"
+                                className="rounded border-input"
                             />
                             <Label htmlFor="show-announcement">Show Announcement Bar</Label>
                         </div>
@@ -681,7 +681,7 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                                         enabled: e.target.checked
                                     }
                                 })}
-                                className="rounded border-gray-300"
+                                className="rounded border-input"
                             />
                             <Label htmlFor="benefits-enabled">Enable Benefits Strip</Label>
                         </div>
@@ -791,3 +791,4 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
         </Tabs>
     );
 }
+

@@ -122,3 +122,4 @@ export function useCommandPalette() {
 
     return { open, setOpen, toggle }
 }
+

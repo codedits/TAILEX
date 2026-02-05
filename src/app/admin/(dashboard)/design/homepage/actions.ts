@@ -19,3 +19,4 @@ export async function updateHomepageLayout(sections: HomepageSection[]) {
     revalidatePath("/admin/design/homepage");
     return { success: true };
 }
+

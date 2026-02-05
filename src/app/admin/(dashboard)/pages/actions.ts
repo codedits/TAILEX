@@ -41,3 +41,4 @@ export async function updatePage(id: string, data: any) {
     revalidatePath(`/${data.slug}`) // Revalidate the public page too
     return { success: true }
 }
+

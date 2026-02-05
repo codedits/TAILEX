@@ -35,32 +35,32 @@ export default async function NavigationDesignPage() {
         <div className="space-y-8">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-semibold tracking-tight text-white mb-1">Navigation Menus</h2>
-                    <p className="text-white/50 text-sm">Manage the structure of your menus.</p>
+                    <h2 className="text-2xl font-semibold tracking-tight text-gray-900 mb-1">Navigation Menus</h2>
+                    <p className="text-gray-500 text-sm">Manage the structure of your menus.</p>
                 </div>
-                <Button className="bg-white text-black hover:bg-white/90 rounded-full px-6 font-medium">
+                <Button className="bg-gray-900 text-white hover:bg-gray-800 rounded-full px-6 font-medium">
                     <Plus className="mr-2 h-4 w-4" /> Create Menu
                 </Button>
             </div>
 
-            <div className="border border-white/10 rounded-2xl bg-[#0A0A0A] overflow-hidden">
+            <div className="border border-border rounded-2xl bg-white overflow-hidden shadow-sm">
                 <Table>
-                    <TableHeader className="bg-white/[0.02]">
-                        <TableRow className="border-white/10 hover:bg-transparent">
-                            <TableHead className="text-white/40 font-medium px-6 py-4">Title</TableHead>
-                            <TableHead className="text-white/40 font-medium px-4">Handle</TableHead>
-                            <TableHead className="text-white/40 font-medium px-4 text-center">Items</TableHead>
-                            <TableHead className="text-white/40 font-medium px-6 text-right">Actions</TableHead>
+                    <TableHeader className="bg-gray-50/50">
+                        <TableRow className="border-gray-100 hover:bg-transparent">
+                            <TableHead className="text-gray-500 font-medium px-6 py-4">Title</TableHead>
+                            <TableHead className="text-gray-500 font-medium px-4">Handle</TableHead>
+                            <TableHead className="text-gray-500 font-medium px-4 text-center">Items</TableHead>
+                            <TableHead className="text-gray-500 font-medium px-6 text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {menus?.map(menu => (
-                            <TableRow key={menu.id} className="border-white/5 hover:bg-white/[0.02]">
-                                <TableCell className="px-6 py-4 font-medium text-white">{menu.title}</TableCell>
-                                <TableCell className="px-4 text-white/50 font-mono text-sm">{menu.handle}</TableCell>
-                                <TableCell className="px-4 text-center text-white/50">{Array.isArray(menu.items) ? menu.items.length : 0}</TableCell>
+                            <TableRow key={menu.id} className="border-gray-50 hover:bg-gray-50">
+                                <TableCell className="px-6 py-4 font-medium text-gray-900">{menu.title}</TableCell>
+                                <TableCell className="px-4 text-gray-500 font-mono text-sm">{menu.handle}</TableCell>
+                                <TableCell className="px-4 text-center text-gray-500">{Array.isArray(menu.items) ? menu.items.length : 0}</TableCell>
                                 <TableCell className="px-6 text-right">
-                                    <Button variant="ghost" size="sm" asChild>
+                                    <Button variant="ghost" size="sm" asChild className="text-gray-600 hover:text-gray-900 hover:bg-gray-100">
                                         <Link href={`/admin/navigation/${menu.id}`}>Edit</Link>
                                     </Button>
                                 </TableCell>
@@ -72,3 +72,4 @@ export default async function NavigationDesignPage() {
         </div>
     );
 }
+

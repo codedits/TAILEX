@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { Star, CheckCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import ReviewForm from "@/components/product/ReviewForm";
+import { useRouter } from "next/navigation";
 
 interface ReviewItem {
   id: string;
@@ -72,29 +75,37 @@ const defaultStats: ReviewStats = {
   ]
 };
 
-export default function ReviewsSection({ 
-  reviews = defaultReviews, 
+export default function ReviewsSection({
+  reviews = defaultReviews,
   stats = defaultStats,
-  productId 
+  productId
 }: ReviewsSectionProps) {
+  const [showForm, setShowForm] = useState(false);
+  const router = useRouter();
+
   const displayReviews = reviews.length > 0 ? reviews : defaultReviews;
   const displayStats = stats.total > 0 ? stats : defaultStats;
-  
+
+  const handleReviewSuccess = () => {
+    setShowForm(false);
+    router.refresh();
+  };
+
   return (
     <section className="py-16 border-t">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
         {/* Summary */}
         <div className="lg:col-span-4 space-y-6">
           <h2 className="text-2xl font-display uppercase tracking-wider">Reviews</h2>
-          
+
           <div className="flex items-baseline gap-4">
             <span className="text-5xl font-medium">{displayStats.average.toFixed(1)}</span>
             <div className="flex flex-col">
               <div className="flex text-primary">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <Star 
-                    key={star} 
-                    className={`w-4 h-4 ${star <= Math.round(displayStats.average) ? 'fill-current' : 'text-muted'}`} 
+                  <Star
+                    key={star}
+                    className={`w-4 h-4 ${star <= Math.round(displayStats.average) ? 'fill-current' : 'text-muted'}`}
                   />
                 ))}
               </div>
@@ -115,56 +126,76 @@ export default function ReviewsSection({
             ))}
           </div>
 
-          <Button variant="outline" className="w-full uppercase tracking-widest">
-            Write a Review
-          </Button>
+          {productId && (
+            <Button
+              variant="outline"
+              className="w-full uppercase tracking-widest"
+              onClick={() => setShowForm(!showForm)}
+            >
+              {showForm ? "Cancel" : "Write a Review"}
+            </Button>
+          )}
         </div>
 
-        {/* Review List */}
+        {/* Review Form or List */}
         <div className="lg:col-span-8 space-y-8">
-          {displayReviews.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <p>No reviews yet. Be the first to review this product!</p>
-            </div>
-          ) : (
-            displayReviews.map((review) => (
-              <div key={review.id} className="border-b pb-8 last:border-0">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center gap-3">
-                    <Avatar>
-                      <AvatarFallback>{review.author[0]}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-sm">{review.author}</p>
-                        {review.verified && (
-                          <span className="inline-flex items-center gap-1 text-xs text-emerald-500">
-                            <CheckCircle className="w-3 h-3" />
-                            Verified
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex text-primary mt-0.5">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-3 h-3 ${i < review.rating ? "fill-current" : "text-muted"}`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <span className="text-xs text-muted-foreground">{review.date}</span>
+          {/* Review Form */}
+          {showForm && productId && (
+            <ReviewForm
+              productId={productId}
+              onSuccess={handleReviewSuccess}
+              onCancel={() => setShowForm(false)}
+            />
+          )}
+
+          {/* Review List */}
+          {!showForm && (
+            <>
+              {displayReviews.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <p>No reviews yet. Be the first to review this product!</p>
                 </div>
-                {review.title && <h3 className="font-medium mb-2">{review.title}</h3>}
-                <p className="text-muted-foreground text-sm leading-relaxed">{review.content}</p>
-                {(review.helpful_count ?? 0) > 0 && (
-                  <p className="text-xs text-muted-foreground mt-3">
-                    {review.helpful_count} {review.helpful_count === 1 ? 'person' : 'people'} found this helpful
-                  </p>
-                )}
-              </div>
-            ))
+              ) : (
+                displayReviews.map((review) => (
+                  <div key={review.id} className="border-b pb-8 last:border-0">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex items-center gap-3">
+                        <Avatar>
+                          <AvatarFallback>{review.author[0]}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-sm">{review.author}</p>
+                            {review.verified && (
+                              <span className="inline-flex items-center gap-1 text-xs text-emerald-500">
+                                <CheckCircle className="w-3 h-3" />
+                                Verified
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex text-primary mt-0.5">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`w-3 h-3 ${i < review.rating ? "fill-current" : "text-muted"}`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-xs text-muted-foreground">{review.date}</span>
+                    </div>
+                    {review.title && <h3 className="font-medium mb-2">{review.title}</h3>}
+                    <p className="text-muted-foreground text-sm leading-relaxed">{review.content}</p>
+                    {(review.helpful_count ?? 0) > 0 && (
+                      <p className="text-xs text-muted-foreground mt-3">
+                        {review.helpful_count} {review.helpful_count === 1 ? 'person' : 'people'} found this helpful
+                      </p>
+                    )}
+                  </div>
+                ))
+              )}
+            </>
           )}
         </div>
       </div>

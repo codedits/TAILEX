@@ -22,9 +22,9 @@ const PriceCell = ({ amount, saleAmount }: { amount: number, saleAmount?: number
     const formatCurrency = useFormatCurrency();
     return (
         <div className="flex flex-col">
-            <span className="font-mono text-white/90">{formatCurrency(amount)}</span>
+            <span className="font-mono text-gray-900">{formatCurrency(amount)}</span>
             {saleAmount && (
-                <span className="text-emerald-400 text-[10px] font-mono">
+                <span className="text-emerald-600 text-[10px] font-mono">
                     {formatCurrency(saleAmount)}
                 </span>
             )}
@@ -40,7 +40,7 @@ export const columns: ColumnDef<Product>[] = [
                 checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
                 onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
                 aria-label="Select all"
-                className="border-white/20 data-[state=checked]:bg-white data-[state=checked]:text-black"
+                className="border-input data-[state=checked]:bg-gray-900 data-[state=checked]:text-white"
             />
         ),
         cell: ({ row }) => (
@@ -48,7 +48,7 @@ export const columns: ColumnDef<Product>[] = [
                 checked={row.getIsSelected()}
                 onCheckedChange={(value) => row.toggleSelected(!!value)}
                 aria-label="Select row"
-                className="border-white/20 data-[state=checked]:bg-white data-[state=checked]:text-black"
+                className="border-input data-[state=checked]:bg-gray-900 data-[state=checked]:text-white"
             />
         ),
         enableSorting: false,
@@ -61,7 +61,7 @@ export const columns: ColumnDef<Product>[] = [
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                    className="hover:bg-white/5 text-white/60 hover:text-white pl-0"
+                    className="hover:bg-gray-100 text-gray-500 hover:text-gray-900 pl-0"
                 >
                     Product
                     <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -73,15 +73,15 @@ export const columns: ColumnDef<Product>[] = [
             return (
                 <div className="flex items-center gap-4">
                     {product.cover_image ? (
-                        <img src={product.cover_image} alt={product.title} className="w-10 h-10 object-cover rounded-lg border border-white/10" />
+                        <img src={product.cover_image} alt={product.title} className="w-10 h-10 object-cover rounded-lg border border-border" />
                     ) : (
-                        <div className="w-10 h-10 bg-white/5 rounded-lg border border-white/10 flex items-center justify-center">
-                            <span className="text-white/20 text-[10px]">Img</span>
+                        <div className="w-10 h-10 bg-gray-100 rounded-lg border border-border flex items-center justify-center">
+                            <span className="text-gray-400 text-[10px]">Img</span>
                         </div>
                     )}
                     <div>
-                        <span className="font-medium text-white block truncate max-w-[200px]">{product.title}</span>
-                        <span className="text-white/40 text-[10px] font-mono">{product.sku || 'NO SKU'}</span>
+                        <span className="font-medium text-gray-900 block truncate max-w-[200px]">{product.title}</span>
+                        <span className="text-gray-500 text-[10px] font-mono">{product.sku || 'NO SKU'}</span>
                     </div>
                 </div>
             )
@@ -102,9 +102,9 @@ export const columns: ColumnDef<Product>[] = [
         header: () => <div className="text-center">Stock</div>,
         cell: ({ row }) => {
             const stock = row.getValue<number>("stock") ?? 0;
-            let color = "text-white/60";
-            if (stock === 0) color = "text-red-400";
-            else if (stock < 10) color = "text-amber-400";
+            let color = "text-gray-600";
+            if (stock === 0) color = "text-red-600";
+            else if (stock < 10) color = "text-amber-600";
 
             return <div className={`text-center font-mono ${color}`}>{stock}</div>
         }
@@ -114,10 +114,10 @@ export const columns: ColumnDef<Product>[] = [
         header: () => <div className="text-center">Status</div>,
         cell: ({ row }) => {
             const status = row.getValue<string>("status") || 'draft';
-            let color = "bg-neutral-500/10 text-neutral-400 border-neutral-500/20";
-            if (status === 'active') color = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
-            if (status === 'archived') color = "bg-red-500/10 text-red-400 border-red-500/20";
-            if (status === 'draft') color = "bg-amber-500/10 text-amber-400 border-amber-500/20";
+            let color = "bg-gray-100 text-gray-600 border-border";
+            if (status === 'active') color = "bg-green-100 text-green-700 border-green-200";
+            if (status === 'archived') color = "bg-red-100 text-red-700 border-red-200";
+            if (status === 'draft') color = "bg-amber-100 text-amber-700 border-amber-200";
 
             return (
                 <div className="flex justify-center">
@@ -136,29 +136,29 @@ export const columns: ColumnDef<Product>[] = [
             return (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-white/10 text-white/60">
+                        <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-gray-100 text-gray-500">
                             <span className="sr-only">Open menu</span>
                             <MoreHorizontal className="h-4 w-4" />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-neutral-900 border-white/10">
-                        <DropdownMenuLabel className="text-white">Actions</DropdownMenuLabel>
+                    <DropdownMenuContent align="end" className="bg-white border-border">
+                        <DropdownMenuLabel className="text-gray-900">Actions</DropdownMenuLabel>
                         <DropdownMenuItem
                             onClick={() => navigator.clipboard.writeText(product.id)}
-                            className="text-white focus:bg-white/10"
+                            className="text-gray-700 focus:bg-gray-100"
                         >
                             Copy Product ID
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-white/10" />
-                        <DropdownMenuItem className="text-white focus:bg-white/10" asChild>
+                        <DropdownMenuSeparator className="bg-gray-200" />
+                        <DropdownMenuItem className="text-gray-700 focus:bg-gray-100" asChild>
                             <Link href={`/admin/products/${product.id}`}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 Edit Product
                             </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-white/10" />
+                        <DropdownMenuSeparator className="bg-gray-200" />
                         <DropdownMenuItem
-                            className="text-red-400 focus:bg-red-500/10 focus:text-red-400"
+                            className="text-red-600 focus:bg-red-50 focus:text-red-600"
                             onClick={async () => {
                                 if (confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
                                     const result = await deleteProduct(product.id);
@@ -178,3 +178,5 @@ export const columns: ColumnDef<Product>[] = [
         },
     },
 ]
+
+

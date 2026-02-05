@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { useState } from "react";
 import { CartProvider } from "@/context/CartContext";
+import { WishlistProvider } from "@/context/WishlistContext";
 import { UserAuthProvider } from "@/context/UserAuthContext";
 import { StoreConfigProvider } from "@/context/StoreConfigContext";
 import { StoreConfig } from "@/services/config";
@@ -27,18 +28,19 @@ export function Providers({
       <StoreConfigProvider initialConfig={initialConfig}>
         <UserAuthProvider>
           <CartProvider>
-            <QuickViewProvider>
-              <TooltipProvider>
-                {children}
-                <Toaster />
-                <Sonner position="top-center" />
-                <DiscountPopup />
-              </TooltipProvider>
-            </QuickViewProvider>
+            <WishlistProvider>
+              <QuickViewProvider>
+                <TooltipProvider>
+                  {children}
+                  <Toaster />
+                  <Sonner position="top-center" />
+                  <DiscountPopup />
+                </TooltipProvider>
+              </QuickViewProvider>
+            </WishlistProvider>
           </CartProvider>
         </UserAuthProvider>
       </StoreConfigProvider>
     </QueryClientProvider>
   );
 }
-

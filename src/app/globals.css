@@ -95,6 +95,27 @@
     --cta: 0 0% 98%;
     --cta-foreground: 0 0% 9%;
   }
+
+  .admin-panel {
+    --border: 0 0% 0% / 0.8;
+    --input: 0 0% 0% / 1;
+    --ring: 0 0% 0%;
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+    --accent: 0 0% 93%;
+    --accent-foreground: 0 0% 0%;
+  }
+
+  /* Keep inputs subtle while allowing button outlines to remain solid black */
+  .admin-panel input:not([type="button"]):not([type="submit"]),
+  .admin-panel textarea,
+  .admin-panel select {
+    border-color: rgba(0, 0, 0, 0.2);
+  }
+
+  .admin-panel [role="switch"][data-state="unchecked"] {
+    @apply bg-gray-200;
+  }
 }
 
 @layer utilities {

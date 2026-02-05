@@ -52,11 +52,11 @@ export function ActionDrawer({
 
     return (
         <Drawer open={open} onOpenChange={onOpenChange}>
-            <DrawerContent className="bg-neutral-900 border-white/10">
+            <DrawerContent className="bg-white border-border">
                 <DrawerHeader className="text-left">
-                    <DrawerTitle className="text-white">{title}</DrawerTitle>
+                    <DrawerTitle className="text-gray-900">{title}</DrawerTitle>
                     {description && (
-                        <DrawerDescription className="text-white/50">
+                        <DrawerDescription className="text-gray-500">
                             {description}
                         </DrawerDescription>
                     )}
@@ -71,8 +71,8 @@ export function ActionDrawer({
                             className={cn(
                                 "w-full justify-start h-14 text-base font-medium rounded-xl",
                                 action.variant === "destructive"
-                                    ? "text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                    : "text-white hover:bg-white/10"
+                                    ? "text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    : "text-gray-700 hover:bg-gray-100"
                             )}
                         >
                             {action.icon && (
@@ -88,7 +88,7 @@ export function ActionDrawer({
                     <DrawerClose asChild>
                         <Button
                             variant="outline"
-                            className="border-white/10 text-white/60 hover:bg-white/5 hover:text-white"
+                            className="border-border text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                         >
                             Cancel
                         </Button>
@@ -98,3 +98,5 @@ export function ActionDrawer({
         </Drawer>
     )
 }
+
+

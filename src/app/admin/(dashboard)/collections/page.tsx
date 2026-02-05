@@ -30,18 +30,17 @@ export default async function CollectionsPage() {
     <div className="space-y-8 max-w-[1600px] mx-auto">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h2 className="text-2xl md:text-3xl font-light tracking-tight text-white mb-1">
+          <h2 className="text-2xl md:text-3xl font-light tracking-tight text-gray-900 mb-1">
             Collections
           </h2>
-          <p className="text-white/50 text-sm">
-            Organize your products into logical groups.
+          <p className="text-gray-500 text-sm">
+            Manage your store's collections.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Link
-            href="/"
-            target="_blank"
-            className="flex items-center gap-1.5 px-3 py-2 text-sm text-white/50 hover:text-white hover:bg-white/5 rounded-full transition-colors"
+            href="/admin/collections/new"
+            className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
           >
             <ExternalLink className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">View Homepage</span>
@@ -65,3 +64,4 @@ export default async function CollectionsPage() {
     </div>
   );
 }
+

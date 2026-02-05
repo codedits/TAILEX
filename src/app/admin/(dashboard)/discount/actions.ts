@@ -89,3 +89,4 @@ export async function deleteDiscountImage() {
         return { error: error.message || 'Failed to delete image' };
     }
 }
+

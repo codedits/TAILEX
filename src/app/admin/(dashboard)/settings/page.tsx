@@ -14,13 +14,13 @@ export default async function SettingsPage() {
         <div className="flex-1 space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-3xl font-light tracking-tight">Settings</h2>
-                    <p className="text-sm text-white/50 mt-1">Configure your store appearance and behavior</p>
+                    <h2 className="text-3xl font-light tracking-tight text-gray-900">Settings</h2>
+                    <p className="text-sm text-gray-500 mt-1">Configure your store appearance and behavior</p>
                 </div>
                 <Link
                     href="/"
                     target="_blank"
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-white hover:bg-gray-50 border border-border text-gray-700 rounded-lg transition-colors"
                 >
                     <ExternalLink className="w-4 h-4" />
                     Preview Changes
@@ -30,3 +30,4 @@ export default async function SettingsPage() {
         </div>
     );
 }
+

@@ -33,3 +33,4 @@ export async function logout() {
     cookieStore.delete('admin_access_token')
     redirect('/admin/login')
 }
+

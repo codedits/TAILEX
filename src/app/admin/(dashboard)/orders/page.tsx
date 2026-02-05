@@ -18,8 +18,8 @@ export default function AdminOrdersPage() {
     <div className="space-y-8 max-w-[1600px] mx-auto">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h2 className="text-2xl md:text-3xl font-light tracking-tight text-white">Orders</h2>
-          <p className="text-white/40 mt-1 text-sm">Manage and track customer orders.</p>
+          <h2 className="text-2xl md:text-3xl font-light tracking-tight text-gray-900">Orders</h2>
+          <p className="text-gray-500 mt-1 text-sm">Manage and track customer orders.</p>
         </div>
       </div>
 
@@ -29,3 +29,4 @@ export default function AdminOrdersPage() {
     </div>
   );
 }
+

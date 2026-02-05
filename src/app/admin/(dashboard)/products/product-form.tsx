@@ -50,15 +50,15 @@ type ImageItem = {
   isExisting: boolean;
 };
 
-function SortableImage({ 
-  item, 
-  index, 
-  onRemove, 
-  onCrop 
-}: { 
-  item: ImageItem; 
-  index: number; 
-  onRemove: (idx: number) => void; 
+function SortableImage({
+  item,
+  index,
+  onRemove,
+  onCrop
+}: {
+  item: ImageItem;
+  index: number;
+  onRemove: (idx: number) => void;
   onCrop: (idx: number, url: string) => void;
 }) {
   const {
@@ -78,18 +78,18 @@ function SortableImage({
   };
 
   return (
-    <div 
-      ref={setNodeRef} 
-      style={style} 
-      className="relative aspect-square rounded-xl overflow-hidden border border-white/10 bg-black group transition-all"
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="relative aspect-square rounded-xl overflow-hidden border border-border bg-gray-50 group transition-all"
     >
       <Image src={item.url} alt="Preview" fill className="object-cover" />
-      
+
       {/* Drag Handle */}
-      <div 
-        {...attributes} 
+      <div
+        {...attributes}
         {...listeners}
-        className="absolute top-2 left-2 p-1.5 bg-black/80 text-white rounded-full opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-20"
+        className="absolute top-2 left-2 p-1.5 bg-white/90 text-gray-900 rounded-full opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-20 shadow-sm hover:bg-white"
       >
         <GripVertical className="w-4 h-4" />
       </div>
@@ -98,14 +98,14 @@ function SortableImage({
         <button
           type="button"
           onClick={() => onCrop(index, item.url)}
-          className="bg-black/80 text-white p-1.5 rounded-full hover:bg-white hover:text-black transition-colors"
+          className="bg-white/90 text-gray-900 p-1.5 rounded-full hover:bg-white transition-colors shadow-sm"
         >
           <CropIcon className="w-3 h-3" />
         </button>
         <button
           type="button"
           onClick={() => onRemove(index)}
-          className="bg-black/80 text-white p-1.5 rounded-full hover:bg-red-500 transition-colors"
+          className="bg-white/90 text-gray-900 p-1.5 rounded-full hover:bg-red-50 hover:text-red-500 transition-colors shadow-sm"
         >
           <X className="w-3 h-3" />
         </button>
@@ -174,7 +174,7 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
     if (files && files.length > 0) {
       const remainingSlots = 10 - images.length;
       const fileArray = Array.from(files).slice(0, remainingSlots);
-      
+
       const newItems: ImageItem[] = fileArray.map(file => ({
         id: Math.random().toString(36).substr(2, 9),
         url: URL.createObjectURL(file),
@@ -272,17 +272,17 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-8">
             {/* Info */}
-            <div className="bg-[#0A0A0A] border border-white/10 rounded-2xl p-8 space-y-6">
-              <h3 className="text-lg font-light tracking-tight text-white mb-4 border-b border-white/5 pb-4">Product Details</h3>
+            <div className="bg-white border border-border rounded-2xl p-8 space-y-6 shadow-sm">
+              <h3 className="text-lg font-light tracking-tight text-gray-900 mb-4 border-b border-gray-100 pb-4">Product Details</h3>
 
               <FormField
                 control={form.control}
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-white/60 text-xs font-medium uppercase tracking-widest">Title</FormLabel>
+                    <FormLabel className="text-gray-500 text-xs font-medium uppercase tracking-widest">Title</FormLabel>
                     <FormControl>
-                      <Input placeholder="Premium Linen Shirt" {...field} className="bg-black border-white/10 text-white rounded-xl h-12" />
+                      <Input placeholder="Premium Linen Shirt" {...field} className="bg-white border-border text-gray-900 rounded-xl h-12" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -294,9 +294,9 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
                 name="slug"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-white/60 text-xs font-medium uppercase tracking-widest">URL Handle</FormLabel>
+                    <FormLabel className="text-gray-500 text-xs font-medium uppercase tracking-widest">URL Handle</FormLabel>
                     <FormControl>
-                      <Input placeholder="premium-linen-shirt" {...field} className="bg-black border-white/10 text-white rounded-xl h-12 font-mono" />
+                      <Input placeholder="premium-linen-shirt" {...field} className="bg-white border-border text-gray-900 rounded-xl h-12 font-mono" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -308,12 +308,12 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-white/60 text-xs font-medium uppercase tracking-widest">Description</FormLabel>
+                    <FormLabel className="text-gray-500 text-xs font-medium uppercase tracking-widest">Description</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Product description..."
                         {...field}
-                        className="bg-black border-white/10 text-white rounded-xl min-h-[160px] resize-none"
+                        className="bg-white border-border text-gray-900 rounded-xl min-h-[160px] resize-none"
                       />
                     </FormControl>
                     <FormMessage />
@@ -323,24 +323,24 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
             </div>
 
             {/* Media */}
-            <div className="bg-[#0A0A0A] border border-white/10 rounded-2xl p-8 space-y-6">
-              <h3 className="text-lg font-light tracking-tight text-white mb-4 border-b border-white/5 pb-4">Media</h3>
+            <div className="bg-white border border-border rounded-2xl p-8 space-y-6 shadow-sm">
+              <h3 className="text-lg font-light tracking-tight text-gray-900 mb-4 border-b border-gray-100 pb-4">Media</h3>
 
               {images.length > 0 && (
-                <DndContext 
+                <DndContext
                   sensors={sensors}
                   collisionDetection={closestCenter}
                   onDragEnd={handleDragEnd}
                 >
-                  <SortableContext 
+                  <SortableContext
                     items={images.map(img => img.id)}
                     strategy={rectSortingStrategy}
                   >
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                       {images.map((item, idx) => (
-                        <SortableImage 
-                          key={item.id} 
-                          item={item} 
+                        <SortableImage
+                          key={item.id}
+                          item={item}
                           index={idx}
                           onRemove={removeImage}
                           onCrop={(i, url) => setCropData({ index: i, image: url })}
@@ -351,27 +351,27 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
                 </DndContext>
               )}
 
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-white/30 transition-all bg-black/20 hover:bg-white/5">
-                <Upload className="w-8 h-8 text-white/40 mb-2" />
-                <span className="text-sm text-white/40 font-light">Drop images or click to upload</span>
+              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-gray-400 transition-all bg-gray-50 hover:bg-gray-100">
+                <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                <span className="text-sm text-gray-500 font-light">Drop images or click to upload</span>
                 <input type="file" accept="image/*" multiple onChange={handleImageChange} className="hidden" />
               </label>
             </div>
 
             {/* Pricing */}
-            <div className="bg-[#0A0A0A] border border-white/10 rounded-2xl p-8 space-y-6">
-              <h3 className="text-lg font-light tracking-tight text-white mb-4 border-b border-white/5 pb-4">Pricing</h3>
+            <div className="bg-white border border-border rounded-2xl p-8 space-y-6 shadow-sm">
+              <h3 className="text-lg font-light tracking-tight text-gray-900 mb-4 border-b border-gray-100 pb-4">Pricing</h3>
               <div className="grid grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
                   name="price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-white/60 text-xs font-medium uppercase tracking-widest">
+                      <FormLabel className="text-gray-500 text-xs font-medium uppercase tracking-widest">
                         Price ({currency?.code || 'PKR'} {currency?.symbol || 'Rs.'})
                       </FormLabel>
                       <FormControl>
-                        <Input type="number" step="0.01" {...field} className="bg-black border-white/10 text-white rounded-xl h-12 font-mono" />
+                        <Input type="number" step="0.01" {...field} className="bg-white border-border text-gray-900 rounded-xl h-12 font-mono" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -382,11 +382,11 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
                   name="sale_price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-white/60 text-xs font-medium uppercase tracking-widest">
+                      <FormLabel className="text-gray-500 text-xs font-medium uppercase tracking-widest">
                         Sale Price ({currency?.code || 'PKR'} {currency?.symbol || 'Rs.'})
                       </FormLabel>
                       <FormControl>
-                        <Input type="number" step="0.01" {...field} value={field.value || ''} className="bg-black border-white/10 text-white rounded-xl h-12 font-mono" />
+                        <Input type="number" step="0.01" {...field} value={field.value || ''} className="bg-white border-border text-gray-900 rounded-xl h-12 font-mono" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -396,17 +396,17 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
             </div>
 
             {/* Inventory */}
-            <div className="bg-[#0A0A0A] border border-white/10 rounded-2xl p-8 space-y-6">
-              <h3 className="text-lg font-light tracking-tight text-white mb-4 border-b border-white/5 pb-4">Inventory</h3>
+            <div className="bg-white border border-border rounded-2xl p-8 space-y-6 shadow-sm">
+              <h3 className="text-lg font-light tracking-tight text-gray-900 mb-4 border-b border-gray-100 pb-4">Inventory</h3>
               <div className="grid grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
                   name="sku"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-white/60 text-xs font-medium uppercase tracking-widest">SKU</FormLabel>
+                      <FormLabel className="text-gray-500 text-xs font-medium uppercase tracking-widest">SKU</FormLabel>
                       <FormControl>
-                        <Input {...field} className="bg-black border-white/10 text-white rounded-xl h-12 font-mono" />
+                        <Input {...field} className="bg-white border-border text-gray-900 rounded-xl h-12 font-mono" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -417,32 +417,51 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
                   name="stock"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-white/60 text-xs font-medium uppercase tracking-widest">Stock</FormLabel>
+                      <FormLabel className="text-gray-500 text-xs font-medium uppercase tracking-widest">Stock</FormLabel>
                       <FormControl>
-                        <Input type="number" {...field} className="bg-black border-white/10 text-white rounded-xl h-12 font-mono" />
+                        <Input type="number" {...field} className="bg-white border-border text-gray-900 rounded-xl h-12 font-mono" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
+
+              <FormField
+                control={form.control}
+                name="track_inventory"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-4 bg-white shadow-sm">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-sm font-medium text-gray-900">Track Inventory</FormLabel>
+                      <p className="text-[10px] text-gray-500">Enable stock management for this product</p>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
             </div>
           </div>
 
           {/* Right Column */}
           <div className="space-y-8">
-            <div className="bg-[#0A0A0A] border border-white/10 rounded-2xl p-6 space-y-6 sticky top-24">
-              <h3 className="text-lg font-light tracking-tight text-white border-b border-white/5 pb-4">Status & Organization</h3>
+            <div className="bg-white border border-border rounded-2xl p-6 space-y-6 sticky top-24 shadow-sm">
+              <h3 className="text-lg font-light tracking-tight text-gray-900 border-b border-gray-100 pb-4">Status & Organization</h3>
 
               <FormField
                 control={form.control}
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-white/60 text-xs font-medium uppercase tracking-widest">Status</FormLabel>
+                    <FormLabel className="text-gray-500 text-xs font-medium uppercase tracking-widest">Status</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                       <FormControl>
-                        <SelectTrigger className="bg-black border-white/10 text-white h-12">
+                        <SelectTrigger className="bg-white border-border text-gray-900 h-12">
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                       </FormControl>
@@ -461,10 +480,10 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
                 control={form.control}
                 name="is_featured"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border border-white/5 p-4 bg-white/[0.02]">
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-4 bg-white shadow-sm">
                     <div className="space-y-0.5">
-                      <FormLabel className="text-sm font-medium text-white">Feature Product</FormLabel>
-                      <p className="text-[10px] text-white/50">Show on homepage</p>
+                      <FormLabel className="text-sm font-medium text-gray-900">Feature Product</FormLabel>
+                      <p className="text-[10px] text-gray-500">Show on homepage</p>
                     </div>
                     <FormControl>
                       <Switch
@@ -481,10 +500,10 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
                 name="category_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-white/60 text-xs font-medium uppercase tracking-widest">Collection</FormLabel>
+                    <FormLabel className="text-gray-500 text-xs font-medium uppercase tracking-widest">Collection</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value || undefined}>
                       <FormControl>
-                        <SelectTrigger className="bg-black border-white/10 text-white h-12">
+                        <SelectTrigger className="bg-white border-border text-gray-900 h-12">
                           <SelectValue placeholder="Select collection" />
                         </SelectTrigger>
                       </FormControl>
@@ -498,11 +517,11 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
                 )}
               />
 
-              <div className="pt-4 border-t border-white/5">
+              <div className="pt-4 border-t border-gray-100">
                 <Button
                   type="submit"
                   disabled={isPending}
-                  className="w-full bg-white text-black hover:bg-white/90 rounded-xl h-12 font-semibold transition-all shadow-xl disabled:opacity-50"
+                  className="w-full bg-gray-900 text-white hover:bg-gray-800 rounded-xl h-12 font-semibold transition-all shadow-xl disabled:opacity-50"
                 >
                   {isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                   {initialData?.id ? "Update Product" : "Create Product"}
@@ -521,7 +540,7 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
           onCropComplete={(blob) => {
             const file = new File([blob], `product-${Date.now()}.webp`, { type: "image/webp" });
             const objectUrl = URL.createObjectURL(file);
-            
+
             setImages(prev => {
               const next = [...prev];
               next[cropData.index] = {
@@ -532,7 +551,7 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
               };
               return next;
             });
-            
+
             setCropData(null);
           }}
           onCancel={() => setCropData(null)}
@@ -541,3 +560,4 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
     </Form>
   );
 }
+

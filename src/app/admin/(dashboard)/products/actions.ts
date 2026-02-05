@@ -13,3 +13,4 @@ export async function updateProduct(formData: FormData) {
 export async function deleteProduct(id: string) {
   return api.deleteProduct(id)
 }
+

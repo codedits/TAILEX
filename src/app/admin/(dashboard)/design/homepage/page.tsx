@@ -21,11 +21,12 @@ export default async function HomepageDesignPage() {
     return (
         <div className="space-y-8">
             <div>
-                <h2 className="text-2xl font-semibold tracking-tight text-white mb-1">Homepage Layout</h2>
-                <p className="text-white/50 text-sm">Drag to reorder sections or toggle their visibility.</p>
+                <h2 className="text-2xl font-semibold tracking-tight text-gray-900 mb-1">Homepage Layout</h2>
+                <p className="text-gray-500 text-sm">Drag to reorder sections or toggle their visibility.</p>
             </div>
 
             <HomepageBuilderClient initialSections={sections} />
         </div>
     );
 }
+

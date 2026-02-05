@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingBag, Eye } from "lucide-react";
+import { ShoppingBag, Eye, Heart, Star, Plus } from "lucide-react";
 import { Product } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useFormatCurrency } from "@/context/StoreConfigContext";
 import { useQuickView } from "@/context/QuickViewContext";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 
 interface ProductCardProps extends Product {
   priority?: boolean;
@@ -18,8 +19,9 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
   const formatCurrency = useFormatCurrency();
   const { openQuickView } = useQuickView();
   const { addItem } = useCart();
+  const { isInWishlist, toggleItem } = useWishlist();
 
-  const { title, price, images, slug, cover_image, sale_price, tags, stock } = product;
+  const { title, price, images, slug, cover_image, sale_price, tags, stock, id, review_count, average_rating } = product;
 
   const isValidImage = (img: any): img is string => typeof img === 'string' && img.trim().length > 0;
 
@@ -35,6 +37,9 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
   const isNew = tags?.some(t => t.toLowerCase() === 'new');
   const discount = isSale ? Math.round(((price - (sale_price as number)) / price) * 100) : 0;
   const isLowStock = stock !== undefined && stock > 0 && stock <= 5;
+
+  // Wishlist state
+  const isWishlisted = isInWishlist(id);
 
   const handleQuickView = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -63,105 +68,152 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
     }
   };
 
+  const handleWishlistToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleItem(id, title);
+  };
+
   return (
-    <div className="product-card group relative flex flex-col w-full">
+    <div className="product-card group relative flex flex-col w-full h-full bg-white">
       {/* Image Container with Badges and Hover Icons */}
-      <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#F3F3F3] mb-4">
+      <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#F9F9F9] transition-all duration-500">
         <Link href={href} className="absolute inset-0 z-10">
           <span className="sr-only">View {title}</span>
         </Link>
 
-        {/* Sale Badge - Black Square Top Left */}
-        {isSale && (
-          <div className="absolute top-0 left-0 z-20 bg-black text-white text-[11px] font-bold px-2 py-1.5 leading-none shadow-sm">
-            -{discount}%
-          </div>
-        )}
+        {/* Badges - Shopify Style (Pills) */}
+        <div className="absolute top-3 left-3 z-20 flex flex-col gap-1.5 pointer-events-none">
+          {isSale && (
+            <div className="bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider shadow-sm">
+              Sale
+            </div>
+          )}
+          {isNew && !isSale && (
+            <div className="bg-black text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider shadow-sm">
+              New
+            </div>
+          )}
+        </div>
 
-        {/* New Badge - White Square Top Left (Below Sale if both exist) */}
-        {isNew && !isSale && (
-          <div className="absolute top-0 left-0 z-20 bg-white text-black border border-black/10 text-[11px] font-bold px-2 py-1.5 leading-none shadow-sm uppercase tracking-tighter">
-            New
-          </div>
-        )}
+        {/* Wishlist Heart Button - Top Right */}
+        <button
+          onClick={handleWishlistToggle}
+          className={cn(
+            "absolute top-3 right-3 z-30 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300",
+            isWishlisted
+              ? "text-red-500"
+              : "text-neutral-400 hover:text-red-500"
+          )}
+          aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+        >
+          <Heart
+            className={cn(
+              "w-5 h-5 transition-all duration-300",
+              isWishlisted && "fill-current"
+            )}
+          />
+        </button>
 
-        {/* Low Stock Badge - Top Right */}
+        {/* Low Stock Badge */}
         {isLowStock && (
-          <div className="absolute top-0 right-0 z-20 bg-red-500 text-white text-[10px] font-bold px-2 py-1.5 leading-none">
-            Only {stock} left
+          <div className="absolute top-3 right-12 z-20 bg-orange-500/90 backdrop-blur-sm text-white text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-wide">
+            Low Stock
           </div>
         )}
 
         {/* Images with Fade Effect */}
-        <div className="relative w-full h-full transition-transform duration-700 ease-out group-hover:scale-105">
+        <div className="relative w-full h-full">
           {isValidImage(imagePrimary) && (
-            <div className="absolute inset-0 transition-opacity duration-500 ease-in-out group-hover:opacity-0">
+            <div className="absolute inset-0 transition-opacity duration-700 ease-in-out">
               <Image
                 src={imagePrimary}
                 alt={title}
                 fill
                 priority={priority}
                 sizes={sizes}
-                quality={80}
-                className="object-cover"
+                quality={85}
+                className="object-cover group-hover:scale-105 transition-transform duration-700"
               />
             </div>
           )}
           {isValidImage(imageSecondary) && (
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out">
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-in-out">
               <Image
                 src={imageSecondary}
                 alt={`${title} alternate view`}
                 fill
                 sizes={sizes}
-                quality={80}
-                className="object-cover"
+                quality={85}
+                className="object-cover group-hover:scale-105 transition-transform duration-700"
               />
             </div>
           )}
         </div>
 
-        {/* Circular Hover Icons (Cart & Quick View) */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2 opacity-0 translate-y-3 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
+        {/* Shopify-Style Bottom Quick Add Button */}
+        <div className="absolute bottom-4 left-4 right-4 z-30 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out">
           <button
             onClick={handleQuickAdd}
-            className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-black hover:text-white transition-colors shadow-lg"
-            aria-label="Add to bag"
+            className="w-full bg-white hover:bg-black hover:text-white text-black text-xs font-bold py-3 rounded-full shadow-xl transition-all duration-300 uppercase tracking-widest flex items-center justify-center gap-2 border border-neutral-100"
           >
-            <ShoppingBag className="w-4 h-4" />
-          </button>
-          <button
-            onClick={handleQuickView}
-            className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-black hover:text-white transition-colors shadow-lg"
-            aria-label="Quick view"
-          >
-            <Eye className="w-4 h-4" />
+            <Plus className="w-3 h-3" />
+            Quick Add
           </button>
         </div>
+
+        {/* Quick View Mini Button */}
+        <button
+          onClick={handleQuickView}
+          className="absolute bottom-20 right-4 z-30 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 delay-75 hover:bg-neutral-50"
+          aria-label="Quick view"
+        >
+          <Eye className="w-4 h-4 text-neutral-600" />
+        </button>
       </div>
 
-      {/* Info Section - Centered */}
-      <div className="flex flex-col items-center text-center px-2">
-        {/* Title - Uppercase, Centered, Clean Sans */}
-        <Link href={href} className="hover:opacity-60 transition-opacity">
-          <h3 className="font-manrope text-xs md:text-sm font-medium uppercase tracking-[0.1em] text-neutral-800 leading-normal line-clamp-2">
+      {/* Info Section - Left Aligned Shopify Style */}
+      <div className="flex flex-col pt-4 pb-2 px-1">
+        {/* Title */}
+        <Link href={href} className="group/title">
+          <h3 className="font-manrope text-sm font-medium text-neutral-800 leading-tight group-hover/title:underline underline-offset-4 decoration-neutral-300 transition-all">
             {title}
           </h3>
         </Link>
 
-        {/* Price Section - Centered Price Line */}
-        <div className="mt-1.5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 font-manrope text-xs md:text-sm">
+        {/* Reviews Integration */}
+        {review_count && review_count > 0 && (
+          <div className="flex items-center gap-1 mt-1.5">
+            <div className="flex">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className={cn(
+                    "w-2.5 h-2.5",
+                    star <= Math.round(average_rating || 0)
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-neutral-200"
+                  )}
+                />
+              ))}
+            </div>
+            <span className="text-[10px] text-neutral-400">({review_count})</span>
+          </div>
+        )}
+
+        {/* Price Section */}
+        <div className="mt-2 flex items-baseline gap-2 font-manrope">
           {isSale ? (
             <>
-              <span className="text-neutral-500 line-through decoration-neutral-500/50 whitespace-nowrap">
-                {formatCurrency(price || 0)}
-              </span>
-              <span className="text-black font-bold whitespace-nowrap">
+              <span className="text-red-600 font-bold text-sm">
                 {formatCurrency(sale_price || 0)}
+              </span>
+              <span className="text-neutral-400 line-through text-xs">
+                {formatCurrency(price || 0)}
               </span>
             </>
           ) : (
-            <span className="text-neutral-800 font-medium whitespace-nowrap">
+            <span className="text-neutral-900 font-medium text-sm">
               {formatCurrency(price || 0)}
             </span>
           )}
@@ -172,4 +224,3 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
 };
 
 export default ProductCard;
-

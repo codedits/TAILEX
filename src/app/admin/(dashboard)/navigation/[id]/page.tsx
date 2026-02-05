@@ -29,11 +29,11 @@ export default async function EditMenuPage({ params }: PageProps) {
     return (
         <div className="space-y-8">
             <div>
-                <Link href="/admin/navigation" className="text-white/40 hover:text-white flex items-center gap-2 text-sm mb-4 transition-colors w-fit">
+                <Link href="/admin/navigation" className="text-gray-500 hover:text-gray-900 flex items-center gap-2 text-sm mb-4 transition-colors w-fit">
                     <ArrowLeft className="w-4 h-4" /> Back to Navigation
                 </Link>
-                <h2 className="text-2xl font-semibold tracking-tight text-white">Edit Menu</h2>
-                <p className="text-white/50 text-sm">Configure links and hierarchy for this menu.</p>
+                <h2 className="text-2xl font-semibold tracking-tight text-gray-900">Edit Menu</h2>
+                <p className="text-gray-500 text-sm">Configure links and hierarchy for this menu.</p>
             </div>
 
             <MenuBuilder
