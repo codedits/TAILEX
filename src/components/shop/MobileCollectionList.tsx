@@ -15,11 +15,11 @@ export default function MobileCollectionList({ collections }: MobileCollectionLi
 
     return (
         <div className="w-full overflow-x-auto pb-4 scrollbar-hide -mx-6 px-6 md:mx-0 md:px-0">
-            <div className="flex items-center justify-center gap-3">
+            <div className="flex items-center justify-start gap-2 md:gap-3">
                 <Link
                     href="/shop"
                     className={cn(
-                        "whitespace-nowrap px-4 py-2 rounded-none text-xs font-medium uppercase tracking-wide transition-colors border",
+                        "whitespace-nowrap px-2 py-1.5 md:px-4 md:py-2 rounded-none text-[10px] md:text-xs font-medium uppercase tracking-wide transition-colors border",
                         isShopAll
                             ? "bg-foreground text-background border-foreground"
                             : "bg-background text-muted-foreground border-border hover:border-foreground/50"
@@ -34,7 +34,7 @@ export default function MobileCollectionList({ collections }: MobileCollectionLi
                             key={col.id}
                             href={`/collection/${col.slug}`}
                             className={cn(
-                                "whitespace-nowrap px-4 py-2 rounded-none text-xs font-medium uppercase tracking-wide transition-colors border",
+                                "whitespace-nowrap px-2 py-1.5 md:px-4 md:py-2 rounded-none text-[10px] md:text-xs font-medium uppercase tracking-wide transition-colors border",
                                 isActive
                                     ? "bg-foreground text-background border-foreground"
                                     : "bg-background text-muted-foreground border-border hover:border-foreground/50"
