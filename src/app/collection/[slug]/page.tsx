@@ -92,9 +92,9 @@ export default async function CollectionDetailPage({ params, searchParams }: Pro
         <main className="min-h-screen bg-background text-foreground selection:bg-black selection:text-white font-sans overflow-visible">
             <Navbar brandName={brand.name} navItems={navItems} />
 
-            <div className="pt-24 pb-24 px-6 md:px-12">
+            <div className="pt-4 pb-24 px-6 md:px-12">
                 {/* Breadcrumbs */}
-                <div className="mb-8 hidden md:block">
+                <div className="flex justify-start mb-8">
                     <Breadcrumb>
                         <BreadcrumbList>
                             <BreadcrumbItem>
@@ -111,24 +111,6 @@ export default async function CollectionDetailPage({ params, searchParams }: Pro
                         </BreadcrumbList>
                     </Breadcrumb>
                 </div>
-
-                {/* Header Section */}
-                <div className="flex flex-col md:flex-row justify-between items-end mb-16 fade-in-up">
-                    <div className="w-full md:w-2/3">
-                        <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4 block">
-                            Collection / 0{(allCollections.findIndex(c => c.id === collection.id) + 1) || 1}
-                        </span>
-                        <h1 className="text-5xl md:text-7xl font-display font-medium tracking-tight mb-6 text-foreground">
-                            {collection.title}
-                        </h1>
-                        {collection.description && (
-                            <p className="text-muted-foreground max-w-lg text-lg font-light leading-relaxed">
-                                {collection.description}
-                            </p>
-                        )}
-                    </div>
-                </div>
-
                 {/* Collections Menu (Visible on all screens) */}
                 <div className="mb-12">
                     <MobileCollectionList collections={allCollections} />

@@ -115,7 +115,7 @@ export const StoreConfigService = {
                 copyright: '© {year} {brand}. All rights reserved.'
             };
 
-            const defaultSocial = { instagram: '', twitter: '', facebook: '' };
+            const defaultSocial = { instagram: 'https://www.instagram.com/tailex.pakistan/', twitter: '', facebook: '' };
 
             // Merge DB config with defaults
             const brand = { ...defaultBrand, ...dbConfig.brand };

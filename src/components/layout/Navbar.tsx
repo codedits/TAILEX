@@ -40,7 +40,7 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
       <header
         className={`w-full z-50 transition-all duration-300 border-b group/nav ${isHome
           ? "absolute top-full bg-transparent text-white border-white/70 hover:bg-white hover:text-black hover:border-black"
-          : "relative bg-white text-black border-neutral-200 hover:border-black shadow-sm"
+          : "relative bg-white text-black border-black shadow-sm"
           }`}
       >
         {/* Row 1: Social Icons (Desktop) */}
@@ -49,7 +49,7 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
             <Link href="https://facebook.com" target="_blank" className="hover:opacity-60 transition-opacity">
               <Facebook className="w-4 h-4" />
             </Link>
-            <Link href="https://instagram.com" target="_blank" className="hover:opacity-60 transition-opacity">
+            <Link href="https://www.instagram.com/tailex.pakistan/" target="_blank" className="hover:opacity-60 transition-opacity">
               <Instagram className="w-4 h-4" />
             </Link>
           </div>
@@ -68,7 +68,7 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
         {/* Row 3: Navigation & Actions (Enclosed) */}
         <div className={`px-6 md:px-12 pt-4 pb-4 flex items-center justify-between border-t ${isHome
           ? "border-white/70 group-hover/nav:border-black"
-          : "border-neutral-200 group-hover/nav:border-black"
+          : "border-black"
           }`}>
           {/* Left: Search (Desktop) / Menu (Mobile) */}
           <div className="flex-1 flex items-center justify-start">

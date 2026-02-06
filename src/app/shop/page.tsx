@@ -67,9 +67,9 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
         <main className="min-h-screen bg-background text-foreground overflow-visible">
             <Navbar brandName={brand.name} navItems={navItems} />
 
-            <div className="pt-14 pb-24 px-6 md:px-12">
+            <div className="pt-4 pb-24 px-6 md:px-12">
                 {/* Breadcrumbs */}
-                <div className="mb-8">
+                <div className="flex justify-start mb-8">
                     <Breadcrumb>
                         <BreadcrumbList>
                             <BreadcrumbItem>
@@ -83,26 +83,8 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
                     </Breadcrumb>
                 </div>
 
-                <div className="flex flex-col md:flex-row justify-between items-end mb-16 fade-in-up">
-                    <div className="w-full md:w-2/3">
-                        <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4 block">
-                            {q ? 'Search Results' : 'Fall / Winter 2025'}
-                        </span>
-                        <h1 className="text-5xl md:text-7xl font-display font-medium tracking-tight mb-6 text-foreground">
-                            {q ? `"${q}"` : 'Shop All'}
-                        </h1>
-                        <p className="text-muted-foreground max-w-lg text-lg font-light leading-relaxed">
-                            {q
-                                ? `Showing results for your search.`
-                                : 'Discover our complete collection of thoughtfully designed pieces, crafted for the modern individual.'}
-                        </p>
-
-
-                    </div>
-                </div>
-
                 {/* Collections Menu (Visible on all screens now) */}
-                <div className="mb-12">
+                <div className="mb-12 text-center">
                     <MobileCollectionList collections={allCollections} />
                 </div>
 

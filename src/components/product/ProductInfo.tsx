@@ -7,19 +7,11 @@ import {
     Plus,
     Heart,
     Share2,
-    Truck,
-    ShieldCheck,
     Ruler
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useFormatCurrency } from "@/context/StoreConfigContext";
 import { Button } from "@/components/ui/button";
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger
-} from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/context/CartContext";
 import { Product } from "@/lib/types";
@@ -267,38 +259,6 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                     Buy Now
                 </Button>
             </div>
-
-            {/* Trust Badges */}
-            <div className="grid grid-cols-2 gap-4 py-6 text-[10px] uppercase font-bold tracking-widest text-neutral-500">
-                <div className="flex items-center gap-3">
-                    <Truck className="w-4 h-4 text-neutral-900" />
-                    <span>Free Shipping Nationwide</span>
-                </div>
-                <div className="flex items-center gap-3">
-                    <ShieldCheck className="w-4 h-4 text-neutral-900" />
-                    <span>Secure Checkout</span>
-                </div>
-            </div>
-
-            {/* Accordions */}
-            <Accordion type="single" collapsible className="w-full border-t border-neutral-200">
-                <AccordionItem value="details">
-                    <AccordionTrigger className="text-xs uppercase tracking-widest font-bold py-4 hover:no-underline">
-                        Details & Care
-                    </AccordionTrigger>
-                    <AccordionContent className="text-sm text-neutral-600 leading-relaxed pb-4">
-                        {product.description}
-                    </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="shipping">
-                    <AccordionTrigger className="text-xs uppercase tracking-widest font-bold py-4 hover:no-underline">
-                        Shipping & Returns
-                    </AccordionTrigger>
-                    <AccordionContent className="text-sm text-neutral-600 leading-relaxed pb-4">
-                        Free standard shipping on all orders. Returns accepted within 30 days of delivery.
-                    </AccordionContent>
-                </AccordionItem>
-            </Accordion>
 
             {/* Mobile Sticky Add to Cart */}
             <StickyAddToCart
