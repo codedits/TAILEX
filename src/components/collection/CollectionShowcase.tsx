@@ -6,7 +6,7 @@ import { ArrowRight } from "lucide-react";
 import { Product } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { CollectionShowcaseCarousel } from "./CollectionShowcaseCarousel";
-import { ScrollReveal } from "../animations/ScrollReveal";
+import { motion } from "framer-motion";
 import { useState } from "react";
 
 interface CollectionShowcaseProps {
@@ -38,57 +38,74 @@ export default function CollectionShowcase({
     // Limit products for initial render
     const carouselProducts = products.slice(0, 8);
     const [imgSrc, setImgSrc] = useState(coverImage || "https://framerusercontent.com/images/BjQfJy7nQoVxvCYTFzwZxprDWiQ.jpg");
-    const [imageLoaded, setImageLoaded] = useState(false);
 
     return (
         <section className={cn("w-full flex flex-col relative z-10 section-fade-in", className)}>
             {/* Section 1: The Collection Hero */}
-            <ScrollReveal threshold={0.15} className="relative w-full h-[70vh] md:h-[115vh] overflow-hidden group bg-background">
-                <div className="absolute inset-0 h-full w-full bg-neutral-900">
+            <div className="relative w-full h-[70vh] md:h-[115vh] overflow-hidden group bg-background">
+                <motion.div
+                    initial={{ opacity: 0, scale: 1.1 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true, amount: 0.1 }}
+                    transition={{ duration: 1.5, ease: [0.33, 1, 0.68, 1] }}
+                    className="absolute inset-0 h-full w-full bg-neutral-900"
+                >
                     <Image
                         src={imgSrc}
                         alt={title}
                         fill
-                        className={`
-                            object-cover transition-all duration-[1500ms] ease-out will-change-transform
-                            ${imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-110"}
-                        `}
-                        onLoad={() => setImageLoaded(true)}
+                        className="object-cover"
                         sizes="(max-width: 1920px) 100vw, 80vw"
                         quality={90}
                         loading="lazy"
                         onError={() => setImgSrc("https://framerusercontent.com/images/BjQfJy7nQoVxvCYTFzwZxprDWiQ.jpg")}
                     />
-                </div>
+                </motion.div>
 
                 {/* Content - Text Independent of Image */}
-                <div className="absolute inset-x-0 bottom-0 top-0 flex flex-col items-center justify-center text-center px-4 md:px-6 text-white p-12">
-                    <div className="space-y-6 max-w-4xl">
-                        <h2
-                            className={`
-                                text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-[200] uppercase tracking-[0.05em] leading-tight script-font
-                                transition-all duration-700 delay-100
-                                ${imageLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
-                            `}
+                <div className="absolute inset-x-0 bottom-0 top-0 flex flex-col items-center justify-center text-center px-4 md:px-6 text-white p-12 z-10">
+                    <motion.div
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, amount: 0.2 }}
+                        variants={{
+                            hidden: { opacity: 0 },
+                            visible: {
+                                opacity: 1,
+                                transition: {
+                                    staggerChildren: 0.2,
+                                    delayChildren: 0.3
+                                }
+                            }
+                        }}
+                        className="space-y-6 max-w-4xl"
+                    >
+                        <motion.h2
+                            variants={{
+                                hidden: { opacity: 0, y: 30 },
+                                visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.33, 1, 0.68, 1] } }
+                            }}
+                            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-[200] uppercase tracking-[0.05em] leading-tight script-font"
                         >
                             {title}
-                        </h2>
+                        </motion.h2>
                         {description && (
-                            <p
-                                className={`
-                                    text-sm sm:text-base md:text-lg font-light tracking-wide text-white/90 text-balance max-w-2xl mx-auto leading-relaxed drop-shadow-md
-                                    transition-all duration-700 delay-200
-                                    ${imageLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
-                                `}
+                            <motion.p
+                                variants={{
+                                    hidden: { opacity: 0, y: 20 },
+                                    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.33, 1, 0.68, 1] } }
+                                }}
+                                className="text-sm sm:text-base md:text-lg font-light tracking-wide text-white/90 text-balance max-w-2xl mx-auto leading-relaxed drop-shadow-md"
                             >
                                 {description}
-                            </p>
+                            </motion.p>
                         )}
-                        <div
-                            className={`
-                                pt-8 transition-all duration-700 delay-300
-                                ${imageLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
-                            `}
+                        <motion.div
+                            variants={{
+                                hidden: { opacity: 0, y: 20 },
+                                visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.33, 1, 0.68, 1] } }
+                            }}
+                            className="pt-8"
                         >
                             <Link
                                 href={collectionHref}
@@ -96,10 +113,10 @@ export default function CollectionShowcase({
                             >
                                 View Collection
                             </Link>
-                        </div>
-                    </div>
+                        </motion.div>
+                    </motion.div>
                 </div>
-            </ScrollReveal>
+            </div>
 
             {/* Section 2: The Product Grid Carousel */}
             <div className="relative w-full py-4 md:py-8 px-4 md:px-8 bg-background border-t border-neutral-100 z-20">

@@ -34,9 +34,11 @@ const fonts = {
   'space mono': spaceMono,
   spacemono: spaceMono,
   mono: spaceMono,
-  script: manrope
+  script: manrope,
+  helvetica: { variable: '--font-helvetica', className: 'font-helvetica' }
 }
 
 export function getFont(fontName: string) {
-  return fonts[fontName as keyof typeof fonts] || fonts.manrope
+  const font = fonts[fontName as keyof typeof fonts] || fonts.manrope
+  return font as any
 }

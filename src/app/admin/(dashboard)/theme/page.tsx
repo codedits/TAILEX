@@ -65,6 +65,7 @@ export default async function ThemePage() {
                                         <SelectValue placeholder="Select a font" />
                                     </SelectTrigger>
                                     <SelectContent>
+                                        <SelectItem value="helvetica">Helvetica (Classic)</SelectItem>
                                         <SelectItem value="manrope">Manrope (Sans)</SelectItem>
                                         <SelectItem value="inter">Inter (Modern)</SelectItem>
                                         <SelectItem value="playfair">Playfair Display (Serif)</SelectItem>

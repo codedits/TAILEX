@@ -6,7 +6,7 @@ import ProductCard from "@/components/product/ProductCard";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ScrollReveal } from "../animations/ScrollReveal";
+import { motion } from "framer-motion";
 
 interface CollectionShowcaseCarouselProps {
     products: Product[];
@@ -26,24 +26,53 @@ export const CollectionShowcaseCarousel = ({
     });
 
     return (
-        <ScrollReveal threshold={0.1} className="overflow-hidden">
+        <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+            variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                    opacity: 1,
+                    transition: {
+                        staggerChildren: 0.1,
+                        delayChildren: 0.2
+                    }
+                }
+            }}
+            className="overflow-hidden"
+        >
             <div className="cursor-grab active:cursor-grabbing" ref={emblaRef}>
-                <div className="flex touch-pan-y py-4 -ml-4 md:-ml-6 stagger-products">
+                <div className="flex touch-pan-y py-4 -ml-4 md:-ml-6">
                     {products.map((product) => (
-                        <div
+                        <motion.div
                             key={product.id}
-                            className="flex-shrink-0 pl-4 md:pl-6 basis-[50%] md:basis-[40%] lg:basis-[30%] xl:basis-[25%] animate-product-reveal"
-                            data-reveal-animate
+                            variants={{
+                                hidden: { opacity: 0, y: 30 },
+                                visible: {
+                                    opacity: 1,
+                                    y: 0,
+                                    transition: { duration: 0.8, ease: [0.33, 1, 0.68, 1] }
+                                }
+                            }}
+                            className="flex-shrink-0 pl-4 md:pl-6 basis-[50%] md:basis-[40%] lg:basis-[30%] xl:basis-[25%]"
                         >
-                            {/* 
-                               Note: ProductCard is a client component with dynamic currency.
-                            */}
                             <ProductCard {...product} />
-                        </div>
+                        </motion.div>
                     ))}
 
                     {/* "See More" Card */}
-                    <div className="flex-shrink-0 pl-4 md:pl-6 basis-[50%] md:basis-[40%] lg:basis-[30%] xl:basis-[25%] animate-product-reveal" data-reveal-animate>
+                    <motion.div
+                        variants={{
+                            hidden: { opacity: 0, y: 30 },
+                            visible: {
+                                opacity: 1,
+                                y: 0,
+                                transition: { duration: 0.8, ease: [0.33, 1, 0.68, 1] }
+                            }
+                        }}
+                        className="flex-shrink-0 pl-4 md:pl-6 basis-[50%] md:basis-[40%] lg:basis-[30%] xl:basis-[25%]"
+                    >
                         <Link
                             href={collectionHref}
                             className="group/seemore relative flex flex-col items-center justify-center w-full aspect-[3/4] bg-neutral-50 border border-neutral-100 hover:bg-neutral-100 transition-all duration-500 ease-out"
@@ -57,9 +86,9 @@ export const CollectionShowcaseCarousel = ({
                                 </div>
                             </div>
                         </Link>
-                    </div>
+                    </motion.div>
                 </div>
             </div>
-        </ScrollReveal>
+        </motion.div>
     );
 };

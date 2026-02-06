@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from "next/image";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import HeroCarousel, { HeroSlide } from './HeroCarousel';
 import { useIsMobile } from '@/hooks/use-media-query';
 
@@ -82,59 +83,76 @@ const HeroSection = ({
     <section className="relative w-full h-[100vh] overflow-hidden bg-neutral-900">
       {/* Background Image Container */}
       <div className="absolute inset-0 h-full w-full">
-        <Image
-          src={effectiveImage}
-          alt={displayHeading || "Hero Image"}
-          fill
-          priority
-          fetchPriority="high"
-          quality={85}
-          sizes="100vw"
-          className={`
-            object-cover object-top transition-all duration-[1500ms] ease-out will-change-transform
-            ${imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-110 shadow-none outline-none"}
-          `}
-          onLoad={() => setImageLoaded(true)}
-          onError={handleImageError}
-        />
+        <AnimatePresence>
+          {effectiveImage && (
+            <motion.div
+              initial={{ opacity: 0, scale: 1.1 }}
+              animate={{
+                opacity: imageLoaded ? 1 : 0,
+                scale: imageLoaded ? 1 : 1.1
+              }}
+              transition={{ duration: 1.5, ease: [0.33, 1, 0.68, 1] }}
+              className="absolute inset-0 h-full w-full"
+            >
+              <Image
+                src={effectiveImage}
+                alt={displayHeading || "Hero Image"}
+                fill
+                priority
+                fetchPriority="high"
+                quality={85}
+                sizes="100vw"
+                className="object-cover object-top"
+                onLoad={() => setImageLoaded(true)}
+                onError={handleImageError}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Overlay */}
-        <div
-          className={`absolute inset-0 bg-black transition-opacity duration-1000 ease-in-out ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-          style={{ opacity: imageLoaded ? overlayOpacity : 0 }}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: imageLoaded ? overlayOpacity : 0 }}
+          transition={{ duration: 1.2, ease: "easeInOut" }}
+          className="absolute inset-0 bg-black z-[5]"
         />
       </div>
 
       {/* Content Container */}
       <div className="relative flex flex-col items-center justify-center w-full px-6 md:px-10 z-10 text-center h-[100vh] max-w-[1920px] mx-auto">
         <div className="flex flex-col items-center justify-center space-y-8">
-          <p className={`
-            text-white/90 text-xs md:text-xs tracking-[0.2em] uppercase font-bold
-            transition-all duration-700 delay-100
-            ${imageLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
-          `}>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={imageLoaded ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.4, ease: [0.33, 1, 0.68, 1] }}
+            className="text-white/90 text-xs md:text-xs tracking-[0.2em] uppercase font-bold"
+          >
             {subheading || "SPRING/SUMMER '26"}
-          </p>
+          </motion.p>
 
-          <h1 className={`
-            text-white text-5xl md:text-8xl font-medium tracking-tight
-            transition-all duration-700 delay-200
-            ${imageLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}
-          `}>
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={imageLoaded ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 1, delay: 0.6, ease: [0.33, 1, 0.68, 1] }}
+            className="text-white text-5xl md:text-8xl font-medium tracking-tight"
+          >
             {displayHeading}
-          </h1>
+          </motion.h1>
 
-          <div className={`
-            pt-4 transition-all duration-700 delay-300
-            ${imageLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}
-          `}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={imageLoaded ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.8, ease: [0.33, 1, 0.68, 1] }}
+            className="pt-4"
+          >
             <Link
               href={ctaLink || "/shop"}
               className="inline-block px-8 py-3 rounded-full border border-white/50 text-white text-[10px] md:text-xs font-semibold tracking-[0.15em] hover:bg-white hover:text-black transition-all duration-300 uppercase"
             >
               {ctaText || "Shop Now"}
             </Link>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

@@ -69,7 +69,7 @@ export const StoreConfigService = {
             const defaultBrand = { name: 'TAILEX', tagline: '', announcement: '', showAnnouncement: false };
             const defaultTheme = {
                 primaryColor: '#000000',
-                font: 'manrope',
+                font: 'helvetica',
                 borderRadius: '0.5rem',
                 backgroundColor: '#ffffff',
                 foregroundColor: '#000000',

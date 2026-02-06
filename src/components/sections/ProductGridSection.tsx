@@ -79,8 +79,8 @@ const ProductGridSection = ({
               {displayProducts.map((product, index) => (
                 <div
                   key={product.id}
-                  className="h-full transition-all duration-700 ease-out opacity-0 translate-y-8 group-[.is-visible]/reveal:opacity-100 group-[.is-visible]/reveal:translate-y-0"
-                  style={{ transitionDelay: `${index * 150 + 400}ms` }}
+                  className="h-full transition-all duration-1000 ease-out opacity-0 translate-y-8 group-[.is-visible]/reveal:opacity-100 group-[.is-visible]/reveal:translate-y-0"
+                  style={{ transitionDelay: `${index * 200 + 100}ms` }}
                 >
                   <ProductCard {...product} />
                 </div>

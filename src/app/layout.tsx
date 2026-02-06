@@ -74,7 +74,7 @@ const DEFAULTS = {
   secondaryColor: '#ffffff',
   backgroundColor: '#ffffff',
   foregroundColor: '#000000',
-  font: 'manrope',
+  font: 'helvetica',
   borderRadius: '0.5rem',
 };
 
@@ -117,8 +117,8 @@ export default async function RootLayout({
     colorScheme: theme,
     ['--brand-primary' as string]: primaryColor,
     ['--brand-radius' as string]: borderRadius,
-    ['--font-display' as string]: `var(--font-${fontName})`,
-    ['--font-body' as string]: `var(--font-${fontName})`,
+    ['--font-display' as string]: fontName === 'helvetica' ? 'var(--font-helvetica)' : `var(--font-${fontName})`,
+    ['--font-body' as string]: fontName === 'helvetica' ? 'var(--font-helvetica)' : `var(--font-${fontName})`,
 
     // Shadcn overrides
     ['--primary' as string]: hslPrimary,

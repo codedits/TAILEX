@@ -127,7 +127,7 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
         {/* Images with Fade Effect */}
         <div className="relative w-full h-full">
           {isValidImage(imagePrimary) && (
-            <div className={`absolute inset-0 transition-all duration-700 ease-in-out ${imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}>
+            <div className={`absolute inset-0 transition-all duration-1000 ease-in-out ${imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}>
               <Image
                 src={imagePrimary}
                 alt={title}

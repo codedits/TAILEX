@@ -62,7 +62,7 @@ const OutlookSection = ({
             variant="stagger"
             className="text-center text-foreground whitespace-pre-line"
             style={{
-              fontFamily: '"Manrope", "Manrope Placeholder", sans-serif',
+              fontFamily: 'var(--font-body), sans-serif',
               fontSize: 'clamp(50px, 7vw, 80px)',
               fontWeight: 700,
               letterSpacing: '-0.02em',

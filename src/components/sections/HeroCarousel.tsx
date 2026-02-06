@@ -102,9 +102,9 @@ const HeroCarousel = ({
 
     // Text Animation Variants
     const textVariants: import("framer-motion").Variants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeInOut" } },
-        exit: { opacity: 0, y: -20, transition: { duration: 0.4, ease: "easeInOut" } }
+        hidden: { opacity: 0, y: 30 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.33, 1, 0.68, 1] } },
+        exit: { opacity: 0, y: -20, transition: { duration: 0.5, ease: [0.33, 1, 0.68, 1] } }
     };
 
     return (
@@ -142,7 +142,7 @@ const HeroCarousel = ({
                                                 alt={slide.heading || brandName}
                                                 fill
                                                 className={`
-                                                    object-cover object-top transition-all duration-[1500ms] ease-out will-change-transform
+                                                    object-cover object-top transition-all duration-[2000ms] ease-out will-change-transform
                                                     ${imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-110"}
                                                 `}
                                                 priority={index === 0}
@@ -163,7 +163,7 @@ const HeroCarousel = ({
                                             alt={slide.heading || brandName}
                                             fill
                                             className={`
-                                                object-cover object-top transition-all duration-[1500ms] ease-out will-change-transform
+                                                object-cover object-top transition-all duration-[2000ms] ease-out will-change-transform
                                                 ${imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-110"}
                                             `}
                                             priority={index === 0}
@@ -176,7 +176,7 @@ const HeroCarousel = ({
                                         />
                                     </div>
                                     <div
-                                        className="absolute inset-0 bg-black transition-opacity duration-700"
+                                        className="absolute inset-0 bg-black transition-opacity duration-1000"
                                         style={{ opacity: overlayOpacity }}
                                     />
                                 </div>
@@ -226,10 +226,10 @@ const HeroCarousel = ({
                         {currentSlide.ctaText && (
                             <motion.div
                                 key={`bottom-${currentIndex}`}
-                                initial={{ opacity: 0, y: 10 }}
+                                initial={{ opacity: 0, y: 15 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
-                                transition={{ duration: 0.4, delay: 0.2 }} // Slight delay for staggering
+                                transition={{ duration: 0.7, delay: 0.5, ease: [0.33, 1, 0.68, 1] }} // Slight delay for staggering
                             >
                                 <Link
                                     href={currentSlide.ctaLink || "/shop"}

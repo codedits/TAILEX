@@ -55,6 +55,7 @@
     --cta-foreground: 0 0% 100%;
 
     /* Font Bindings */
+    --font-helvetica: "Helvetica Neue", Helvetica, Arial, sans-serif;
     /* Accessing the font variable injected by next/font */
     /* If next/font injects a class, we use inheritance. If it injects a variable, we map it here. */
     /* In layout.tsx, we apply font.className to body, so inheritance works. */
@@ -216,7 +217,7 @@
   }
 
   .script-font {
-    font-family: var(--font-manrope), sans-serif;
+    font-family: var(--font-body), sans-serif;
   }
 
   .section-title {

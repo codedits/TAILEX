@@ -68,7 +68,7 @@ const NewsSection = ({
               variant="stagger"
               className="text-foreground whitespace-pre-line"
               style={{
-                fontFamily: '"Manrope", "Manrope Placeholder", sans-serif',
+                fontFamily: 'var(--font-body), sans-serif',
                 fontSize: 'clamp(40px, 5vw, 64px)',
                 fontWeight: 700,
                 letterSpacing: '-0.02em',
@@ -89,7 +89,7 @@ const NewsSection = ({
               <p
                 className="text-muted-foreground"
                 style={{
-                  fontFamily: '"Geist", "Geist Placeholder", sans-serif',
+                  fontFamily: 'var(--font-body), sans-serif',
                   fontSize: 'clamp(15px, 1.5vw, 18px)',
                   fontWeight: 400,
                   letterSpacing: '0.02em',
@@ -149,7 +149,7 @@ const NewsSection = ({
                       <h3
                         className="text-foreground text-center"
                         style={{
-                          fontFamily: '"Manrope", "Manrope Placeholder", sans-serif',
+                          fontFamily: 'var(--font-body), sans-serif',
                           fontSize: 'clamp(16px, 1.5vw, 20px)',
                           fontWeight: 500,
                           letterSpacing: '-0.01em',
@@ -164,7 +164,7 @@ const NewsSection = ({
                         <p
                           className="text-muted-foreground text-center line-clamp-2"
                           style={{
-                            fontFamily: '"Manrope", "Manrope Placeholder", sans-serif',
+                            fontFamily: 'var(--font-body), sans-serif',
                             fontSize: 'clamp(12px, 1.2vw, 14px)',
                             fontWeight: 400,
                             letterSpacing: '0.02em',
