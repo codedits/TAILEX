@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { MenuItem } from "@/lib/types";
 
 interface MobileMenuOverlayProps {
-    navLinks: { name: string; href: string }[];
+    navLinks: MenuItem[];
     onClose: () => void;
 }
 
@@ -20,17 +21,17 @@ export default function MobileMenuOverlay({ navLinks, onClose }: MobileMenuOverl
             <nav className="flex flex-col items-center gap-6">
                 {navLinks.map((link, i) => (
                     <motion.div
-                        key={link.name}
+                        key={link.label}
                         initial={{ opacity: 0, y: 50 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 + i * 0.1, duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
                     >
                         <Link
-                            href={link.href}
+                            href={link.url}
                             onClick={onClose}
                             className="text-4xl md:text-6xl font-black uppercase tracking-tighter hover:text-neutral-500 transition-colors"
                         >
-                            {link.name}
+                            {link.label}
                         </Link>
                     </motion.div>
                 ))}

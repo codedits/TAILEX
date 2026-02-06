@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import { ShoppingCart, Menu, X, User, Search } from "lucide-react";
+import { ShoppingBag, Menu, X, User, Instagram, Facebook } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/UserAuthContext";
@@ -13,7 +13,6 @@ import { SearchModal } from "@/components/layout/SearchModal";
 import { MenuItem } from "@/lib/types";
 
 // Lazy-load the mobile menu to reduce initial bundle size
-// This separates 80KB+ of Framer Motion animation code from the critical path
 const MobileMenuOverlay = dynamic(() => import("./MobileMenuOverlay"), {
   ssr: false,
   loading: () => null,
@@ -22,80 +21,60 @@ const MobileMenuOverlay = dynamic(() => import("./MobileMenuOverlay"), {
 const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navItems?: MenuItem[] }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { cartCount, setIsCartOpen } = useCart();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
   const pathname = usePathname();
   const isHome = pathname === "/";
 
-  const navLinks = [
-    { name: "HOME", href: "/" },
-    { name: "SHOP", href: "/shop" },
-    { name: "COLLECTIONS", href: "/collection" },
-    { name: "ABOUT", href: "/about" },
+  const defaultLinks: MenuItem[] = [
+    { label: "HOME", url: "/" },
+    { label: "SHOP", url: "/shop" },
+    { label: "COLLECTIONS", url: "/collection" },
+    { label: "ABOUT", url: "/about" },
   ];
+
+  const linksToDisplay = navItems && navItems.length > 0 ? navItems : defaultLinks;
 
   return (
     <>
       <CartSheet />
       <header
-        className={`left-0 right-0 z-50 transition-all duration-300 border-b ${isHome
-          ? "absolute top-full bg-transparent text-white border-white/10 hover:bg-white hover:text-black hover:border-neutral-200 hover:shadow-sm"
-          : "relative bg-white text-black border-neutral-200 shadow-sm"
+        className={`w-full z-50 transition-all duration-300 border-b group/nav ${isHome
+          ? "absolute top-full bg-transparent text-white border-white/70 hover:bg-white hover:text-black hover:border-black"
+          : "relative bg-white text-black border-neutral-200 hover:border-black shadow-sm"
           }`}
       >
-        <div className="px-6 md:px-8 py-6 w-full flex items-center justify-between relative">
-
-          {/* Left Nav */}
-          <nav className="hidden md:flex items-center gap-8 flex-1">
-            {navLinks.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="text-[11px] font-medium uppercase tracking-widest hover:opacity-70 transition-opacity flex items-center gap-1"
-              >
-                {item.name}
-              </Link>
-            ))}
-          </nav>
-
-          {/* Center Logo (Desktop) / Left Logo (Mobile) */}
-          <div className="md:absolute md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2">
-            <Link
-              href="/"
-              className="text-2xl md:text-3xl font-bold tracking-tighter uppercase hover:opacity-80 transition-opacity"
-            >
-              TAILEX
+        {/* Row 1: Social Icons (Desktop) */}
+        <div className="hidden md:flex justify-end px-6 md:px-12 py-1">
+          <div className="flex items-center gap-4">
+            <Link href="https://facebook.com" target="_blank" className="hover:opacity-60 transition-opacity">
+              <Facebook className="w-4 h-4" />
+            </Link>
+            <Link href="https://instagram.com" target="_blank" className="hover:opacity-60 transition-opacity">
+              <Instagram className="w-4 h-4" />
             </Link>
           </div>
+        </div>
 
-          {/* Right Actions */}
-          <div className="flex items-center gap-6 flex-1 justify-end">
+        {/* Row 2: Logo (Desktop Only) */}
+        <div className="hidden md:flex w-full justify-center py-4 md:py-6">
+          <Link
+            href="/"
+            className="text-4xl md:text-6xl font-bold tracking-tighter uppercase font-helvetica"
+          >
+            {brandName}
+          </Link>
+        </div>
 
-            {/* Icons */}
-            {/* Search */}
-            <SearchModal />
-
-            {/* Account */}
-            <Link
-              href={isAuthenticated ? "/account" : "/login"}
-              className="hover:opacity-70 transition-opacity"
-              aria-label="Account"
-            >
-              <User className="w-5 h-5 stroke-[1.5]" />
-            </Link>
-
-            {/* Cart */}
-            <button
-              className="relative hover:opacity-70 transition-opacity"
-              onClick={() => setIsCartOpen(true)}
-              aria-label={`Open cart${cartCount > 0 ? `, ${cartCount} items` : ''}`}
-            >
-              <ShoppingCart className="w-5 h-5 stroke-[1.5]" />
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
-              )}
-            </button>
-
-            {/* Mobile Menu Toggle */}
+        {/* Row 3: Navigation & Actions (Enclosed) */}
+        <div className={`px-6 md:px-12 pt-4 pb-4 flex items-center justify-between border-t ${isHome
+          ? "border-white/70 group-hover/nav:border-black"
+          : "border-neutral-200 group-hover/nav:border-black"
+          }`}>
+          {/* Left: Search (Desktop) / Menu (Mobile) */}
+          <div className="flex-1 flex items-center justify-start">
+            <div className="hidden md:block">
+              <SearchModal />
+            </div>
             <button
               className="md:hidden hover:opacity-70 transition-opacity"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -104,13 +83,58 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
+
+          {/* Center: Navigation Links (Desktop) / Logo (Mobile) */}
+          <div className="flex md:hidden flex-1 items-center justify-center">
+            <Link
+              href="/"
+              className="text-2xl font-bold tracking-tighter uppercase font-helvetica -translate-y-0.5"
+            >
+              {brandName}
+            </Link>
+          </div>
+
+          <nav className="hidden md:flex items-center justify-center gap-12 flex-wrap">
+            {linksToDisplay.map((item) => (
+              <Link
+                key={item.label}
+                href={item.url}
+                className="relative text-[13px] font-bold uppercase tracking-widest group/link py-1"
+              >
+                {item.label}
+                <span className="absolute bottom-0 left-0 w-full h-[1.5px] bg-current transform scale-x-0 group-hover/link:scale-x-100 transition-transform duration-300 origin-left" />
+              </Link>
+            ))}
+          </nav>
+
+          {/* Right: Actions */}
+          <div className="flex-1 flex items-center justify-end gap-6">
+            <Link
+              href={isAuthenticated ? "/account" : "/login"}
+              className="hidden md:block hover:opacity-60 transition-opacity"
+              aria-label="Account"
+            >
+              <User className="w-5 h-5 stroke-[1.5]" />
+            </Link>
+
+            <button
+              className="relative hover:opacity-60 transition-opacity"
+              onClick={() => setIsCartOpen(true)}
+              aria-label={`Open cart${cartCount > 0 ? `, ${cartCount} items` : ''}`}
+            >
+              <ShoppingBag className="w-6 h-6 stroke-[1.5]" />
+              <span className="absolute -bottom-1.5 -right-1.5 w-4.5 h-4.5 bg-black text-white text-[9px] flex items-center justify-center rounded-full font-bold">
+                {cartCount}
+              </span>
+            </button>
+          </div>
         </div>
       </header>
 
       {/* Full Screen Menu Overlay - Dynamically Loaded */}
       <AnimatePresence>
         {isMenuOpen && (
-          <MobileMenuOverlay navLinks={navLinks} onClose={() => setIsMenuOpen(false)} />
+          <MobileMenuOverlay navLinks={linksToDisplay} onClose={() => setIsMenuOpen(false)} />
         )}
       </AnimatePresence>
     </>

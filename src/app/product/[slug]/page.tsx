@@ -89,7 +89,7 @@ export default async function ProductPage({ params }: Props) {
   const brand = config.brand;
   const footerConfig = config.footer;
   const socialConfig = config.social;
-  const navItemsList = config.navigation.main;
+  const navItems = config.navigation.main;
 
   // Fetch Related Products (excluding current product, same category preferred)
   const { data: relatedProducts } = await supabase
@@ -130,7 +130,7 @@ export default async function ProductPage({ params }: Props) {
           })
         }}
       />
-      <Navbar brandName={brand.name} navItems={navItemsList} />
+      <Navbar brandName={brand.name} navItems={navItems} />
 
       <div className="pt-0 md:pt-8 pb-20 px-0 md:px-12">
         <ProductDetail product={typedProduct} />

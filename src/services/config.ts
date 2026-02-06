@@ -55,12 +55,33 @@ export const StoreConfigService = {
             // 2. Fetch Navigation Menus
             const { data: navMenus } = await supabase.from('navigation_menus').select('*');
 
+            // 3. Fetch Collections to inject into navigation
+            const { data: collections } = await supabase
+                .from('collections')
+                .select('title, slug')
+                .eq('is_visible', true)
+                .order('sort_order', { ascending: true });
+
             const dbConfig: any = {};
             data.forEach(row => {
                 dbConfig[row.key] = row.value;
             });
 
-            const mainNav = navMenus?.find(n => n.handle === 'main-menu')?.items || [];
+            // Format dynamic collections as navigation items
+            const collectionNavItems = collections?.map(c => ({
+                label: c.title.toUpperCase(),
+                url: `/collection/${c.slug}`
+            })) || [];
+
+            // Combine manual links with dynamic collections
+            // We want: HOME, Collections..., SHOP
+            // Current manual main menu might have some of these, but we'll prepend HOME and inject collections
+            const rawMainNav = navMenus?.find(n => n.handle === 'main-menu')?.items || [];
+            const mainNav = [
+                { label: 'HOME', url: '/' },
+                ...collectionNavItems,
+                { label: 'SHOP', url: '/shop' }
+            ];
 
             // Navigation fallback logic
             const footerNavItems = navMenus?.find(n => n.handle === 'footer')?.items || [];

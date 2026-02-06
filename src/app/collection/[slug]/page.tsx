@@ -6,7 +6,7 @@ import AsyncProductGrid from "@/components/collection/AsyncProductGrid";
 import MobileCollectionList from "@/components/shop/MobileCollectionList";
 import { Product, Collection } from "@/lib/types";
 import { notFound } from "next/navigation";
-import { getNavigation, getBrandConfig, getFooterConfig, getSocialConfig } from "@/lib/theme";
+import { StoreConfigService } from "@/services/config";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -63,23 +63,21 @@ export default async function CollectionDetailPage({ params, searchParams }: Pro
         .order('sort_order', { ascending: true })
         .order('title');
 
-    const configPromises = Promise.all([
-        getNavigation('main-menu'),
-        getBrandConfig(),
-        getFooterConfig(),
-        getSocialConfig()
-    ]);
-
-    const [collectionResult, collectionsListResult, [navItems, brand, footerConfig, socialConfig]] = await Promise.all([
+    const [collectionResult, collectionsListResult, config] = await Promise.all([
         collectionPromise,
         collectionsListPromise,
-        configPromises
+        StoreConfigService.getStoreConfig()
     ]);
 
     const collection = collectionResult.data;
     if (!collection) notFound();
 
     const allCollections = (collectionsListResult.data || []) as Collection[];
+
+    const brand = config.brand;
+    const footerConfig = config.footer;
+    const socialConfig = config.social;
+    const navItems = config.navigation.main;
 
     const productsPromise = supabase
         .from('products')

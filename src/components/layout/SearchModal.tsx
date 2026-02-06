@@ -113,7 +113,7 @@ export function SearchModal() {
   }, []);
 
   return (
-    <div ref={containerRef} className={cn("flex items-center", open ? "absolute inset-x-4 z-[100] md:static md:inset-auto" : "relative z-10")}>
+    <div ref={containerRef} className={cn("flex items-center", open ? "absolute inset-x-4 z-[100] md:relative md:inset-auto" : "relative z-10")}>
       <AnimatePresence mode="wait">
         {!open ? (
           <motion.button
@@ -171,7 +171,7 @@ export function SearchModal() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
-                  className="absolute top-full right-0 left-0 md:left-auto md:w-[400px] mt-2 bg-white rounded-xl shadow-2xl border border-neutral-100 overflow-hidden z-[120] p-2"
+                  className="absolute top-full left-0 md:w-[400px] mt-2 bg-white rounded-xl shadow-2xl border border-neutral-100 overflow-hidden z-[120] p-2"
                 >
                   <Command className="border-none" shouldFilter={false}>
                     <CommandList className="max-h-[300px] overflow-y-auto custom-scrollbar">

@@ -5,7 +5,7 @@ import Footer from "@/components/layout/Footer";
 import AsyncProductGrid from "@/components/collection/AsyncProductGrid";
 import MobileCollectionList from "@/components/shop/MobileCollectionList";
 import { Product, Collection } from "@/lib/types";
-import { getNavigation, getBrandConfig, getFooterConfig, getSocialConfig } from "@/lib/theme";
+import { StoreConfigService } from "@/services/config";
 import Link from "next/link";
 import {
     Breadcrumb,
@@ -27,25 +27,22 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
     const supabase = await createClient();
     const { q } = await searchParams;
 
-    // Parallel Fetching
-    const configPromises = Promise.all([
-        getNavigation('main-menu'),
-        getBrandConfig(),
-        getFooterConfig(),
-        getSocialConfig()
-    ]);
-
     const collectionsListPromise = supabase
         .from('collections')
         .select('id, title, slug')
         .eq('is_visible', true)
         .order('title');
 
-    // Fetch critical shell data
-    const [[navItems, brand, footerConfig, socialConfig], collectionsListResult] = await Promise.all([
-        configPromises,
+    // Fetch config and collections list
+    const [config, collectionsListResult] = await Promise.all([
+        StoreConfigService.getStoreConfig(),
         collectionsListPromise
     ]);
+
+    const brand = config.brand;
+    const footerConfig = config.footer;
+    const socialConfig = config.social;
+    const navItems = config.navigation.main;
 
     const allCollections = (collectionsListResult.data || []) as Collection[];
 

@@ -16,12 +16,12 @@ export async function StoreHeader({ firstCollection }: StoreHeaderProps) {
     return (
         <div className="relative z-50">
             {firstCollection && (
-                <TopCollectionStrip 
+                <TopCollectionStrip
                     collectionName={firstCollection.title}
                     collectionSlug={firstCollection.slug}
                 />
             )}
-            
+
             {config.brand.showAnnouncement && config.brand.announcement && (
                 <AnnouncementBar text={config.brand.announcement} />
             )}
