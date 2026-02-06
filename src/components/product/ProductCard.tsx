@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from 'react';
 import Link from "next/link";
 import Image from "next/image";
 import { ShoppingBag, Eye, Heart, Star, Plus } from "lucide-react";
@@ -20,6 +21,7 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
   const { openQuickView } = useQuickView();
   const { addItem } = useCart();
   const { isInWishlist, toggleItem } = useWishlist();
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const { title, price, images, slug, cover_image, sale_price, tags, stock, id, review_count, average_rating } = product;
 
@@ -125,7 +127,7 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
         {/* Images with Fade Effect */}
         <div className="relative w-full h-full">
           {isValidImage(imagePrimary) && (
-            <div className="absolute inset-0 transition-opacity duration-700 ease-in-out">
+            <div className={`absolute inset-0 transition-all duration-700 ease-in-out ${imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}>
               <Image
                 src={imagePrimary}
                 alt={title}
@@ -133,7 +135,8 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
                 priority={priority}
                 sizes={sizes}
                 quality={85}
-                className="object-cover group-hover:scale-105 transition-transform duration-700"
+                onLoad={() => setImageLoaded(true)}
+                className="object-cover transition-transform duration-700"
               />
             </div>
           )}

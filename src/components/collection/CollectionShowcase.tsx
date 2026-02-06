@@ -38,6 +38,7 @@ export default function CollectionShowcase({
     // Limit products for initial render
     const carouselProducts = products.slice(0, 8);
     const [imgSrc, setImgSrc] = useState(coverImage || "https://framerusercontent.com/images/BjQfJy7nQoVxvCYTFzwZxprDWiQ.jpg");
+    const [imageLoaded, setImageLoaded] = useState(false);
 
     return (
         <section className={cn("w-full flex flex-col relative z-10 section-fade-in", className)}>
@@ -48,8 +49,11 @@ export default function CollectionShowcase({
                         src={imgSrc}
                         alt={title}
                         fill
-                        className="object-cover hero-entrance-animate will-change-transform"
-                        data-reveal-animate
+                        className={`
+                            object-cover transition-all duration-[1500ms] ease-out will-change-transform
+                            ${imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-110"}
+                        `}
+                        onLoad={() => setImageLoaded(true)}
                         sizes="(max-width: 1920px) 100vw, 80vw"
                         quality={90}
                         loading="lazy"
@@ -60,15 +64,32 @@ export default function CollectionShowcase({
                 {/* Content - Text Independent of Image */}
                 <div className="absolute inset-x-0 bottom-0 top-0 flex flex-col items-center justify-center text-center px-4 md:px-6 text-white p-12">
                     <div className="space-y-6 max-w-4xl">
-                        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-[200] uppercase tracking-[0.05em] leading-tight script-font hero-text-animate-delay-1" data-reveal-animate>
+                        <h2
+                            className={`
+                                text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-[200] uppercase tracking-[0.05em] leading-tight script-font
+                                transition-all duration-700 delay-100
+                                ${imageLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
+                            `}
+                        >
                             {title}
                         </h2>
                         {description && (
-                            <p className="text-sm sm:text-base md:text-lg font-light tracking-wide text-white/90 text-balance max-w-2xl mx-auto leading-relaxed drop-shadow-md hero-text-animate-delay-2" data-reveal-animate>
+                            <p
+                                className={`
+                                    text-sm sm:text-base md:text-lg font-light tracking-wide text-white/90 text-balance max-w-2xl mx-auto leading-relaxed drop-shadow-md
+                                    transition-all duration-700 delay-200
+                                    ${imageLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
+                                `}
+                            >
                                 {description}
                             </p>
                         )}
-                        <div className="pt-8 hero-text-animate-delay-3" data-reveal-animate>
+                        <div
+                            className={`
+                                pt-8 transition-all duration-700 delay-300
+                                ${imageLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
+                            `}
+                        >
                             <Link
                                 href={collectionHref}
                                 className="inline-flex items-center gap-2 text-[9px] md:text-[11px] uppercase tracking-[0.08em] border-b border-white pb-1 hover:text-white/80 hover:border-white/80 transition-all font-medium"

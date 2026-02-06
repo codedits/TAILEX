@@ -49,6 +49,7 @@ const HeroCarousel = ({
 }: HeroCarouselProps) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isClient, setIsClient] = useState(false);
+    const [imageLoaded, setImageLoaded] = useState(false);
     const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
 
     // Hydration flag
@@ -140,14 +141,16 @@ const HeroCarousel = ({
                                                 src={slide.mobileImage}
                                                 alt={slide.heading || brandName}
                                                 fill
-                                                className="object-cover object-top hero-entrance-animate will-change-transform"
+                                                className={`
+                                                    object-cover object-top transition-all duration-[1500ms] ease-out will-change-transform
+                                                    ${imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-110"}
+                                                `}
                                                 priority={index === 0}
                                                 loading={index === 0 ? "eager" : "lazy"}
                                                 fetchPriority={index === 0 ? "high" : "auto"}
                                                 quality={85}
                                                 sizes="100vw"
-                                                placeholder="blur"
-                                                blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMCAxMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzE3MTcxNyIvPjwvc3ZnPg=="
+                                                onLoad={() => index === 0 && setImageLoaded(true)}
                                                 onError={() => handleImageError(slide.id)}
                                             />
                                         </div>
@@ -159,14 +162,16 @@ const HeroCarousel = ({
                                             src={effectiveImage}
                                             alt={slide.heading || brandName}
                                             fill
-                                            className="object-cover object-top hero-entrance-animate will-change-transform"
+                                            className={`
+                                                object-cover object-top transition-all duration-[1500ms] ease-out will-change-transform
+                                                ${imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-110"}
+                                            `}
                                             priority={index === 0}
                                             loading={index === 0 ? "eager" : "lazy"}
                                             fetchPriority={index === 0 ? "high" : "auto"}
                                             quality={85}
                                             sizes="100vw"
-                                            placeholder="blur"
-                                            blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMCAxMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzE3MTcxNyIvPjwvc3ZnPg=="
+                                            onLoad={() => index === 0 && setImageLoaded(true)}
                                             onError={() => handleImageError(slide.id)}
                                         />
                                     </div>

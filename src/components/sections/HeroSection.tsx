@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from "next/image";
 import Link from "next/link";
 import HeroCarousel, { HeroSlide } from './HeroCarousel';
+import { useIsMobile } from '@/hooks/use-media-query';
 
 type HeroSectionProps = {
   heading?: string;
@@ -41,6 +42,8 @@ const HeroSection = ({
   slides,
   autoPlayInterval = 5000
 }: HeroSectionProps) => {
+  const isMobile = useIsMobile();
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   // If slides array is provided and has items, use carousel mode
   if (slides && slides.length > 0) {
@@ -57,8 +60,6 @@ const HeroSection = ({
   }
 
   // Legacy single image mode
-  const [heroImage, setHeroImage] = useState(image?.trim() || DEFAULT_HERO_IMAGE);
-  const [heroMobileImage, setHeroMobileImage] = useState(mobileImage?.trim() || '');
   const [imageError, setImageError] = useState(false);
 
   const displayHeading = heading || brandName;
@@ -67,63 +68,66 @@ const HeroSection = ({
   const handleImageError = () => {
     console.warn('Hero image failed to load, using fallback');
     setImageError(true);
-    setHeroImage(DEFAULT_HERO_IMAGE);
-    setHeroMobileImage('');
   };
 
-  const effectiveImage = imageError ? DEFAULT_HERO_IMAGE : heroImage;
+  const getEffectiveImage = () => {
+    if (imageError) return DEFAULT_HERO_IMAGE;
+    if (isMobile && mobileImage) return mobileImage.trim();
+    return (image?.trim() || DEFAULT_HERO_IMAGE);
+  };
+
+  const effectiveImage = getEffectiveImage();
 
   return (
-    <section className="relative w-full h-[100vh] overflow-hidden">
+    <section className="relative w-full h-[100vh] overflow-hidden bg-neutral-900">
       {/* Background Image Container */}
-      <div className="absolute inset-0 h-full w-full bg-neutral-900">
-        <picture>
-          {heroMobileImage && !imageError && (
-            <source
-              media="(max-width: 768px)"
-              srcSet={heroMobileImage}
-            />
-          )}
-          <source
-            media="(min-width: 769px)"
-            srcSet={effectiveImage}
-          />
-          <Image
-            src={effectiveImage}
-            alt={displayHeading || "Hero Image"}
-            fill
-            className="object-cover object-top hero-entrance-animate will-change-transform"
-            priority
-            fetchPriority="high"
-            decoding="async"
-            quality={85}
-            sizes="100vw"
-            placeholder="blur"
-            blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMCAxMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzE3MTcxNyIvPjwvc3ZnPg=="
-            aria-hidden="true"
-            onError={handleImageError}
-          />
-        </picture>
+      <div className="absolute inset-0 h-full w-full">
+        <Image
+          src={effectiveImage}
+          alt={displayHeading || "Hero Image"}
+          fill
+          priority
+          fetchPriority="high"
+          quality={85}
+          sizes="100vw"
+          className={`
+            object-cover object-top transition-all duration-[1500ms] ease-out will-change-transform
+            ${imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-110 shadow-none outline-none"}
+          `}
+          onLoad={() => setImageLoaded(true)}
+          onError={handleImageError}
+        />
 
         {/* Overlay */}
         <div
-          className="absolute inset-0 bg-black transition-opacity duration-700 ease-in-out"
-          style={{ opacity: overlayOpacity }}
+          className={`absolute inset-0 bg-black transition-opacity duration-1000 ease-in-out ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+          style={{ opacity: imageLoaded ? overlayOpacity : 0 }}
         />
       </div>
 
       {/* Content Container */}
       <div className="relative flex flex-col items-center justify-center w-full px-6 md:px-10 z-10 text-center h-[100vh] max-w-[1920px] mx-auto">
         <div className="flex flex-col items-center justify-center space-y-8">
-          <p className="text-white/90 text-xs md:text-xs tracking-[0.2em] uppercase font-bold hero-text-animate-delay-1">
+          <p className={`
+            text-white/90 text-xs md:text-xs tracking-[0.2em] uppercase font-bold
+            transition-all duration-700 delay-100
+            ${imageLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
+          `}>
             {subheading || "SPRING/SUMMER '26"}
           </p>
 
-          <h1 className="text-white text-5xl md:text-8xl font-medium tracking-tight hero-text-animate-delay-2">
+          <h1 className={`
+            text-white text-5xl md:text-8xl font-medium tracking-tight
+            transition-all duration-700 delay-200
+            ${imageLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}
+          `}>
             {displayHeading}
           </h1>
 
-          <div className="pt-4 hero-text-animate-delay-3">
+          <div className={`
+            pt-4 transition-all duration-700 delay-300
+            ${imageLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}
+          `}>
             <Link
               href={ctaLink || "/shop"}
               className="inline-block px-8 py-3 rounded-full border border-white/50 text-white text-[10px] md:text-xs font-semibold tracking-[0.15em] hover:bg-white hover:text-black transition-all duration-300 uppercase"

@@ -122,6 +122,7 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -334,55 +335,6 @@
     animation: ken-burns 20s ease-out infinite alternate;
   }
 
-  /* ============================================ */
-  /* Hero Entrance Animations - No JS Required   */
-  /* ============================================ */
-
-  .hero-image-animate {
-    animation: heroImageFadeScale 0.8s ease-out 0.2s both;
-  }
-
-  .hero-text-animate {
-    animation: heroTextFadeUp 0.8s cubic-bezier(0.33, 0, 0, 1) both;
-  }
-
-  .hero-text-animate-delay-1 {
-    animation: heroTextFadeUp 0.8s cubic-bezier(0.33, 0, 0, 1) 0.1s both;
-  }
-
-  .hero-text-animate-delay-2 {
-    animation: heroTextFadeUp 0.8s cubic-bezier(0.33, 0, 0, 1) 0.2s both;
-  }
-
-  .hero-text-animate-delay-3 {
-    animation: heroTextFadeUp 0.8s cubic-bezier(0.33, 0, 0, 1) 0.3s both;
-  }
-
-
-  @keyframes heroImageFadeScale {
-    from {
-      opacity: 0;
-      transform: scale(1.1);
-    }
-
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  @keyframes heroTextFadeUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
   /* Section fade-in for Suspense streamed content */
   .section-fade-in {
     animation: sectionFadeIn 0.5s ease-out both;
@@ -482,23 +434,4 @@
 .scroll-reveal.is-hidden [data-reveal-animate] {
   animation: none !important;
   opacity: 0 !important;
-}
-
-/* Hero Entrance Animation - Optimized for stability and LCP */
-@keyframes hero-entrance-fade-scale {
-  0% {
-    opacity: 0.01;
-    /* Start slightly above 0 for browser rendering stability */
-    transform: scale(1.05);
-  }
-
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.hero-entrance-animate {
-  animation: hero-entrance-fade-scale 1.5s cubic-bezier(0.33, 0, 0, 1) both;
-  will-change: transform;
 }

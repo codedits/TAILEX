@@ -59,7 +59,7 @@ export function ScrollReveal({
         <div
             ref={ref}
             className={cn(
-                "scroll-reveal",
+                "scroll-reveal group/reveal",
                 isVisible ? "is-visible" : "is-hidden",
                 className
             )}
