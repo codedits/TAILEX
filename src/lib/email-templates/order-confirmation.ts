@@ -2,21 +2,34 @@ import { Order } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
 
 export function getOrderConfirmationHtml(order: Order, currency: string, siteUrl: string): string {
-  const itemsList = order.items?.map(item => `
-    <div style="border-bottom: 1px solid #eaeaea; padding: 15px 0; display: flex; justify-content: space-between;">
+  const getAbsoluteUrl = (url: string | null | undefined) => {
+    if (!url) return null;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return `${siteUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+
+  const itemsList = order.items?.map(item => {
+    const imageUrl = getAbsoluteUrl(item.image_url);
+    return `
+    <div style="border-bottom: 1px solid #eaeaea; padding: 15px 0; display: flex; align-items: flex-start;">
+       ${imageUrl ? `
+         <div style="width: 60px; margin-right: 15px;">
+           <img src="${imageUrl}" alt="${item.title}" width="60" height="75" style="display: block; object-fit: cover; border: 1px solid #eaeaea;" />
+         </div>
+       ` : ''}
        <div style="flex: 1;">
           <span style="display: block; font-size: 14px; color: #000; font-weight: 500;">${item.title}</span>
           ${item.properties && (item.properties.color || item.properties.size)
-      ? `<span style="display: block; font-size: 12px; color: #666; margin-top: 4px;">Color: ${item.properties.color || 'N/A'} | Size: ${item.properties.size || 'N/A'}</span>`
-      : `<span style="display: block; font-size: 12px; color: #999; margin-top: 4px;">${item.variant_title || ''}</span>`
-    }
-          <span style="display: block; font-size: 12px; color: #999; margin-top: 2px;">Qty: ${item.quantity}</span>
-       </div>
-       <div style="text-align: right;">
-          <span style="font-size: 14px; color: #000;">${formatCurrency(item.unit_price, { code: currency, symbol: currency === 'PKR' ? 'Rs.' : '$', format: 'symbol amount' })}</span>
+        ? `<span style="display: block; font-size: 12px; color: #666; margin-top: 4px;">Color: ${item.properties.color || 'N/A'} | Size: ${item.properties.size || 'N/A'}</span>`
+        : `<span style="display: block; font-size: 12px; color: #999; margin-top: 4px;">${item.variant_title || ''}</span>`
+      }
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+            <span style="font-size: 12px; color: #999;">Qty: ${item.quantity}</span>
+            <span style="font-size: 14px; color: #000; font-weight: 500;">${formatCurrency(item.unit_price, { code: currency, symbol: currency === 'PKR' ? 'Rs.' : '$', format: 'symbol amount' })}</span>
+          </div>
        </div>
     </div>
-  `).join('') || '';
+  `}).join('') || '';
 
   // Note: We duplicate simple currency formatting logic or reuse the one from utils. 
   // Ideally, formatCurrency should take just the Order's currency code if simple, or the config object.
