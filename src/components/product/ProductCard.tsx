@@ -141,21 +141,21 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
             </div>
           )}
           {isValidImage(imageSecondary) && (
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-in-out">
+            <div className="absolute inset-0 opacity-0 lg:group-hover:opacity-100 transition-opacity duration-700 ease-in-out">
               <Image
                 src={imageSecondary}
                 alt={`${title} alternate view`}
                 fill
                 sizes={sizes}
                 quality={85}
-                className="object-cover group-hover:scale-105 transition-transform duration-700"
+                className="object-cover lg:group-hover:scale-105 transition-transform duration-700"
               />
             </div>
           )}
         </div>
 
         {/* Shopify-Style Bottom Quick Add Button */}
-        <div className="absolute bottom-4 left-4 right-4 z-30 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out">
+        <div className="absolute bottom-4 left-4 right-4 z-30 translate-y-4 opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100 transition-all duration-300 ease-out">
           <button
             onClick={handleQuickAdd}
             className="w-full bg-white hover:bg-black hover:text-white text-black text-xs font-bold py-3 rounded-full shadow-xl transition-all duration-300 uppercase tracking-widest flex items-center justify-center gap-2 border border-neutral-100"
@@ -168,7 +168,7 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
         {/* Quick View Mini Button */}
         <button
           onClick={handleQuickView}
-          className="absolute bottom-20 right-4 z-30 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 delay-75 hover:bg-neutral-50"
+          className="absolute bottom-20 right-4 z-30 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center opacity-0 translate-x-4 lg:group-hover:opacity-100 lg:group-hover:translate-x-0 transition-all duration-300 delay-75 hover:bg-neutral-50"
           aria-label="Quick view"
         >
           <Eye className="w-4 h-4 text-neutral-600" />
@@ -179,7 +179,7 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
       <div className="flex flex-col pt-4 pb-2 px-1">
         {/* Title */}
         <Link href={href} className="group/title">
-          <h3 className="font-manrope text-sm font-medium text-neutral-800 leading-tight group-hover/title:underline underline-offset-4 decoration-neutral-300 transition-all">
+          <h3 className="font-manrope text-sm font-medium text-neutral-800 leading-tight lg:group-hover/title:underline underline-offset-4 decoration-neutral-300 transition-all">
             {title}
           </h3>
         </Link>
