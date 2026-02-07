@@ -81,34 +81,31 @@ const HeroSection = ({
 
   return (
     <section className="relative w-full h-[100vh] overflow-hidden bg-white">
-      {/* Background Image Container */}
       <div className="absolute inset-0 h-full w-full">
-        <AnimatePresence>
-          {effectiveImage && (
-            <motion.div
-              initial={{ opacity: 0, scale: 1.1 }}
-              animate={{
-                opacity: imageLoaded ? 1 : 0,
-                scale: imageLoaded ? 1 : 1.1
-              }}
-              transition={{ duration: 1.5, ease: [0.33, 1, 0.68, 1] }}
-              className="absolute inset-0 h-full w-full"
-            >
-              <Image
-                src={effectiveImage}
-                alt={displayHeading || "Hero Image"}
-                fill
-                priority
-                fetchPriority="high"
-                quality={85}
-                sizes="100vw"
-                className="object-cover object-top"
-                onLoad={() => setImageLoaded(true)}
-                onError={handleImageError}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {effectiveImage && (
+          <motion.div
+            initial={{ opacity: 0, scale: 1.1 }}
+            animate={{
+              opacity: imageLoaded ? 1 : 0,
+              scale: imageLoaded ? 1 : 1.1
+            }}
+            transition={{ duration: 1.5, ease: [0.33, 1, 0.68, 1] }}
+            className="absolute inset-0 h-full w-full"
+          >
+            <Image
+              src={effectiveImage}
+              alt={displayHeading || "Hero Image"}
+              fill
+              priority
+              fetchPriority="high"
+              quality={85}
+              sizes="100vw"
+              className="object-cover object-top"
+              onLoad={() => setImageLoaded(true)}
+              onError={handleImageError}
+            />
+          </motion.div>
+        )}
 
         {/* Overlay */}
         <motion.div

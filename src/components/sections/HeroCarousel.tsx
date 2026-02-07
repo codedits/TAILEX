@@ -136,15 +136,20 @@ const HeroCarousel = ({
                                 <div className="relative w-full h-full">
                                     {/* Mobile Image (Optimized) */}
                                     {slide.mobileImage && !imageErrors.has(slide.id) && (
-                                        <div className="md:hidden absolute inset-0">
+                                        <motion.div
+                                            initial={index === 0 ? { opacity: 0, scale: 1.1 } : { opacity: 1, scale: 1 }}
+                                            animate={index === 0 ? {
+                                                opacity: imageLoaded ? 1 : 0,
+                                                scale: imageLoaded ? 1 : 1.1
+                                            } : {}}
+                                            transition={{ duration: 1.5, ease: [0.33, 1, 0.68, 1] }}
+                                            className="absolute inset-0"
+                                        >
                                             <Image
                                                 src={slide.mobileImage}
                                                 alt={slide.heading || brandName}
                                                 fill
-                                                className={`
-                                                    object-cover object-top transition-all duration-[2000ms] ease-out will-change-transform
-                                                    ${imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-110"}
-                                                `}
+                                                className="object-cover object-top"
                                                 priority={index === 0}
                                                 loading={index === 0 ? "eager" : "lazy"}
                                                 fetchPriority={index === 0 ? "high" : "auto"}
@@ -153,19 +158,24 @@ const HeroCarousel = ({
                                                 onLoad={() => index === 0 && setImageLoaded(true)}
                                                 onError={() => handleImageError(slide.id)}
                                             />
-                                        </div>
+                                        </motion.div>
                                     )}
 
                                     {/* Desktop Image (Optimized) */}
-                                    <div className={`absolute inset-0 ${slide.mobileImage && !imageErrors.has(slide.id) ? 'hidden md:block' : ''}`}>
+                                    <motion.div
+                                        initial={index === 0 ? { opacity: 0, scale: 1.1 } : { opacity: 1, scale: 1 }}
+                                        animate={index === 0 ? {
+                                            opacity: imageLoaded ? 1 : 0,
+                                            scale: imageLoaded ? 1 : 1.1
+                                        } : {}}
+                                        transition={{ duration: 1.5, ease: [0.33, 1, 0.68, 1] }}
+                                        className={`absolute inset-0 ${slide.mobileImage && !imageErrors.has(slide.id) ? 'hidden md:block' : ''}`}
+                                    >
                                         <Image
                                             src={effectiveImage}
                                             alt={slide.heading || brandName}
                                             fill
-                                            className={`
-                                                object-cover object-top transition-all duration-[2000ms] ease-out will-change-transform
-                                                ${imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-110"}
-                                            `}
+                                            className="object-cover object-top"
                                             priority={index === 0}
                                             loading={index === 0 ? "eager" : "lazy"}
                                             fetchPriority={index === 0 ? "high" : "auto"}
@@ -174,10 +184,13 @@ const HeroCarousel = ({
                                             onLoad={() => index === 0 && setImageLoaded(true)}
                                             onError={() => handleImageError(slide.id)}
                                         />
-                                    </div>
-                                    <div
-                                        className="absolute inset-0 bg-black transition-opacity duration-1000"
-                                        style={{ opacity: overlayOpacity }}
+                                    </motion.div>
+
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: imageLoaded ? overlayOpacity : 0 }}
+                                        transition={{ duration: 1.2, ease: "easeInOut" }}
+                                        className="absolute inset-0 bg-black z-[5]"
                                     />
                                 </div>
                             </SwiperSlide>

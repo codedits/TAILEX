@@ -52,7 +52,7 @@ export default function HomeLayout({ data }: HomeLayoutProps) {
             {/* CRITICAL ABOVE-FOLD: Hero Section (SSR)     */}
             {/* ONLY priority image on entire page          */}
             {/* ============================================ */}
-            <div className="relative flex flex-col items-center justify-center w-full overflow-visible">
+            <div className="relative flex flex-col items-center justify-center w-full overflow-hidden">
                 {heroSection?.enabled && (
                     <HeroSection
                         heading={heroSection.content?.heading || hero.heading || brand.name}
@@ -91,7 +91,7 @@ export default function HomeLayout({ data }: HomeLayoutProps) {
             {/* REMAINING COLLECTIONS: Streamed via Suspense */}
             {/* ============================================ */}
             {categoriesSection?.enabled && remainingCollections.length > 0 && (
-                <div className="relative flex flex-col items-center justify-center w-full overflow-visible">
+                <div className="relative flex flex-col items-center justify-center w-full overflow-hidden">
                     {remainingCollections.map((collection) => (
                         <Suspense key={collection.id} fallback={<CollectionShowcaseSkeleton />}>
                             <CollectionShowcase

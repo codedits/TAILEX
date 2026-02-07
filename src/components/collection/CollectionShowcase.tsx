@@ -40,13 +40,13 @@ export default function CollectionShowcase({
     const [imgSrc, setImgSrc] = useState(coverImage || "https://framerusercontent.com/images/BjQfJy7nQoVxvCYTFzwZxprDWiQ.jpg");
 
     return (
-        <section className={cn("w-full flex flex-col relative z-10 section-fade-in", className)}>
+        <section className={cn("w-full flex flex-col relative z-10", className)}>
             {/* Section 1: The Collection Hero */}
             <div className="relative w-full h-[70vh] md:h-[115vh] overflow-hidden group bg-background">
                 <motion.div
                     initial={{ opacity: 0, scale: 1.1 }}
                     whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true, amount: 0.1 }}
+                    viewport={{ once: true, amount: 0.15 }}
                     transition={{ duration: 1.5, ease: [0.33, 1, 0.68, 1] }}
                     className="absolute inset-0 h-full w-full bg-white"
                 >
