@@ -67,6 +67,7 @@ export function VariantConfigSection({
     const hasExistingVariants = variants.some(v => v.id && !v.id.startsWith('temp-'));
 
     // Regenerate variants when config changes
+    // Regenerate variants when config changes
     const regenerateVariants = useCallback(() => {
         const generated = generateVariants({
             enableColor,
@@ -77,32 +78,54 @@ export function VariantConfigSection({
             baseSku,
         });
 
-        // Convert to ProductVariant type with temporary IDs
-        const newVariants: ProductVariant[] = generated.map((g, idx) => ({
-            id: `temp-${idx}-${Date.now()}`,
-            product_id: '',
-            ...g,
-        }));
+        // Merge with existing variants to preserve IDs and inventory
+        const mergedVariants: ProductVariant[] = generated.map((g, idx) => {
+            // Try to find a match in current variants
+            const match = variants.find(v => {
+                // Normalize null/undefined for comparison
+                const vColor = v.color || null;
+                const gColor = g.color || null;
+                const vSize = v.size || null;
+                const gSize = g.size || null;
+                return vColor === gColor && vSize === gSize;
+            });
 
-        onVariantsChange(newVariants);
-    }, [enableColor, enableSize, availableColors, availableSizes, basePrice, baseSku, onVariantsChange]);
+            if (match) {
+                // Keep existing variant data (ID, inventory, etc.)
+                // We overwrite title/sku/price from generator only if we strictly want to enforce sync,
+                // but usually better to keep user edits. 
+                // However, for consistency with 'generation', we might want to update some fields.
+                // For now, let's PRESERVE the existing variant entirely to be safe.
+                return match;
+            }
+
+            return {
+                id: `temp-${idx}-${Date.now()}`,
+                product_id: '',
+                ...g,
+            };
+        });
+
+        onVariantsChange(mergedVariants);
+    }, [enableColor, enableSize, availableColors, availableSizes, basePrice, baseSku, onVariantsChange, variants]);
 
     // Auto-regenerate when toggle or options change (but NEVER if we have existing DB variants)
+    // Auto-regenerate when toggle or options change
     useEffect(() => {
-        // Always skip regeneration if we have real database variants (editing existing product)
-        if (hasExistingVariants) {
-            return;
-        }
+        // We removed the 'hasExistingVariants' blocker here to allow
+        // "Variantizing" an old product (Simple -> Variable).
+        // The regenerateVariants function now safely MERGES instead of overwriting.
 
         if (isInitialMount.current) {
             isInitialMount.current = false;
             // Skip regeneration on initial mount if we have any variants
+            // (We assume DB state matches config on load)
             if (variants.length > 0) {
                 return;
             }
         }
         regenerateVariants();
-    }, [enableColor, enableSize, availableColors.length, availableSizes.length, hasExistingVariants]);
+    }, [enableColor, enableSize, availableColors.length, availableSizes.length]);
 
     // Add custom color
     const addColor = useCallback(() => {
