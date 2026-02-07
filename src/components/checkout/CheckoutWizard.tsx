@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, Loader2, ChevronRight, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/context/UserAuthContext";
 import { useFormatCurrency } from "@/context/StoreConfigContext";
+import { createClient } from "@/lib/supabase/client";
 import type { AuthUser } from "@/lib/auth";
 import { ShippingMethodStep } from "./shipping-method-step";
 import { PaymentMethodStep } from "./payment-method-step";
@@ -64,6 +65,7 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
 
     const activeUser = authUser || (initialUser as any);
     const router = useRouter();
+    const [isDataPreFilled, setIsDataPreFilled] = useState(!!customer);
 
     // React Hook Form
     const form = useForm<FormData>({
@@ -80,6 +82,37 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
             email: activeUser?.email || "",
         }
     });
+
+    // Client-side pre-fill for logged-in users who didn't have customer prop from server
+    useEffect(() => {
+        const fetchProfile = async () => {
+            if (activeUser && !customer && !isDataPreFilled) {
+                const supabase = createClient();
+                const { data: customerData } = await supabase
+                    .from('customers')
+                    .select('*')
+                    .eq('user_id', activeUser.id)
+                    .single();
+
+                if (customerData) {
+                    form.reset({
+                        first_name: customerData.first_name || "",
+                        last_name: customerData.last_name || "",
+                        address1: customerData.address1 || "",
+                        city: customerData.city || "",
+                        zip: customerData.zip || "",
+                        country: customerData.country || "Pakistan",
+                        country_code: "PK",
+                        phone: customerData.phone || "",
+                        email: activeUser.email || "",
+                    });
+                    setIsDataPreFilled(true);
+                }
+            }
+        };
+
+        fetchProfile();
+    }, [activeUser, customer, isDataPreFilled, form]);
 
     useEffect(() => {
         if (activeUser) {
