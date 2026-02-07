@@ -118,6 +118,36 @@ export async function POST(request: NextRequest) {
             .eq('variant_id', variant_id || null)
             .single();
 
+        // Check inventory availability (enforcing usage of inventory_levels)
+        if (variant_id) {
+            const { data: inventory } = await supabase
+                .from('inventory_levels')
+                .select('available')
+                .eq('variant_id', variant_id)
+                .single(); // Assuming single location for now, or use .sum() logic if multiple
+
+            // If we have multiple locations, we should sum them up. 
+            // However, .single() might fail if there are multiple rows.
+            // Let's use the safer accumulation approach:
+
+            const { data: allInventory } = await supabase
+                .from('inventory_levels')
+                .select('available')
+                .eq('variant_id', variant_id);
+
+            const totalAvailable = allInventory?.reduce((sum, item) => sum + (item.available || 0), 0) ?? 0;
+
+            // Check existing qty in cart to ensure total doesn't exceed stock
+            const existingQty = existingItem?.quantity || 0;
+
+            if (existingQty + quantity > totalAvailable) {
+                return NextResponse.json({
+                    error: `Only ${totalAvailable} items available in stock`
+                }, { status: 400 });
+            }
+        }
+
+        // Check if item already exists in cart
         if (existingItem) {
             // Update quantity
             const newQuantity = existingItem.quantity + quantity;
