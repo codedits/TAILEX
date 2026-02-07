@@ -1,6 +1,6 @@
 import { getBrandConfig, getNavigation, getFooterConfig, getSocialConfig } from "@/lib/theme";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+
 
 export const metadata = {
     title: "Terms of Service",
@@ -67,7 +67,7 @@ export default async function TermsPage() {
                 </div>
             </div>
 
-            <Footer config={footerConfig} brandName={brand.name} social={socialConfig} />
+
         </main>
     );
 }

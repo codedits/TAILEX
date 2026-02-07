@@ -44,10 +44,10 @@ export default function CollectionShowcase({
             {/* Section 1: The Collection Hero */}
             <div className="relative w-full h-[70vh] md:h-[115vh] overflow-hidden group bg-background">
                 <motion.div
-                    initial={{ opacity: 0, scale: 1.1 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true, amount: 0.15 }}
-                    transition={{ duration: 1.5, ease: [0.33, 1, 0.68, 1] }}
+                    initial={{ opacity: 0, x: 150 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, amount: 0.1 }}
+                    transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
                     className="absolute inset-0 h-full w-full bg-white"
                 >
                     <Image

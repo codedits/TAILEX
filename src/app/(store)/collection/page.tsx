@@ -1,5 +1,5 @@
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+
 import { CollectionCard } from "@/components/collection/CollectionCard";
 import CollectionBrowser from "@/components/collection/CollectionBrowser";
 import { createClient } from "@/lib/supabase/server";
@@ -87,7 +87,7 @@ export default async function CollectionPage() {
         {/* All Products Removed - See /shop */}
       </div>
 
-      <Footer config={footerConfig} brandName={brand.name} social={socialConfig} />
+
     </main>
   );
 }

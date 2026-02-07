@@ -1,5 +1,5 @@
 import { StoreHeader } from "@/components/layout/StoreHeader";
-import Footer from "@/components/layout/Footer";
+
 import { getBrandConfig, getFooterConfig, getSocialConfig } from "@/lib/theme";
 import { AccountSidebar } from "@/components/account/AccountSidebar";
 
@@ -29,7 +29,7 @@ export default async function AccountLayout({
                     </div>
                 </div>
             </main>
-            <Footer config={footerConfig} brandName={brand.name} social={socialConfig} />
+
         </>
     );
 }

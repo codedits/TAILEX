@@ -1,6 +1,6 @@
 import { getBrandConfig, getNavigation, getFooterConfig, getSocialConfig } from "@/lib/theme";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+
 
 export const metadata = {
     title: "Privacy Policy",
@@ -74,7 +74,7 @@ export default async function PrivacyPage() {
                 </div>
             </div>
 
-            <Footer config={footerConfig} brandName={brand.name} social={socialConfig} />
+
         </main>
     );
 }

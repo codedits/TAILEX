@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getBrandConfig, getNavigation, getFooterConfig, getSocialConfig, getHeroConfig, getHomepageLayout } from "@/lib/theme";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+
 import Image from "next/image";
 import style2 from "@/assets/style-2.jpg";
 
@@ -90,7 +90,7 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      <Footer config={footerConfig} brandName={brand.name} social={socialConfig} />
+
     </main>
   );
 }

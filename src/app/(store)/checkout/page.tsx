@@ -2,7 +2,7 @@ import { getAuthUser } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { StoreConfigService } from "@/services/config";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+
 import CheckoutWizard from "@/components/checkout/CheckoutWizard";
 export const dynamic = "force-dynamic";
 export default async function CheckoutPage() {
@@ -42,7 +42,7 @@ export default async function CheckoutPage() {
         } : null}
         deliveryConfig={storeConfig.delivery}
       />
-      <Footer />
+
     </main>
   );
 }

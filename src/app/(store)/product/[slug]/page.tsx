@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+
 import ProductDetail from "@/components/product/ProductDetail";
 import Featuring from "@/components/sections/Featuring";
 import RelatedProducts from "@/components/product/RelatedProducts";
@@ -152,7 +152,7 @@ export default async function ProductPage({ params }: Props) {
         <RelatedProducts products={safeRelated} />
       </div>
 
-      <Footer config={footerConfig} brandName={brand.name} social={socialConfig} />
+
     </main>
   );
 }

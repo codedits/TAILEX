@@ -4,7 +4,7 @@ import HeroSection from "@/components/sections/HeroSection";
 import { TopCollectionStrip } from "@/components/sections/TopCollectionStrip";
 import ProductGridSection from "@/components/sections/ProductGridSection";
 import CollectionShowcase from "@/components/collection/CollectionShowcase";
-import Footer from "@/components/layout/Footer";
+
 import { HOMEPAGE_TEXT } from "@/config/homepage-text";
 import { TrustBar } from "@/components/sections/TrustBar";
 import Featuring from "@/components/sections/Featuring";
@@ -12,7 +12,7 @@ import Featuring from "@/components/sections/Featuring";
 // Skeletons for Suspense fallbacks
 import { CollectionShowcaseSkeleton } from "@/components/skeletons/CollectionShowcaseSkeleton";
 import { ProductGridSkeleton } from "@/components/skeletons/ProductGridSkeleton";
-import { FooterSkeleton } from "@/components/skeletons/FooterSkeleton";
+
 
 interface HomeLayoutProps {
     data: HomeData;
@@ -132,13 +132,7 @@ export default function HomeLayout({ data }: HomeLayoutProps) {
             {/* ============================================ */}
             {/* FOOTER: Streamed LAST via Suspense          */}
             {/* ============================================ */}
-            <Suspense fallback={<FooterSkeleton />}>
-                <Footer
-                    config={footer}
-                    brandName={brand.name}
-                    social={social}
-                />
-            </Suspense>
+
         </div>
     );
 }

@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+
 import AsyncProductGrid from "@/components/collection/AsyncProductGrid";
 import MobileCollectionList from "@/components/shop/MobileCollectionList";
 import { Product, Collection } from "@/lib/types";
@@ -136,7 +136,7 @@ export default async function CollectionDetailPage({ params, searchParams }: Pro
                 </div>
             </div>
 
-            <Footer config={footerConfig} brandName={brand.name} social={socialConfig} />
+
         </main>
     );
 }

@@ -1,5 +1,5 @@
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
@@ -123,7 +123,7 @@ export default async function NewsPage() {
         </div>
       </section>
 
-      <Footer config={footerConfig} brandName={brand.name} social={socialConfig} />
+
     </main>
   );
 }

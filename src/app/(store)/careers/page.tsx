@@ -1,6 +1,6 @@
 import { getBrandConfig, getNavigation, getFooterConfig, getSocialConfig } from "@/lib/theme";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
@@ -86,7 +86,7 @@ export default async function CareersPage() {
                 </div>
             </div>
 
-            <Footer config={footerConfig} brandName={brand.name} social={socialConfig} />
+
         </main>
     );
 }

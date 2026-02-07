@@ -1,6 +1,6 @@
 import { getBrandConfig, getNavigation, getFooterConfig, getSocialConfig } from "@/lib/theme";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+
 import { Mail, Phone, MapPin } from "lucide-react";
 
 export const metadata = {
@@ -103,7 +103,7 @@ export default async function ContactPage() {
                 </div>
             </div>
 
-            <Footer config={footerConfig} brandName={brand.name} social={socialConfig} />
+
         </main>
     );
 }

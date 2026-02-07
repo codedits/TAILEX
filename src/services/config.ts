@@ -120,8 +120,44 @@ export const StoreConfigService = {
             };
 
             const defaultFooter: FooterConfig = {
-                tagline: 'Timeless wardrobe essentials.',
-                columns: [], // Will be populated below if not in config
+                tagline: 'Curating the modern wardrobe through discipline and detail.',
+                columns: [
+                    {
+                        title: 'Shop',
+                        links: [
+                            { label: 'All Products', url: '/shop' },
+                            { label: 'New Arrivals', url: '/collection/new-arrivals' },
+                            { label: 'Best Sellers', url: '/collection/best-sellers' },
+                            { label: 'Accessories', url: '/collection/accessories' },
+                        ]
+                    },
+                    {
+                        title: 'Company',
+                        links: [
+                            { label: 'About Us', url: '/about' },
+                            { label: 'The Journal', url: '/news' },
+                            { label: 'Careers', url: '/careers' },
+                            { label: 'Contact', url: '/contact' },
+                        ]
+                    },
+                    {
+                        title: 'Account',
+                        links: [
+                            { label: 'Login', url: '/login' },
+                            { label: 'Sign Up', url: '/register' },
+                            { label: 'My Orders', url: '/account/orders' },
+                            { label: 'Settings', url: '/account' },
+                        ]
+                    },
+                    {
+                        title: 'Legal',
+                        links: [
+                            { label: 'Privacy Policy', url: '/privacy' },
+                            { label: 'Terms of Service', url: '/terms' },
+                            { label: 'Cookie Policy', url: '/cookies' },
+                        ]
+                    }
+                ],
                 showSocial: true,
                 copyright: '© {year} {brand}. All rights reserved.'
             };
@@ -143,8 +179,8 @@ export const StoreConfigService = {
             const footer: FooterConfig = {
                 ...defaultFooter,
                 ...dbFooter,
-                // Ensure columns exist. If DB has columns use them, otherwise use navigation menu items as a single column or empty
-                columns: dbFooter.columns || (footerNavItems.length > 0 ? [{ title: 'Links', links: footerNavItems }] : [])
+                // Ensure columns exist. If DB has columns use them, otherwise use navigation menu items as a single column, otherwise use defaults
+                columns: dbFooter.columns || (footerNavItems.length > 0 ? [{ title: 'Links', links: footerNavItems }] : defaultFooter.columns)
             };
 
             const homepageLayout = dbConfig.homepage_layout || [];

@@ -1,5 +1,5 @@
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+
 import ProductFeed from "@/components/product/ProductFeed";
 import { createClient } from "@/lib/supabase/server";
 import { type Product } from "@/lib/types";
@@ -40,7 +40,7 @@ export default async function ProductPage() {
 
       <ProductFeed initialProducts={allProducts} />
 
-      <Footer config={footerConfig} brandName={brand.name} social={socialConfig} />
+
     </main>
   );
 }
