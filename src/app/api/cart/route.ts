@@ -19,6 +19,34 @@ async function getUserFromToken(request: NextRequest) {
     }
 }
 
+// Helper to get or create a cart for the user
+async function getOrCreateCart(supabase: any, userId: string) {
+    // Try to find existing cart
+    const { data: existingCart } = await supabase
+        .from('carts')
+        .select('id')
+        .eq('customer_id', userId)
+        .single();
+
+    if (existingCart) {
+        return existingCart.id;
+    }
+
+    // Create new cart
+    const { data: newCart, error } = await supabase
+        .from('carts')
+        .insert({ customer_id: userId })
+        .select('id')
+        .single();
+
+    if (error) {
+        console.error('Failed to create cart:', error);
+        throw new Error('Failed to create cart');
+    }
+
+    return newCart.id;
+}
+
 // GET: Fetch user's cart with product details
 export async function GET(request: NextRequest) {
     try {
@@ -28,15 +56,29 @@ export async function GET(request: NextRequest) {
         }
 
         const supabase = await createAdminClient();
+
+        // Get user's cart
+        const { data: cart } = await supabase
+            .from('carts')
+            .select('id')
+            .eq('customer_id', tokenData.userId)
+            .single();
+
+        if (!cart) {
+            return NextResponse.json({ cart: [] });
+        }
+
+        // Get cart items with product details
         const { data: cartItems, error } = await supabase
-            .from('user_cart')
+            .from('cart_items')
             .select(`
-        id,
-        quantity,
-        variant_id,
-        product:products(id, title, slug, price, sale_price, cover_image, stock)
-      `)
-            .eq('user_id', tokenData.userId);
+                id,
+                quantity,
+                variant_id,
+                product:products(id, title, slug, price, sale_price, cover_image),
+                variant:product_variants(id, title, price, sale_price, color, size)
+            `)
+            .eq('cart_id', cart.id);
 
         if (error) {
             console.error('Cart Fetch Error:', error);
@@ -65,12 +107,13 @@ export async function POST(request: NextRequest) {
         }
 
         const supabase = await createAdminClient();
+        const cartId = await getOrCreateCart(supabase, tokenData.userId);
 
         // Check if item already exists in cart
         const { data: existingItem } = await supabase
-            .from('user_cart')
+            .from('cart_items')
             .select('id, quantity')
-            .eq('user_id', tokenData.userId)
+            .eq('cart_id', cartId)
             .eq('product_id', product_id)
             .eq('variant_id', variant_id || null)
             .single();
@@ -79,7 +122,7 @@ export async function POST(request: NextRequest) {
             // Update quantity
             const newQuantity = existingItem.quantity + quantity;
             const { error } = await supabase
-                .from('user_cart')
+                .from('cart_items')
                 .update({ quantity: newQuantity })
                 .eq('id', existingItem.id);
 
@@ -90,8 +133,8 @@ export async function POST(request: NextRequest) {
         }
 
         // Insert new item
-        const { error: insertError } = await supabase.from('user_cart').insert({
-            user_id: tokenData.userId,
+        const { error: insertError } = await supabase.from('cart_items').insert({
+            cart_id: cartId,
             product_id,
             variant_id: variant_id || null,
             quantity,
@@ -125,11 +168,23 @@ export async function DELETE(request: NextRequest) {
         }
 
         const supabase = await createAdminClient();
+
+        // Get user's cart first to verify ownership
+        const { data: cart } = await supabase
+            .from('carts')
+            .select('id')
+            .eq('customer_id', tokenData.userId)
+            .single();
+
+        if (!cart) {
+            return NextResponse.json({ error: 'Cart not found' }, { status: 404 });
+        }
+
         const { error } = await supabase
-            .from('user_cart')
+            .from('cart_items')
             .delete()
             .eq('id', itemId)
-            .eq('user_id', tokenData.userId); // Ensure user owns the item
+            .eq('cart_id', cart.id); // Ensure user owns the item
 
         if (error) {
             console.error('Cart Delete Error:', error);
@@ -159,13 +214,24 @@ export async function PATCH(request: NextRequest) {
 
         const supabase = await createAdminClient();
 
+        // Get user's cart first to verify ownership
+        const { data: cart } = await supabase
+            .from('carts')
+            .select('id')
+            .eq('customer_id', tokenData.userId)
+            .single();
+
+        if (!cart) {
+            return NextResponse.json({ error: 'Cart not found' }, { status: 404 });
+        }
+
         if (quantity <= 0) {
             // Remove item if quantity is 0 or less
             const { error } = await supabase
-                .from('user_cart')
+                .from('cart_items')
                 .delete()
                 .eq('id', item_id)
-                .eq('user_id', tokenData.userId);
+                .eq('cart_id', cart.id);
 
             if (error) {
                 return NextResponse.json({ error: 'Failed to remove item' }, { status: 500 });
@@ -174,10 +240,10 @@ export async function PATCH(request: NextRequest) {
         }
 
         const { error } = await supabase
-            .from('user_cart')
+            .from('cart_items')
             .update({ quantity })
             .eq('id', item_id)
-            .eq('user_id', tokenData.userId);
+            .eq('cart_id', cart.id);
 
         if (error) {
             console.error('Cart Update Error:', error);

@@ -142,11 +142,11 @@ export function MobileProductCard({
             >
                 <div className="overflow-hidden">
                     <div className="px-4 pb-4 pt-0 space-y-3 border-t border-gray-100">
-                        {/* Stock Info */}
+                        {/* Stock Info - now calculated from variants */}
                         <div className="flex items-center justify-between py-2">
-                            <span className="text-gray-500 text-sm">Stock</span>
-                            <span className={cn("font-mono font-medium", getStockColor(product.stock ?? 0))}>
-                                {product.stock ?? 0} units
+                            <span className="text-gray-500 text-sm">Variants</span>
+                            <span className="text-gray-600 font-medium">
+                                {product.variants?.length ?? 0} variant{(product.variants?.length ?? 0) !== 1 ? 's' : ''}
                             </span>
                         </div>
 

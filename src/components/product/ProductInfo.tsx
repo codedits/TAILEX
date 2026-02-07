@@ -103,14 +103,14 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         });
 
         return relevantVariants.every(v =>
-            v.status === 'disabled' || (v.stock ?? v.inventory_quantity ?? 0) <= 0
+            v.status === 'disabled' || (v.inventory_quantity ?? 0) <= 0
         );
     };
 
     const currentPrice = selectedVariant?.price ?? product.price;
     const currentSalePrice = selectedVariant?.sale_price ?? product.sale_price;
     const hasSale = !!currentSalePrice && currentSalePrice < currentPrice;
-    const currentStock = selectedVariant?.stock ?? selectedVariant?.inventory_quantity ?? product.stock ?? 0;
+    const currentStock = selectedVariant?.inventory_quantity ?? 0;
     const isOutOfStock = product.track_inventory && currentStock <= 0 && !product.allow_backorder;
 
     // Handlers

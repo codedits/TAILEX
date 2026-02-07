@@ -19,8 +19,8 @@ export function LowStockAlert({ products }: { products: Product[] }) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                     {products.slice(0, 3).map(p => (
                         <div key={p.id} className="flex justify-between items-center bg-red-100 p-2 rounded-lg border border-red-200">
-                            <span className="truncate text-sm text-red-800 mr-2">{p.title}</span>
-                            <span className="text-sm font-semibold text-red-600">{p.stock}</span>
+                            <span className="truncate text-sm text-red-800">{p.title}</span>
+                            <span className="text-xs font-medium text-red-500">Low Stock</span>
                         </div>
                     ))}
                 </div>

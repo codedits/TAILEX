@@ -98,15 +98,12 @@ export const columns: ColumnDef<Product>[] = [
         },
     },
     {
-        accessorKey: "stock",
-        header: () => <div className="text-center">Stock</div>,
+        accessorKey: "variants",
+        header: () => <div className="text-center">Variants</div>,
         cell: ({ row }) => {
-            const stock = row.getValue<number>("stock") ?? 0;
-            let color = "text-gray-600";
-            if (stock === 0) color = "text-red-600";
-            else if (stock < 10) color = "text-amber-600";
-
-            return <div className={`text-center font-mono ${color}`}>{stock}</div>
+            const variants = row.original.variants as any[] | undefined;
+            const count = variants?.length ?? 0;
+            return <div className="text-center font-mono text-gray-600">{count}</div>
         }
     },
     {

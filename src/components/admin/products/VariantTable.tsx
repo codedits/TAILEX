@@ -245,13 +245,14 @@ function VariantRow({
                 />
             </div>
 
-            {/* Stock */}
+            {/* Stock (Display only - managed in inventory_levels) */}
             <div className="col-span-2">
                 <Input
                     type="number"
-                    value={variant.stock ?? variant.inventory_quantity ?? 0}
-                    onChange={(e) => onUpdate(index, 'stock', parseInt(e.target.value) || 0)}
+                    value={variant.inventory_quantity ?? 0}
+                    onChange={(e) => onUpdate(index, 'inventory_quantity', parseInt(e.target.value) || 0)}
                     className="h-8 text-sm font-mono"
+                    title="Stock is managed in inventory_levels"
                 />
             </div>
 

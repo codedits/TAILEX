@@ -8,12 +8,46 @@ import { ProductTableClient } from "@/components/admin/products/ProductTableClie
 
 async function ProductsTable() {
   const supabase = await createAdminClient();
+
+  // Fetch products with variants
   const { data: products } = await supabase
     .from("products")
-    .select("*")
+    .select(`
+      *,
+      variants:product_variants(*)
+    `)
     .order("created_at", { ascending: false });
 
-  return <ProductTableClient products={products || []} />;
+  if (!products) return <ProductTableClient products={[]} />;
+
+  // Fetch inventory levels for all variants
+  const variantIds = products.flatMap(p => p.variants?.map((v: any) => v.id) || []);
+
+  let inventoryMap: Record<string, number> = {};
+
+  if (variantIds.length > 0) {
+    const { data: inventory } = await supabase
+      .from('inventory_levels')
+      .select('variant_id, available')
+      .in('variant_id', variantIds);
+
+    if (inventory) {
+      for (const inv of inventory) {
+        inventoryMap[inv.variant_id] = (inventoryMap[inv.variant_id] || 0) + (inv.available || 0);
+      }
+    }
+  }
+
+  // Attach inventory to variants
+  const productsWithInventory = products.map(p => ({
+    ...p,
+    variants: p.variants?.map((v: any) => ({
+      ...v,
+      inventory_quantity: inventoryMap[v.id] || 0
+    }))
+  }));
+
+  return <ProductTableClient products={productsWithInventory} />;
 }
 
 export default function ProductsPage() {

@@ -7,13 +7,16 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
   const resolvedParams = await params;
   const supabase = await createAdminClient();
 
-  // Fetch product and collections in parallel
+  // Fetch product with variants and collections in parallel
   const [productResult, collectionsResult] = await Promise.all([
-    supabase.from('products').select('*').eq('id', resolvedParams.id).single(),
+    supabase.from('products').select(`
+      *,
+      variants:product_variants(*)
+    `).eq('id', resolvedParams.id).single(),
     supabase.from('collections').select('*').order('title')
   ]);
 
-  const product = productResult.data;
+  let product = productResult.data;
   const collections = collectionsResult.data || [];
 
   if (!product) {
@@ -24,6 +27,31 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
         <Link href="/admin/products" className="text-gray-700 hover:text-gray-900 underline">Back to products</Link>
       </div>
     );
+  }
+
+  // Fetch inventory levels for variants
+  if (product.variants && product.variants.length > 0) {
+    const variantIds = product.variants.map((v: any) => v.id);
+    const { data: inventory } = await supabase
+      .from('inventory_levels')
+      .select('variant_id, available')
+      .in('variant_id', variantIds);
+
+    if (inventory) {
+      // Build inventory map (sum across locations)
+      const inventoryMap: Record<string, number> = {};
+      for (const inv of inventory) {
+        inventoryMap[inv.variant_id] = (inventoryMap[inv.variant_id] || 0) + (inv.available || 0);
+      }
+      // Attach inventory_quantity to each variant
+      product = {
+        ...product,
+        variants: product.variants.map((v: any) => ({
+          ...v,
+          inventory_quantity: inventoryMap[v.id] || 0
+        }))
+      };
+    }
   }
 
   return (

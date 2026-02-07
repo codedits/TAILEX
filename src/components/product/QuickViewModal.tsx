@@ -44,7 +44,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
     const currentPrice = selectedVariant?.price ?? product.price;
     const currentSalePrice = selectedVariant?.sale_price ?? product.sale_price;
     const hasSale = !!currentSalePrice && currentSalePrice < currentPrice;
-    const currentStock = selectedVariant?.inventory_quantity ?? product.stock ?? 0;
+    const currentStock = selectedVariant?.inventory_quantity ?? 0;
     const isOutOfStock = product.track_inventory && currentStock <= 0;
 
     const handleAddToCart = () => {

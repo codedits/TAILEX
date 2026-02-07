@@ -84,7 +84,34 @@ export default async function ProductPage({ params }: Props) {
     notFound();
   }
 
-  const typedProduct = productResult.data as Product;
+  let productData = productResult.data;
+
+  // Fetch inventory levels for variants
+  if (productData.variants && productData.variants.length > 0) {
+    const variantIds = productData.variants.map((v: any) => v.id);
+    const { data: inventory } = await supabase
+      .from("inventory_levels")
+      .select("variant_id, available")
+      .in("variant_id", variantIds);
+
+    if (inventory) {
+      // Build inventory map (sum across locations)
+      const inventoryMap: Record<string, number> = {};
+      for (const inv of inventory) {
+        inventoryMap[inv.variant_id] = (inventoryMap[inv.variant_id] || 0) + (inv.available || 0);
+      }
+      // Attach inventory_quantity to each variant
+      productData = {
+        ...productData,
+        variants: productData.variants.map((v: any) => ({
+          ...v,
+          inventory_quantity: inventoryMap[v.id] || 0
+        }))
+      };
+    }
+  }
+
+  const typedProduct = productData as Product;
 
   const brand = config.brand;
   const footerConfig = config.footer;

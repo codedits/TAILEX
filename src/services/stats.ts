@@ -38,29 +38,34 @@ export const StatsService = {
             const [
                 { data: orders },
                 { data: products },
-                { count: productCount }
+                { count: productCount },
+                { data: inventory }
             ] = await Promise.all([
                 // Fetch only last two months for change calculation
                 supabase.from('orders')
                     .select('total, created_at')
                     .neq('status', 'cancelled')
                     .gte('created_at', firstDayLastMonth),
-                // Still need product status for counts, but maybe we can just count in DB?
-                // For now, let's limit the product fetch if it's too huge, or select only needed fields.
-                supabase.from('products').select('stock, status'),
-                supabase.from('products').select('*', { count: 'exact', head: true })
+                // Get product status for active count
+                supabase.from('products').select('id, status'),
+                supabase.from('products').select('*', { count: 'exact', head: true }),
+                // Get inventory levels for low stock calculation
+                supabase.from('inventory_levels').select('variant_id, available')
             ]);
 
 
             const safeOrders = orders || [];
             const safeProducts = products || [];
+            const safeInventory = inventory || [];
 
             // Calculate Revenue & Order Counts
             const totalRevenue = safeOrders.reduce((sum, order) => sum + (order.total || 0), 0);
             const totalOrders = safeOrders.length;
             const totalProducts = productCount || 0;
             const activeProducts = safeProducts.filter(p => p.status === 'active').length;
-            const lowStockCount = safeProducts.filter(p => (p.stock || 0) < 10 && p.status === 'active').length;
+
+            // Low stock: count variants with available < 10
+            const lowStockCount = safeInventory.filter(inv => (inv.available || 0) < 10).length;
 
             // Calculate "Change vs Last Month" using already fetched data
             const firstDayCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -164,14 +169,37 @@ export const StatsService = {
 
     getLowStockProducts: async (limit: number = 5): Promise<Product[]> => {
         const supabase = await createAdminClient();
-        const { data } = await supabase
-            .from('products')
-            .select('*')
-            .lt('stock', 10)
-            .eq('status', 'active')
-            .order('stock', { ascending: true })
+
+        // Get variants with low stock from inventory_levels
+        const { data: lowStockInventory } = await supabase
+            .from('inventory_levels')
+            .select('variant_id, available')
+            .lt('available', 10)
+            .order('available', { ascending: true })
             .limit(limit);
 
-        return (data || []) as Product[];
+        if (!lowStockInventory?.length) return [];
+
+        // Get the variant IDs
+        const variantIds = lowStockInventory.map(inv => inv.variant_id);
+
+        // Get products for these variants
+        const { data: variants } = await supabase
+            .from('product_variants')
+            .select('product_id')
+            .in('id', variantIds);
+
+        if (!variants?.length) return [];
+
+        const productIds = [...new Set(variants.map(v => v.product_id))];
+
+        const { data: products } = await supabase
+            .from('products')
+            .select('*')
+            .in('id', productIds)
+            .eq('status', 'active')
+            .limit(limit);
+
+        return (products || []) as Product[];
     }
 };

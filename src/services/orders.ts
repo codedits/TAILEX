@@ -35,7 +35,7 @@ export const OrderService = {
         const { data: products, error: productsError } = await supabase
             .from('products')
             .select(`
-                id, title, price, sale_price, cover_image, sku, stock,
+                id, title, price, sale_price, cover_image, sku,
                 variants:product_variants(*)
             `)
             .in('id', productIds);
@@ -272,25 +272,20 @@ export const OrderService = {
     async deleteOrder(id: string): Promise<void> {
         const supabase = await createAdminClient();
 
-        // First delete order items
-        const { error: itemsError } = await supabase
-            .from('order_items')
-            .delete()
-            .eq('order_id', id);
+        console.log(`Starting deletion for order: ${id}`);
 
-        if (itemsError) {
-            console.error('Failed to delete order items:', itemsError);
-        }
-
-        // Then delete the order
+        // Rely on ON DELETE CASCADE for order_items (defined in SQL schema)
         const { error } = await supabase
             .from('orders')
             .delete()
             .eq('id', id);
 
-        if (error) throw new AppError(error.message, 'DB_ERROR');
+        if (error) {
+            console.error('Delete Order DB Error:', error);
+            throw new AppError(error.message, 'DB_ERROR');
+        }
 
-        revalidatePath('/admin/orders');
+        console.log(`Successfully deleted order: ${id}`);
     }
 };
 

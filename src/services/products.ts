@@ -20,7 +20,7 @@ function normalizeProductPayload(data: ProductInput) {
             ? Number(saleRaw)
             : saleRaw;
 
-    const stock = typeof data.stock === 'string' ? Number(data.stock) : data.stock;
+    // Note: stock is now managed in inventory_levels, not on products
     const tags = Array.isArray(data.tags) ? data.tags : [];
     const images = Array.isArray(data.images) ? data.images.filter(Boolean) : [];
 
@@ -44,7 +44,7 @@ function normalizeProductPayload(data: ProductInput) {
         images,
         sku: data.sku ?? null,
         barcode: data.barcode ?? null,
-        stock: stock ?? 0,
+        // stock is now in inventory_levels, not here
         track_inventory: trackInventory,
         allow_backorder: data.allow_backorder ?? false,
         weight: data.weight ?? null,
@@ -128,6 +128,27 @@ export const ProductService = {
 
         if (error) throw new AppError(error.message, 'DB_ERROR', 500);
         if (!data) throw AppError.notFound(`Product with slug "${slug}" not found`);
+
+        // Fetch inventory levels for all variants
+        if (data.variants && data.variants.length > 0) {
+            const variantIds = data.variants.map((v: any) => v.id);
+            const { data: inventory } = await supabase
+                .from('inventory_levels')
+                .select('variant_id, available')
+                .in('variant_id', variantIds);
+
+            // Map inventory to variants
+            if (inventory) {
+                const inventoryMap: Record<string, number> = {};
+                for (const inv of inventory) {
+                    inventoryMap[inv.variant_id] = (inventoryMap[inv.variant_id] || 0) + (inv.available || 0);
+                }
+                data.variants = data.variants.map((v: any) => ({
+                    ...v,
+                    inventory_quantity: inventoryMap[v.id] || 0
+                }));
+            }
+        }
 
         return data as Product;
     },
@@ -279,7 +300,8 @@ export const ProductService = {
     async syncVariants(productId: string, variants: Partial<ProductVariant>[]): Promise<ProductVariant[]> {
         const supabase = await createAdminClient();
 
-        // Delete existing variants
+        // Delete existing variants (Note: this is destructive to cart items if ON DELETE CASCADE is set)
+        // TODO: Future refactor should update existing variants instead of delete/recreate
         const { error: deleteError } = await supabase
             .from('product_variants')
             .delete()
@@ -295,20 +317,21 @@ export const ProductService = {
             return [];
         }
 
-        // Prepare variants for insert (remove temp IDs, add product_id)
+        // Prepare variants for insert
         const variantsToInsert = variants.map((v, index) => ({
             product_id: productId,
             title: v.title || null,
             color: v.color || null,
             size: v.size || null,
             price: v.price ?? 0,
-            stock: v.stock ?? v.inventory_quantity ?? 0,
+            sale_price: v.sale_price,
             sku: v.sku || null,
             status: v.status || 'active',
             position: v.position ?? index,
+            image_url: v.image_url
         }));
 
-        const { data, error: insertError } = await supabase
+        const { data: insertedVariants, error: insertError } = await supabase
             .from('product_variants')
             .insert(variantsToInsert)
             .select();
@@ -318,24 +341,101 @@ export const ProductService = {
             throw new AppError(insertError.message, 'DB_ERROR');
         }
 
-        return (data || []) as ProductVariant[];
+        // Handle Inventory Updates
+        if (insertedVariants && insertedVariants.length > 0) {
+            // Get default location
+            const { data: location } = await supabase
+                .from('inventory_locations')
+                .select('id')
+                .eq('is_default', true)
+                .maybeSingle();
+
+            // If no default, get any location or create one
+            let locationId = location?.id;
+            if (!locationId) {
+                const { data: anyLocation } = await supabase
+                    .from('inventory_locations')
+                    .select('id')
+                    .limit(1)
+                    .maybeSingle();
+
+                if (anyLocation) {
+                    locationId = anyLocation.id;
+                } else {
+                    // Create a default location if absolutely none exist
+                    const { data: newLocation } = await supabase
+                        .from('inventory_locations')
+                        .insert({ name: 'Default Warehouse', is_default: true })
+                        .select('id')
+                        .single();
+                    locationId = newLocation?.id;
+                }
+            }
+
+            if (locationId) {
+                // Prepare inventory records
+                // We need to match inserted variants back to the input variants to get inventory_quantity
+                // Since we inserted in order, we can map by index
+                const inventoryToInsert = insertedVariants.map((v, index) => ({
+                    location_id: locationId,
+                    variant_id: v.id,
+                    available: variants[index].inventory_quantity ?? 0
+                }));
+
+                const { error: invError } = await supabase
+                    .from('inventory_levels')
+                    .insert(inventoryToInsert);
+
+                if (invError) {
+                    console.error('Error creating inventory levels:', invError);
+                    // Don't fail the whole request, but log it. Inventory will be 0.
+                } else {
+                    // Update returned variants with the inventory quantity we just set
+                    return insertedVariants.map((v, i) => ({
+                        ...v,
+                        inventory_quantity: inventoryToInsert[i].available
+                    }));
+                }
+            }
+        }
+
+        return (insertedVariants || []) as ProductVariant[];
     },
 
     // Cart Validation
     // Extended to support variant-aware cart items
+    // Stock is now queried from inventory_levels (single source of truth)
     async validateCartItems(items: { id: string; productId?: string; variantId?: string; quantity: number; size?: string; color?: string }[]): Promise<any> {
         const supabase = await createClient();
         if (!items || items.length === 0) return { isValid: true, items: [], errors: [] };
 
-        // Extract unique product IDs (support both legacy id and new productId format)
+        // Extract unique product IDs and variant IDs
         const productIds = [...new Set(items.map(i => i.productId || i.id))];
+        const variantIds = [...new Set(items.filter(i => i.variantId).map(i => i.variantId!))];
 
+        // Fetch products with variants
         const { data: products, error } = await supabase
             .from('products')
-            .select(`id, title, price, sale_price, stock, slug, cover_image, status, variants:product_variants(*)`)
+            .select(`id, title, price, sale_price, slug, cover_image, status, variants:product_variants(id, title, price, sale_price, image_url, color, size)`)
             .in('id', productIds);
 
         if (error || !products) return { isValid: false, items: [], errors: ['Failed to validate items'] };
+
+        // Fetch inventory levels for all variants
+        let inventoryMap: Record<string, number> = {};
+        if (variantIds.length > 0) {
+            const { data: inventory } = await supabase
+                .from('inventory_levels')
+                .select('variant_id, available')
+                .in('variant_id', variantIds);
+
+            if (inventory) {
+                // Sum available stock across all locations for each variant
+                for (const inv of inventory) {
+                    inventoryMap[inv.variant_id] = (inventoryMap[inv.variant_id] || 0) + (inv.available || 0);
+                }
+            }
+        }
 
         const validatedItems = [];
         const errors = [];
@@ -350,14 +450,14 @@ export const ProductService = {
                 continue;
             }
 
-            // Find matching variant if variantId provided
+            // Find matching variant
             let variant = null;
             if (item.variantId && product.variants) {
                 variant = (product.variants as any[]).find(v => v.id === item.variantId);
             }
 
-            // Stock validation (use variant stock if available, otherwise product stock)
-            const availableStock = variant?.stock ?? variant?.inventory_quantity ?? product.stock ?? 0;
+            // Stock validation from inventory_levels
+            const availableStock = item.variantId ? (inventoryMap[item.variantId] || 0) : 0;
             if (availableStock < item.quantity) {
                 errors.push(`Insufficient stock for "${product.title}". Available: ${availableStock}`);
                 allValid = false;
@@ -372,7 +472,7 @@ export const ProductService = {
                 : basePrice;
 
             validatedItems.push({
-                id: item.id, // Preserve composite ID
+                id: item.id,
                 productId: productId,
                 variantId: item.variantId,
                 quantity: item.quantity,

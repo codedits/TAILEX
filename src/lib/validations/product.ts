@@ -17,7 +17,7 @@ export const productSchema = z.object({
     ),
     sku: z.string().optional(),
     barcode: z.string().optional(),
-    stock: z.coerce.number().int().min(0, "Stock must be 0 or greater"),
+    // stock is now managed per-variant in inventory_levels
     track_inventory: z.boolean().default(true),
     allow_backorder: z.boolean().default(false),
     weight: z.preprocess(

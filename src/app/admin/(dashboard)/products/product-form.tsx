@@ -165,7 +165,7 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
       description: initialData?.description || "",
       price: initialData?.price || 0,
       sale_price: initialData?.sale_price ?? undefined,
-      stock: initialData?.stock || 0,
+      // stock is managed per-variant in inventory_levels
       sku: initialData?.sku || "",
       status: (initialData?.status as any) || "draft",
       category_id: initialData?.category_id || "",
@@ -428,19 +428,10 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="stock"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-500 text-xs font-medium uppercase tracking-widest">Stock</FormLabel>
-                      <FormControl>
-                        <Input type="number" {...field} className="bg-white border-border text-gray-900 rounded-xl h-12 font-mono" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Stock is now managed per-variant in inventory_levels */}
+                <div className="flex items-center">
+                  <p className="text-xs text-gray-500">Stock is managed per-variant below</p>
+                </div>
               </div>
 
               <FormField

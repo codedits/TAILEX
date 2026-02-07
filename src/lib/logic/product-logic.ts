@@ -27,14 +27,17 @@ export function calculateProductPrice(product: Product | Partial<Product>): {
 
 // ==========================================
 // STOCK LOGIC
+// Stock is now stored in inventory_levels, not on products.
+// These functions accept an optional inventory parameter.
 // ==========================================
 
-export function isOutOfStock(product: Product | Partial<Product>): boolean {
-    return (product.stock || 0) <= 0;
+export function isOutOfStock(product: Product | Partial<Product>, inventoryAvailable?: number): boolean {
+    // If inventory is provided, use it; otherwise assume out of stock
+    return (inventoryAvailable ?? 0) <= 0;
 }
 
-export function hasSufficientStock(product: Product | Partial<Product>, quantity: number = 1): boolean {
-    return (product.stock || 0) >= quantity;
+export function hasSufficientStock(product: Product | Partial<Product>, quantity: number = 1, inventoryAvailable?: number): boolean {
+    return (inventoryAvailable ?? 0) >= quantity;
 }
 
 // ==========================================

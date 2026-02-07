@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -60,6 +60,12 @@ export function VariantConfigSection({
 }: VariantConfigSectionProps) {
     const [newColor, setNewColor] = useState("");
 
+    // Track if this is the first render - don't regenerate if variants already exist (editing product)
+    const isInitialMount = useRef(true);
+
+    // Check if current variants are from database (have real UUIDs, not temp- prefixed)
+    const hasExistingVariants = variants.some(v => v.id && !v.id.startsWith('temp-'));
+
     // Regenerate variants when config changes
     const regenerateVariants = useCallback(() => {
         const generated = generateVariants({
@@ -81,10 +87,22 @@ export function VariantConfigSection({
         onVariantsChange(newVariants);
     }, [enableColor, enableSize, availableColors, availableSizes, basePrice, baseSku, onVariantsChange]);
 
-    // Auto-regenerate when toggle or options change
+    // Auto-regenerate when toggle or options change (but NEVER if we have existing DB variants)
     useEffect(() => {
+        // Always skip regeneration if we have real database variants (editing existing product)
+        if (hasExistingVariants) {
+            return;
+        }
+
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            // Skip regeneration on initial mount if we have any variants
+            if (variants.length > 0) {
+                return;
+            }
+        }
         regenerateVariants();
-    }, [enableColor, enableSize, availableColors.length, availableSizes.length]);
+    }, [enableColor, enableSize, availableColors.length, availableSizes.length, hasExistingVariants]);
 
     // Add custom color
     const addColor = useCallback(() => {

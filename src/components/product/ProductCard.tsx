@@ -23,7 +23,7 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
   const { isInWishlist, toggleItem } = useWishlist();
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  const { title, price, images, slug, cover_image, sale_price, tags, stock, id, review_count, average_rating } = product;
+  const { title, price, images, slug, cover_image, sale_price, tags, id, review_count, average_rating } = product;
 
   const isValidImage = (img: any): img is string => typeof img === 'string' && img.trim().length > 0;
 
@@ -38,7 +38,7 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
   const isSale = !!(sale_price && sale_price < price);
   const isNew = tags?.some(t => t.toLowerCase() === 'new');
   const discount = isSale ? Math.round(((price - (sale_price as number)) / price) * 100) : 0;
-  const isLowStock = stock !== undefined && stock > 0 && stock <= 5;
+  // Stock is now per-variant in inventory_levels, not on product level
 
   // Wishlist state
   const isWishlisted = isInWishlist(id);
@@ -117,12 +117,7 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
           />
         </button>
 
-        {/* Low Stock Badge */}
-        {isLowStock && (
-          <div className="absolute top-3 right-12 z-20 bg-orange-500/90 backdrop-blur-sm text-white text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-wide">
-            Low Stock
-          </div>
-        )}
+        {/* Low Stock Badge removed - stock is now per-variant */}
 
         {/* Images with Fade Effect */}
         <div className="relative w-full h-full">
