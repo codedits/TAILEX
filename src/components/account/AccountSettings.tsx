@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { updateProfile } from '@/app/account/actions';
+import { updateProfile } from '@/app/(store)/account/actions';
 import { useRouter } from 'next/navigation';
 import { User, MapPin, Check, Save } from 'lucide-react';
 
