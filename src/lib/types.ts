@@ -44,6 +44,12 @@ export type Product = {
   status?: 'draft' | 'active' | 'archived'
   is_featured?: boolean
 
+  // Variant Configuration (Clothing-focused)
+  enable_color_variants?: boolean
+  enable_size_variants?: boolean
+  available_colors?: string[]
+  available_sizes?: string[]
+
   // SEO
   seo_title?: string | null
   seo_description?: string | null
@@ -71,8 +77,14 @@ export type Product = {
 export type ProductVariant = {
   id: string
   product_id: string
-  title: string
+  title?: string | null
 
+  // Clothing-specific fields
+  color?: string | null
+  size?: string | null
+  status?: 'active' | 'disabled'
+
+  // Legacy option fields (for backward compatibility)
   option1_name?: string | null
   option1_value?: string | null
   option2_name?: string | null
@@ -80,15 +92,18 @@ export type ProductVariant = {
   option3_name?: string | null
   option3_value?: string | null
 
+  // Pricing
   price?: number | null
   sale_price?: number | null
 
+  // Inventory
   sku?: string | null
   barcode?: string | null
-  inventory_quantity: number
+  stock?: number
+  inventory_quantity?: number // Legacy alias for stock
 
   image_url?: string | null
-  position: number
+  position?: number
 
   created_at?: string
   updated_at?: string
@@ -672,6 +687,7 @@ export type CreateOrderInput = {
   billing_address?: OrderAddress
   customer_note?: string
   discount_code?: string
+  shipping_method?: 'standard' | 'express'
   payment_method?: PaymentMethodType
   payment_proof_url?: string | null
   transaction_id?: string | null

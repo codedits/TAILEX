@@ -59,6 +59,28 @@ function parseExistingImages(formData: FormData): string[] {
   }
 }
 
+function parseJsonArray(formData: FormData, key: string): string[] {
+  const value = formData.get(key);
+  if (!value || typeof value !== 'string') return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function parseVariants(formData: FormData): ProductVariant[] {
+  const value = formData.get('variants');
+  if (!value || typeof value !== 'string') return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 function buildProductPayload(formData: FormData): { data?: ProductPayload; error?: string } {
   const entries = Array.from(formData.entries()).filter(([, value]) => typeof value === 'string') as Array<[string, string]>;
   const rawData = Object.fromEntries(entries);
@@ -106,6 +128,25 @@ function buildProductPayload(formData: FormData): { data?: ProductPayload; error
     tags: parseTagsCsv(tagsCsv),
   };
 
+  // Add variant configuration if present
+  const enableColorVariants = parseBooleanField(formData.get('enable_color_variants'));
+  const enableSizeVariants = parseBooleanField(formData.get('enable_size_variants'));
+  const availableColors = parseJsonArray(formData, 'available_colors');
+  const availableSizes = parseJsonArray(formData, 'available_sizes');
+
+  if (typeof enableColorVariants === 'boolean') {
+    payload.enable_color_variants = enableColorVariants;
+  }
+  if (typeof enableSizeVariants === 'boolean') {
+    payload.enable_size_variants = enableSizeVariants;
+  }
+  if (availableColors.length > 0) {
+    payload.available_colors = availableColors;
+  }
+  if (availableSizes.length > 0) {
+    payload.available_sizes = availableSizes;
+  }
+
   return { data: payload };
 }
 
@@ -117,8 +158,14 @@ export async function createProduct(formData: FormData): Promise<ApiResponse<Pro
     }
 
     const imageFiles = extractImageFiles(formData);
+    const variants = parseVariants(formData);
 
     const product = await ProductService.createProduct(productData, imageFiles);
+
+    // Sync variants to database
+    if (variants.length > 0) {
+      await ProductService.syncVariants(product.id, variants);
+    }
 
     revalidatePath('/admin/products');
     revalidatePath('/collection');
@@ -144,8 +191,12 @@ export async function updateProduct(formData: FormData): Promise<ApiResponse<Pro
 
     const existingImages = parseExistingImages(formData);
     const imageFiles = extractImageFiles(formData);
+    const variants = parseVariants(formData);
 
     const product = await ProductService.updateProduct(id, { ...productData, images: existingImages }, imageFiles);
+
+    // Sync variants to database
+    await ProductService.syncVariants(id, variants);
 
     revalidatePath('/admin/products');
     revalidatePath(`/admin/products/${id}`);

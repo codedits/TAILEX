@@ -41,6 +41,11 @@ export type StoreConfig = {
     categoryGrid: { aspectRatio: string };
     homepageLayout: HomepageSection[];
     globalDiscount: GlobalDiscountConfig;
+    delivery: {
+        standard: { price: number; time: string; description: string };
+        express: { price: number; time: string; description: string };
+        freeThreshold: number;
+    };
 };
 
 export const StoreConfigService = {
@@ -108,6 +113,12 @@ export const StoreConfigService = {
                 showOncePerSession: true
             };
 
+            const defaultDelivery = {
+                standard: { price: 250, time: '3-5 Working Days', description: 'Reliable delivery via TCS or Leopards.' },
+                express: { price: 450, time: '1-2 Working Days', description: 'Priority processing and overnight shipping.' },
+                freeThreshold: 2000
+            };
+
             const defaultFooter: FooterConfig = {
                 tagline: 'Timeless wardrobe essentials.',
                 columns: [], // Will be populated below if not in config
@@ -125,6 +136,7 @@ export const StoreConfigService = {
             const benefits = { ...defaultBenefits, ...dbConfig.benefits };
             const social = { ...defaultSocial, ...dbConfig.social };
             const globalDiscount = { ...defaultGlobalDiscount, ...dbConfig.global_discount };
+            const delivery = { ...defaultDelivery, ...dbConfig.delivery };
 
             // Footer Logic: Merge DB footer config with defaults AND inject navigation items if needed
             const dbFooter = dbConfig.footer || {};
@@ -149,7 +161,8 @@ export const StoreConfigService = {
                 benefits,
                 categoryGrid,
                 homepageLayout,
-                globalDiscount
+                globalDiscount,
+                delivery
             };
         },
         ['store-config'],

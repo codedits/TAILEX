@@ -9,10 +9,19 @@ import { useFormatCurrency } from "@/context/StoreConfigContext";
 interface ShippingMethodStepProps {
     selectedMethod: string;
     onSelect: (method: string) => void;
+    deliveryConfig: {
+        standard: { price: number; time: string; description: string };
+        express: { price: number; time: string; description: string };
+        freeThreshold: number;
+    };
+    cartTotal: number;
 }
 
-export function ShippingMethodStep({ selectedMethod, onSelect }: ShippingMethodStepProps) {
+export function ShippingMethodStep({ selectedMethod, onSelect, deliveryConfig, cartTotal }: ShippingMethodStepProps) {
     const formatCurrency = useFormatCurrency();
+    const { standard, express, freeThreshold } = deliveryConfig;
+
+    const isStandardFree = cartTotal >= freeThreshold;
 
     return (
         <div className="space-y-6">
@@ -33,14 +42,16 @@ export function ShippingMethodStep({ selectedMethod, onSelect }: ShippingMethodS
                     <Label htmlFor="shipping-standard" className="flex-1 ml-4 cursor-pointer">
                         <div className="flex justify-between items-center mb-1">
                             <span className="font-semibold text-sm uppercase tracking-wide">Standard Delivery</span>
-                            <span className="font-bold text-sm">{formatCurrency(250)}</span>
+                            <span className={cn("font-bold text-sm", isStandardFree && "text-green-600")}>
+                                {isStandardFree ? "FREE" : formatCurrency(standard.price)}
+                            </span>
                         </div>
                         <div className="flex items-center gap-2 text-xs text-neutral-500 mb-2">
                             <Truck className="w-3 h-3" />
-                            <span>3-5 Working Days</span>
+                            <span>{standard.time}</span>
                         </div>
                         <p className="text-[10px] text-neutral-400 leading-relaxed uppercase tracking-wide">
-                            Reliable delivery via TCS or Leopards.
+                            {standard.description}
                         </p>
                     </Label>
                 </div>
@@ -56,14 +67,14 @@ export function ShippingMethodStep({ selectedMethod, onSelect }: ShippingMethodS
                     <Label htmlFor="shipping-express" className="flex-1 ml-4 cursor-pointer">
                         <div className="flex justify-between items-center mb-1">
                             <span className="font-semibold text-sm uppercase tracking-wide">Express Delivery</span>
-                            <span className="font-bold text-sm">{formatCurrency(450)}</span>
+                            <span className="font-bold text-sm">{formatCurrency(express.price)}</span>
                         </div>
                         <div className="flex items-center gap-2 text-xs text-amber-600 mb-2">
                             <Zap className="w-3 h-3 fill-current" />
-                            <span>1-2 Working Days</span>
+                            <span>{express.time}</span>
                         </div>
                         <p className="text-[10px] text-neutral-400 leading-relaxed uppercase tracking-wide">
-                            Priority processing and overnight shipping.
+                            {express.description}
                         </p>
                     </Label>
                 </div>

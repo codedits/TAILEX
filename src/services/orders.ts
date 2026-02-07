@@ -11,6 +11,7 @@ import {
     ProductVariant
 } from '@/lib/types';
 import { calculateProductPrice } from '@/lib/logic/product-logic';
+import { StoreConfigService } from './config';
 import { revalidatePath } from 'next/cache';
 
 export const OrderService = {
@@ -86,8 +87,18 @@ export const OrderService = {
             });
         }
 
-        // Calculate Totals
-        const shippingTotal = subtotal >= 100 ? 0 : 9.99;
+        // Calculate Totals - Dynamic based on Store Config
+        const storeConfig = await StoreConfigService.getStoreConfig();
+        const { delivery } = storeConfig;
+
+        let shippingTotal = 0;
+        if (input.shipping_method === 'express') {
+            shippingTotal = delivery.express.price;
+        } else {
+            // Default to standard if not specified or explicitly 'standard'
+            shippingTotal = subtotal >= delivery.freeThreshold ? 0 : delivery.standard.price;
+        }
+
         const taxTotal = 0;
         const total = subtotal + shippingTotal + taxTotal;
 

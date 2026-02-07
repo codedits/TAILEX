@@ -20,6 +20,8 @@ import { Switch } from "@/components/ui/switch";
 import { convertFileToWebP } from '@/lib/image-utils';
 import { ImageCropper } from "@/components/ui/image-cropper";
 import { useStoreConfig } from "@/context/StoreConfigContext";
+import { VariantConfigSection } from "@/components/admin/products/VariantConfigSection";
+import type { ProductVariant } from "@/lib/types";
 import {
   DndContext,
   closestCenter,
@@ -130,6 +132,13 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
   });
   const [cropData, setCropData] = useState<{ index: number, image: string } | null>(null);
 
+  // Variant configuration state
+  const [enableColorVariants, setEnableColorVariants] = useState(initialData?.enable_color_variants ?? false);
+  const [enableSizeVariants, setEnableSizeVariants] = useState(initialData?.enable_size_variants ?? false);
+  const [availableColors, setAvailableColors] = useState<string[]>(initialData?.available_colors ?? []);
+  const [availableSizes, setAvailableSizes] = useState<string[]>(initialData?.available_sizes ?? []);
+  const [variants, setVariants] = useState<ProductVariant[]>(initialData?.variants ?? []);
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -235,6 +244,13 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
     // Existing images (now preserved in order)
     const existingImages = images.filter(img => img.isExisting).map(img => img.url);
     formData.set('existing_images', JSON.stringify(existingImages));
+
+    // Append variant configuration
+    formData.set('enable_color_variants', String(enableColorVariants));
+    formData.set('enable_size_variants', String(enableSizeVariants));
+    formData.set('available_colors', JSON.stringify(availableColors));
+    formData.set('available_sizes', JSON.stringify(availableSizes));
+    formData.set('variants', JSON.stringify(variants));
 
     startTransition(async () => {
       try {
@@ -446,6 +462,23 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
                 )}
               />
             </div>
+
+            {/* Variant Configuration */}
+            <VariantConfigSection
+              enableColor={enableColorVariants}
+              enableSize={enableSizeVariants}
+              availableColors={availableColors}
+              availableSizes={availableSizes}
+              variants={variants}
+              basePrice={form.watch('price') || 0}
+              baseSku={form.watch('sku') || 'PROD'}
+              currencySymbol={currency?.symbol || 'Rs.'}
+              onEnableColorChange={setEnableColorVariants}
+              onEnableSizeChange={setEnableSizeVariants}
+              onColorsChange={setAvailableColors}
+              onSizesChange={setAvailableSizes}
+              onVariantsChange={setVariants}
+            />
           </div>
 
           {/* Right Column */}

@@ -26,6 +26,11 @@ interface CheckoutWizardProps {
     user: AuthUser | null;
     customer?: any;
     savedAddress?: any;
+    deliveryConfig: {
+        standard: { price: number; time: string; description: string };
+        express: { price: number; time: string; description: string };
+        freeThreshold: number;
+    };
 }
 
 type CheckoutStep = 'email' | 'otp' | 'address' | 'shipping' | 'payment' | 'success';
@@ -37,7 +42,7 @@ const formSchema = addressSchema.extend({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function CheckoutWizard({ user: initialUser, customer, savedAddress }: CheckoutWizardProps) {
+export default function CheckoutWizard({ user: initialUser, customer, savedAddress, deliveryConfig }: CheckoutWizardProps) {
     const formatCurrency = useFormatCurrency();
     const { items, cartTotal, clearCart } = useCart();
     const { sendOTP, verifyOTP, user: authUser } = useAuth();
@@ -84,8 +89,16 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
         }
     }, [activeUser]);
 
-    // Derived Totals
-    const shippingCost = shippingMethod === "express" ? 450 : 250;
+    // Derived Totals - Dynamic based on admin settings
+    const { standard, express, freeThreshold } = deliveryConfig;
+
+    // Calculate shipping cost based on selected method and free threshold
+    const shippingCost = (() => {
+        if (shippingMethod === "express") return express.price;
+        // Standard shipping is free if total >= threshold
+        return cartTotal >= freeThreshold ? 0 : standard.price;
+    })();
+
     const finalTotal = cartTotal + shippingCost;
 
     // --- HANDLERS ---
@@ -166,6 +179,7 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
                 shipping_address: shippingAddress,
                 billing_address: shippingAddress, // Simple version
                 phone: shippingAddress?.phone,
+                shipping_method: shippingMethod,
                 payment_method: paymentMethod,
                 payment_proof_url: proofUrl,
                 transaction_id: transactionId,
@@ -336,7 +350,12 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
                                         </div>
                                     </div>
 
-                                    <ShippingMethodStep selectedMethod={shippingMethod} onSelect={setShippingMethod} />
+                                    <ShippingMethodStep
+                                        selectedMethod={shippingMethod}
+                                        onSelect={setShippingMethod}
+                                        deliveryConfig={deliveryConfig}
+                                        cartTotal={cartTotal}
+                                    />
 
                                     <div className="flex gap-4">
                                         <Button variant="outline" className="flex-1" onClick={() => setStep('address')}>
@@ -412,7 +431,11 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
                         </div>
                         <div className="flex justify-between text-neutral-500">
                             <span>Shipping</span>
-                            <span>{step === 'shipping' || step === 'payment' ? formatCurrency(shippingCost) : "Calculated next step"}</span>
+                            <span className={shippingCost === 0 ? "text-green-600 font-medium" : ""}>
+                                {step === 'shipping' || step === 'payment'
+                                    ? (shippingCost === 0 ? "FREE" : formatCurrency(shippingCost))
+                                    : "Calculated next step"}
+                            </span>
                         </div>
                     </div>
                     <Separator className="my-6 bg-black/10" />

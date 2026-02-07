@@ -206,6 +206,7 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                 <TabsTrigger value="categoryGrid">Collections</TabsTrigger>
                 <TabsTrigger value="benefits">Benefits</TabsTrigger>
                 <TabsTrigger value="currency">Currency</TabsTrigger>
+                <TabsTrigger value="delivery">Delivery</TabsTrigger>
             </TabsList>
 
             <TabsContent value="brand">
@@ -759,6 +760,144 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                         </div>
                         <Button onClick={() => handleSave('categoryGrid')} disabled={isSaving}>
                             {isSaving ? 'Saving...' : 'Save Collection Settings'}
+                        </Button>
+                    </CardContent>
+                </Card>
+            </TabsContent>
+
+            <TabsContent value="delivery">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Delivery Settings</CardTitle>
+                        <CardDescription>Configure multiple delivery methods and free shipping threshold.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        {/* STANDARD DELIVERY */}
+                        <div className="space-y-4 border-b border-border pb-6">
+                            <h3 className="text-sm font-semibold uppercase tracking-wider">Standard Delivery</h3>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Price (Rs.)</Label>
+                                    <Input
+                                        type="number"
+                                        value={config.delivery?.standard?.price ?? 250}
+                                        onChange={(e) => setConfig({
+                                            ...config,
+                                            delivery: {
+                                                ...config.delivery,
+                                                standard: { ...config.delivery.standard, price: Number(e.target.value) }
+                                            }
+                                        })}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Delivery Time</Label>
+                                    <Input
+                                        value={config.delivery?.standard?.time ?? '3-5 Working Days'}
+                                        onChange={(e) => setConfig({
+                                            ...config,
+                                            delivery: {
+                                                ...config.delivery,
+                                                standard: { ...config.delivery.standard, time: e.target.value }
+                                            }
+                                        })}
+                                    />
+                                </div>
+                                <div className="col-span-2 space-y-2">
+                                    <Label>Description</Label>
+                                    <Input
+                                        value={config.delivery?.standard?.description ?? 'Reliable delivery via TCS or Leopards.'}
+                                        onChange={(e) => setConfig({
+                                            ...config,
+                                            delivery: {
+                                                ...config.delivery,
+                                                standard: { ...config.delivery.standard, description: e.target.value }
+                                            }
+                                        })}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* EXPRESS DELIVERY */}
+                        <div className="space-y-4 border-b border-border pb-6">
+                            <h3 className="text-sm font-semibold uppercase tracking-wider">Express Delivery</h3>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Price (Rs.)</Label>
+                                    <Input
+                                        type="number"
+                                        value={config.delivery?.express?.price ?? 450}
+                                        onChange={(e) => setConfig({
+                                            ...config,
+                                            delivery: {
+                                                ...config.delivery,
+                                                express: { ...config.delivery.express, price: Number(e.target.value) }
+                                            }
+                                        })}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Delivery Time</Label>
+                                    <Input
+                                        value={config.delivery?.express?.time ?? '1-2 Working Days'}
+                                        onChange={(e) => setConfig({
+                                            ...config,
+                                            delivery: {
+                                                ...config.delivery,
+                                                express: { ...config.delivery.express, time: e.target.value }
+                                            }
+                                        })}
+                                    />
+                                </div>
+                                <div className="col-span-2 space-y-2">
+                                    <Label>Description</Label>
+                                    <Input
+                                        value={config.delivery?.express?.description ?? 'Priority processing and overnight shipping.'}
+                                        onChange={(e) => setConfig({
+                                            ...config,
+                                            delivery: {
+                                                ...config.delivery,
+                                                express: { ...config.delivery.express, description: e.target.value }
+                                            }
+                                        })}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* FREE THRESHOLD */}
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label>Free Delivery Threshold (Rs.)</Label>
+                                <Input
+                                    type="number"
+                                    value={config.delivery?.freeThreshold ?? 2000}
+                                    onChange={(e) => setConfig({
+                                        ...config,
+                                        delivery: {
+                                            ...config.delivery,
+                                            freeThreshold: Number(e.target.value)
+                                        }
+                                    })}
+                                    placeholder="2000"
+                                />
+                                <p className="text-[0.8rem] text-muted-foreground">
+                                    Orders above this amount get free <strong>Standard</strong> delivery.
+                                </p>
+                            </div>
+
+                            <div className="p-4 bg-muted/50 rounded-lg border border-border">
+                                <p className="text-sm">
+                                    <strong>Logic:</strong> Orders ≥ Rs. {config.delivery?.freeThreshold ?? 2000} lead to
+                                    <span className="text-green-500 font-medium mx-1">FREE STANDARD DELIVERY</span>.
+                                    Express delivery always maintains its set price.
+                                </p>
+                            </div>
+                        </div>
+
+                        <Button onClick={() => handleSave('delivery')} disabled={isSaving} className="w-full">
+                            {isSaving ? 'Saving...' : 'Save All Delivery Settings'}
                         </Button>
                     </CardContent>
                 </Card>

@@ -37,33 +37,80 @@ export default function ProductInfo({ product }: ProductInfoProps) {
     const { toast } = useToast();
     const { addItem } = useCart();
 
-    // Default Options
+    // Default Options - supports both legacy options and new clothing variants
     useEffect(() => {
-        if (product.options && Object.keys(selectedOptions).length === 0) {
-            const defaults: Record<string, string> = {};
+        if (Object.keys(selectedOptions).length > 0) return;
+
+        const defaults: Record<string, string> = {};
+
+        // New clothing variant system
+        if (product.enable_color_variants && product.available_colors?.length) {
+            defaults['Color'] = product.available_colors[0];
+        }
+        if (product.enable_size_variants && product.available_sizes?.length) {
+            defaults['Size'] = product.available_sizes[0];
+        }
+
+        // Legacy options system (fallback)
+        if (Object.keys(defaults).length === 0 && product.options) {
             product.options.forEach(opt => {
                 if (opt.values.length > 0) defaults[opt.name] = opt.values[0];
             });
+        }
+
+        if (Object.keys(defaults).length > 0) {
             setSelectedOptions(defaults);
         }
-    }, [product.options]);
+    }, [product.options, product.available_colors, product.available_sizes]);
 
     // Derived State (Variants, Price, Stock)
     const selectedVariant = useMemo(() => {
         if (!product.variants || product.variants.length === 0) return null;
 
+        // New clothing variant system (color/size fields)
+        if (product.enable_color_variants || product.enable_size_variants) {
+            return product.variants.find(v => {
+                const colorMatch = !product.enable_color_variants || v.color === selectedOptions['Color'];
+                const sizeMatch = !product.enable_size_variants || v.size === selectedOptions['Size'];
+                const isActive = v.status !== 'disabled';
+                return colorMatch && sizeMatch && isActive;
+            }) || null;
+        }
+
+        // Legacy option system (option1/2/3 fields)
         return product.variants.find(v => {
             const match1 = !v.option1_name || v.option1_value === selectedOptions[v.option1_name];
             const match2 = !v.option2_name || v.option2_value === selectedOptions[v.option2_name];
             const match3 = !v.option3_name || v.option3_value === selectedOptions[v.option3_name];
             return match1 && match2 && match3;
         }) || null;
-    }, [selectedOptions, product.variants]);
+    }, [selectedOptions, product.variants, product.enable_color_variants, product.enable_size_variants]);
+
+    // Helper to check if a specific option value is out of stock
+    const isOptionOutOfStock = (optionType: 'Color' | 'Size', value: string): boolean => {
+        if (!product.variants || !product.track_inventory) return false;
+
+        const relevantVariants = product.variants.filter(v => {
+            if (optionType === 'Color') {
+                const colorMatch = v.color === value;
+                const sizeMatch = !product.enable_size_variants || v.size === selectedOptions['Size'];
+                return colorMatch && sizeMatch;
+            } else {
+                const sizeMatch = v.size === value;
+                const colorMatch = !product.enable_color_variants || v.color === selectedOptions['Color'];
+                return colorMatch && sizeMatch;
+            }
+        });
+
+        return relevantVariants.every(v =>
+            v.status === 'disabled' || (v.stock ?? v.inventory_quantity ?? 0) <= 0
+        );
+    };
 
     const currentPrice = selectedVariant?.price ?? product.price;
     const currentSalePrice = selectedVariant?.sale_price ?? product.sale_price;
     const hasSale = !!currentSalePrice && currentSalePrice < currentPrice;
-    const currentStock = selectedVariant?.inventory_quantity ?? product.stock ?? 0;
+    const currentStock = selectedVariant?.stock ?? selectedVariant?.inventory_quantity ?? product.stock ?? 0;
     const isOutOfStock = product.track_inventory && currentStock <= 0 && !product.allow_backorder;
 
     // Handlers
@@ -190,8 +237,97 @@ export default function ProductInfo({ product }: ProductInfoProps) {
 
             <div className="h-px bg-neutral-200" />
 
-            {/* Options */}
-            {product.options?.map((option) => (
+            {/* Clothing Variant Options (Color/Size) */}
+            {product.enable_color_variants && product.available_colors && product.available_colors.length > 0 && (
+                <div className="space-y-3">
+                    <div className="flex justify-between items-center text-xs uppercase tracking-widest font-bold text-neutral-900">
+                        <span>Color: <span className="text-neutral-500 font-medium">{selectedOptions['Color']}</span></span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {product.available_colors.map((color) => {
+                            const outOfStock = isOptionOutOfStock('Color', color);
+                            return (
+                                <button
+                                    key={color}
+                                    onClick={() => !outOfStock && handleOptionSelect('Color', color)}
+                                    disabled={outOfStock}
+                                    className={cn(
+                                        "px-6 py-3 text-xs font-bold uppercase tracking-wider transition-all border min-w-[3rem]",
+                                        selectedOptions['Color'] === color
+                                            ? "border-neutral-900 bg-neutral-900 text-white"
+                                            : outOfStock
+                                                ? "border-neutral-100 text-neutral-300 bg-neutral-50 cursor-not-allowed line-through"
+                                                : "border-neutral-200 hover:border-neutral-400 text-neutral-900 bg-transparent"
+                                    )}
+                                >
+                                    {color}
+                                    {outOfStock && <span className="ml-1 text-[10px]">(Out)</span>}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            {product.enable_size_variants && product.available_sizes && product.available_sizes.length > 0 && (
+                <div className="space-y-4">
+                    <div className="flex justify-between items-end">
+                        <span className="text-[13px] font-medium text-neutral-900">Select size</span>
+                        <button
+                            onClick={() => setShowSizeGuide(true)}
+                            className="flex items-center gap-1.5 text-[13px] text-neutral-900 hover:opacity-70 transition-opacity border-b border-black pb-0.5"
+                        >
+                            <span className="flex gap-[1px] items-end h-3">
+                                <span className="w-[1.5px] h-1.5 bg-black"></span>
+                                <span className="w-[1.5px] h-2.5 bg-black"></span>
+                                <span className="w-[1.5px] h-2 bg-black"></span>
+                            </span>
+                            Sizing
+                        </button>
+                    </div>
+
+                    <div className="flex -space-x-px">
+                        {product.available_sizes.map((size) => {
+                            const outOfStock = isOptionOutOfStock('Size', size);
+                            const isSelected = selectedOptions['Size'] === size;
+
+                            return (
+                                <button
+                                    key={size}
+                                    onClick={() => !outOfStock && handleOptionSelect('Size', size)}
+                                    // disabled={outOfStock} // Keep clickable to show it exists, but handle with logic
+                                    className={cn(
+                                        "relative flex-1 py-4 text-sm font-medium transition-all border border-neutral-200 min-w-[3rem] items-center justify-center",
+                                        isSelected
+                                            ? "z-10 border-neutral-900 border-[2px] -m-[1px]" // Bold border for selection
+                                            : "hover:bg-neutral-50",
+                                        outOfStock && "text-neutral-300 bg-neutral-50/50 cursor-not-allowed"
+                                    )}
+                                >
+                                    <span className={cn(isSelected && "translate-y-[0.5px]")}>{size}</span>
+
+                                    {/* Diagonal Slash for Out of Stock */}
+                                    {outOfStock && (
+                                        <div className="absolute inset-0 pointer-events-none">
+                                            <svg className="w-full h-full text-neutral-300" preserveAspectRatio="none">
+                                                <line x1="0" y1="100%" x2="100%" y2="0" stroke="currentColor" strokeWidth="1" />
+                                            </svg>
+                                        </div>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Model Info (Placeholder aesthetic) */}
+                    <div className="pt-2 text-center text-[12px] text-neutral-500 italic">
+                        Male Model: 6'0", wearing size M
+                    </div>
+                </div>
+            )}
+
+            {/* Legacy Options (fallback for products not using clothing variant system) */}
+            {!(product.enable_color_variants || product.enable_size_variants) && product.options?.map((option) => (
                 <div key={option.id} className="space-y-3">
                     <div className="flex justify-between items-center text-xs uppercase tracking-widest font-bold text-neutral-900">
                         <span>{option.name}: <span className="text-neutral-500 font-medium">{selectedOptions[option.name]}</span></span>

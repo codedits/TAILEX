@@ -60,6 +60,11 @@ function normalizeProductPayload(data: ProductInput) {
         metadata: data.metadata ?? {},
         updated_at: now,
         published_at: (data.status === 'active') ? (data.published_at ?? now) : null,
+        // Variant configuration
+        enable_color_variants: data.enable_color_variants ?? false,
+        enable_size_variants: data.enable_size_variants ?? false,
+        available_colors: data.available_colors ?? [],
+        available_sizes: data.available_sizes ?? [],
     } as Partial<Product>;
 }
 
@@ -265,6 +270,55 @@ export const ProductService = {
         const supabase = await createAdminClient();
         const { error } = await supabase.from('product_variants').delete().eq('id', id);
         if (error) throw new AppError(error.message, 'DB_ERROR');
+    },
+
+    /**
+     * Sync variants for a product
+     * Deletes all existing variants and creates new ones
+     */
+    async syncVariants(productId: string, variants: Partial<ProductVariant>[]): Promise<ProductVariant[]> {
+        const supabase = await createAdminClient();
+
+        // Delete existing variants
+        const { error: deleteError } = await supabase
+            .from('product_variants')
+            .delete()
+            .eq('product_id', productId);
+
+        if (deleteError) {
+            console.error('Error deleting variants:', deleteError);
+            throw new AppError(deleteError.message, 'DB_ERROR');
+        }
+
+        // Return early if no variants to create
+        if (variants.length === 0) {
+            return [];
+        }
+
+        // Prepare variants for insert (remove temp IDs, add product_id)
+        const variantsToInsert = variants.map((v, index) => ({
+            product_id: productId,
+            title: v.title || null,
+            color: v.color || null,
+            size: v.size || null,
+            price: v.price ?? 0,
+            stock: v.stock ?? v.inventory_quantity ?? 0,
+            sku: v.sku || null,
+            status: v.status || 'active',
+            position: v.position ?? index,
+        }));
+
+        const { data, error: insertError } = await supabase
+            .from('product_variants')
+            .insert(variantsToInsert)
+            .select();
+
+        if (insertError) {
+            console.error('Error inserting variants:', insertError);
+            throw new AppError(insertError.message, 'DB_ERROR');
+        }
+
+        return (data || []) as ProductVariant[];
     },
 
     // Cart Validation
