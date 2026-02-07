@@ -101,7 +101,7 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-black flex lg:grid lg:grid-cols-2 overflow-hidden">
       {/* Editorial Side - Hidden on mobile */}
-      <div className="hidden lg:block relative bg-neutral-900 border-r border-white/5">
+      <div className="hidden lg:block relative bg-white border-r border-white/5">
         <Image
           src="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=1976&auto=format&fit=crop"
           alt="Editorial"

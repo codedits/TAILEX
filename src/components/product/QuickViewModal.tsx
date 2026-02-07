@@ -204,7 +204,7 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                                                             className={cn(
                                                                 "px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all border",
                                                                 selectedOptions[option.name] === value
-                                                                    ? "border-black bg-black text-white"
+                                                                    ? "border-black bg-white text-black font-bold"
                                                                     : "border-neutral-200 hover:border-neutral-400 text-neutral-900"
                                                             )}
                                                         >
@@ -240,8 +240,8 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
                                             <button
                                                 onClick={handleAddToCart}
                                                 disabled={isOutOfStock || isPending}
-                                                className="flex-1 h-12 bg-black text-white text-xs font-bold uppercase tracking-widest
-                                                       flex items-center justify-center gap-2 hover:bg-neutral-800 
+                                                className="flex-1 h-12 bg-white text-black text-xs font-bold uppercase tracking-widest
+                                                       flex items-center justify-center gap-2 hover:bg-neutral-50 border border-black
                                                        active:scale-[0.98] transition-all disabled:opacity-50"
                                             >
                                                 <ShoppingBag className="w-4 h-4" />

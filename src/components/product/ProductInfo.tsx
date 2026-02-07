@@ -254,7 +254,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                                     className={cn(
                                         "px-6 py-3 text-xs font-bold uppercase tracking-wider transition-all border min-w-[3rem]",
                                         selectedOptions['Color'] === color
-                                            ? "border-neutral-900 bg-neutral-900 text-white"
+                                            ? "border-black bg-white text-black font-bold"
                                             : outOfStock
                                                 ? "border-neutral-100 text-neutral-300 bg-neutral-50 cursor-not-allowed line-through"
                                                 : "border-neutral-200 hover:border-neutral-400 text-neutral-900 bg-transparent"
@@ -348,7 +348,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                                 className={cn(
                                     "px-6 py-3 text-xs font-bold uppercase tracking-wider transition-all border min-w-[3rem]",
                                     selectedOptions[option.name] === value
-                                        ? "border-neutral-900 bg-neutral-900 text-white"
+                                        ? "border-black bg-white text-black font-bold"
                                         : "border-neutral-200 hover:border-neutral-400 text-neutral-900 bg-transparent"
                                 )}
                             >
@@ -377,7 +377,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                     <Button
                         onClick={() => handleAddToCart(true)}
                         disabled={isOutOfStock || isPending}
-                        className="flex-1 h-full rounded-none bg-neutral-900 text-white hover:bg-neutral-800 uppercase tracking-widest font-bold text-xs transition-transform active:scale-95 disabled:opacity-70"
+                        className="flex-1 h-full rounded-none bg-white text-black hover:bg-neutral-50 border border-black uppercase tracking-widest font-bold text-xs transition-transform active:scale-95 disabled:opacity-70"
                     >
                         {isPending ? "Adding..." : isOutOfStock ? "Sold Out" : "Add to Bag"}
                     </Button>

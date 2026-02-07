@@ -71,7 +71,7 @@ const HeroCarousel = ({
     if (slides.length === 0) {
         return (
             <section className="relative w-full h-[100vh] overflow-hidden">
-                <div className="absolute inset-0 h-full w-full bg-neutral-900">
+                <div className="absolute inset-0 h-full w-full bg-white">
                     <Image
                         src={DEFAULT_HERO_IMAGE}
                         alt={brandName}
@@ -108,7 +108,7 @@ const HeroCarousel = ({
     };
 
     return (
-        <section className="relative w-full h-[100vh] overflow-hidden bg-neutral-900 group">
+        <section className="relative w-full h-[100vh] overflow-hidden bg-white group">
             {/* Swiper Slider - Background Images */}
             <div className="absolute inset-0 h-full w-full z-0">
                 <Swiper

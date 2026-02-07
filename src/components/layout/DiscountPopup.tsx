@@ -110,7 +110,7 @@ export function DiscountPopup() {
                         <Button
                             asChild
                             onClick={handleClose}
-                            className="w-full h-12 text-xs font-semibold tracking-[0.2em] uppercase bg-black text-white hover:bg-neutral-800 transition-colors rounded-none"
+                            className="w-full h-12 text-xs font-semibold tracking-[0.2em] uppercase bg-white text-black hover:bg-neutral-50 transition-colors rounded-none border border-black"
                         >
                             <Link href="/shop">
                                 Shop Now

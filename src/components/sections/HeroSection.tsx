@@ -80,7 +80,7 @@ const HeroSection = ({
   const effectiveImage = getEffectiveImage();
 
   return (
-    <section className="relative w-full h-[100vh] overflow-hidden bg-neutral-900">
+    <section className="relative w-full h-[100vh] overflow-hidden bg-white">
       {/* Background Image Container */}
       <div className="absolute inset-0 h-full w-full">
         <AnimatePresence>

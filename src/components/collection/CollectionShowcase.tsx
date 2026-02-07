@@ -48,7 +48,7 @@ export default function CollectionShowcase({
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true, amount: 0.1 }}
                     transition={{ duration: 1.5, ease: [0.33, 1, 0.68, 1] }}
-                    className="absolute inset-0 h-full w-full bg-neutral-900"
+                    className="absolute inset-0 h-full w-full bg-white"
                 >
                     <Image
                         src={imgSrc}
