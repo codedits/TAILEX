@@ -322,16 +322,18 @@ export const ProductService = {
     },
 
     // Cart Validation
-    // Note: We need to import CartValidationResult type or define it in types.ts not services/products.ts to avoid circular dep if types imports service? 
-    // Actually types.ts should be leaf.
-    async validateCartItems(items: { id: string; quantity: number; size?: string; color?: string }[]): Promise<any> {
+    // Extended to support variant-aware cart items
+    async validateCartItems(items: { id: string; productId?: string; variantId?: string; quantity: number; size?: string; color?: string }[]): Promise<any> {
         const supabase = await createClient();
         if (!items || items.length === 0) return { isValid: true, items: [], errors: [] };
+
+        // Extract unique product IDs (support both legacy id and new productId format)
+        const productIds = [...new Set(items.map(i => i.productId || i.id))];
 
         const { data: products, error } = await supabase
             .from('products')
             .select(`id, title, price, sale_price, stock, slug, cover_image, status, variants:product_variants(*)`)
-            .in('id', items.map(i => i.id));
+            .in('id', productIds);
 
         if (error || !products) return { isValid: false, items: [], errors: ['Failed to validate items'] };
 
@@ -340,34 +342,44 @@ export const ProductService = {
         let allValid = true;
 
         for (const item of items) {
-            const product = products.find(p => p.id === item.id);
+            const productId = item.productId || item.id;
+            const product = products.find(p => p.id === productId);
             if (!product || product.status !== 'active') {
-                errors.push(`Product "${item.id}" is unavailable`);
+                errors.push(`Product "${productId}" is unavailable`);
                 allValid = false;
                 continue;
             }
 
-            // Stock validation
-            const availableStock = product.stock ?? 0;
+            // Find matching variant if variantId provided
+            let variant = null;
+            if (item.variantId && product.variants) {
+                variant = (product.variants as any[]).find(v => v.id === item.variantId);
+            }
+
+            // Stock validation (use variant stock if available, otherwise product stock)
+            const availableStock = variant?.stock ?? variant?.inventory_quantity ?? product.stock ?? 0;
             if (availableStock < item.quantity) {
                 errors.push(`Insufficient stock for "${product.title}". Available: ${availableStock}`);
                 allValid = false;
                 continue;
             }
 
-            // Calculate final price
-            const salePrice = product.sale_price;
-            const finalPrice = (salePrice !== null && salePrice !== undefined && salePrice < product.price)
+            // Calculate final price (variant price takes precedence)
+            const basePrice = variant?.price ?? product.price;
+            const salePrice = variant?.sale_price ?? product.sale_price;
+            const finalPrice = (salePrice !== null && salePrice !== undefined && salePrice < basePrice)
                 ? salePrice
-                : product.price;
+                : basePrice;
 
             validatedItems.push({
-                id: product.id,
+                id: item.id, // Preserve composite ID
+                productId: productId,
+                variantId: item.variantId,
                 quantity: item.quantity,
                 currentPrice: finalPrice,
                 slug: product.slug,
                 name: product.title,
-                image: product.cover_image,
+                image: variant?.image_url || product.cover_image,
                 size: item.size,
                 color: item.color
             });

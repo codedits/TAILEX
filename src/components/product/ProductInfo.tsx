@@ -150,6 +150,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             price: currentSalePrice || currentPrice,
             image: image,
             size: Object.values(selectedOptions).join(" / "),
+            color: selectedOptions['Color'] || undefined,
             quantity: quantity,
             slug: product.slug,
         } as any, openCart);

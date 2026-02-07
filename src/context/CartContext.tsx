@@ -55,6 +55,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               if (result.items.length > 0 || (parsedItems.length > 0 && result.items.length === 0)) {
                 const mappedItems = result.items.map((vi: CartValidationItem) => ({
                   id: vi.id,
+                  productId: vi.productId,
+                  variantId: vi.variantId,
                   name: vi.name,
                   price: vi.currentPrice,
                   image: vi.image,
@@ -86,7 +88,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 }
               }
             }).catch(console.error);
-          }, 3000); // Wait 3 seconds after mount
+          }, 8000); // Wait 8 seconds after mount to ensure server is ready and hydration is complete
 
           return () => clearTimeout(timeoutId);
         }

@@ -54,10 +54,11 @@ export const OrderService = {
             let unitPrice = 0;
             let variantTitle = null;
             let sku = product.sku;
+            let variant: ProductVariant | undefined;
 
             if (item.variant_id) {
                 const variants = product.variants as ProductVariant[] || [];
-                const variant = variants.find(v => v.id === item.variant_id);
+                variant = variants.find(v => v.id === item.variant_id);
                 if (!variant) throw AppError.badRequest(`Variant ID ${item.variant_id} not found`);
 
                 variantTitle = variant.title;
@@ -79,11 +80,15 @@ export const OrderService = {
                 title: product.title,
                 variant_title: variantTitle,
                 sku,
-                image_url: product.cover_image,
+                image_url: variant?.image_url || product.cover_image,
                 quantity: item.quantity,
                 unit_price: unitPrice,
                 total_price: totalPrice,
-                requires_shipping: true
+                requires_shipping: true,
+                properties: variant ? {
+                    color: variant.color,
+                    size: variant.size
+                } : {}
             });
         }
 

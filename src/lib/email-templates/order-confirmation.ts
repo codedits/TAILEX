@@ -6,7 +6,11 @@ export function getOrderConfirmationHtml(order: Order, currency: string, siteUrl
     <div style="border-bottom: 1px solid #eaeaea; padding: 15px 0; display: flex; justify-content: space-between;">
        <div style="flex: 1;">
           <span style="display: block; font-size: 14px; color: #000; font-weight: 500;">${item.title}</span>
-          <span style="display: block; font-size: 12px; color: #999; margin-top: 4px;">${item.variant_title || 'Standard'} x${item.quantity}</span>
+          ${item.properties && (item.properties.color || item.properties.size)
+      ? `<span style="display: block; font-size: 12px; color: #666; margin-top: 4px;">Color: ${item.properties.color || 'N/A'} | Size: ${item.properties.size || 'N/A'}</span>`
+      : `<span style="display: block; font-size: 12px; color: #999; margin-top: 4px;">${item.variant_title || ''}</span>`
+    }
+          <span style="display: block; font-size: 12px; color: #999; margin-top: 2px;">Qty: ${item.quantity}</span>
        </div>
        <div style="text-align: right;">
           <span style="font-size: 14px; color: #000;">${formatCurrency(item.unit_price, { code: currency, symbol: currency === 'PKR' ? 'Rs.' : '$', format: 'symbol amount' })}</span>

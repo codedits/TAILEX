@@ -397,7 +397,9 @@ export type LocalCartItem = {
 }
 
 export type CartValidationItem = {
-  id: string; // Product ID
+  id: string; // Composite ID (productId-variantId or just productId)
+  productId?: string;
+  variantId?: string;
   quantity: number;
   currentPrice: number;
   slug: string;

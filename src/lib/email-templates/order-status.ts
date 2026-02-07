@@ -22,7 +22,10 @@ export function getOrderUpdateHtml(order: Order, currency: string, siteUrl: stri
                 ${imageUrl ? `<td style="width: 60px; vertical-align: top; padding-right: 16px;"><img src="${imageUrl}" alt="${item.title}" width="60" height="75" style="display: block; object-fit: cover; border: 1px solid #eee;" /></td>` : ''}
                 <td style="vertical-align: top;">
                   <p style="margin: 0; font-size: 14px; font-weight: 600; color: #000;">${item.title}</p>
-                  <p style="margin: 4px 0 0 0; font-size: 12px; color: #666;">${item.variant_title || 'Standard'}</p>
+                  ${item.properties && (item.properties.color || item.properties.size)
+        ? `<p style="margin: 4px 0 0 0; font-size: 12px; color: #666;">Color: ${item.properties.color || 'N/A'} | Size: ${item.properties.size || 'N/A'}</p>`
+        : `<p style="margin: 4px 0 0 0; font-size: 12px; color: #666;">${item.variant_title || 'Standard'}</p>`
+      }
                   <p style="margin: 4px 0 0 0; font-size: 12px; color: #999;">Qty: ${item.quantity}</p>
                 </td>
               </tr>
