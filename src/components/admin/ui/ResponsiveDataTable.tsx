@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/table"
 import { useIsDesktop } from "@/hooks/use-media-query"
 import { cn } from "@/lib/utils"
+import { useRouter, useSearchParams } from "next/navigation"
 
 interface ResponsiveDataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -44,6 +45,9 @@ interface ResponsiveDataTableProps<TData, TValue> {
     renderMobileCard?: (row: Row<TData>) => React.ReactNode
     // Optional loading state
     isLoading?: boolean
+    // Server-side pagination
+    currentPage?: number
+    totalPages?: number
 }
 
 export function ResponsiveDataTable<TData, TValue>({
@@ -52,8 +56,14 @@ export function ResponsiveDataTable<TData, TValue>({
     filterColumn = "title",
     filterPlaceholder = "Filter...",
     renderMobileCard,
+    currentPage,
+    totalPages,
 }: ResponsiveDataTableProps<TData, TValue>) {
     const isDesktop = useIsDesktop()
+    const router = useRouter()
+    const searchParams = useSearchParams()
+
+    // ... existing table state ...
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -76,20 +86,36 @@ export function ResponsiveDataTable<TData, TValue>({
             columnVisibility,
             rowSelection,
         },
+        manualPagination: !!totalPages, // Enable manual pagination if server-side props exist
+        pageCount: totalPages ?? -1,
     })
+
+    // Handle Page Change
+    const handlePageChange = (newPage: number) => {
+        if (totalPages) {
+            const params = new URLSearchParams(searchParams.toString())
+            params.set("page", newPage.toString())
+            router.push(`?${params.toString()}`)
+        } else {
+            table.setPageIndex(newPage - 1)
+        }
+    }
+
+    // ... rest of render ...
 
     return (
         <div className="w-full space-y-4">
-            {/* Filter Bar - Same for both views */}
+            {/* ... Filter Bar ... */}
             <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center flex-1 gap-2">
                     <div className="relative max-w-sm w-full">
                         <Input
                             placeholder={filterPlaceholder}
                             value={(table.getColumn(filterColumn)?.getFilterValue() as string) ?? ""}
-                            onChange={(event) =>
+                            onChange={(event) => {
                                 table.getColumn(filterColumn)?.setFilterValue(event.target.value)
-                            }
+                                // Optional: Debounced server search could go here
+                            }}
                             className="bg-white border border-input rounded-lg h-10 text-gray-900 placeholder:text-gray-500 focus:ring-1 focus:ring-ring transition-all"
                         />
                     </div>
@@ -218,7 +244,7 @@ export function ResponsiveDataTable<TData, TValue>({
                 </div>
             )}
 
-            {/* Pagination - Same for both views */}
+            {/* Pagination */}
             <div className="flex items-center justify-between gap-4 flex-wrap">
                 <div className="text-sm text-gray-500 order-2 md:order-1">
                     {table.getFilteredSelectedRowModel().rows.length} of{" "}
@@ -226,15 +252,15 @@ export function ResponsiveDataTable<TData, TValue>({
                 </div>
                 <div className="flex items-center gap-2 order-1 md:order-2 w-full md:w-auto justify-between md:justify-end">
                     <div className="text-sm text-gray-500 hidden md:block">
-                        Page {table.getState().pagination.pageIndex + 1} of{" "}
-                        {table.getPageCount()}
+                        Page {totalPages ? currentPage : table.getState().pagination.pageIndex + 1} of{" "}
+                        {totalPages || table.getPageCount()}
                     </div>
                     <div className="flex gap-2">
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => table.previousPage()}
-                            disabled={!table.getCanPreviousPage()}
+                            onClick={() => handlePageChange(totalPages ? (currentPage || 1) - 1 : table.getState().pagination.pageIndex)}
+                            disabled={totalPages ? (currentPage || 1) <= 1 : !table.getCanPreviousPage()}
                             className="bg-white border border-border rounded-lg text-gray-900 font-medium hover:bg-gray-100 transition-all disabled:opacity-30"
                         >
                             <ChevronLeft className="h-4 w-4 md:mr-1" />
@@ -243,8 +269,8 @@ export function ResponsiveDataTable<TData, TValue>({
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => table.nextPage()}
-                            disabled={!table.getCanNextPage()}
+                            onClick={() => handlePageChange(totalPages ? (currentPage || 1) + 1 : table.getState().pagination.pageIndex + 2)}
+                            disabled={totalPages ? (currentPage || 1) >= (totalPages || 1) : !table.getCanNextPage()}
                             className="bg-white border border-border rounded-lg text-gray-900 font-medium hover:bg-gray-100 transition-all disabled:opacity-30"
                         >
                             <span className="hidden md:inline">Next</span>

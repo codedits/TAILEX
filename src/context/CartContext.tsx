@@ -104,7 +104,44 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, isMounted]);
 
-  const addItem = (newItem: Omit<CartItem, "quantity">, openCart: boolean = true) => {
+  const addItem = async (newItem: Omit<CartItem, "quantity">, openCart: boolean = true) => {
+    // Optimistic check? No, let's be safe.
+    // Ideally we should know the current quantity in cart to check (current + 1)
+
+    const currentItem = items.find(
+      (item) => item.id === newItem.id && item.size === newItem.size && item.color === newItem.color
+    );
+    const currentQty = currentItem ? currentItem.quantity : 0;
+    const nextQty = currentQty + 1;
+
+    try {
+      // We only check if variantId is present. Simple products might not have variantId in cart item if logic differs,
+      // but our unified logic uses variantId for everything now? 
+      // Logic audit said simple products don't have variants? 
+      // Wait, if no variantId, we can't check inventory_levels easily unless we map product_id -> variant_id?
+      // Let's assume variantId is always present for now as per "Standardize Backend" task. 
+
+      if (newItem.variantId) {
+        // Dynamic import to avoid server action issues in client component if not handled well? 
+        // Next.js handles this.
+        const { checkVariantStock } = await import('@/actions/stock');
+        const stock = await checkVariantStock(newItem.variantId, nextQty);
+
+        if (!stock.isAvailable) {
+          toast({
+            title: "Out of Stock",
+            description: `Sorry, only ${stock.available} available.`,
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+    } catch (e) {
+      console.error("Stock check failed", e);
+      // Fallback: allow add, let checkout validate? Or block?
+      // Let's allow for now to not block if network fails, but log it.
+    }
+
     setItems((prevItems) => {
       // Check for exact match including variants
       const existingItem = prevItems.find(

@@ -6,48 +6,68 @@ import { Suspense } from "react";
 import { TableSkeleton } from "@/components/admin/ui/TableSkeleton";
 import { ProductTableClient } from "@/components/admin/products/ProductTableClient";
 
-async function ProductsTable() {
+async function ProductsTable({
+  searchParams,
+}: {
+  searchParams?: { page?: string; query?: string };
+}) {
   const supabase = await createAdminClient();
+  const page = Number(searchParams?.page) || 1;
+  const search = searchParams?.query || "";
+  const limit = 10;
+  const offset = (page - 1) * limit;
 
-  // Fetch products with variants
-  const { data: products } = await supabase
+  // 1. Fetch Paginated Products
+  let query = supabase
     .from("products")
-    .select(`
-      *,
-      variants:product_variants(*)
-    `)
-    .order("created_at", { ascending: false });
+    .select(`*, variants:product_variants(*)`, { count: "exact" })
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1);
 
-  if (!products) return <ProductTableClient products={[]} />;
+  if (search) {
+    query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+  }
 
-  // Fetch inventory levels for all variants
-  const variantIds = products.flatMap(p => p.variants?.map((v: any) => v.id) || []);
+  const { data: products, count } = await query;
 
+  if (!products) return <ProductTableClient products={[]} totalPages={0} currentPage={1} />;
+
+  // 2. Fetch Inventory for Visible Items Only
+  const variantIds = products.flatMap((p) => p.variants?.map((v: any) => v.id) || []);
   let inventoryMap: Record<string, number> = {};
 
   if (variantIds.length > 0) {
     const { data: inventory } = await supabase
-      .from('inventory_levels')
-      .select('variant_id, available')
-      .in('variant_id', variantIds);
+      .from("inventory_levels")
+      .select("variant_id, available")
+      .in("variant_id", variantIds);
 
     if (inventory) {
       for (const inv of inventory) {
-        inventoryMap[inv.variant_id] = (inventoryMap[inv.variant_id] || 0) + (inv.available || 0);
+        inventoryMap[inv.variant_id] =
+          (inventoryMap[inv.variant_id] || 0) + (inv.available || 0);
       }
     }
   }
 
-  // Attach inventory to variants
-  const productsWithInventory = products.map(p => ({
+  // 3. Merge Data
+  const productsWithInventory = products.map((p) => ({
     ...p,
     variants: p.variants?.map((v: any) => ({
       ...v,
-      inventory_quantity: inventoryMap[v.id] || 0
-    }))
+      inventory_quantity: inventoryMap[v.id] || 0,
+    })),
   }));
 
-  return <ProductTableClient products={productsWithInventory} />;
+  const totalPages = Math.ceil((count || 0) / limit);
+
+  return (
+    <ProductTableClient
+      products={productsWithInventory}
+      totalPages={totalPages}
+      currentPage={page}
+    />
+  );
 }
 
 export default function ProductsPage() {

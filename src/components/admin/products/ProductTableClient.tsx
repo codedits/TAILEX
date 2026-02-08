@@ -15,7 +15,7 @@ interface ProductTableClientProps {
     products: Product[]
 }
 
-export function ProductTableClient({ products }: ProductTableClientProps) {
+export function ProductTableClient({ products, currentPage = 1, totalPages = 1 }: ProductTableClientProps & { currentPage?: number; totalPages?: number }) {
     const router = useRouter()
     const [selectedProduct, setSelectedProduct] = React.useState<Product | null>(null)
     const [drawerOpen, setDrawerOpen] = React.useState(false)
@@ -86,6 +86,8 @@ export function ProductTableClient({ products }: ProductTableClientProps) {
                 filterColumn="title"
                 filterPlaceholder="Filter products..."
                 renderMobileCard={renderMobileCard}
+                currentPage={currentPage}
+                totalPages={totalPages}
             />
 
             <ActionDrawer
