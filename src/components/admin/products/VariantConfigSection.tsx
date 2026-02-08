@@ -92,11 +92,11 @@ export function VariantConfigSection({
 
             if (match) {
                 // Keep existing variant data (ID, inventory, etc.)
-                // We overwrite title/sku/price from generator only if we strictly want to enforce sync,
-                // but usually better to keep user edits. 
-                // However, for consistency with 'generation', we might want to update some fields.
-                // For now, let's PRESERVE the existing variant entirely to be safe.
-                return match;
+                // Enforce base price sync
+                return {
+                    ...match,
+                    price: basePrice
+                };
             }
 
             return {
@@ -109,8 +109,7 @@ export function VariantConfigSection({
         onVariantsChange(mergedVariants);
     }, [enableColor, enableSize, availableColors, availableSizes, basePrice, baseSku, onVariantsChange, variants]);
 
-    // Auto-regenerate when toggle or options change (but NEVER if we have existing DB variants)
-    // Auto-regenerate when toggle or options change
+    // Auto-regenerate when toggle, options, or BASE PRICE changes
     useEffect(() => {
         // We removed the 'hasExistingVariants' blocker here to allow
         // "Variantizing" an old product (Simple -> Variable).
@@ -125,7 +124,7 @@ export function VariantConfigSection({
             }
         }
         regenerateVariants();
-    }, [enableColor, enableSize, availableColors.length, availableSizes.length]);
+    }, [enableColor, enableSize, availableColors.length, availableSizes.length, basePrice]);
 
     // Add custom color
     const addColor = useCallback(() => {
