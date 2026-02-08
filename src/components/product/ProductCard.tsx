@@ -52,8 +52,8 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    // For products without options, add directly
-    if (!product.options?.length) {
+    // For products without variants, add directly
+    if (!product.variants?.length) {
       addItem({
         id: product.id,
         productId: product.id,
@@ -65,7 +65,7 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
         slug: slug,
       } as any, true);
     } else {
-      // Has options, open quick view for selection
+      // Has variants, open quick view for selection
       openQuickView(product as Product);
     }
   };

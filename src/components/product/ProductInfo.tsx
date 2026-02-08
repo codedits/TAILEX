@@ -18,6 +18,7 @@ import { Product } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import { StickyAddToCart } from "./StickyAddToCart";
 import { SizeGuideModal } from "./SizeGuideModal";
+import { STANDARD_SIZES } from "@/lib/logic/variant-generator";
 
 interface ProductInfoProps {
     product: Product;
@@ -288,29 +289,30 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                     </div>
 
                     <div className="flex -space-x-px">
-                        {product.available_sizes.map((size) => {
-                            const outOfStock = isOptionOutOfStock('Size', size);
+                        {STANDARD_SIZES.map((size) => {
+                            const isEnabled = product.available_sizes?.includes(size);
+                            const outOfStock = isEnabled && isOptionOutOfStock('Size', size);
                             const isSelected = selectedOptions['Size'] === size;
 
                             return (
                                 <button
                                     key={size}
-                                    onClick={() => !outOfStock && handleOptionSelect('Size', size)}
-                                    // disabled={outOfStock} // Keep clickable to show it exists, but handle with logic
+                                    onClick={() => isEnabled && !outOfStock && handleOptionSelect('Size', size)}
+                                    disabled={!isEnabled || outOfStock}
                                     className={cn(
                                         "relative flex-1 py-4 text-sm font-medium transition-all border border-neutral-200 min-w-[3rem] items-center justify-center",
                                         isSelected
                                             ? "z-10 border-neutral-900 border-[2px] -m-[1px]" // Bold border for selection
-                                            : "hover:bg-neutral-50",
-                                        outOfStock && "text-neutral-300 bg-neutral-50/50 cursor-not-allowed"
+                                            : isEnabled && !outOfStock ? "hover:bg-neutral-50" : "",
+                                        (!isEnabled || outOfStock) && "text-neutral-500 bg-neutral-100/50 cursor-not-allowed"
                                     )}
                                 >
                                     <span className={cn(isSelected && "translate-y-[0.5px]")}>{size}</span>
 
-                                    {/* Diagonal Slash for Out of Stock */}
-                                    {outOfStock && (
+                                    {/* Diagonal Slash for Disabled/Out of Stock */}
+                                    {(!isEnabled || outOfStock) && (
                                         <div className="absolute inset-0 pointer-events-none">
-                                            <svg className="w-full h-full text-neutral-300" preserveAspectRatio="none">
+                                            <svg className="w-full h-full text-neutral-400" preserveAspectRatio="none">
                                                 <line x1="0" y1="100%" x2="100%" y2="0" stroke="currentColor" strokeWidth="1" />
                                             </svg>
                                         </div>
@@ -386,12 +388,11 @@ export default function ProductInfo({ product }: ProductInfoProps) {
 
                 {/* Buy Now */}
                 <Button
-                    variant="outline"
                     onClick={() => {
                         if (handleAddToCart(false)) router.push('/checkout');
                     }}
                     disabled={isOutOfStock}
-                    className="w-full h-12 rounded-none border-neutral-900 text-neutral-900 hover:bg-neutral-50 uppercase tracking-widest font-bold text-xs"
+                    className="w-full h-12 rounded-none bg-black text-white hover:bg-neutral-900 border border-black uppercase tracking-widest font-bold text-xs transition-transform active:scale-95"
                 >
                     Buy Now
                 </Button>

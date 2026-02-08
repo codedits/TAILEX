@@ -297,7 +297,12 @@ export const ProductService = {
      * Sync variants for a product
      * Deletes all existing variants and creates new ones
      */
-    async syncVariants(productId: string, variants: Partial<ProductVariant>[]): Promise<ProductVariant[]> {
+    async syncVariants(
+        productId: string,
+        variants: Partial<ProductVariant>[],
+        basePrice: number,
+        baseSalePrice?: number | null
+    ): Promise<ProductVariant[]> {
         const supabase = await createAdminClient();
 
         // Delete existing variants (Note: this is destructive to cart items if ON DELETE CASCADE is set)
@@ -323,8 +328,8 @@ export const ProductService = {
             title: v.title || null,
             color: v.color || null,
             size: v.size || null,
-            price: v.price ?? 0,
-            sale_price: v.sale_price,
+            price: basePrice, // Enforce base price
+            sale_price: baseSalePrice ?? null, // Enforce base sale price
             sku: v.sku || null,
             status: v.status || 'active',
             position: v.position ?? index,

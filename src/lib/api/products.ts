@@ -164,7 +164,7 @@ export async function createProduct(formData: FormData): Promise<ApiResponse<Pro
 
     // Sync variants to database
     if (variants.length > 0) {
-      await ProductService.syncVariants(product.id, variants);
+      await ProductService.syncVariants(product.id, variants, product.price, product.sale_price);
     }
 
     revalidatePath('/admin/products');
@@ -196,7 +196,7 @@ export async function updateProduct(formData: FormData): Promise<ApiResponse<Pro
     const product = await ProductService.updateProduct(id, { ...productData, images: existingImages }, imageFiles);
 
     // Sync variants to database
-    await ProductService.syncVariants(id, variants);
+    await ProductService.syncVariants(id, variants, product.price, product.sale_price);
 
     revalidatePath('/admin/products');
     revalidatePath(`/admin/products/${id}`);
