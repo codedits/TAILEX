@@ -67,7 +67,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen relative flex items-center justify-center overflow-hidden font-inter">
       {/* Background Video */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 bg-black">
         <div className="absolute inset-0 bg-black/60 z-10" /> {/* Dark Overlay */}
         <video
           autoPlay

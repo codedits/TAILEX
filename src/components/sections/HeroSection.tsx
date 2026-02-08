@@ -84,9 +84,8 @@ const HeroSection = ({
       <div className="absolute inset-0 h-full w-full">
         {effectiveImage && (
           <motion.div
-            initial={{ opacity: 0, scale: 1.1 }}
+            initial={{ opacity: 1, scale: 1.1 }}
             animate={{
-              opacity: imageLoaded ? 1 : 0,
               scale: imageLoaded ? 1 : 1.1
             }}
             transition={{ duration: 1.5, ease: [0.33, 1, 0.68, 1] }}

@@ -137,9 +137,8 @@ const HeroCarousel = ({
                                     {/* Mobile Image (Optimized) */}
                                     {slide.mobileImage && !imageErrors.has(slide.id) && (
                                         <motion.div
-                                            initial={index === 0 ? { opacity: 0, scale: 1.1 } : { opacity: 1, scale: 1 }}
+                                            initial={index === 0 ? { opacity: 1, scale: 1.1 } : { opacity: 1, scale: 1 }}
                                             animate={index === 0 ? {
-                                                opacity: imageLoaded ? 1 : 0,
                                                 scale: imageLoaded ? 1 : 1.1
                                             } : {}}
                                             transition={{ duration: 1.5, ease: [0.33, 1, 0.68, 1] }}
@@ -163,9 +162,8 @@ const HeroCarousel = ({
 
                                     {/* Desktop Image (Optimized) */}
                                     <motion.div
-                                        initial={index === 0 ? { opacity: 0, scale: 1.1 } : { opacity: 1, scale: 1 }}
+                                        initial={index === 0 ? { opacity: 1, scale: 1.1 } : { opacity: 1, scale: 1 }}
                                         animate={index === 0 ? {
-                                            opacity: imageLoaded ? 1 : 0,
                                             scale: imageLoaded ? 1 : 1.1
                                         } : {}}
                                         transition={{ duration: 1.5, ease: [0.33, 1, 0.68, 1] }}
