@@ -129,7 +129,7 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
                 fill
                 priority={priority}
                 sizes={sizes}
-                quality={85}
+                quality={75}
                 onLoad={() => setImageLoaded(true)}
                 className="object-cover transition-transform duration-700"
               />
@@ -142,7 +142,7 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
                 alt={`${title} alternate view`}
                 fill
                 sizes={sizes}
-                quality={85}
+                quality={75}
                 className="object-cover lg:group-hover:scale-105 transition-transform duration-700"
               />
             </div>

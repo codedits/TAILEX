@@ -108,7 +108,7 @@ const HeroCarousel = ({
                                                 priority={index === 0}
                                                 loading={index === 0 ? "eager" : "lazy"}
                                                 fetchPriority={index === 0 ? "high" : "auto"}
-                                                quality={85}
+                                                quality={75}
                                                 sizes="100vw"
                                                 onLoad={() => index === 0 && setImageLoaded(true)}
                                                 onError={() => handleImageError(slide.id)}
@@ -133,7 +133,7 @@ const HeroCarousel = ({
                                             priority={index === 0}
                                             loading={index === 0 ? "eager" : "lazy"}
                                             fetchPriority={index === 0 ? "high" : "auto"}
-                                            quality={85}
+                                            quality={75}
                                             sizes="100vw"
                                             onLoad={() => index === 0 && setImageLoaded(true)}
                                             onError={() => handleImageError(slide.id)}

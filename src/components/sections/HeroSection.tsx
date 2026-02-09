@@ -100,7 +100,7 @@ const HeroSection = ({
                 fill
                 priority
                 fetchPriority="high"
-                quality={85}
+                quality={75}
                 sizes="100vw"
                 className="object-cover object-top"
                 onLoad={() => setImageLoaded(true)}
