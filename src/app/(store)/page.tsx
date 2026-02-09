@@ -7,14 +7,10 @@ export const revalidate = 3600; // 1 hour
 
 export default async function Home() {
   const data = await getHomeData();
-  const firstCollection = data.collections?.[0] ? {
-    title: data.collections[0].title,
-    slug: data.collections[0].slug
-  } : null;
 
   return (
     <main>
-      <StoreHeader firstCollection={firstCollection} />
+      <StoreHeader collectionsPromise={data.collectionsPromise} />
       <HomeLayout data={data} />
     </main>
   );
