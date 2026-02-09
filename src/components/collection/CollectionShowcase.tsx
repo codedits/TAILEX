@@ -6,7 +6,7 @@ import { ArrowRight } from "lucide-react";
 import { Product } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { CollectionShowcaseCarousel } from "./CollectionShowcaseCarousel";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { useState } from "react";
 
 interface CollectionShowcaseProps {
@@ -43,11 +43,11 @@ export default function CollectionShowcase({
         <section className={cn("w-full flex flex-col relative z-10", className)}>
             {/* Section 1: The Collection Hero */}
             <div className="relative w-full h-[70vh] md:h-[115vh] overflow-hidden group bg-background">
-                <motion.div
-                    initial={{ opacity: 0, x: 150 }}
-                    whileInView={{ opacity: 1, x: 0 }}
+                <m.div
+                    initial={{ opacity: 0, scale: 1.1 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true, amount: 0.1 }}
-                    transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 1.5, ease: [0.33, 1, 0.68, 1] }}
                     className="absolute inset-0 h-full w-full bg-white"
                 >
                     <Image
@@ -60,11 +60,11 @@ export default function CollectionShowcase({
                         loading="lazy"
                         onError={() => setImgSrc("https://framerusercontent.com/images/BjQfJy7nQoVxvCYTFzwZxprDWiQ.jpg")}
                     />
-                </motion.div>
+                </m.div>
 
                 {/* Content - Text Independent of Image */}
                 <div className="absolute inset-x-0 bottom-0 top-0 flex flex-col items-center justify-center text-center px-4 md:px-6 text-white p-12 z-10">
-                    <motion.div
+                    <m.div
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true, amount: 0.2 }}
@@ -80,7 +80,7 @@ export default function CollectionShowcase({
                         }}
                         className="space-y-6 max-w-4xl"
                     >
-                        <motion.h2
+                        <m.h2
                             variants={{
                                 hidden: { opacity: 0, y: 30 },
                                 visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.33, 1, 0.68, 1] } }
@@ -88,9 +88,9 @@ export default function CollectionShowcase({
                             className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-[200] uppercase tracking-[0.05em] leading-tight script-font"
                         >
                             {title}
-                        </motion.h2>
+                        </m.h2>
                         {description && (
-                            <motion.p
+                            <m.p
                                 variants={{
                                     hidden: { opacity: 0, y: 20 },
                                     visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.33, 1, 0.68, 1] } }
@@ -98,9 +98,9 @@ export default function CollectionShowcase({
                                 className="text-sm sm:text-base md:text-lg font-light tracking-wide text-white/90 text-balance max-w-2xl mx-auto leading-relaxed drop-shadow-md"
                             >
                                 {description}
-                            </motion.p>
+                            </m.p>
                         )}
-                        <motion.div
+                        <m.div
                             variants={{
                                 hidden: { opacity: 0, y: 20 },
                                 visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.33, 1, 0.68, 1] } }
@@ -113,8 +113,8 @@ export default function CollectionShowcase({
                             >
                                 View Collection
                             </Link>
-                        </motion.div>
-                    </motion.div>
+                        </m.div>
+                    </m.div>
                 </div>
             </div>
 
