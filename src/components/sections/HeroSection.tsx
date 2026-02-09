@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import HeroCarousel, { HeroSlide } from './HeroCarousel';
 import { useIsMobile } from '@/hooks/use-media-query';
 import { cn } from "@/lib/utils";
@@ -85,7 +85,7 @@ const HeroSection = ({
       <div className="absolute inset-0 h-full w-full">
         {effectiveImage && (
           <div className="absolute inset-0 h-full w-full">
-            <motion.div
+            <m.div
               initial={{ opacity: 0, scale: 1.1 }}
               animate={{
                 opacity: imageLoaded ? 1 : 0,
@@ -106,12 +106,12 @@ const HeroSection = ({
                 onLoad={() => setImageLoaded(true)}
                 onError={handleImageError}
               />
-            </motion.div>
+            </m.div>
           </div>
         )}
 
         {/* Overlay */}
-        <motion.div
+        <m.div
           initial={{ opacity: 0 }}
           animate={{ opacity: imageLoaded ? overlayOpacity : 0 }}
           transition={{ duration: 1.2, ease: "easeInOut" }}
@@ -122,25 +122,25 @@ const HeroSection = ({
       {/* Content Container */}
       <div className="relative flex flex-col items-center justify-center w-full px-6 md:px-10 z-10 text-center h-[100vh] max-w-[1920px] mx-auto">
         <div className="flex flex-col items-center justify-center space-y-8">
-          <motion.p
+          <m.p
             initial={{ opacity: 0, y: 20 }}
             animate={imageLoaded ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.4, ease: [0.33, 1, 0.68, 1] }}
             className="text-white/90 text-xs md:text-xs tracking-[0.2em] uppercase font-bold"
           >
             {subheading || "SPRING/SUMMER '26"}
-          </motion.p>
+          </m.p>
 
-          <motion.h1
+          <m.h1
             initial={{ opacity: 0, y: 30 }}
             animate={imageLoaded ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 1, delay: 0.6, ease: [0.33, 1, 0.68, 1] }}
             className="text-white text-5xl md:text-8xl font-medium tracking-tight"
           >
             {displayHeading}
-          </motion.h1>
+          </m.h1>
 
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             animate={imageLoaded ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.8, ease: [0.33, 1, 0.68, 1] }}
@@ -152,7 +152,7 @@ const HeroSection = ({
             >
               {ctaText || "Shop Now"}
             </Link>
-          </motion.div>
+          </m.div>
         </div>
       </div>
     </section>

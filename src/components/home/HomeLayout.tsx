@@ -1,15 +1,18 @@
 import { Suspense } from "react";
 import { HomeData } from "@/lib/home-data";
 import HeroSection from "@/components/sections/HeroSection";
-import { TopCollectionStrip } from "@/components/sections/TopCollectionStrip";
-import ProductGridSection from "@/components/sections/ProductGridSection";
-import CollectionShowcase from "@/components/collection/CollectionShowcase";
+import dynamic from "next/dynamic";
+
+// Sections that can be lazy-loaded to reduce TBT
+const TopCollectionStrip = dynamic(() => import("@/components/sections/TopCollectionStrip").then(mod => mod.TopCollectionStrip));
+const ProductGridSection = dynamic(() => import("@/components/sections/ProductGridSection"));
+const CollectionShowcase = dynamic(() => import("@/components/collection/CollectionShowcase"));
+const TrustBar = dynamic(() => import("@/components/sections/TrustBar").then(mod => mod.TrustBar));
+const Featuring = dynamic(() => import("@/components/sections/Featuring"));
 
 import { HOMEPAGE_TEXT } from "@/config/homepage-text";
-import { TrustBar } from "@/components/sections/TrustBar";
-import Featuring from "@/components/sections/Featuring";
 
-// Skeletons for Suspense fallbacks
+// Skeletons remain as direct imports for Suspense fallbacks
 import { CollectionShowcaseSkeleton } from "@/components/skeletons/CollectionShowcaseSkeleton";
 import { ProductGridSkeleton } from "@/components/skeletons/ProductGridSkeleton";
 

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import { cn } from "@/lib/utils";
@@ -94,7 +94,7 @@ const HeroCarousel = ({
                                 {/* Mobile Image */}
                                 {slide.mobileImage && !imageErrors.has(slide.id) && (
                                     <div className="md:hidden absolute inset-0 overflow-hidden">
-                                        <motion.div
+                                        <m.div
                                             initial={{ opacity: 0, scale: 1.1 }}
                                             animate={index === currentIndex ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 1.1 }}
                                             transition={{ duration: 1.5, ease: [0.33, 1, 0.68, 1] }}
@@ -113,13 +113,13 @@ const HeroCarousel = ({
                                                 onLoad={() => index === 0 && setImageLoaded(true)}
                                                 onError={() => handleImageError(slide.id)}
                                             />
-                                        </motion.div>
+                                        </m.div>
                                     </div>
                                 )}
 
                                 {/* Desktop Image */}
                                 <div className={cn("absolute inset-0 overflow-hidden", slide.mobileImage && !imageErrors.has(slide.id) && "hidden md:block")}>
-                                    <motion.div
+                                    <m.div
                                         initial={{ opacity: 0, scale: 1.1 }}
                                         animate={index === currentIndex ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 1.1 }}
                                         transition={{ duration: 1.5, ease: [0.33, 1, 0.68, 1] }}
@@ -138,7 +138,7 @@ const HeroCarousel = ({
                                             onLoad={() => index === 0 && setImageLoaded(true)}
                                             onError={() => handleImageError(slide.id)}
                                         />
-                                    </motion.div>
+                                    </m.div>
                                 </div>
 
                                 <div
@@ -154,7 +154,7 @@ const HeroCarousel = ({
             {/* Content Layer */}
             <div className="absolute inset-0 flex flex-col items-center justify-center w-full px-6 md:px-10 z-30 text-center h-full max-w-[1920px] mx-auto pointer-events-none">
                 <AnimatePresence mode="wait">
-                    <motion.div
+                    <m.div
                         key={currentIndex}
                         initial="hidden"
                         animate="visible"
@@ -178,14 +178,14 @@ const HeroCarousel = ({
                                 Shop Now
                             </Link>
                         </div>
-                    </motion.div>
+                    </m.div>
                 </AnimatePresence>
 
                 {/* Bottom CTA */}
                 <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-40 w-full flex justify-center pointer-events-auto">
                     <AnimatePresence mode="wait">
                         {currentSlide?.ctaText && (
-                            <motion.div
+                            <m.div
                                 key={`bottom-${currentIndex}`}
                                 initial={{ opacity: 0, y: 15 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -201,7 +201,7 @@ const HeroCarousel = ({
                                     </span>
                                     <ArrowRightIcon className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" />
                                 </Link>
-                            </motion.div>
+                            </m.div>
                         )}
                     </AnimatePresence>
                 </div>

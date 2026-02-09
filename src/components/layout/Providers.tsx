@@ -7,6 +7,7 @@ import { useState } from "react";
 import { UserAuthProvider } from "@/context/UserAuthContext";
 import { StoreConfigProvider } from "@/context/StoreConfigContext";
 import { StoreConfig } from "@/services/config";
+import { LazyMotion, domAnimation } from "framer-motion";
 
 export function Providers({
   children,
@@ -27,12 +28,14 @@ export function Providers({
   return (
     <QueryClientProvider client={queryClient}>
       <StoreConfigProvider initialConfig={initialConfig}>
-        <UserAuthProvider>
-          <TooltipProvider>
-            {children}
-            <Sonner position="top-center" />
-          </TooltipProvider>
-        </UserAuthProvider>
+        <LazyMotion features={domAnimation}>
+          <UserAuthProvider>
+            <TooltipProvider>
+              {children}
+              <Sonner position="top-center" />
+            </TooltipProvider>
+          </UserAuthProvider>
+        </LazyMotion>
       </StoreConfigProvider>
     </QueryClientProvider>
   );
