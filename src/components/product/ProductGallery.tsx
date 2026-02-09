@@ -9,9 +9,11 @@ import { Maximize2, X } from "lucide-react";
 interface ProductGalleryProps {
     images: string[];
     title: string;
+    blurDataUrl?: string | null;
+    blurDataUrls?: Record<string, string>;
 }
 
-export default function ProductGallery({ images, title }: ProductGalleryProps) {
+export default function ProductGallery({ images, title, blurDataUrl, blurDataUrls }: ProductGalleryProps) {
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [emblaRef, emblaApi] = useEmblaCarousel({
         align: "center",
@@ -90,6 +92,8 @@ export default function ProductGallery({ images, title }: ProductGalleryProps) {
                                     className="object-cover"
                                     priority={idx === 0}
                                     sizes="(max-width: 768px) 100vw, 800px"
+                                    placeholder={blurDataUrls?.[img] || (idx === 0 && blurDataUrl) ? "blur" : "empty"}
+                                    blurDataURL={blurDataUrls?.[img] || (idx === 0 ? blurDataUrl ?? undefined : undefined)}
                                 />
                             </div>
                         ))}
@@ -120,6 +124,8 @@ export default function ProductGallery({ images, title }: ProductGalleryProps) {
                         } : undefined}
                         priority
                         sizes="(max-width: 1200px) 50vw, 800px"
+                        placeholder={blurDataUrls?.[images[selectedIndex]] || blurDataUrl ? "blur" : "empty"}
+                        blurDataURL={blurDataUrls?.[images[selectedIndex]] || blurDataUrl || undefined}
                     />
 
                     {/* Hint */}

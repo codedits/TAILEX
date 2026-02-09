@@ -10,6 +10,12 @@ interface CollectionCardProps {
 }
 
 export const CollectionCard = ({ collection }: CollectionCardProps) => {
+    const blurDataUrls = (collection.metadata as Record<string, unknown>)?.blurDataUrls as Record<string, string> | undefined;
+    const blurSrc = collection.image_url ? blurDataUrls?.[collection.image_url] : undefined;
+    const blurProps = blurSrc
+        ? { placeholder: "blur" as const, blurDataURL: blurSrc }
+        : {};
+
     return (
         <Link
             href={`/collection/${collection.slug}`}
@@ -23,6 +29,7 @@ export const CollectionCard = ({ collection }: CollectionCardProps) => {
                     className="object-cover transition-transform duration-1000 ease-out group-hover:scale-110"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     quality={75}
+                    {...blurProps}
                 />
             ) : (
                 <div className="absolute inset-0 bg-neutral-200 dark:bg-neutral-800" />

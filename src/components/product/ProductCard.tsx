@@ -23,13 +23,17 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
   const { isInWishlist, toggleItem } = useWishlist();
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  const { title, price, images, slug, cover_image, sale_price, tags, id, review_count, average_rating } = product;
+  const { title, price, images, slug, cover_image, sale_price, tags, id, review_count, average_rating, metadata } = product;
 
   const isValidImage = (img: any): img is string => typeof img === 'string' && img.trim().length > 0;
 
   const imagePrimary = isValidImage(cover_image) ? cover_image : (images?.find(isValidImage) || "");
   const imageSecondary = images?.filter(isValidImage).find(img => img !== imagePrimary) || imagePrimary;
   const href = `/product/${slug}`;
+
+  // Resolve blur placeholder from metadata
+  const blurDataUrls = (metadata as Record<string, unknown>)?.blurDataUrls as Record<string, string> | undefined;
+  const primaryBlur = blurDataUrls?.[imagePrimary] || undefined;
 
   // Standardized e-commerce grid sizes for optimal performance
   const sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 300px";
@@ -130,6 +134,8 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
                 priority={priority}
                 sizes={sizes}
                 quality={75}
+                placeholder={primaryBlur ? "blur" : "empty"}
+                blurDataURL={primaryBlur}
                 onLoad={() => setImageLoaded(true)}
                 className="object-cover transition-transform duration-700"
               />

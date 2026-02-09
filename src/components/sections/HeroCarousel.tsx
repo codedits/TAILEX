@@ -16,6 +16,7 @@ export type HeroSlide = {
     subheading?: string;
     ctaText?: string;
     ctaLink?: string;
+    blurDataURL?: string;
 };
 
 type HeroCarouselProps = {
@@ -110,6 +111,8 @@ const HeroCarousel = ({
                                                 fetchPriority={index === 0 ? "high" : "auto"}
                                                 quality={75}
                                                 sizes="100vw"
+                                                placeholder={slide.blurDataURL ? "blur" : "empty"}
+                                                blurDataURL={slide.blurDataURL}
                                                 onLoad={() => index === 0 && setImageLoaded(true)}
                                                 onError={() => handleImageError(slide.id)}
                                             />
@@ -135,6 +138,8 @@ const HeroCarousel = ({
                                             fetchPriority={index === 0 ? "high" : "auto"}
                                             quality={75}
                                             sizes="100vw"
+                                            placeholder={slide.blurDataURL ? "blur" : "empty"}
+                                            blurDataURL={slide.blurDataURL}
                                             onLoad={() => index === 0 && setImageLoaded(true)}
                                             onError={() => handleImageError(slide.id)}
                                         />

@@ -17,6 +17,7 @@ type HeroSectionProps = {
   ctaLink?: string;
   brandName?: string;
   overlayOpacity?: number;
+  blurDataURL?: string;
   // New carousel props
   slides?: HeroSlide[];
   autoPlayInterval?: number;
@@ -41,6 +42,7 @@ const HeroSection = ({
   overlayOpacity = 0.3,
   ctaText,
   ctaLink,
+  blurDataURL,
   slides,
   autoPlayInterval = 5000
 }: HeroSectionProps) => {
@@ -103,6 +105,8 @@ const HeroSection = ({
                 quality={75}
                 sizes="100vw"
                 className="object-cover object-top"
+                placeholder={blurDataURL ? "blur" : "empty"}
+                blurDataURL={blurDataURL}
                 onLoad={() => setImageLoaded(true)}
                 onError={handleImageError}
               />

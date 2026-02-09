@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { AppError } from './errors';
 import { Product, ProductVariant, PaginatedResponse } from '@/lib/types';
 import { unstable_cache } from 'next/cache';
+import { processImage, generateBlurDataURL, generateImageFilename, type ImageCategory } from '@/lib/image-processor';
 
 type ProductInput = Partial<Product> & {
     track_quantity?: boolean;
@@ -210,9 +211,18 @@ export const ProductService = {
         }
 
         const existingImages = Array.isArray(data.images) ? data.images : [];
-        const imageUrls = await this.handleImageUploads(imageFiles, existingImages);
+        const { urls: imageUrls, blurDataUrls } = await this.handleImageUploads(imageFiles, existingImages);
 
-        const productData = normalizeProductPayload({ ...data, images: imageUrls });
+        // Merge blur placeholders into metadata.blurDataUrls
+        const existingBlurs = (data.metadata as Record<string, unknown>)?.blurDataUrls as Record<string, string> || {};
+        const productData = normalizeProductPayload({
+            ...data,
+            images: imageUrls,
+            metadata: {
+                ...(data.metadata || {}),
+                blurDataUrls: { ...existingBlurs, ...blurDataUrls },
+            },
+        });
         productData.created_at = new Date().toISOString();
 
         const { data: newProduct, error } = await supabase
@@ -252,9 +262,18 @@ export const ProductService = {
         }
 
         const existingImages = Array.isArray(data.images) ? data.images : [];
-        const imageUrls = await this.handleImageUploads(imageFiles, existingImages);
+        const { urls: imageUrls, blurDataUrls } = await this.handleImageUploads(imageFiles, existingImages);
 
-        const productData = normalizeProductPayload({ ...data, images: imageUrls });
+        // Merge blur placeholders into metadata.blurDataUrls
+        const existingBlurs = (data.metadata as Record<string, unknown>)?.blurDataUrls as Record<string, string> || {};
+        const productData = normalizeProductPayload({
+            ...data,
+            images: imageUrls,
+            metadata: {
+                ...(data.metadata || {}),
+                blurDataUrls: { ...existingBlurs, ...blurDataUrls },
+            },
+        });
 
         const { data: updatedProduct, error } = await supabase
             .from('products')
@@ -493,31 +512,57 @@ export const ProductService = {
         return { isValid: allValid, items: validatedItems, errors };
     },
 
-    // Helper for image uploads
-    async handleImageUploads(files: File[], existingUrls: string[]): Promise<string[]> {
-
+    // Helper for image uploads — now with Sharp processing
+    async handleImageUploads(files: File[], existingUrls: string[]): Promise<{
+        urls: string[];
+        blurDataUrls: Record<string, string>;
+    }> {
         const supabase = await createAdminClient();
         const preservedUrls = Array.isArray(existingUrls) ? existingUrls.filter(Boolean) : [];
         const validFiles = files.filter(f => f && f.size > 0);
         const newUrls: string[] = [];
+        const blurMap: Record<string, string> = {};
 
         for (const file of validFiles) {
-            const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-            const fileName = `products/${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+            try {
+                // Process through Sharp: resize, convert to WebP, generate blur
+                const processed = await processImage(file, 'product');
 
-            const { error: uploadError } = await supabase.storage
-                .from('products')
-                .upload(fileName, file, { contentType: file.type, cacheControl: '31536000' });
+                const fileName = generateImageFilename('products');
 
-            if (uploadError) {
-                console.error('Upload error:', uploadError);
-                continue;
+                const { error: uploadError } = await supabase.storage
+                    .from('products')
+                    .upload(fileName, processed.buffer, {
+                        contentType: processed.contentType,
+                        cacheControl: '31536000',
+                    });
+
+                if (uploadError) {
+                    console.error('Upload error:', uploadError);
+                    continue;
+                }
+
+                const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(fileName);
+                newUrls.push(publicUrl);
+                blurMap[publicUrl] = processed.blurDataURL;
+            } catch (err) {
+                console.error('Image processing error:', err);
+                // Fallback: upload raw file if Sharp fails
+                const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+                const fileName = `products/${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+                const { error: uploadError } = await supabase.storage
+                    .from('products')
+                    .upload(fileName, file, { contentType: file.type, cacheControl: '31536000' });
+
+                if (!uploadError) {
+                    const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(fileName);
+                    newUrls.push(publicUrl);
+                }
             }
-
-            const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(fileName);
-            newUrls.push(publicUrl);
         }
 
-        return Array.from(new Set([...preservedUrls, ...newUrls]));
+        const allUrls = Array.from(new Set([...preservedUrls, ...newUrls]));
+
+        return { urls: allUrls, blurDataUrls: blurMap };
     },
 };

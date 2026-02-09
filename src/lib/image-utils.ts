@@ -1,37 +1,54 @@
 /**
- * Converts a File object to WebP format using:
- * 1. OffscreenCanvas in a Web Worker (if supported) for high performance without thread blocking.
- * 2. Fallback to main thread Canvas API (standard HTML5).
+ * Client-side image optimization before upload.
  * 
- * @param file The input file (image)
+ * Pipeline:
+ * 1. Resize to maxWidth (prevents uploading massive originals)
+ * 2. Convert to WebP (smaller than JPEG/PNG)
+ * 3. Use Web Worker with OffscreenCanvas when available (non-blocking)
+ * 4. Fallback to main thread Canvas API
+ * 
+ * Sharp on the server handles final optimization — this just reduces upload bandwidth.
+ * 
+ * @param file The input image file
  * @param quality Quality between 0 and 1 (default 0.8)
- * @returns Promise resolving to a new File object in WebP format
+ * @param maxWidth Maximum width in pixels (default 2400 — large enough for hero, small enough to not upload 6000px originals)
+ * @returns Promise resolving to an optimized WebP File
  */
-export async function convertFileToWebP(file: File, quality = 0.8): Promise<File> {
-    // If already webp, return as is
-    if (file.type === 'image/webp') return file;
+export async function convertFileToWebP(file: File, quality = 0.8, maxWidth = 2400): Promise<File> {
+    // If already webp and small enough, return as is
+    if (file.type === 'image/webp' && file.size < 500_000) return file;
 
     // Check for Worker and OffscreenCanvas support
     if (typeof window !== 'undefined' && window.Worker && typeof OffscreenCanvas !== 'undefined') {
         try {
-            return await convertWithWorker(file, quality);
+            return await convertWithWorker(file, quality, maxWidth);
         } catch (error) {
             console.warn('Web Worker conversion failed, falling back to main thread:', error);
-            return convertWithMainThread(file, quality);
+            return convertWithMainThread(file, quality, maxWidth);
         }
     } else {
-        return convertWithMainThread(file, quality);
+        return convertWithMainThread(file, quality, maxWidth);
     }
 }
 
-async function convertWithWorker(file: File, quality: number): Promise<File> {
+async function convertWithWorker(file: File, quality: number, maxWidth: number): Promise<File> {
     return new Promise(async (resolve, reject) => {
         try {
             // Create ImageBitmap from file (efficient and transferrable)
-            const bitmap = await createImageBitmap(file);
+            let bitmap = await createImageBitmap(file);
 
-            // Adjust worker path as needed based on Next.js setup
-            // This pattern works with standard Webpack/Next.js
+            // Resize if needed (createImageBitmap supports resize options)
+            if (bitmap.width > maxWidth) {
+                const ratio = maxWidth / bitmap.width;
+                const newHeight = Math.round(bitmap.height * ratio);
+                bitmap.close();
+                bitmap = await createImageBitmap(file, {
+                    resizeWidth: maxWidth,
+                    resizeHeight: newHeight,
+                    resizeQuality: 'high',
+                });
+            }
+
             const worker = new Worker(new URL('./image.worker.ts', import.meta.url));
 
             worker.onmessage = (e) => {
@@ -65,15 +82,24 @@ async function convertWithWorker(file: File, quality: number): Promise<File> {
     });
 }
 
-function convertWithMainThread(file: File, quality: number): Promise<File> {
+function convertWithMainThread(file: File, quality: number, maxWidth: number): Promise<File> {
     return new Promise((resolve, reject) => {
         const img = new Image();
         img.src = URL.createObjectURL(file);
 
         img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+
+            // Resize if needed
+            if (width > maxWidth) {
+                height = Math.round((height * maxWidth) / width);
+                width = maxWidth;
+            }
+
             const canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
+            canvas.width = width;
+            canvas.height = height;
 
             const ctx = canvas.getContext('2d');
             if (!ctx) {
@@ -81,7 +107,7 @@ function convertWithMainThread(file: File, quality: number): Promise<File> {
                 return;
             }
 
-            ctx.drawImage(img, 0, 0);
+            ctx.drawImage(img, 0, 0, width, height);
 
             canvas.toBlob((blob) => {
                 if (!blob) {

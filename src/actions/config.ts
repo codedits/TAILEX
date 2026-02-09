@@ -21,6 +21,7 @@ export async function updateStoreConfigAction(key: string, value: any) {
     }
 }
 import { createAdminClient, ensureBucketExists } from '@/lib/supabase/admin';
+import { processImage, generateImageFilename } from '@/lib/image-processor';
 
 export async function uploadSiteAsset(formData: FormData) {
     try {
@@ -30,17 +31,21 @@ export async function uploadSiteAsset(formData: FormData) {
         await ensureBucketExists('site-assets');
         const supabase = await createAdminClient();
 
-        const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-        const fileName = `hero/${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+        // Process through Sharp: resize for hero (up to 2560px), convert to WebP, generate blur
+        const processed = await processImage(file, 'hero');
+        const fileName = generateImageFilename('hero');
 
         const { error: uploadError } = await supabase.storage
             .from('site-assets')
-            .upload(fileName, file, { contentType: file.type, cacheControl: '31536000' });
+            .upload(fileName, processed.buffer, {
+                contentType: processed.contentType,
+                cacheControl: '31536000',
+            });
 
         if (uploadError) throw uploadError;
 
         const { data: { publicUrl } } = supabase.storage.from('site-assets').getPublicUrl(fileName);
-        return { success: true, url: publicUrl };
+        return { success: true, url: publicUrl, blurDataURL: processed.blurDataURL };
     } catch (error: any) {
         console.error('Upload Asset Error:', error);
         return { error: error.message || 'Failed to upload asset' };

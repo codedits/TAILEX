@@ -3,11 +3,12 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
+import { processImage, generateImageFilename } from '@/lib/image-processor'
 
 // ==========================================
 // IMAGE UPLOAD HELPER
 // ==========================================
-async function uploadHeroImage(file: File): Promise<string> {
+async function uploadHeroImage(file: File): Promise<{ url: string; blurDataURL: string }> {
   const supabase = await createAdminClient()
   
   if (!file || file.size === 0) {
@@ -18,13 +19,14 @@ async function uploadHeroImage(file: File): Promise<string> {
     throw new Error('File size exceeds 10MB limit')
   }
   
-  const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg'
-  const fileName = `hero/${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`
+  // Process through Sharp: resize for hero (up to 2560px), convert to WebP, generate blur
+  const processed = await processImage(file, 'hero');
+  const fileName = generateImageFilename('hero');
   
   const { error: uploadError } = await supabase.storage
     .from('collections')
-    .upload(fileName, file, {
-      contentType: file.type,
+    .upload(fileName, processed.buffer, {
+      contentType: processed.contentType,
       cacheControl: '31536000',
     })
   
@@ -36,7 +38,7 @@ async function uploadHeroImage(file: File): Promise<string> {
     .from('collections')
     .getPublicUrl(fileName)
   
-  return publicUrl
+  return { url: publicUrl, blurDataURL: processed.blurDataURL }
 }
 
 // ==========================================
@@ -60,25 +62,34 @@ export async function updateSiteConfig(formData: FormData) {
   
   // Handle hero image upload
   let heroImage = existingHeroImage || ''
+  let heroBlurDataURL = ''
   if (heroImageFile && heroImageFile.size > 0) {
     try {
-      heroImage = await uploadHeroImage(heroImageFile)
+      const result = await uploadHeroImage(heroImageFile)
+      heroImage = result.url
+      heroBlurDataURL = result.blurDataURL
     } catch (error) {
       console.error('Hero image upload error:', error)
       // Continue with existing image if upload fails
     }
   }
   
+  // Build hero config
+  const heroConfig: Record<string, any> = { 
+    heading: heroHeading, 
+    subheading: heroSub, 
+    image: heroImage,
+    ctaText: heroCtaText || 'Shop Now',
+    ctaLink: heroCtaLink || '/collection'
+  }
+  if (heroBlurDataURL) {
+    heroConfig.blurDataURL = heroBlurDataURL
+  }
+
   // Upsert Configs
   await supabase.from('site_config').upsert({
       key: 'hero',
-      value: { 
-        heading: heroHeading, 
-        subheading: heroSub, 
-        image: heroImage,
-        ctaText: heroCtaText || 'Shop Now',
-        ctaLink: heroCtaLink || '/collection'
-      }
+      value: heroConfig
   }, { onConflict: 'key' })
   
   // Only update theme if color is provided

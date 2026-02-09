@@ -9,13 +9,14 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import type { Collection, ApiResponse } from '@/lib/types'
+import { processImage, generateImageFilename } from '@/lib/image-processor'
 
 
 // ==========================================
 // IMAGE UPLOAD
 // ==========================================
 
-async function uploadImage(file: File): Promise<string> {
+async function uploadImage(file: File): Promise<{ url: string; blurDataURL: string }> {
   const supabase = await createAdminClient()
 
   if (!file || file.size === 0) {
@@ -26,13 +27,14 @@ async function uploadImage(file: File): Promise<string> {
     throw new Error('File size exceeds 6MB limit')
   }
 
-  const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg'
-  const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`
+  // Process through Sharp: resize, convert to WebP, generate blur
+  const processed = await processImage(file, 'collection');
+  const fileName = generateImageFilename('collections');
 
   const { error: uploadError } = await supabase.storage
     .from('collections')
-    .upload(fileName, file, {
-      contentType: file.type,
+    .upload(fileName, processed.buffer, {
+      contentType: processed.contentType,
       cacheControl: '31536000',
     })
 
@@ -44,8 +46,8 @@ async function uploadImage(file: File): Promise<string> {
         await ensureBucketExists('collections')
         const { error: retryErr } = await supabase.storage
           .from('collections')
-          .upload(fileName, file, {
-            contentType: file.type,
+          .upload(fileName, processed.buffer, {
+            contentType: processed.contentType,
             cacheControl: '31536000',
           })
 
@@ -64,7 +66,7 @@ async function uploadImage(file: File): Promise<string> {
     .from('collections')
     .getPublicUrl(fileName)
 
-  return publicUrl
+  return { url: publicUrl, blurDataURL: processed.blurDataURL }
 }
 
 async function deleteImageFromStorage(url: string) {
@@ -129,10 +131,13 @@ export async function createCollection(formData: FormData): Promise<ApiResponse<
     // Handle image uploads
     const imageFile = formData.get('imageFile') as File
     let imageUrl: string | null = null
+    let blurDataURL: string | null = null
 
     if (imageFile && imageFile.size > 0) {
       try {
-        imageUrl = await uploadImage(imageFile)
+        const result = await uploadImage(imageFile)
+        imageUrl = result.url
+        blurDataURL = result.blurDataURL
       } catch (error) {
         console.error('Image upload error:', error)
         return { error: 'Primary image upload failed' }
@@ -147,6 +152,7 @@ export async function createCollection(formData: FormData): Promise<ApiResponse<
         description: description?.trim() || null,
         image_url: imageUrl,
         is_visible: isVisible,
+        metadata: blurDataURL && imageUrl ? { blurDataUrls: { [imageUrl]: blurDataURL } } : undefined,
         seo_title: seoTitle?.trim() || null,
         seo_description: seoDescription?.trim() || null,
       })
@@ -216,27 +222,37 @@ export async function updateCollection(formData: FormData): Promise<ApiResponse<
 
     let imageUrl: string | null = existingImage || null
     let oldImageUrl: string | null = null
+    let blurDataURL: string | null = null
 
     if (imageFile && imageFile.size > 0) {
       try {
         oldImageUrl = existingImage || null
-        imageUrl = await uploadImage(imageFile)
+        const result = await uploadImage(imageFile)
+        imageUrl = result.url
+        blurDataURL = result.blurDataURL
       } catch (error) {
         return { error: 'Primary image upload failed' }
       }
     }
 
+    const updatePayload: Record<string, any> = {
+      title: title.trim(),
+      slug: slug.toLowerCase().trim(),
+      description: description?.trim() || null,
+      image_url: imageUrl,
+      is_visible: isVisible,
+      seo_title: seoTitle?.trim() || null,
+      seo_description: seoDescription?.trim() || null,
+    }
+
+    // Store blur in metadata if we uploaded a new image
+    if (blurDataURL && imageUrl) {
+      updatePayload.metadata = { blurDataUrls: { [imageUrl]: blurDataURL } }
+    }
+
     const { data, error } = await supabase
       .from('collections')
-      .update({
-        title: title.trim(),
-        slug: slug.toLowerCase().trim(),
-        description: description?.trim() || null,
-        image_url: imageUrl,
-        is_visible: isVisible,
-        seo_title: seoTitle?.trim() || null,
-        seo_description: seoDescription?.trim() || null,
-      })
+      .update(updatePayload)
       .eq('id', id)
       .select()
       .single()

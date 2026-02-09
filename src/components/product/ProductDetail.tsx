@@ -28,7 +28,12 @@ export default function ProductDetail({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-16">
         {/* Left Column: Media Gallery - ON TOP for mobile */}
         <div className="lg:col-span-7 order-1">
-          <ProductGallery images={distinctImages} title={product.title} />
+          <ProductGallery
+            images={distinctImages}
+            title={product.title}
+            blurDataUrl={((product.metadata as Record<string, unknown>)?.blurDataUrls as Record<string, string>)?.[distinctImages[0]] || null}
+            blurDataUrls={(product.metadata as Record<string, unknown>)?.blurDataUrls as Record<string, string> | undefined}
+          />
         </div>
 
         {/* Mobile Header (Vendor + Title) - BELOW gallery on mobile */}
