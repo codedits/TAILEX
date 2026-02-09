@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { createReview } from "@/lib/api/reviews";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 interface ReviewFormProps {
@@ -29,19 +29,15 @@ export default function ReviewForm({ productId, onSuccess, onCancel }: ReviewFor
         e.preventDefault();
 
         if (rating === 0) {
-            toast({
-                title: "Please select a rating",
+            toast.error("Please select a rating", {
                 description: "Click on the stars to rate this product",
-                variant: "destructive",
             });
             return;
         }
 
         if (!content.trim()) {
-            toast({
-                title: "Please write a review",
+            toast.error("Please write a review", {
                 description: "Share your experience with this product",
-                variant: "destructive",
             });
             return;
         }
@@ -59,16 +55,13 @@ export default function ReviewForm({ productId, onSuccess, onCancel }: ReviewFor
             });
 
             if (result.error) {
-                toast({
-                    title: "Error",
+                toast.error("Error", {
                     description: result.error,
-                    variant: "destructive",
                 });
                 return;
             }
 
-            toast({
-                title: "Review Submitted!",
+            toast.success("Review Submitted!", {
                 description: result.message || "Thank you for your review! It will be visible after approval.",
             });
 
@@ -81,10 +74,8 @@ export default function ReviewForm({ productId, onSuccess, onCancel }: ReviewFor
 
             onSuccess?.();
         } catch (error) {
-            toast({
-                title: "Error",
+            toast.error("Error", {
                 description: "Failed to submit review. Please try again.",
-                variant: "destructive",
             });
         } finally {
             setIsSubmitting(false);

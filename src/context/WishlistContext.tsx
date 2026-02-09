@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { getWishlist, addToWishlist, removeFromWishlist } from "@/lib/api/customers";
 import type { Product } from "@/lib/types";
 
@@ -73,10 +73,8 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
             if (result.error) {
                 // Revert optimistic update
                 setItems((prev) => prev.filter((item) => item.product_id !== productId));
-                toast({
-                    title: "Error",
+                toast.error("Error", {
                     description: result.error,
-                    variant: "destructive",
                 });
                 return;
             }
@@ -90,17 +88,14 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
                 );
             }
 
-            toast({
-                title: "Added to Wishlist",
+            toast.success("Added to Wishlist", {
                 description: productName ? `${productName} saved to your wishlist` : "Item saved to wishlist",
             });
         } catch (error) {
             // Revert optimistic update
             setItems((prev) => prev.filter((item) => item.product_id !== productId));
-            toast({
-                title: "Error",
+            toast.error("Error", {
                 description: "Failed to add to wishlist",
-                variant: "destructive",
             });
         }
     }, []);
@@ -119,16 +114,13 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
                 if (removedItem) {
                     setItems((prev) => [...prev, removedItem]);
                 }
-                toast({
-                    title: "Error",
+                toast.error("Error", {
                     description: result.error,
-                    variant: "destructive",
                 });
                 return;
             }
 
-            toast({
-                title: "Removed from Wishlist",
+            toast.success("Removed from Wishlist", {
                 description: productName ? `${productName} removed from wishlist` : "Item removed from wishlist",
             });
         } catch (error) {
@@ -136,10 +128,8 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
             if (removedItem) {
                 setItems((prev) => [...prev, removedItem]);
             }
-            toast({
-                title: "Error",
+            toast.error("Error", {
                 description: "Failed to remove from wishlist",
-                variant: "destructive",
             });
         }
     }, [items]);

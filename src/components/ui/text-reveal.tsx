@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { motion, useInView, Variants } from 'motion/react';
+import { motion, useInView, Variants } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 type RevealVariant =
@@ -256,15 +256,15 @@ export function TextReveal({
     duration === (originalVariant.visible as any).transition?.duration
       ? originalVariant
       : {
-          hidden: originalVariant.hidden,
-          visible: {
-            ...originalVariant.visible,
-            transition: {
-              ...((originalVariant.visible as Record<string, unknown>).transition as Record<string, unknown>),
-              duration,
-            },
+        hidden: originalVariant.hidden,
+        visible: {
+          ...originalVariant.visible,
+          transition: {
+            ...((originalVariant.visible as Record<string, unknown>).transition as Record<string, unknown>),
+            duration,
           },
-        };
+        },
+      };
 
   useEffect(() => {
     if (shouldAnimate && !hasAnimated) {

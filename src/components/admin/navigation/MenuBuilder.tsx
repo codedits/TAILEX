@@ -7,7 +7,7 @@ import { MenuItem } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Trash2, Plus, Save, GripVertical } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 
 interface MenuBuilderProps {
     initialMenu: {
@@ -21,7 +21,7 @@ interface MenuBuilderProps {
 export default function MenuBuilder({ initialMenu }: MenuBuilderProps) {
     const [menu, setMenu] = useState(initialMenu);
     const [loading, setLoading] = useState(false);
-    const { toast } = useToast();
+
     const router = useRouter();
 
     const handleAddItem = () => {
@@ -56,9 +56,9 @@ export default function MenuBuilder({ initialMenu }: MenuBuilderProps) {
         setLoading(false);
 
         if (res?.error) {
-            toast({ title: 'Error', description: res.error, variant: 'destructive' });
+            toast.error(res.error);
         } else {
-            toast({ title: 'Success', description: 'Menu saved successfully' });
+            toast.success('Menu saved successfully');
             router.refresh();
         }
     };

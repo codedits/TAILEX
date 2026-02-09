@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import Link from "next/link";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, Loader2, ChevronRight, ArrowLeft } from "lucide-react";
@@ -143,9 +143,9 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
         setIsProcessing(false);
         if (result.success) {
             setStep('otp');
-            toast({ title: "Code sent", description: "Please check your inbox." });
+            toast.success("Code sent", { description: "Please check your inbox." });
         } else {
-            toast({ title: "Error", description: result.error, variant: "destructive" });
+            toast.error("Error", { description: result.error });
         }
     };
 
@@ -158,7 +158,7 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
             setIsProcessing(false);
         } else {
             setIsProcessing(false);
-            toast({ title: "Invalid Code", description: "Try again.", variant: "destructive" });
+            toast.error("Invalid Code", { description: "Try again." });
         }
     };
 
@@ -191,7 +191,7 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
             let proofUrl = null;
             if (paymentMethod !== 'COD') {
                 if (!proofFile) {
-                    toast({ title: "Proof Missing", description: "Please upload payment receipt", variant: "destructive" });
+                    toast.error("Proof Missing", { description: "Please upload payment receipt" });
                     setIsProcessing(false);
                     return;
                 }
@@ -232,12 +232,12 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
                 clearCart();
                 router.push(`/account/orders/${result.orderId}`);
             } else {
-                toast({ title: "Order Failed", description: result.error || "Unknown error", variant: "destructive" });
+                toast.error("Order Failed", { description: result.error || "Unknown error" });
             }
 
         } catch (err) {
             console.error(err);
-            toast({ title: "Error", description: "Something went wrong processing your order.", variant: "destructive" });
+            toast.error("Error", { description: "Something went wrong processing your order." });
         } finally {
             setIsProcessing(false);
         }

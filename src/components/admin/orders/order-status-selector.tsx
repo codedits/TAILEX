@@ -8,7 +8,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { updateOrderStatus } from "@/lib/api/orders"; // Ensure this matches export in api/orders.ts
 import { Loader2 } from "lucide-react";
 import { OrderStatus } from "@/lib/types";
@@ -31,13 +31,13 @@ export function OrderStatusSelector({ orderId, currentStatus }: Props) {
             const result = await updateOrderStatus(orderId, { status: value as OrderStatus });
 
             if (result.error) {
-                toast({ title: "Update failed", description: result.error, variant: "destructive" });
+                toast.error("Update failed", { description: result.error });
                 setStatus(currentStatus); // Revert
             } else {
-                toast({ title: "Status Updated", description: `Order marked as ${value}` });
+                toast.success("Status Updated", { description: `Order marked as ${value}` });
             }
         } catch (e) {
-            toast({ title: "Error", description: "Failed to update status", variant: "destructive" });
+            toast.error("Error", { description: "Failed to update status" });
             setStatus(currentStatus);
         } finally {
             setLoading(false);

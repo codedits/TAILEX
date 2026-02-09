@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from "sonner";
 import { Eye } from 'lucide-react';
 
 interface PageBuilderProps {
@@ -19,7 +19,7 @@ interface PageBuilderProps {
 export default function PageBuilder({ initialPage }: PageBuilderProps) {
     const [page, setPage] = useState(initialPage);
     const [loading, setLoading] = useState(false);
-    const { toast } = useToast();
+
     const router = useRouter();
 
     const handleSave = async () => {
@@ -35,9 +35,9 @@ export default function PageBuilder({ initialPage }: PageBuilderProps) {
         setLoading(false);
 
         if (res?.error) {
-            toast({ title: 'Error', description: res.error, variant: 'destructive' });
+            toast.error(res.error);
         } else {
-            toast({ title: 'Success', description: 'Page saved successfully' });
+            toast.success('Page saved successfully');
             router.refresh();
         }
     };

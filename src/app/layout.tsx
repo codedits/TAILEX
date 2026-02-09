@@ -184,11 +184,11 @@ export default async function RootLayout({
         />
       </head>
       <body className={font.className}>
-        <Providers initialConfig={config}>
-          <SmoothScroll>
+        <SmoothScroll>
+          <Providers initialConfig={config}>
             {children}
-          </SmoothScroll>
-        </Providers>
+          </Providers>
+        </SmoothScroll>
       </body>
     </html>
   );

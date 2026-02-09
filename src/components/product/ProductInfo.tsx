@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useFormatCurrency } from "@/context/StoreConfigContext";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
 import { Product } from "@/lib/types";
 import { useRouter } from "next/navigation";
@@ -35,7 +35,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
     const [isPending, setIsPending] = useState(false);
     const [showSizeGuide, setShowSizeGuide] = useState(false);
 
-    const { toast } = useToast();
+
     const { addItem } = useCart();
 
     // Default Options - supports both legacy options and new clothing variants
@@ -124,16 +124,15 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         const missingOptions = options.filter(opt => !selectedOptions[opt.name]);
 
         if (missingOptions.length > 0) {
-            toast({
-                title: `Please select ${missingOptions[0].name}`,
-                variant: "destructive",
-            });
+            toast.error(`Please select ${missingOptions[0].name}`);
             return false;
         }
 
         if (isOutOfStock) {
-            toast({ title: "Out of Stock", variant: "destructive" });
-            return false;
+            if (isOutOfStock) {
+                toast.error("Out of Stock");
+                return false;
+            }
         }
 
         // Optimistic: Set pending state immediately
@@ -165,9 +164,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
 
     const toggleFavorite = () => {
         setIsFavorite(!isFavorite);
-        toast({
-            title: !isFavorite ? "Saved to Wishlist" : "Removed from Wishlist",
-        });
+        toast.success(!isFavorite ? "Saved to Wishlist" : "Removed from Wishlist");
     };
 
     return (

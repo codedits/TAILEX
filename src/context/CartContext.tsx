@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { validateCartItems } from "@/lib/api/products";
 import { CartValidationItem } from "@/lib/types";
 
@@ -73,16 +73,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                   setItems(mappedItems);
 
                   if (result.errors.length > 0) {
-                    toast({
-                      title: "Cart Updated",
-                      description: "Some items were sold out or changed price and have been updated.",
-                      variant: "destructive"
+                    toast.error("Cart Updated", {
+                      description: "Some items were sold out or changed price and have been updated."
                     });
                   } else if (result.items.length !== parsedItems.length) {
-                    toast({
-                      title: "Cart Updated",
-                      description: "Some unavailable items were removed.",
-                      variant: "destructive"
+                    toast.error("Cart Updated", {
+                      description: "Some unavailable items were removed."
                     });
                   }
                 }
@@ -128,10 +124,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const stock = await checkVariantStock(newItem.variantId, nextQty);
 
         if (!stock.isAvailable) {
-          toast({
-            title: "Out of Stock",
-            description: `Sorry, only ${stock.available} available.`,
-            variant: "destructive"
+          toast.error("Out of Stock", {
+            description: `Sorry, only ${stock.available} available.`
           });
           return;
         }
@@ -161,9 +155,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     if (openCart) {
       setIsCartOpen(true);
-      toast({
-        title: "Added to cart",
-        description: `${newItem.name} has been added to your cart.`,
+      toast.success("Added to cart", {
+        description: `${newItem.name} has been added to your cart.`
       });
     }
   };

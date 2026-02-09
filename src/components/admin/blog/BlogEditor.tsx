@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { Eye, Save, Loader2 } from "lucide-react";
 import {
     Select,
@@ -26,7 +26,7 @@ interface BlogEditorProps {
 export function BlogEditor({ initialPost }: BlogEditorProps) {
     const [post, setPost] = useState(initialPost);
     const [loading, setLoading] = useState(false);
-    const { toast } = useToast();
+
     const router = useRouter();
 
     const handleSave = async () => {
@@ -44,9 +44,9 @@ export function BlogEditor({ initialPost }: BlogEditorProps) {
         setLoading(false);
 
         if (result.error) {
-            toast({ title: "Error", description: result.error, variant: "destructive" });
+            toast.error(result.error);
         } else {
-            toast({ title: "Success", description: "Blog post saved successfully" });
+            toast.success("Blog post saved successfully");
             router.refresh();
         }
     };

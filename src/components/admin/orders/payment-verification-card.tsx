@@ -9,7 +9,7 @@ import { CheckCircle, XCircle, AlertCircle, ExternalLink, CreditCard } from "luc
 import Image from "next/image";
 import { useState } from "react";
 import { updateOrderStatusAction } from "@/app/admin/(dashboard)/orders/actions";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 interface PaymentVerificationCardProps {
     order: Order;
@@ -30,12 +30,12 @@ export function PaymentVerificationCard({ order }: PaymentVerificationCardProps)
             );
 
             if (result.success) {
-                toast({ title: approved ? "Payment Verified" : "Payment Rejected" });
+                toast.success(approved ? "Payment Verified" : "Payment Rejected");
             } else {
-                toast({ title: "Error", description: result.error, variant: "destructive" });
+                toast.error(result.error);
             }
         } catch (error) {
-            toast({ title: "Error", description: "Something went wrong", variant: "destructive" });
+            toast.error("Something went wrong");
         } finally {
             setIsUpdating(false);
         }

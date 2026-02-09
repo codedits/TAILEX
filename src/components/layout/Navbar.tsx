@@ -8,8 +8,8 @@ import { ShoppingBag, Menu, X, User, Instagram, Facebook } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/UserAuthContext";
-import { CartSheet } from "@/components/layout/CartSheet";
-import { SearchModal } from "@/components/layout/SearchModal";
+const CartSheet = dynamic(() => import("@/components/layout/CartSheet").then(mod => mod.CartSheet), { ssr: false });
+const SearchModal = dynamic(() => import("@/components/layout/SearchModal").then(mod => mod.SearchModal), { ssr: false });
 import { MenuItem } from "@/lib/types";
 
 // Lazy-load the mobile menu to reduce initial bundle size

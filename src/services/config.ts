@@ -53,19 +53,27 @@ export const StoreConfigService = {
         async (): Promise<StoreConfig> => {
             const supabase = await createAdminClient();
 
-            // 1. Fetch Key-Value Config
-            const { data, error } = await supabase.from('site_config').select('key, value');
-            if (error) throw new AppError(error.message, 'DB_ERROR');
-
-            // 2. Fetch Navigation Menus
-            const { data: navMenus } = await supabase.from('navigation_menus').select('*');
-
-            // 3. Fetch Collections to inject into navigation
-            const { data: collections } = await supabase
+            const createConfigPromise = supabase.from('site_config').select('key, value');
+            const createNavPromise = supabase.from('navigation_menus').select('*');
+            const createCollectionsPromise = supabase
                 .from('collections')
                 .select('title, slug')
                 .eq('is_visible', true)
                 .order('sort_order', { ascending: true });
+
+            const [
+                { data: configData, error: configError },
+                { data: navMenus },
+                { data: collections }
+            ] = await Promise.all([
+                createConfigPromise,
+                createNavPromise,
+                createCollectionsPromise
+            ]);
+
+            if (configError) throw new AppError(configError.message, 'DB_ERROR');
+
+            const data = configData || [];
 
             const dbConfig: any = {};
             data.forEach(row => {

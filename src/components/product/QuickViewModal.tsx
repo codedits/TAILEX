@@ -8,7 +8,7 @@ import { Product } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useFormatCurrency } from "@/context/StoreConfigContext";
 import { useCart } from "@/context/CartContext";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface QuickViewModalProps {
@@ -20,7 +20,7 @@ interface QuickViewModalProps {
 export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps) {
     const formatCurrency = useFormatCurrency();
     const { addItem } = useCart();
-    const { toast } = useToast();
+
 
     const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
     const [quantity, setQuantity] = useState(1);
@@ -51,8 +51,10 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
         // Validate options
         const missingOptions = product.options?.filter(opt => !selectedOptions[opt.name]) || [];
         if (missingOptions.length > 0) {
-            toast({ title: `Please select ${missingOptions[0].name}`, variant: "destructive" });
-            return;
+            if (missingOptions.length > 0) {
+                toast.error(`Please select ${missingOptions[0].name}`);
+                return;
+            }
         }
 
         setIsPending(true);

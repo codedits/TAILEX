@@ -4,11 +4,9 @@ import { useState, useEffect, useCallback } from 'react';
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/autoplay';
-import 'swiper/css/pagination';
+import useEmblaCarousel from 'embla-carousel-react';
+import Autoplay from 'embla-carousel-autoplay';
+import { cn } from "@/lib/utils";
 
 export type HeroSlide = {
     id: string;
@@ -31,14 +29,6 @@ type HeroCarouselProps = {
 
 const DEFAULT_HERO_IMAGE = "https://framerusercontent.com/images/T0Z10o3Yaf4JPrk9f5lhcmJJwno.jpg";
 
-/**
- * HeroCarousel - Swiper Version
- * 
- * Logic:
- * - Swiper handles the background image sliding (robust, touch-friendly).
- * - Framer Motion handles the text fade/slide animations (premium feel).
- * - State is synced via onSlideChange.
- */
 const HeroCarousel = ({
     slides,
     brandName = "TAILEX",
@@ -48,14 +38,27 @@ const HeroCarousel = ({
     defaultSubheading
 }: HeroCarouselProps) => {
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [isClient, setIsClient] = useState(false);
     const [imageLoaded, setImageLoaded] = useState(false);
     const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
 
-    // Hydration flag
+    // Embla setup
+    const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, duration: 20 }, [
+        Autoplay({ delay: autoPlayInterval, stopOnInteraction: false })
+    ]);
+
+    const onSelect = useCallback(() => {
+        if (!emblaApi) return;
+        setCurrentIndex(emblaApi.selectedScrollSnap());
+    }, [emblaApi]);
+
     useEffect(() => {
-        setIsClient(true);
-    }, []);
+        if (!emblaApi) return;
+        onSelect();
+        emblaApi.on('select', onSelect);
+        return () => {
+            emblaApi.off('select', onSelect);
+        };
+    }, [emblaApi, onSelect]);
 
     const handleImageError = useCallback((slideId: string) => {
         setImageErrors((prev) => new Set(prev).add(slideId));
@@ -68,35 +71,7 @@ const HeroCarousel = ({
         return slide.image;
     };
 
-    if (slides.length === 0) {
-        return (
-            <section className="relative w-full h-[100vh] overflow-hidden">
-                <div className="absolute inset-0 h-full w-full bg-white">
-                    <Image
-                        src={DEFAULT_HERO_IMAGE}
-                        alt={brandName}
-                        fill
-                        className="object-cover object-top"
-                        priority
-                        quality={85}
-                        sizes="100vw"
-                    />
-                    <div
-                        className="absolute inset-0 bg-black"
-                        style={{ opacity: overlayOpacity }}
-                    />
-                </div>
-                <div className="relative flex flex-col items-center justify-center w-full h-[100vh] text-center z-10">
-                    <p className="text-white/90 text-xs tracking-[0.2em] uppercase font-bold">
-                        {defaultSubheading || "SPRING/SUMMER '26"}
-                    </p>
-                    <h1 className="text-white text-5xl md:text-8xl font-medium tracking-tight mt-4">
-                        {defaultHeading || brandName}
-                    </h1>
-                </div>
-            </section>
-        );
-    }
+    if (slides.length === 0) return null;
 
     const currentSlide = slides[currentIndex];
 
@@ -109,40 +84,21 @@ const HeroCarousel = ({
 
     return (
         <section className="relative w-full h-[100vh] overflow-hidden bg-white group">
-            {/* Swiper Slider - Background Images */}
-            <div className="absolute inset-0 h-full w-full z-0">
-                <Swiper
-                    modules={[Autoplay, Pagination]}
-                    slidesPerView={1}
-                    loop={slides.length > 1}
-                    speed={800}
-                    autoplay={{
-                        delay: autoPlayInterval,
-                        disableOnInteraction: false,
-                    }}
-                    pagination={{
-                        clickable: true,
-                        el: '.hero-pagination',
-                        bulletClass: 'inline-block w-2 h-2 rounded-full bg-white/40 mx-1 cursor-pointer transition-all duration-300',
-                        bulletActiveClass: '!bg-white !w-6',
-                    }}
-                    onSlideChange={(swiper) => setCurrentIndex(swiper.realIndex)}
-                    className="h-full w-full"
-                >
+            {/* Embla Slider - Background Images */}
+            <div className="absolute inset-0 h-full w-full z-0" ref={emblaRef}>
+                <div className="flex h-full">
                     {slides.map((slide, index) => {
                         const effectiveImage = getEffectiveImage(slide);
                         return (
-                            <SwiperSlide key={`${slide.id}-${index}`}>
-                                <div className="relative w-full h-full">
-                                    {/* Mobile Image (Optimized) */}
-                                    {slide.mobileImage && !imageErrors.has(slide.id) && (
+                            <div key={`${slide.id}-${index}`} className="relative w-full h-full flex-[0_0_100%]">
+                                {/* Mobile Image */}
+                                {slide.mobileImage && !imageErrors.has(slide.id) && (
+                                    <div className="md:hidden absolute inset-0 overflow-hidden">
                                         <motion.div
-                                            initial={index === 0 ? { opacity: 1, scale: 1.1 } : { opacity: 1, scale: 1 }}
-                                            animate={index === 0 ? {
-                                                scale: imageLoaded ? 1 : 1.1
-                                            } : {}}
+                                            initial={{ opacity: 0, scale: 1.1 }}
+                                            animate={index === currentIndex ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 1.1 }}
                                             transition={{ duration: 1.5, ease: [0.33, 1, 0.68, 1] }}
-                                            className="absolute inset-0"
+                                            className="absolute inset-0 w-full h-full"
                                         >
                                             <Image
                                                 src={slide.mobileImage}
@@ -158,16 +114,16 @@ const HeroCarousel = ({
                                                 onError={() => handleImageError(slide.id)}
                                             />
                                         </motion.div>
-                                    )}
+                                    </div>
+                                )}
 
-                                    {/* Desktop Image (Optimized) */}
+                                {/* Desktop Image */}
+                                <div className={cn("absolute inset-0 overflow-hidden", slide.mobileImage && !imageErrors.has(slide.id) && "hidden md:block")}>
                                     <motion.div
-                                        initial={index === 0 ? { opacity: 1, scale: 1.1 } : { opacity: 1, scale: 1 }}
-                                        animate={index === 0 ? {
-                                            scale: imageLoaded ? 1 : 1.1
-                                        } : {}}
+                                        initial={{ opacity: 0, scale: 1.1 }}
+                                        animate={index === currentIndex ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 1.1 }}
                                         transition={{ duration: 1.5, ease: [0.33, 1, 0.68, 1] }}
-                                        className={`absolute inset-0 ${slide.mobileImage && !imageErrors.has(slide.id) ? 'hidden md:block' : ''}`}
+                                        className="absolute inset-0 w-full h-full"
                                     >
                                         <Image
                                             src={effectiveImage}
@@ -183,21 +139,19 @@ const HeroCarousel = ({
                                             onError={() => handleImageError(slide.id)}
                                         />
                                     </motion.div>
-
-                                    <motion.div
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: imageLoaded ? overlayOpacity : 0 }}
-                                        transition={{ duration: 1.2, ease: "easeInOut" }}
-                                        className="absolute inset-0 bg-black z-[5]"
-                                    />
                                 </div>
-                            </SwiperSlide>
+
+                                <div
+                                    className="absolute inset-0 bg-black z-[5]"
+                                    style={{ opacity: imageLoaded ? overlayOpacity : 0, transition: 'opacity 1.2s ease-in-out' }}
+                                />
+                            </div>
                         );
                     })}
-                </Swiper>
+                </div>
             </div>
 
-            {/* Content Layer - Text Animation (Decoupled from Swiper) */}
+            {/* Content Layer */}
             <div className="absolute inset-0 flex flex-col items-center justify-center w-full px-6 md:px-10 z-30 text-center h-full max-w-[1920px] mx-auto pointer-events-none">
                 <AnimatePresence mode="wait">
                     <motion.div
@@ -208,21 +162,17 @@ const HeroCarousel = ({
                         variants={textVariants}
                         className="flex flex-col items-center justify-center space-y-4 pointer-events-auto"
                     >
-                        {/* Subheading */}
                         <p className="text-white/90 text-xs tracking-[0.2em] uppercase font-bold">
-                            {currentSlide.subheading || defaultSubheading || "SPRING/SUMMER '26"}
+                            {currentSlide?.subheading || defaultSubheading || "SPRING/SUMMER '26"}
                         </p>
 
-                        {/* Heading */}
                         <h1 className="text-white text-5xl md:text-8xl font-medium tracking-tight">
-                            {currentSlide.heading || defaultHeading || brandName}
+                            {currentSlide?.heading || defaultHeading || brandName}
                         </h1>
 
-                        {/* Center CTA */}
-                        {/* Always show Shop Now or custom CTA if provided */}
                         <div className="pt-4">
                             <Link
-                                href={currentSlide.ctaLink || "/shop"}
+                                href={currentSlide?.ctaLink || "/shop"}
                                 className="inline-block px-8 py-3 rounded-full border border-white/50 text-white text-[10px] md:text-xs font-semibold tracking-[0.15em] hover:bg-white hover:text-black transition-all duration-300 uppercase"
                             >
                                 Shop Now
@@ -231,16 +181,16 @@ const HeroCarousel = ({
                     </motion.div>
                 </AnimatePresence>
 
-                {/* Bottom: Slide-specific tagline/link - Also Animated */}
+                {/* Bottom CTA */}
                 <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-40 w-full flex justify-center pointer-events-auto">
                     <AnimatePresence mode="wait">
-                        {currentSlide.ctaText && (
+                        {currentSlide?.ctaText && (
                             <motion.div
                                 key={`bottom-${currentIndex}`}
                                 initial={{ opacity: 0, y: 15 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
-                                transition={{ duration: 0.7, delay: 0.5, ease: [0.33, 1, 0.68, 1] }} // Slight delay for staggering
+                                transition={{ duration: 0.7, delay: 0.5, ease: [0.33, 1, 0.68, 1] }}
                             >
                                 <Link
                                     href={currentSlide.ctaLink || "/shop"}
@@ -249,27 +199,40 @@ const HeroCarousel = ({
                                     <span className="text-xs md:text-sm tracking-[0.15em] uppercase font-medium">
                                         {currentSlide.ctaText}
                                     </span>
-                                    <svg
-                                        className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                    </svg>
+                                    <ArrowRightIcon className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" />
                                 </Link>
                             </motion.div>
                         )}
                     </AnimatePresence>
                 </div>
 
-                {/* Swiper Pagination Bullets */}
+                {/* Pagination */}
                 {slides.length > 1 && (
-                    <div className="hero-pagination absolute bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center" />
+                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center gap-2 pointer-events-auto">
+                        {slides.map((_, index) => (
+                            <button
+                                key={index}
+                                onClick={() => emblaApi?.scrollTo(index)}
+                                className={cn(
+                                    "rounded-full transition-all duration-300",
+                                    index === currentIndex ? "bg-white w-6 h-2" : "bg-white/40 w-2 h-2 hover:bg-white/60"
+                                )}
+                                aria-label={`Go to slide ${index + 1}`}
+                            />
+                        ))}
+                    </div>
                 )}
             </div>
         </section>
     );
 };
+
+function ArrowRightIcon(props: React.SVGProps<SVGSVGElement>) {
+    return (
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+        </svg>
+    );
+}
 
 export default HeroCarousel;

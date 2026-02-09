@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 export interface UserProfile {
     id: string;
@@ -105,7 +105,7 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
                 queryClient.setQueryData(['auth-session'], data.user);
             }
 
-            toast({ title: "Welcome!", description: `Signed in as ${data.user.email}` });
+            toast.success("Welcome!", { description: `Signed in as ${data.user.email}` });
 
             return { success: true };
         } catch (error) {
@@ -126,7 +126,7 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
         } finally {
             // Clear React Query cache
             queryClient.setQueryData(['auth-session'], null);
-            toast({ title: "Logged out", description: "You have been signed out." });
+            toast.message("Logged out", { description: "You have been signed out." });
         }
     };
 

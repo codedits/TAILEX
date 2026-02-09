@@ -13,7 +13,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Loader2, XCircle } from "lucide-react";
 
@@ -52,23 +52,18 @@ export function OrderCancelButton({ orderId, orderStatus, createdAt }: OrderCanc
             const data = await response.json();
 
             if (data.success) {
-                toast({
-                    title: "Order Cancelled",
+                toast.success("Order Cancelled", {
                     description: "Your order has been cancelled and stock has been restored.",
                 });
                 router.refresh();
             } else {
-                toast({
-                    title: "Cancellation Failed",
+                toast.error("Cancellation Failed", {
                     description: data.error,
-                    variant: "destructive"
                 });
             }
         } catch (error) {
-            toast({
-                title: "Error",
+            toast.error("Error", {
                 description: "Something went wrong. Please try again.",
-                variant: "destructive"
             });
         } finally {
             setIsLoading(false);

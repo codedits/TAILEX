@@ -321,19 +321,21 @@
     animation-delay: 500ms;
   }
 
-  /* Ken Burns Effect */
-  @keyframes ken-burns {
-    0% {
-      transform: scale(1);
+  /* Shopify-style Hero Entrance (Scale + Fade) */
+  @keyframes image-entrance {
+    from {
+      opacity: 0;
+      transform: scale(1.1);
     }
 
-    100% {
-      transform: scale(1.15);
+    to {
+      opacity: 1;
+      transform: scale(1);
     }
   }
 
-  .animate-ken-burns {
-    animation: ken-burns 20s ease-out infinite alternate;
+  .animate-image-entrance {
+    animation: image-entrance 2s cubic-bezier(0.33, 1, 0.68, 1) forwards;
   }
 
   /* Section fade-in for Suspense streamed content */

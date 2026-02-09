@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { updateReviewStatus, deleteReview } from "@/lib/api/reviews";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 interface Review {
     id: string;
@@ -62,9 +62,9 @@ export function ReviewsTableClient({ reviews }: ReviewsTableClientProps) {
     const handleApprove = async (reviewId: string) => {
         const result = await updateReviewStatus(reviewId, 'approved');
         if (result.error) {
-            toast({ title: "Error", description: result.error, variant: "destructive" });
+            toast.error(result.error);
         } else {
-            toast({ title: "Review Approved", description: "The review is now visible on the product page." });
+            toast.success("Review Approved", { description: "The review is now visible on the product page." });
             router.refresh();
         }
     };
@@ -72,9 +72,9 @@ export function ReviewsTableClient({ reviews }: ReviewsTableClientProps) {
     const handleReject = async (reviewId: string) => {
         const result = await updateReviewStatus(reviewId, 'rejected');
         if (result.error) {
-            toast({ title: "Error", description: result.error, variant: "destructive" });
+            toast.error(result.error);
         } else {
-            toast({ title: "Review Rejected", description: "The review has been rejected." });
+            toast.success("Review Rejected", { description: "The review has been rejected." });
             router.refresh();
         }
     };
@@ -83,9 +83,9 @@ export function ReviewsTableClient({ reviews }: ReviewsTableClientProps) {
         if (!confirm("Are you sure you want to delete this review? This cannot be undone.")) return;
         const result = await deleteReview(reviewId);
         if (result.error) {
-            toast({ title: "Error", description: result.error, variant: "destructive" });
+            toast.error(result.error);
         } else {
-            toast({ title: "Review Deleted", description: "The review has been permanently deleted." });
+            toast.success("Review Deleted", { description: "The review has been permanently deleted." });
             router.refresh();
         }
     };

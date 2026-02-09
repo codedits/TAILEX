@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Printer, Package } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 interface OrderActionsProps {
     orderId: string;
@@ -19,8 +19,7 @@ export function OrderActions({ orderId, trackingNumber }: OrderActionsProps) {
             // In a real app, you'd generate the carrier URL
             window.open(`https://www.google.com/search?q=${trackingNumber}`, '_blank');
         } else {
-            toast({
-                title: "Tracking Unavailable",
+            toast("Tracking Unavailable", {
                 description: "Your order is being processed. Tracking will be available once shipped.",
             });
         }

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2, ArrowLeft, ArrowRight } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useAuth } from "@/context/UserAuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -21,7 +21,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
+
   const router = useRouter();
   const { sendOTP, verifyOTP, isAuthenticated, isLoading } = useAuth();
 
@@ -42,9 +42,9 @@ export default function LoginPage() {
 
     if (result.success) {
       setStep("otp");
-      toast({ title: "Code sent", description: "Check your email." });
+      toast.success("Code sent", { description: "Check your email." });
     } else {
-      toast({ title: "Error", description: result.error, variant: "destructive" });
+      toast.error(result.error);
     }
   };
 
@@ -59,7 +59,7 @@ export default function LoginPage() {
     if (result.success) {
       router.push('/account');
     } else {
-      toast({ title: "Invalid code", description: "Please try again.", variant: "destructive" });
+      toast.error("Invalid code", { description: "Please try again." });
       setOtp("");
     }
   };

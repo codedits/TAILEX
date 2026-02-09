@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: '64mb',
     },
+    optimizePackageImports: ['lucide-react', 'date-fns', 'lodash'],
   },
 
   // Image optimization config

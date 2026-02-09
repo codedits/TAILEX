@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import Image from "next/image";
 import Link from "next/link";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { createOrderAction } from "@/actions/order";
 import { useRouter } from "next/navigation";
 import { User } from "@supabase/supabase-js";
@@ -47,10 +47,8 @@ export default function CheckoutForm({ user }: CheckoutFormProps) {
                 if (item.variant_id) {
                     const stock = await checkVariantStock(item.variant_id, item.quantity);
                     if (!stock.isAvailable) {
-                        toast({
-                            title: "Stock Issue",
-                            description: `Item with variant ID ${item.variant_id} has only ${stock.available} left.`,
-                            variant: "destructive"
+                        toast.error("Stock Issue", {
+                            description: `Item with variant ID ${item.variant_id} has only ${stock.available} left.`
                         });
                         setIsProcessing(false);
                         return;
@@ -61,10 +59,8 @@ export default function CheckoutForm({ user }: CheckoutFormProps) {
             console.error("Stock pre-validation failed", e);
             // Proceed? Or block? 
             // Let's block to be safe.
-            toast({
-                title: "System Error",
-                description: "Failed to validate stock. Please try again.",
-                variant: "destructive"
+            toast.error("System Error", {
+                description: "Failed to validate stock. Please try again."
             });
             setIsProcessing(false);
             return;
@@ -99,8 +95,7 @@ export default function CheckoutForm({ user }: CheckoutFormProps) {
 
             if (result.success) {
                 clearCart();
-                toast({
-                    title: "Order placed successfully!",
+                toast.success("Order placed successfully!", {
                     description: `Order #${result.orderId} created.`,
                 });
                 // Redirect to Account order detail if logged in, else Home
@@ -110,17 +105,13 @@ export default function CheckoutForm({ user }: CheckoutFormProps) {
                     router.push("/");
                 }
             } else {
-                toast({
-                    title: "Order failed",
-                    description: result.error,
-                    variant: "destructive"
+                toast.error("Order failed", {
+                    description: result.error
                 });
             }
         } catch (err) {
-            toast({
-                title: "Error",
-                description: "Something went wrong.",
-                variant: "destructive"
+            toast.error("Error", {
+                description: "Something went wrong."
             });
         } finally {
             setIsProcessing(false);

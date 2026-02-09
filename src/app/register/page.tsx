@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2, ArrowLeft, ArrowRight, Mail, ShieldCheck, UserPlus } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 // import { sendOTP, verifyOTP } from "@/app/login/actions"; // REMOVED
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -44,7 +44,7 @@ export default function RegisterPage() {
   const [step, setStep] = useState<"email" | "otp">("email");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
+
   const router = useRouter();
   const { sendOTP, verifyOTP } = useAuth(); // ADDED
 
@@ -64,14 +64,14 @@ export default function RegisterPage() {
       const result = await sendOTP(data.email);
 
       if (!result.success) { // CHANGED: check 'success' instead of 'error' presence
-        toast({ title: "Error", description: result.error, variant: "destructive" });
+        toast.error(result.error);
       } else {
         setEmail(data.email);
         setStep("otp");
-        toast({ title: "Code sent!", description: "Check your email for the verification code." });
+        toast.success("Code sent!", { description: "Check your email for the verification code." });
       }
     } catch (error) {
-      toast({ title: "Error", description: "Something went wrong sending the code.", variant: "destructive" });
+      toast.error("Something went wrong sending the code.");
     } finally {
       setLoading(false);
     }
@@ -83,16 +83,16 @@ export default function RegisterPage() {
       const result = await verifyOTP(email, data.code);
 
       if (!result.success) {
-        toast({ title: "Invalid Code", description: result.error, variant: "destructive" });
+        toast.error("Invalid Code", { description: result.error });
         otpForm.setValue("code", "");
       } else {
-        toast({ title: "Account Created", description: "Welcome to TAILEX." });
+        toast.success("Account Created", { description: "Welcome to TAILEX." });
         // Redirect is handled by context state or logic, but for register we go to /account or /shop
         // Actually verifyOTP in context doesn't redirect. We do it here.
         router.push('/account');
       }
     } catch (error) {
-      toast({ title: "Error", description: "Failed to verify code.", variant: "destructive" });
+      toast.error("Failed to verify code.");
     } finally {
       setLoading(false);
     }
