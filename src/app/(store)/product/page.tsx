@@ -1,14 +1,14 @@
 import Navbar from "@/components/layout/Navbar";
 
 import ProductFeed from "@/components/product/ProductFeed";
-import { createClient } from "@/lib/supabase/server";
+import { createStaticClient } from "@/lib/supabase/static";
 import { type Product } from "@/lib/types";
 import { getNavigation, getBrandConfig, getFooterConfig, getSocialConfig } from "@/lib/theme";
 
 export const revalidate = 300; // 5 minutes - aggressive cache
 
 export default async function ProductPage() {
-  const supabase = await createClient();
+  const supabase = createStaticClient();
   const [navItems, brand, footerConfig, socialConfig, productsResult] = await Promise.all([
     getNavigation('main-menu'),
     getBrandConfig(),

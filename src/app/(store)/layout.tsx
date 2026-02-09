@@ -3,6 +3,7 @@ import Footer from '@/components/layout/Footer';
 import { StoreConfigService } from '@/services/config';
 import { FooterSkeleton } from '@/components/skeletons/FooterSkeleton';
 import { StoreProviders } from '@/components/layout/StoreProviders';
+import { SmoothScroll } from '@/components/layout/SmoothScroll';
 
 export default async function StoreLayout({
     children,
@@ -16,14 +17,16 @@ export default async function StoreLayout({
 
     return (
         <StoreProviders>
-            <div className="flex flex-col min-h-screen">
-                <div className="flex-grow">
-                    {children}
+            <SmoothScroll>
+                <div className="flex flex-col min-h-screen">
+                    <div className="flex-grow">
+                        {children}
+                    </div>
+                    <Suspense fallback={<FooterSkeleton />}>
+                        <Footer config={footerConfig} brandName={brand.name} social={socialConfig} />
+                    </Suspense>
                 </div>
-                <Suspense fallback={<FooterSkeleton />}>
-                    <Footer config={footerConfig} brandName={brand.name} social={socialConfig} />
-                </Suspense>
-            </div>
+            </SmoothScroll>
         </StoreProviders>
     );
 }

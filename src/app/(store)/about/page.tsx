@@ -1,12 +1,11 @@
 import { Suspense } from "react";
-import { createClient } from "@/lib/supabase/server";
 import { getBrandConfig, getNavigation, getFooterConfig, getSocialConfig, getHeroConfig, getHomepageLayout } from "@/lib/theme";
 import Navbar from "@/components/layout/Navbar";
 
 import Image from "next/image";
 import style2 from "@/assets/style-2.jpg";
 
-export const revalidate = 300;
+export const revalidate = 86400; // SSG: 24 hours — static marketing page
 
 export default async function AboutPage() {
   const [brand, navItems, footerConfig, socialConfig, heroConfig, layout] = await Promise.all([

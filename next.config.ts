@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
-  // Increase timeout for static generation (fixes 500 errors on build)
+  // Increase timeout for static generation (ISR/SSG pages)
   staticPageGenerationTimeout: 120,
 
   // Server Actions config
@@ -11,12 +11,23 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: '64mb',
     },
-    optimizePackageImports: ['lucide-react', 'date-fns', 'lodash'],
+    // Tree-shake heavy packages — only import what's used
+    optimizePackageImports: [
+      'lucide-react',
+      'date-fns',
+      'lodash',
+      'recharts',
+      '@radix-ui/react-icons',
+      'framer-motion',
+      'motion',
+      '@dnd-kit/core',
+      '@dnd-kit/sortable',
+      '@dnd-kit/utilities',
+    ],
   },
 
   // Image optimization config
   images: {
-    // Allow images from any HTTPS source (Supabase, external CDNs, etc.)
     remotePatterns: [
       {
         protocol: 'https',
@@ -35,21 +46,78 @@ const nextConfig: NextConfig = {
         hostname: '**.supabase.co',
       },
     ],
-    // Optimize image formats
+    // Optimize image formats — AVIF first (smallest), WebP fallback
     formats: ['image/avif', 'image/webp'],
-    // Higher starting values to prevent low-resolution fetches on mobile
+    // Responsive device sizes for srcset generation
     deviceSizes: [400, 640, 750, 828, 1080, 1200, 1440, 1920, 2048, 2560],
     imageSizes: [64, 128, 256, 384, 512, 640],
-    qualities: [75, 80, 85, 90, 95, 100],
     // Cache optimized images for 1 year
     minimumCacheTTL: 31536000,
   },
 
-  // Enable compression
+  // Enable gzip compression
   compress: true,
 
-  // Optimize for production
+  // Strip X-Powered-By header
   poweredByHeader: false,
+
+  // HTTP headers for CDN caching & security
+  async headers() {
+    return [
+      {
+        // Cache static assets aggressively (fonts, images, CSS, JS chunks)
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Cache optimized images
+        source: '/_next/image',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Public static files
+        source: '/images/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, stale-while-revalidate=604800',
+          },
+        ],
+      },
+      {
+        // Security headers for all routes
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -2,7 +2,7 @@ import Navbar from "@/components/layout/Navbar";
 
 import Link from "next/link";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/server";
+import { createStaticClient } from "@/lib/supabase/static";
 import { getNavigation, getBrandConfig, getFooterConfig, getSocialConfig } from "@/lib/theme";
 
 export const revalidate = 300; // 5 minutes - aggressive cache
@@ -36,7 +36,7 @@ const fallbackArticles = [
 ];
 
 export default async function NewsPage() {
-  const supabase = await createClient();
+  const supabase = createStaticClient();
 
   const [navItems, brand, footerConfig, socialConfig, postsResult] = await Promise.all([
     getNavigation('main-menu'),

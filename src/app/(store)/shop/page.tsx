@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { createClient } from "@/lib/supabase/server";
+import { createStaticClient } from "@/lib/supabase/static";
 import Navbar from "@/components/layout/Navbar";
 
 import AsyncProductGrid from "@/components/collection/AsyncProductGrid";
@@ -16,16 +16,15 @@ import {
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-export const revalidate = 60;
+export const revalidate = 120; // ISR: 2 minutes — cached shop listing
 
 export const metadata = {
     title: "Shop All | TAILEX",
     description: "Browse our complete collection of premium fashion items.",
 };
 
-export default async function ShopPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
-    const supabase = await createClient();
-    const { q } = await searchParams;
+export default async function ShopPage() {
+    const supabase = createStaticClient();
 
     const collectionsListPromise = supabase
         .from('collections')
@@ -46,18 +45,11 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
 
     const allCollections = (collectionsListResult.data || []) as Collection[];
 
-    // Fetch All Products (Streamed)
-    let productsQuery = supabase
+    // Fetch All Products (ISR cached)
+    const productsPromise = supabase
         .from('products')
         .select('*')
-        .eq('status', 'active');
-
-    if (q) {
-        const trimmedQ = q.trim();
-        productsQuery = productsQuery.or(`title.ilike.%${trimmedQ}%,description.ilike.%${trimmedQ}%,product_type.ilike.%${trimmedQ}%`);
-    }
-
-    const productsPromise = productsQuery
+        .eq('status', 'active')
         .order('created_at', { ascending: false })
         .limit(20)
         .then(res => (res.data || []) as Product[]);

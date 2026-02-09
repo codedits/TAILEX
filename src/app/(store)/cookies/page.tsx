@@ -2,6 +2,8 @@ import { getBrandConfig, getNavigation, getFooterConfig, getSocialConfig } from 
 import Navbar from "@/components/layout/Navbar";
 
 
+export const revalidate = 86400; // SSG-like: 24 hours — static legal page
+
 export const metadata = {
     title: "Cookie Policy",
     description: "Learn about how we use cookies on our website.",

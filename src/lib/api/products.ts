@@ -169,6 +169,7 @@ export async function createProduct(formData: FormData): Promise<ApiResponse<Pro
 
     revalidatePath('/admin/products');
     revalidatePath('/collection');
+    revalidatePath('/shop');
     revalidatePath('/');
     (revalidateTag as any)('products', 'max');
     (revalidateTag as any)('collections', 'max');
@@ -202,6 +203,7 @@ export async function updateProduct(formData: FormData): Promise<ApiResponse<Pro
     revalidatePath(`/admin/products/${id}`);
     revalidatePath(`/product/${productData.slug}`);
     revalidatePath('/collection');
+    revalidatePath('/shop');
     revalidatePath('/');
     (revalidateTag as any)('products', 'max');
     (revalidateTag as any)('collections', 'max');

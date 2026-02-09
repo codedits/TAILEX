@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { createClient } from "@/lib/supabase/server";
 import Navbar from "@/components/layout/Navbar";
 
 import AsyncProductGrid from "@/components/collection/AsyncProductGrid";
@@ -7,6 +6,7 @@ import MobileCollectionList from "@/components/shop/MobileCollectionList";
 import { Product, Collection } from "@/lib/types";
 import { notFound } from "next/navigation";
 import { StoreConfigService } from "@/services/config";
+import { createStaticClient } from "@/lib/supabase/static";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -18,17 +18,28 @@ import {
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-export const revalidate = 60; // ISR: Revalidate every 60 seconds
+export const revalidate = 120; // ISR: 2 minutes — collections change less frequently
+
+// Pre-build all visible collection pages at deploy time
+export async function generateStaticParams() {
+  const supabase = createStaticClient();
+  const { data } = await supabase
+    .from('collections')
+    .select('slug')
+    .eq('is_visible', true);
+  return (data || []).map((c) => ({ slug: c.slug }));
+}
+
+export const dynamicParams = true;
 
 type Props = {
     params: Promise<{ slug: string }>;
-    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 // High-end store: Generate metadata for SEO
 export async function generateMetadata({ params }: Props) {
     const { slug } = await params;
-    const supabase = await createClient();
+    const supabase = createStaticClient();
 
     const { data: collection } = await supabase
         .from('collections')
@@ -46,9 +57,9 @@ export async function generateMetadata({ params }: Props) {
     };
 }
 
-export default async function CollectionDetailPage({ params, searchParams }: Props) {
+export default async function CollectionDetailPage({ params }: Props) {
     const { slug } = await params;
-    const supabase = await createClient();
+    const supabase = createStaticClient();
 
     const collectionPromise = supabase
         .from('collections')

@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import { manrope, inter, playfair, spaceMono, getFont } from "@/lib/fonts";
 import "./globals.css";
 import { Providers } from "@/components/layout/Providers";
-import { SmoothScroll } from "@/components/layout/SmoothScroll";
-import { getBaseUrl, hexToHslValues } from "@/lib/utils";
+import { hexToHslValues } from "@/lib/utils";
 import { StoreConfigService } from "@/services/config";
 
 // ============================================
@@ -85,9 +83,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
+  // REMOVED: cookies() call was forcing ALL pages into dynamic rendering,
+  // defeating ISR/SSG. The theme is hardcoded to 'light' anyway.
 
-  // Fetch Config from DB (Cached)
+  // Fetch Config from DB (Cached via unstable_cache in StoreConfigService)
   const config = await StoreConfigService.getStoreConfig();
 
   // Force Light Mode for Storefront (Admin handles its own dark mode)
@@ -184,11 +183,9 @@ export default async function RootLayout({
         />
       </head>
       <body className={font.className}>
-        <SmoothScroll>
-          <Providers initialConfig={config}>
-            {children}
-          </Providers>
-        </SmoothScroll>
+        <Providers initialConfig={config}>
+          {children}
+        </Providers>
       </body>
     </html>
   );

@@ -4,6 +4,8 @@ import Navbar from "@/components/layout/Navbar";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+export const revalidate = 86400; // SSG-like: 24 hours — static marketing page
+
 export const metadata = {
     title: "Careers",
     description: "Join our team and help us build the future of streetwear.",

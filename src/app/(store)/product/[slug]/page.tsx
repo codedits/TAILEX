@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createStaticClient } from "@/lib/supabase/static";
 import Navbar from "@/components/layout/Navbar";
 
 import ProductDetail from "@/components/product/ProductDetail";
@@ -20,13 +20,26 @@ import { Metadata } from "next";
 
 export const revalidate = 60; // Revalidate every minute
 
+// Pre-build all active product pages at deploy time (Shopify-style)
+export async function generateStaticParams() {
+  const supabase = createStaticClient();
+  const { data } = await supabase
+    .from('products')
+    .select('slug')
+    .eq('status', 'active');
+  return (data || []).map((p) => ({ slug: p.slug }));
+}
+
+// Allow new products added after build to be ISR-rendered on demand
+export const dynamicParams = true;
+
 type Props = {
   params: Promise<{ slug: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = await createClient();
+  const supabase = createStaticClient();
 
   // Fetch product for metadata
   const { data: product } = await supabase
@@ -67,7 +80,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
-  const supabase = await createClient();
+  const supabase = createStaticClient();
 
   // Fetch product and all config in parallel
   const [productResult, config] = await Promise.all([

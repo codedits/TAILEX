@@ -2,9 +2,8 @@ import Navbar from "@/components/layout/Navbar";
 
 import { CollectionCard } from "@/components/collection/CollectionCard";
 import CollectionBrowser from "@/components/collection/CollectionBrowser";
-import { createClient } from "@/lib/supabase/server";
+import { createStaticClient } from "@/lib/supabase/static";
 import { StoreConfigService } from "@/services/config";
-import { getProducts } from "@/lib/api/products";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -27,13 +26,15 @@ export const metadata: Metadata = {
 };
 
 export default async function CollectionPage() {
-  const supabase = await createClient();
+  const supabase = createStaticClient();
 
   // Fetch all config and data in parallel
   const [config, productsResult, collectionsResult] = await Promise.all([
     StoreConfigService.getStoreConfig(),
-    // Use shared API to ensure consistency (e.g. status='active')
-    getProducts({ status: 'active', limit: 1000, orderBy: 'created_at', order: 'desc' }),
+    supabase
+      .from('products')
+      .select('id, category_id')
+      .eq('status', 'active'),
     supabase
       .from('collections')
       .select('id, title, slug, image_url, description')
@@ -46,7 +47,7 @@ export default async function CollectionPage() {
   const socialConfig = config.social;
   const navItems = config.navigation.main;
 
-  const safeProducts = (productsResult.data?.data || []) as Product[];
+  const safeProducts = (productsResult.data || []) as Pick<Product, 'id' | 'category_id'>[];
   const safeCollections = (collectionsResult.data || []) as Collection[];
 
   // Calculate product count per collection

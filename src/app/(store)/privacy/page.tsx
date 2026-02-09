@@ -2,6 +2,8 @@ import { getBrandConfig, getNavigation, getFooterConfig, getSocialConfig } from 
 import Navbar from "@/components/layout/Navbar";
 
 
+export const revalidate = 86400; // SSG-like: 24 hours — static legal page
+
 export const metadata = {
     title: "Privacy Policy",
     description: "Read our privacy policy to understand how we handle your data.",

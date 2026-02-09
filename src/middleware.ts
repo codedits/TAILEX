@@ -1,5 +1,4 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { updateSession } from '@/lib/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
     // 1. Admin Protection Logic
@@ -17,19 +16,22 @@ export async function middleware(request: NextRequest) {
         }
     }
 
-    // 2. Supabase Session Logic (Preserve existing auth flow)
-    return await updateSession(request)
+    // 2. Lightweight pass-through for all other routes
+    // NOTE: Supabase auth.getUser() was removed here because the app uses
+    // custom JWT auth (not Supabase Auth). The old updateSession() call
+    // made a network request on EVERY page load, blocking ISR/SSG caching
+    // and adding 100-300ms latency. Custom auth is validated in API routes
+    // and server components via getAuthUser() from lib/auth.ts.
+    return NextResponse.next()
 }
 
 export const config = {
     matcher: [
         /*
-         * Match all request paths except for the ones starting with:
-         * - _next/static (static files)
-         * - _next/image (image optimization files)
-         * - favicon.ico (favicon file)
-         * - public (public assets)
+         * Only run middleware on admin routes (the only routes that need protection).
+         * All other routes pass through without middleware overhead, allowing
+         * ISR/SSG pages to be served directly from CDN cache.
          */
-        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+        '/admin/:path*',
     ],
 }

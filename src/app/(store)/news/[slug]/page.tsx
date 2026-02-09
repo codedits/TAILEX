@@ -1,7 +1,22 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getLatestPosts } from "@/lib/theme";
+import { createStaticClient } from "@/lib/supabase/static";
 import { BlogPost } from "@/lib/types";
+
+export const revalidate = 300; // ISR: 5 minutes — blog content changes infrequently
+
+// Pre-build all published blog post pages
+export async function generateStaticParams() {
+    const supabase = createStaticClient();
+    const { data } = await supabase
+        .from('blog_posts')
+        .select('slug')
+        .eq('status', 'published');
+    return (data || []).map((p) => ({ slug: p.slug }));
+}
+
+export const dynamicParams = true;
 
 // Mock function to get a single post - in real app would verify slug
 // Since we don't have a direct "getPostBySlug" in theme yet, we simulate or reuse getLatestPosts

@@ -3,6 +3,8 @@ import Navbar from "@/components/layout/Navbar";
 
 import { Mail, Phone, MapPin } from "lucide-react";
 
+export const revalidate = 86400; // SSG-like: 24 hours — static marketing page
+
 export const metadata = {
     title: "Contact Us",
     description: "Get in touch with us for any inquiries or support.",

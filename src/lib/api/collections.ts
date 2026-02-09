@@ -160,6 +160,7 @@ export async function createCollection(formData: FormData): Promise<ApiResponse<
 
     revalidatePath('/admin/collections')
     revalidatePath('/collection')
+    revalidatePath('/shop')
     revalidatePath('/')
 
     return { data: data as Collection }
@@ -252,6 +253,7 @@ export async function updateCollection(formData: FormData): Promise<ApiResponse<
     revalidatePath('/admin/collections')
     revalidatePath(`/admin/collections/${id}`)
     revalidatePath('/collection')
+    revalidatePath('/shop')
     revalidatePath('/')
 
     return { data: data as Collection }
@@ -291,6 +293,7 @@ export async function deleteCollection(id: string): Promise<ApiResponse<null>> {
 
     revalidatePath('/admin/collections')
     revalidatePath('/collection')
+    revalidatePath('/shop')
     revalidatePath('/')
 
     return { message: 'Collection deleted successfully' }
