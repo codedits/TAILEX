@@ -23,7 +23,8 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
   const { cartCount, setIsCartOpen } = useCart();
   const { isAuthenticated } = useAuth();
   const pathname = usePathname();
-  const isHome = pathname === "/";
+  // Ensure isHome is true for root and handles potential trailing slashes
+  const isHome = pathname === "/" || pathname === "" || pathname === "/index";
 
   const defaultLinks: MenuItem[] = [
     { label: "HOME", url: "/" },
@@ -38,9 +39,9 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
     <>
       <CartSheet />
       <header
-        className={`w-full z-50 transition-all duration-300 border-b group/nav ${isHome
-          ? "absolute top-full bg-transparent text-white border-white/70 hover:bg-white hover:text-black hover:border-black"
-          : "relative bg-white text-black border-black shadow-sm"
+        className={`w-full z-50 transition-all duration-500 border-b group/nav ${isHome
+          ? "absolute top-full left-0 bg-transparent text-white border-white/10 hover:bg-white hover:text-black hover:border-black"
+          : "relative bg-white text-black border-neutral-200 shadow-sm"
           }`}
       >
         {/* Row 1: Social Icons (Desktop) */}

@@ -74,18 +74,29 @@ async function deleteImageFromStorage(url: string) {
   try {
     const supabase = await createAdminClient()
 
-    // Extract filename from URL
-    // Standard Supabase public URL: https://[project-ref].supabase.co/storage/v1/object/public/[bucket]/[filename]
-    const parts = url.split('/')
-    const fileName = parts[parts.length - 1]
+    // Extract filename/path from URL
+    // URL: https://.../storage/v1/object/public/collections/filename.webp
+    const urlObj = new URL(url)
+    const parts = urlObj.pathname.split('/')
+    const bucketIndex = parts.indexOf('collections') // Find bucket name in path
 
-    if (fileName) {
+    let storagePath = ''
+    if (bucketIndex !== -1 && bucketIndex < parts.length - 1) {
+      storagePath = parts.slice(bucketIndex + 1).join('/')
+    } else {
+      // Fallback to filename
+      storagePath = parts[parts.length - 1]
+    }
+
+    if (storagePath) {
       const { error } = await supabase.storage
         .from('collections')
-        .remove([fileName])
+        .remove([storagePath])
 
       if (error) {
-        console.error(`Failed to delete image ${fileName} from storage:`, error.message)
+        console.error(`Failed to delete image ${storagePath} from collections:`, error.message)
+      } else {
+        console.log(`Deleted old collection image: ${storagePath}`)
       }
     }
   } catch (err) {

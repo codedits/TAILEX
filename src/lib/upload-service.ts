@@ -230,18 +230,14 @@ async function uploadFileWithProgress(
 
 // ─── Delete uploaded image from storage ──────────────────────────────────
 
+import { deleteImage } from '@/app/actions/delete-image';
+
 export async function deleteUploadedImage(remoteUrl: string): Promise<boolean> {
-  try {
-    const response = await fetch('/api/uploads/cleanup', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: remoteUrl }),
-    });
-    return response.ok;
-  } catch {
-    console.error('Failed to delete uploaded image:', remoteUrl);
-    return false;
+  const result = await deleteImage(remoteUrl);
+  if (!result.success) {
+    console.error('Failed to delete uploaded image:', result.error);
   }
+  return result.success;
 }
 
 // ─── Preview URL management ──────────────────────────────────────────────
