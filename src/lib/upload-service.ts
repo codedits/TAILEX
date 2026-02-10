@@ -150,55 +150,82 @@ export function getUploadQueue(maxConcurrent = 3): UploadQueue {
 
 // ─── Core upload function with XHR for progress ─────────────────────────
 
-import { uploadImage, type UploadResponse } from '@/app/actions/upload-image';
+import { optimizeImage, type OptimizeResult } from '@/app/actions/optimize-image';
+import { createClient } from '@/lib/supabase/client';
 
-// ─── Core upload function with Server Action ─────────────────────────────
+// ─── Direct Upload + Server Optimization ─────────────────────────────────
 
 async function uploadFileWithProgress(
   file: File,
   signal: AbortSignal,
   onProgress: (progress: number) => void,
 ): Promise<UploadResult> {
-  return new Promise<UploadResult>((resolve, reject) => {
-    // Server Actions don't support XHR-style progress yet, so we simulate it
-    let progress = 0;
-    const interval = setInterval(() => {
-      // Fast start, slow finish simulation
-      if (progress < 40) progress += 10;
-      else if (progress < 70) progress += 5;
-      else if (progress < 90) progress += 2;
+  const supabase = createClient();
 
-      if (progress > 90) progress = 90; // Hold at 90% until done
-      onProgress(progress);
-    }, 300);
+  // 1. Generate unique filename for raw upload
+  // format: raw/{timestamp}-{random}.{ext}
+  const fileExt = file.name.split('.').pop();
+  const rawFileName = `raw/${Date.now()}-${Math.random().toString(36).substring(2, 10)}.${fileExt}`;
 
-    const formData = new FormData();
-    formData.append('file', file);
+  // 2. Simulate Upload Progress (Supabase JS SDK doesn't expose progress events easily yet)
+  // We split progress: 0-50% = Uploading, 50-90% = Processing, 100% = Done
+  let progress = 0;
+  const progressInterval = setInterval(() => {
+    if (progress < 50) progress += 5; // Uploading phase
+    else if (progress < 90) progress += 1; // Processing phase (slower)
 
-    // Call the Server Action
-    uploadImage(formData)
-      .then((response: UploadResponse) => {
-        clearInterval(interval);
+    if (progress > 90) progress = 90;
+    onProgress(progress);
+  }, 200);
 
-        if ('error' in response) {
-          reject(new Error(response.error));
-        } else {
-          onProgress(100);
-          resolve(response.data as UploadResult);
-        }
-      })
-      .catch((err) => {
-        clearInterval(interval);
-        console.error('Upload Action failed:', err);
-        reject(new Error(err.message || 'Upload failed'));
+  try {
+    // 3. Upload Raw File directly to Supabase Storage
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('products')
+      .upload(rawFileName, file, {
+        cacheControl: '3600',
+        upsert: false,
       });
 
-    // Handle abort
-    signal.addEventListener('abort', () => {
-      clearInterval(interval);
-      reject(new DOMException('Upload cancelled', 'AbortError'));
-    });
-  });
+    if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`);
+
+    // Jump to 50% (Upload done, starting optimization)
+    progress = 50;
+    onProgress(50);
+
+    // Checks for abort before potentially expensive server action
+    if (signal.aborted) throw new DOMException('Upload cancelled', 'AbortError');
+
+    // 4. Trigger Server-Side Optimization
+    // This action downloads the raw file, processes it, saves optimized version, and deletes raw.
+    const result: OptimizeResult = await optimizeImage(rawFileName);
+
+    if (result.error) throw new Error(result.error);
+    if (!result.data) throw new Error('No data returned from optimization');
+
+    // Finish
+    clearInterval(progressInterval);
+    onProgress(100);
+    return result.data;
+
+  } catch (err) {
+    clearInterval(progressInterval);
+
+    // Try to cleanup raw file if optimization failed (best effort)
+    // We can fire-and-forget this cleanup
+    if (err instanceof Error && !err.message.includes('Upload failed')) {
+      supabase.storage.from('products').remove([rawFileName]).then(({ error }) => {
+        if (error) console.error('Failed to cleanup raw file:', error);
+      });
+    }
+
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new DOMException('Upload cancelled', 'AbortError');
+    }
+
+    console.error('Upload pipeline failed:', err);
+    throw new Error(err instanceof Error ? err.message : 'Upload failed');
+  }
 }
 
 // ─── Delete uploaded image from storage ──────────────────────────────────
