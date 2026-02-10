@@ -21,13 +21,13 @@ import sharp from 'sharp';
 // ─── Configuration ───────────────────────────────────────────────────────
 export const IMAGE_CONFIG = {
   /** Max width for product/collection images stored in Supabase */
-  PRODUCT_MAX_WIDTH: 1920,
+  PRODUCT_MAX_WIDTH: 2500,
   /** Max width for hero/full-bleed images */
   HERO_MAX_WIDTH: 2560,
   /** Max width for thumbnails / card images */
   CARD_MAX_WIDTH: 1200,
   /** WebP quality for stored source images (Next.js re-encodes on delivery) */
-  WEBP_QUALITY: 80,
+  WEBP_QUALITY: 90,
   /** LQIP blur placeholder width (tiny — base64 encoded inline) */
   BLUR_WIDTH: 20,
   /** LQIP blur JPEG quality */

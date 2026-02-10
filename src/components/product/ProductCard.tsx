@@ -36,7 +36,7 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
   const primaryBlur = blurDataUrls?.[imagePrimary] || undefined;
 
   // Standardized e-commerce grid sizes for optimal performance
-  const sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 300px";
+  const sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw";
 
   // Badges Logic
   const isSale = !!(sale_price && sale_price < price);
@@ -133,7 +133,7 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
                 fill
                 priority={priority}
                 sizes={sizes}
-                quality={75}
+                quality={90}
                 placeholder={primaryBlur ? "blur" : "empty"}
                 blurDataURL={primaryBlur}
                 onLoad={() => setImageLoaded(true)}
@@ -148,7 +148,7 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
                 alt={`${title} alternate view`}
                 fill
                 sizes={sizes}
-                quality={75}
+                quality={90}
                 className="object-cover lg:group-hover:scale-105 transition-transform duration-700"
               />
             </div>

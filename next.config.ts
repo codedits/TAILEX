@@ -55,6 +55,8 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 300, 384, 450, 512, 640],
     // Cache optimized images for 1 year
     minimumCacheTTL: 31536000,
+    // Explicitly allow qualities used in the app
+    qualities: [75, 90, 100],
   },
 
   // Enable gzip compression

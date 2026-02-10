@@ -72,6 +72,7 @@ export default function ProductGallery({ images, title, blurDataUrl, blurDataUrl
                             fill
                             className="object-cover"
                             sizes="96px"
+                            quality={90}
                         />
                     </button>
                 ))}
@@ -91,7 +92,8 @@ export default function ProductGallery({ images, title, blurDataUrl, blurDataUrl
                                     fill
                                     className="object-cover"
                                     priority={idx === 0}
-                                    sizes="(max-width: 768px) 100vw, 800px"
+                                    sizes="(max-width: 768px) 100vw, 90vw"
+                                    quality={100}
                                     placeholder={blurDataUrls?.[img] || (idx === 0 && blurDataUrl) ? "blur" : "empty"}
                                     blurDataURL={blurDataUrls?.[img] || (idx === 0 ? blurDataUrl ?? undefined : undefined)}
                                 />
@@ -123,7 +125,8 @@ export default function ProductGallery({ images, title, blurDataUrl, blurDataUrl
                             transformOrigin: `${mousePos.x}% ${mousePos.y}%`
                         } : undefined}
                         priority
-                        sizes="(max-width: 1200px) 50vw, 800px"
+                        sizes="(max-width: 1200px) 100vw, 50vw"
+                        quality={100}
                         placeholder={blurDataUrls?.[images[selectedIndex]] || blurDataUrl ? "blur" : "empty"}
                         blurDataURL={blurDataUrls?.[images[selectedIndex]] || blurDataUrl || undefined}
                     />

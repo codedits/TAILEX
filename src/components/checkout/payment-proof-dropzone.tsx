@@ -5,7 +5,7 @@ import { useState, useCallback } from "react";
 import { Upload, X, FileText, CheckCircle, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { compressImage } from "@/lib/image-compressor";
+
 import { Button } from "@/components/ui/button";
 
 // Since I didn't see react-dropzone in package.json, I'll use a custom implementation or standard input if I can't verifying it.
@@ -31,7 +31,7 @@ export function PaymentProofDropzone({
 }: PaymentProofDropzoneProps) {
     const [isDragging, setIsDragging] = useState(false);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [isCompressing, setIsCompressing] = useState(false);
+
 
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
@@ -46,22 +46,10 @@ export function PaymentProofDropzone({
     const processFile = async (file: File) => {
         if (!file.type.startsWith("image/")) return;
 
-        setIsCompressing(true);
-        try {
-            // Create local preview immediately
-            const objectUrl = URL.createObjectURL(file);
-            setPreviewUrl(objectUrl);
-
-            // Compress
-            const compressed = await compressImage(file);
-            onFileSelect(compressed);
-        } catch (err) {
-            console.error("Compression failed", err);
-            // Fallback to original
-            onFileSelect(file);
-        } finally {
-            setIsCompressing(false);
-        }
+        // Create local preview immediately
+        const objectUrl = URL.createObjectURL(file);
+        setPreviewUrl(objectUrl);
+        onFileSelect(file);
     };
 
     const handleDrop = (e: React.DragEvent) => {
@@ -144,11 +132,7 @@ export function PaymentProofDropzone({
 
                 <div className="flex flex-col items-center gap-2">
                     <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center mb-2">
-                        {isCompressing ? (
-                            <Loader2 className="w-5 h-5 text-neutral-400 animate-spin" />
-                        ) : (
-                            <Upload className="w-5 h-5 text-neutral-400" />
-                        )}
+                        <Upload className="w-5 h-5 text-neutral-400" />
                     </div>
                     <p className="text-sm font-medium text-neutral-900">
                         Click to upload payment screenshot

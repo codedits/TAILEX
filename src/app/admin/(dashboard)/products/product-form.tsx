@@ -17,7 +17,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { productSchema, type ProductFormValues } from "@/lib/validations/product";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
-import { convertFileToWebP } from '@/lib/image-utils';
 import { ImageCropper } from "@/components/ui/image-cropper";
 import { useStoreConfig } from "@/context/StoreConfigContext";
 import { VariantConfigSection } from "@/components/admin/products/VariantConfigSection";
@@ -184,9 +183,18 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
       const remainingSlots = 10 - images.length;
       const fileArray = Array.from(files).slice(0, remainingSlots);
 
-      const newItems: ImageItem[] = fileArray.map(file => ({
+      // Validate file size (10MB limit)
+      const validFiles = fileArray.filter(file => {
+        if (file.size > 10 * 1024 * 1024) {
+          toast.error(`File ${file.name} exceeds 10MB limit`);
+          return false;
+        }
+        return true;
+      });
+
+      const newItems: ImageItem[] = validFiles.map(file => ({
         id: Math.random().toString(36).substr(2, 9),
-        url: URL.createObjectURL(file),
+        url: URL.createObjectURL(file), // Preview uses original
         file,
         isExisting: false
       }));
@@ -217,29 +225,11 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
 
     // ... (inside onSubmit)
 
-    // Handle files with WebP conversion
-    // We do this before startTransition to avoid blocking the UI update too much, 
-    // although for large files it might take a moment.
-    try {
-      const newFilesItems = images.filter(img => !img.isExisting && img.file);
-      if (newFilesItems.length > 0) {
-        toast.loading("Optimizing images...");
-        const convertedFiles = await Promise.all(
-          newFilesItems.map(item => convertFileToWebP(item.file!, 0.85))
-        );
-        convertedFiles.forEach(file => {
-          formData.append('imageFiles', file);
-        });
-        toast.dismiss();
-      }
-    } catch (error) {
-      console.error("Image conversion failed", error);
-      toast.error("Image optimization failed, using originals");
-      // Fallback
-      images.filter(img => !img.isExisting && img.file).forEach(item => {
-        formData.append('imageFiles', item.file!);
-      });
-    }
+    // Handle files - Send ORIGINAL files to server (server handles optimization)
+    const newFilesItems = images.filter(img => !img.isExisting && img.file);
+    newFilesItems.forEach(item => {
+      formData.append('imageFiles', item.file!);
+    });
 
     // Existing images (now preserved in order)
     const existingImages = images.filter(img => img.isExisting).map(img => img.url);
