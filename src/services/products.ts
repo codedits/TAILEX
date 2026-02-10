@@ -518,6 +518,7 @@ export const ProductService = {
         blurDataUrls: Record<string, string>;
     }> {
         const supabase = await createAdminClient();
+        console.log('handleImageUploads: Starting', { fileCount: files.length, existingCount: existingUrls.length });
         const preservedUrls = Array.isArray(existingUrls) ? existingUrls.filter(Boolean) : [];
         const validFiles = files.filter(f => f && f.size > 0);
         const newUrls: string[] = [];
@@ -526,7 +527,13 @@ export const ProductService = {
         for (const file of validFiles) {
             try {
                 // Process through Sharp: resize, convert to WebP, generate blur
+                console.log(`Processing file: ${file.name}, size: ${file.size}, type: ${file.type}`);
                 const processed = await processImage(file, 'product');
+                console.log('Image processed successfully', {
+                    originalSize: file.size,
+                    processedSize: processed.buffer.length,
+                    contentType: processed.contentType
+                });
 
                 const fileName = generateImageFilename('products');
 
@@ -541,6 +548,7 @@ export const ProductService = {
                     console.error('Upload error:', uploadError);
                     continue;
                 }
+                console.log('Upload successful:', fileName);
 
                 const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(fileName);
                 newUrls.push(publicUrl);
@@ -564,5 +572,117 @@ export const ProductService = {
         const allUrls = Array.from(new Set([...preservedUrls, ...newUrls]));
 
         return { urls: allUrls, blurDataUrls: blurMap };
+    },
+
+    /**
+     * Create product with pre-uploaded image URLs (background upload path).
+     * Images are already processed and stored — we just save references.
+     */
+    async createProductWithUrls(
+        data: Partial<Product>,
+        imageUrls: string[],
+        blurDataUrls: Record<string, string>
+    ): Promise<Product> {
+        const supabase = await createAdminClient();
+
+        // Validate slug uniqueness
+        if (data.slug) {
+            const { data: existing, error: existsError } = await supabase
+                .from('products')
+                .select('id')
+                .eq('slug', data.slug)
+                .maybeSingle();
+
+            if (existsError && existsError.code !== 'PGRST116') {
+                throw new AppError('Failed to validate product slug', 'DB_ERROR', 500);
+            }
+
+            if (existing) {
+                throw AppError.badRequest(`Product with slug "${data.slug}" already exists`);
+            }
+        }
+
+        // Merge blur placeholders into metadata
+        const existingBlurs = (data.metadata as Record<string, unknown>)?.blurDataUrls as Record<string, string> || {};
+        const productData = normalizeProductPayload({
+            ...data,
+            images: imageUrls,
+            metadata: {
+                ...(data.metadata || {}),
+                blurDataUrls: { ...existingBlurs, ...blurDataUrls },
+            },
+        });
+        productData.created_at = new Date().toISOString();
+
+        const { data: newProduct, error } = await supabase
+            .from('products')
+            .insert(productData)
+            .select()
+            .single();
+
+        if (error) {
+            if (error.code === '23505') {
+                throw AppError.badRequest('Product with this slug or SKU already exists');
+            }
+            throw new AppError(error.message, 'DB_ERROR', 500);
+        }
+        return newProduct as Product;
+    },
+
+    /**
+     * Update product with pre-uploaded image URLs (background upload path).
+     * Images are already processed and stored — we just update references.
+     */
+    async updateProductWithUrls(
+        id: string,
+        data: Partial<Product>,
+        imageUrls: string[],
+        blurDataUrls: Record<string, string>
+    ): Promise<Product> {
+        const supabase = await createAdminClient();
+
+        // Validate slug uniqueness if changing
+        if (data.slug) {
+            const { data: existing, error: existsError } = await supabase
+                .from('products')
+                .select('id')
+                .eq('slug', data.slug)
+                .neq('id', id)
+                .maybeSingle();
+
+            if (existsError && existsError.code !== 'PGRST116') {
+                throw new AppError('Failed to validate product slug', 'DB_ERROR', 500);
+            }
+
+            if (existing) {
+                throw AppError.badRequest(`Another product with slug "${data.slug}" already exists`);
+            }
+        }
+
+        // Merge blur placeholders into metadata
+        const existingBlurs = (data.metadata as Record<string, unknown>)?.blurDataUrls as Record<string, string> || {};
+        const productData = normalizeProductPayload({
+            ...data,
+            images: imageUrls,
+            metadata: {
+                ...(data.metadata || {}),
+                blurDataUrls: { ...existingBlurs, ...blurDataUrls },
+            },
+        });
+
+        const { data: updatedProduct, error } = await supabase
+            .from('products')
+            .update(productData)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            if (error.code === '23505') {
+                throw AppError.badRequest('Product with this slug or SKU already exists');
+            }
+            throw new AppError(error.message, 'DB_ERROR', 500);
+        }
+        return updatedProduct as Product;
     },
 };

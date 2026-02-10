@@ -2,134 +2,59 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { updateProduct, createProduct } from "./actions";
-import { useTransition, useState } from "react";
+import { useTransition, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import Image from "next/image";
-import { X, Upload, Loader2, Save, Crop as CropIcon, ChevronUp, ChevronDown, GripVertical } from "lucide-react";
+import { Loader2, Save } from "lucide-react";
 import type { Product, Collection } from "@/lib/types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { productSchema, type ProductFormValues } from "@/lib/validations/product";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
-import { ImageCropper } from "@/components/ui/image-cropper";
 import { useStoreConfig } from "@/context/StoreConfigContext";
 import { VariantConfigSection } from "@/components/admin/products/VariantConfigSection";
+import { ProductImageUploader } from "@/components/admin/products/ProductImageUploader";
+import { useImageUpload } from "@/hooks/use-image-upload";
 import type { ProductVariant } from "@/lib/types";
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  rectSortingStrategy,
-  useSortable
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { useState } from "react";
 
 type ProductFormProps = {
   initialData?: Partial<Product>
   collections?: Collection[]
 }
 
-type ImageItem = {
-  id: string;
-  url: string;
-  file?: File;
-  isExisting: boolean;
-};
-
-function SortableImage({
-  item,
-  index,
-  onRemove,
-  onCrop
-}: {
-  item: ImageItem;
-  index: number;
-  onRemove: (idx: number) => void;
-  onCrop: (idx: number, url: string) => void;
-}) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging
-  } = useSortable({ id: item.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    zIndex: isDragging ? 20 : 0,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="relative aspect-square rounded-xl overflow-hidden border border-border bg-gray-50 group transition-all"
-    >
-      <Image src={item.url} alt="Preview" fill className="object-cover" />
-
-      {/* Drag Handle */}
-      <div
-        {...attributes}
-        {...listeners}
-        className="absolute top-2 left-2 p-1.5 bg-white/90 text-gray-900 rounded-full opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-20 shadow-sm hover:bg-white"
-      >
-        <GripVertical className="w-4 h-4" />
-      </div>
-
-      <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-        <button
-          type="button"
-          onClick={() => onCrop(index, item.url)}
-          className="bg-white/90 text-gray-900 p-1.5 rounded-full hover:bg-white transition-colors shadow-sm"
-        >
-          <CropIcon className="w-3 h-3" />
-        </button>
-        <button
-          type="button"
-          onClick={() => onRemove(index)}
-          className="bg-white/90 text-gray-900 p-1.5 rounded-full hover:bg-red-50 hover:text-red-500 transition-colors shadow-sm"
-        >
-          <X className="w-3 h-3" />
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export function ProductForm({ initialData, collections = [] }: ProductFormProps) {
   const router = useRouter();
   const { currency } = useStoreConfig();
   const [isPending, startTransition] = useTransition();
-  const [images, setImages] = useState<ImageItem[]>(() => {
-    const existing = initialData?.images?.length
+
+  // ─── Image Upload System ──────────────────────────────────────────────
+  // Prepare initial images for edit mode (with blur data URLs from metadata)
+  const existingBlurMap = (initialData?.metadata as Record<string, unknown>)?.blurDataUrls as Record<string, string> || {};
+
+  const initialImages = (() => {
+    const urls = initialData?.images?.length
       ? initialData.images
       : (initialData?.cover_image ? [initialData.cover_image] : []);
-    return existing.map(url => ({
-      id: Math.random().toString(36).substr(2, 9),
+    return urls.map(url => ({
       url,
-      isExisting: true
+      blurDataUrl: existingBlurMap[url] || undefined,
     }));
+  })();
+
+  const upload = useImageUpload({
+    maxImages: 10,
+    maxFileSize: 10 * 1024 * 1024,
+    maxConcurrent: 3,
+    initialImages,
+    onValidationError: (errors) => {
+      errors.forEach(err => toast.error(err));
+    },
   });
-  const [cropData, setCropData] = useState<{ index: number, image: string } | null>(null);
 
   // Variant configuration state
   const [enableColorVariants, setEnableColorVariants] = useState(initialData?.enable_color_variants ?? false);
@@ -137,24 +62,6 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
   const [availableColors, setAvailableColors] = useState<string[]>(initialData?.available_colors ?? []);
   const [availableSizes, setAvailableSizes] = useState<string[]>(initialData?.available_sizes ?? []);
   const [variants, setVariants] = useState<ProductVariant[]>(initialData?.variants ?? []);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (over && active.id !== over.id) {
-      setImages((items) => {
-        const oldIndex = items.findIndex((i) => i.id === active.id);
-        const newIndex = items.findIndex((i) => i.id === over.id);
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
-  };
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
@@ -164,7 +71,6 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
       description: initialData?.description || "",
       price: initialData?.price || 0,
       sale_price: initialData?.sale_price ?? undefined,
-      // stock is managed per-variant in inventory_levels
       sku: initialData?.sku || "",
       status: (initialData?.status as any) || "draft",
       category_id: initialData?.category_id || "",
@@ -177,43 +83,41 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
     },
   });
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      const remainingSlots = 10 - images.length;
-      const fileArray = Array.from(files).slice(0, remainingSlots);
+  // ─── Cleanup orphaned uploads if user navigates away ──────────────────
+  useEffect(() => {
+    // Warn user if they have unsaved uploaded images
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (upload.isUploading) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [upload.isUploading]);
 
-      // Validate file size (10MB limit)
-      const validFiles = fileArray.filter(file => {
-        if (file.size > 10 * 1024 * 1024) {
-          toast.error(`File ${file.name} exceeds 10MB limit`);
-          return false;
-        }
-        return true;
-      });
-
-      const newItems: ImageItem[] = validFiles.map(file => ({
-        id: Math.random().toString(36).substr(2, 9),
-        url: URL.createObjectURL(file), // Preview uses original
-        file,
-        isExisting: false
-      }));
-
-      setImages(prev => [...prev, ...newItems]);
-    }
-  };
-
-  const removeImage = (index: number) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
-  };
-
+  // ─── Submit Handler ───────────────────────────────────────────────────
   async function onSubmit(data: ProductFormValues) {
+    // Block submission if images are still uploading
+    if (upload.isUploading) {
+      toast.error("Please wait for all images to finish uploading");
+      return;
+    }
+
+    // Check for failed uploads
+    const failedImages = upload.images.filter(img => img.status === 'error');
+    if (failedImages.length > 0) {
+      toast.error(`${failedImages.length} image(s) failed to upload. Remove them or retry.`);
+      return;
+    }
+
     const formData = new FormData();
-    // Append validated data
+
+    // Append validated form fields
     Object.entries(data).forEach(([key, value]) => {
       if (value !== null && value !== undefined) {
         if (key === 'is_featured') {
-          // Checkbox handling for FormData
           if (value) formData.append(key, 'on');
         } else {
           formData.append(key, String(value));
@@ -221,19 +125,13 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
       }
     });
 
+    // Append pre-uploaded image URLs (in display order)
+    const imageUrls = upload.getUploadedUrls();
+    formData.set('image_urls', JSON.stringify(imageUrls));
 
-
-    // ... (inside onSubmit)
-
-    // Handle files - Send ORIGINAL files to server (server handles optimization)
-    const newFilesItems = images.filter(img => !img.isExisting && img.file);
-    newFilesItems.forEach(item => {
-      formData.append('imageFiles', item.file!);
-    });
-
-    // Existing images (now preserved in order)
-    const existingImages = images.filter(img => img.isExisting).map(img => img.url);
-    formData.set('existing_images', JSON.stringify(existingImages));
+    // Append blur data URLs for LQIP placeholders
+    const blurDataUrls = upload.getBlurDataUrls();
+    formData.set('blur_data_urls', JSON.stringify(blurDataUrls));
 
     // Append variant configuration
     formData.set('enable_color_variants', String(enableColorVariants));
@@ -257,7 +155,9 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
         } else {
           toast.success(initialData?.id ? "Product updated" : "Product created");
 
-          // Small delay before redirecting so they see the success toast
+          // Clear upload state to free memory
+          upload.cleanup();
+
           setTimeout(() => {
             router.push("/admin/products");
             router.refresh();
@@ -328,40 +228,23 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
               />
             </div>
 
-            {/* Media */}
+            {/* Media — New Background Upload System */}
             <div className="bg-white border border-border rounded-2xl p-8 space-y-6 shadow-sm">
-              <h3 className="text-lg font-light tracking-tight text-gray-900 mb-4 border-b border-gray-100 pb-4">Media</h3>
+              <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
+                <h3 className="text-lg font-light tracking-tight text-gray-900">Media</h3>
+                {upload.isUploading && (
+                  <span className="text-xs text-blue-600 font-medium animate-pulse">
+                    Uploading...
+                  </span>
+                )}
+              </div>
 
-              {images.length > 0 && (
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={handleDragEnd}
-                >
-                  <SortableContext
-                    items={images.map(img => img.id)}
-                    strategy={rectSortingStrategy}
-                  >
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                      {images.map((item, idx) => (
-                        <SortableImage
-                          key={item.id}
-                          item={item}
-                          index={idx}
-                          onRemove={removeImage}
-                          onCrop={(i, url) => setCropData({ index: i, image: url })}
-                        />
-                      ))}
-                    </div>
-                  </SortableContext>
-                </DndContext>
-              )}
-
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-gray-400 transition-all bg-gray-50 hover:bg-gray-100">
-                <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                <span className="text-sm text-gray-500 font-light">Drop images or click to upload</span>
-                <input type="file" accept="image/*" multiple onChange={handleImageChange} className="hidden" />
-              </label>
+              <ProductImageUploader
+                upload={upload}
+                maxImages={10}
+                cropAspect={3 / 4}
+                disabled={isPending}
+              />
             </div>
 
             {/* Pricing */}
@@ -531,14 +414,24 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
                 )}
               />
 
-              <div className="pt-4 border-t border-gray-100">
+              <div className="pt-4 border-t border-gray-100 space-y-3">
+                {/* Upload status warning */}
+                {upload.isUploading && (
+                  <p className="text-xs text-amber-600 text-center">
+                    Wait for image uploads to complete
+                  </p>
+                )}
+
                 <Button
                   type="submit"
-                  disabled={isPending}
+                  disabled={isPending || upload.isUploading}
                   className="w-full bg-gray-900 text-white hover:bg-gray-800 rounded-xl h-12 font-semibold transition-all shadow-xl disabled:opacity-50"
                 >
                   {isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                  {initialData?.id ? "Update Product" : "Create Product"}
+                  {upload.isUploading
+                    ? `Uploading ${upload.uploadingCount} image${upload.uploadingCount > 1 ? 's' : ''}...`
+                    : initialData?.id ? "Update Product" : "Create Product"
+                  }
                 </Button>
               </div>
             </div>
@@ -546,32 +439,6 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
 
         </div>
       </form>
-
-      {cropData && (
-        <ImageCropper
-          image={cropData.image}
-          aspect={3 / 4} // Products use 3:4 aspect
-          onCropComplete={(blob) => {
-            const file = new File([blob], `product-${Date.now()}.webp`, { type: "image/webp" });
-            const objectUrl = URL.createObjectURL(file);
-
-            setImages(prev => {
-              const next = [...prev];
-              next[cropData.index] = {
-                ...next[cropData.index],
-                url: objectUrl,
-                file: file,
-                isExisting: false // Even after crop it's a new file
-              };
-              return next;
-            });
-
-            setCropData(null);
-          }}
-          onCancel={() => setCropData(null)}
-        />
-      )}
     </Form>
   );
 }
-

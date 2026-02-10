@@ -150,6 +150,28 @@ function buildProductPayload(formData: FormData): { data?: ProductPayload; error
   return { data: payload };
 }
 
+function parseBlurDataUrls(formData: FormData): Record<string, string> {
+  const value = formData.get('blur_data_urls');
+  if (!value || typeof value !== 'string') return {};
+  try {
+    const parsed = JSON.parse(value);
+    return typeof parsed === 'object' && parsed !== null ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function parseImageUrls(formData: FormData): string[] {
+  const value = formData.get('image_urls');
+  if (!value || typeof value !== 'string') return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed.filter((u: unknown): u is string => typeof u === 'string' && u.length > 0) : [];
+  } catch {
+    return [];
+  }
+}
+
 export async function createProduct(formData: FormData): Promise<ApiResponse<Product>> {
   try {
     const { data: productData, error } = buildProductPayload(formData);
@@ -157,10 +179,27 @@ export async function createProduct(formData: FormData): Promise<ApiResponse<Pro
       return { error: error || 'Invalid product data' };
     }
 
-    const imageFiles = extractImageFiles(formData);
     const variants = parseVariants(formData);
 
-    const product = await ProductService.createProduct(productData, imageFiles);
+    // New path: images already uploaded via background API, URLs passed directly
+    const preUploadedUrls = parseImageUrls(formData);
+    const blurDataUrls = parseBlurDataUrls(formData);
+
+    // Legacy path: raw file uploads (fallback for backward compatibility)
+    const imageFiles = extractImageFiles(formData);
+
+    let product;
+    if (preUploadedUrls.length > 0 || imageFiles.length === 0) {
+      // Pre-uploaded path: images are already in storage
+      product = await ProductService.createProductWithUrls(
+        productData,
+        preUploadedUrls,
+        blurDataUrls
+      );
+    } else {
+      // Legacy path: upload files server-side
+      product = await ProductService.createProduct(productData, imageFiles);
+    }
 
     // Sync variants to database
     if (variants.length > 0) {
@@ -190,11 +229,29 @@ export async function updateProduct(formData: FormData): Promise<ApiResponse<Pro
       return { error: error || 'Invalid product data' };
     }
 
-    const existingImages = parseExistingImages(formData);
-    const imageFiles = extractImageFiles(formData);
     const variants = parseVariants(formData);
 
-    const product = await ProductService.updateProduct(id, { ...productData, images: existingImages }, imageFiles);
+    // New path: pre-uploaded URLs
+    const preUploadedUrls = parseImageUrls(formData);
+    const blurDataUrls = parseBlurDataUrls(formData);
+
+    // Legacy path
+    const existingImages = parseExistingImages(formData);
+    const imageFiles = extractImageFiles(formData);
+
+    let product;
+    if (preUploadedUrls.length > 0 || imageFiles.length === 0) {
+      // Pre-uploaded path: all image URLs are already resolved
+      product = await ProductService.updateProductWithUrls(
+        id,
+        productData,
+        preUploadedUrls,
+        blurDataUrls
+      );
+    } else {
+      // Legacy path
+      product = await ProductService.updateProduct(id, { ...productData, images: existingImages }, imageFiles);
+    }
 
     // Sync variants to database
     await ProductService.syncVariants(id, variants, product.price, product.sale_price);

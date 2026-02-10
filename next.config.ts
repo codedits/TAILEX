@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
   // Server Actions config
   experimental: {
     serverActions: {
-      bodySizeLimit: '64mb',
+      bodySizeLimit: '100mb',
     },
     // Tree-shake heavy packages — only import what's used
     optimizePackageImports: [

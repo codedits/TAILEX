@@ -34,4 +34,6 @@ export const config = {
          */
         '/admin/:path*',
     ],
+    // Explicitly set body size limit for middleware
+    bodySizeLimit: '64mb',
 }
