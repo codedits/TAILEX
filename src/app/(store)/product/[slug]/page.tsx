@@ -88,12 +88,14 @@ export default async function ProductPage({ params }: Props) {
       .from("products")
       .select(`*, options:product_options(*), variants:product_variants(*)`)
       .eq("slug", slug)
-      .single(),
+      .maybeSingle(),
     StoreConfigService.getStoreConfig()
   ]);
 
   if (productResult.error || !productResult.data) {
-    console.error("Product not found:", productResult.error);
+    if (productResult.error) {
+      console.error("Product fetch error:", productResult.error);
+    }
     notFound();
   }
 

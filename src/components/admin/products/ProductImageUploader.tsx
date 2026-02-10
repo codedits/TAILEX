@@ -38,6 +38,7 @@ import {
   closestCenter,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -106,12 +107,15 @@ function SortableImageTile({
       style={style}
       className={cn(
         'relative aspect-square rounded-xl overflow-hidden border bg-gray-50 group transition-all',
+        'cursor-grab active:cursor-grabbing',
         isDragging && 'shadow-2xl ring-2 ring-gray-900/20',
         isError && 'border-red-300 bg-red-50',
         isSuccess && 'border-border',
         isUploading && 'border-blue-200',
         !isError && !isUploading && 'border-border',
       )}
+      {...attributes}
+      {...listeners}
     >
       {/* Image preview */}
       <Image
@@ -122,15 +126,19 @@ function SortableImageTile({
           'object-cover transition-all duration-300',
           isUploading && 'opacity-70',
           isError && 'opacity-50 grayscale',
+          !isDragging && 'group-hover:scale-110'
         )}
         sizes="(max-width: 768px) 50vw, 25vw"
         unoptimized // blob: URLs can't go through next/image optimizer
       />
 
+      {/* Grid overlay for better contrast */}
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none" />
+
       {/* First image badge */}
       {index === 0 && (
-        <div className="absolute bottom-2 left-2 z-20">
-          <span className="text-[10px] font-medium uppercase tracking-wider bg-gray-900/80 text-white px-2 py-0.5 rounded-full backdrop-blur-sm">
+        <div className="absolute bottom-2.5 left-2.5 z-20">
+          <span className="text-[10px] font-bold uppercase tracking-widest bg-gray-900 text-white px-2.5 py-1 rounded-md backdrop-blur-md shadow-lg border border-white/10">
             Cover
           </span>
         </div>
@@ -138,13 +146,13 @@ function SortableImageTile({
 
       {/* Upload progress overlay */}
       {isUploading && (
-        <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px] flex flex-col items-center justify-center z-10">
-          <Loader2 className="w-6 h-6 text-blue-600 animate-spin mb-2" />
-          <span className="text-xs font-medium text-blue-700">
+        <div className="absolute inset-0 bg-white/60 backdrop-blur-[4px] flex flex-col items-center justify-center z-10 pointer-events-none">
+          <Loader2 className="w-8 h-8 text-blue-600 animate-spin mb-2" />
+          <span className="text-sm font-bold text-blue-700">
             {image.progress > 0 ? `${image.progress}%` : 'Waiting...'}
           </span>
           {/* Progress bar */}
-          <div className="w-3/4 h-1 bg-blue-100 rounded-full mt-2 overflow-hidden">
+          <div className="w-[80%] h-1.5 bg-blue-100 rounded-full mt-3 overflow-hidden">
             <div
               className="h-full bg-blue-600 rounded-full transition-all duration-300 ease-out"
               style={{ width: `${image.progress}%` }}
@@ -155,9 +163,9 @@ function SortableImageTile({
 
       {/* Error overlay */}
       {isError && (
-        <div className="absolute inset-0 bg-red-50/80 backdrop-blur-[1px] flex flex-col items-center justify-center z-10 p-2">
-          <AlertCircle className="w-5 h-5 text-red-500 mb-1" />
-          <span className="text-[10px] font-medium text-red-600 text-center leading-tight line-clamp-2">
+        <div className="absolute inset-0 bg-red-50/90 backdrop-blur-[2px] flex flex-col items-center justify-center z-10 p-3 pointer-events-none">
+          <AlertCircle className="w-6 h-6 text-red-500 mb-1.5" />
+          <span className="text-xs font-bold text-red-600 text-center leading-tight line-clamp-3">
             {image.error || 'Upload failed'}
           </span>
         </div>
@@ -165,39 +173,29 @@ function SortableImageTile({
 
       {/* Success indicator (brief flash) */}
       {isSuccess && !image.isExisting && (
-        <div className="absolute top-2 left-10 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
-          <CheckCircle2 className="w-4 h-4 text-green-500 drop-shadow-sm" />
+        <div className="absolute top-2.5 left-2.5 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+          <CheckCircle2 className="w-5 h-5 text-green-500 drop-shadow-md" />
         </div>
       )}
 
-      {/* Drag handle */}
-      <div
-        {...attributes}
-        {...listeners}
-        className={cn(
-          'absolute top-2 left-2 p-1.5 bg-white/90 text-gray-700 rounded-full z-20 shadow-sm',
-          'opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity',
-          'cursor-grab active:cursor-grabbing hover:bg-white',
-          disabled && 'hidden',
-        )}
-      >
-        <GripVertical className="w-4 h-4" />
-      </div>
-
       {/* Action buttons */}
-      <div className={cn(
-        'absolute top-2 right-2 flex gap-1.5 z-20',
-        'opacity-0 group-hover:opacity-100 transition-opacity',
-      )}>
+      <div 
+        className={cn(
+          'absolute top-2.5 right-2.5 flex flex-col gap-2 z-20',
+          'opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity',
+        )}
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Zoom button (desktop) */}
         {isSuccess && (
           <button
             type="button"
             onClick={() => onZoom(image.previewUrl)}
-            className="bg-white/90 text-gray-700 p-1.5 rounded-full hover:bg-white transition-colors shadow-sm"
+            className="bg-white text-gray-900 w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-50 transition-colors shadow-xl border border-gray-100"
             title="Zoom preview"
           >
-            <ZoomIn className="w-3 h-3" />
+            <ZoomIn className="w-4 h-4" />
           </button>
         )}
 
@@ -206,10 +204,10 @@ function SortableImageTile({
           <button
             type="button"
             onClick={() => onCrop(image.id, image.previewUrl)}
-            className="bg-white/90 text-gray-700 p-1.5 rounded-full hover:bg-white transition-colors shadow-sm"
+            className="bg-white text-gray-900 w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-50 transition-colors shadow-xl border border-gray-100"
             title="Crop image"
           >
-            <CropIcon className="w-3 h-3" />
+            <CropIcon className="w-4 h-4" />
           </button>
         )}
 
@@ -221,10 +219,10 @@ function SortableImageTile({
               // Re-adding the file triggers a re-upload
               // For now, we just let the user remove and re-add
             }}
-            className="bg-white/90 text-amber-600 p-1.5 rounded-full hover:bg-white transition-colors shadow-sm"
+            className="bg-white text-amber-600 w-9 h-9 flex items-center justify-center rounded-lg hover:bg-amber-50 transition-colors shadow-xl border border-amber-100"
             title="Retry upload"
           >
-            <RotateCcw className="w-3 h-3" />
+            <RotateCcw className="w-4 h-4" />
           </button>
         )}
 
@@ -232,18 +230,23 @@ function SortableImageTile({
         <button
           type="button"
           onClick={() => onRemove(image.id)}
-          className="bg-white/90 text-gray-700 p-1.5 rounded-full hover:bg-red-50 hover:text-red-500 transition-colors shadow-sm"
+          className="bg-white text-red-500 w-9 h-9 flex items-center justify-center rounded-lg hover:bg-red-50 transition-colors shadow-xl border border-red-100"
           title="Remove image"
           disabled={disabled}
         >
-          <X className="w-3 h-3" />
+          <X className="w-4 h-4 stroke-[2.5px]" />
         </button>
+      </div>
+
+      {/* Visual drag handle hint (centered, subtle) */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-30 transition-opacity">
+        <GripVertical className="w-10 h-10 text-white drop-shadow-lg" />
       </div>
 
       {/* File size indicator */}
       {image.fileSize > 0 && !image.isExisting && (
-        <div className="absolute bottom-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
-          <span className="text-[9px] font-mono bg-black/50 text-white px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+        <div className="absolute bottom-2.5 right-2.5 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="text-[10px] font-bold bg-black/70 text-white px-2 py-1 rounded-md backdrop-blur-md">
             {formatFileSize(image.fileSize)}
           </span>
         </div>
@@ -302,6 +305,10 @@ export function ProductImageUploader({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
+    }),
+    useSensor(TouchSensor, {
+      // Long press (250ms) to start dragging on mobile, allows scrolling normally
+      activationConstraint: { delay: 250, tolerance: 5 },
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
@@ -405,7 +412,7 @@ export function ProductImageUploader({
               items={images.map(img => img.id)}
               strategy={rectSortingStrategy}
             >
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {images.map((image, idx) => (
                   <SortableImageTile
                     key={image.id}
@@ -429,8 +436,8 @@ export function ProductImageUploader({
                       disabled && 'opacity-50 cursor-not-allowed',
                     )}
                   >
-                    <ImageIcon className="w-6 h-6 text-gray-400 mb-1" />
-                    <span className="text-[10px] text-gray-500 font-medium">Add more</span>
+                    <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                    <span className="text-sm text-gray-500 font-bold">Add more</span>
                     <input
                       ref={images.length > 0 ? undefined : fileInputRef}
                       type="file"

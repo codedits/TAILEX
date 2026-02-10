@@ -10,7 +10,7 @@ export default async function EditCollectionPage({ params }: { params: { id: str
     const { id } = await params;
 
     const supabase = await createAdminClient();
-    const { data: collection } = await supabase.from('collections').select('*').eq('id', id).single();
+    const { data: collection } = await supabase.from('collections').select('*').eq('id', id).maybeSingle();
 
     if (!collection) {
         notFound();

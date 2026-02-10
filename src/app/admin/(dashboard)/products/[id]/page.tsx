@@ -12,7 +12,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
     supabase.from('products').select(`
       *,
       variants:product_variants(*)
-    `).eq('id', resolvedParams.id).single(),
+    `).eq('id', resolvedParams.id).maybeSingle(),
     supabase.from('collections').select('*').order('title')
   ]);
 

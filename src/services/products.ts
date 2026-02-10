@@ -125,9 +125,11 @@ export const ProductService = {
         options:product_options(*)
       `)
             .eq('slug', slug)
-            .single();
+            .maybeSingle();
 
-        if (error) throw new AppError(error.message, 'DB_ERROR', 500);
+        if (error) {
+            throw new AppError(error.message, 'DB_ERROR', 500);
+        }
         if (!data) throw AppError.notFound(`Product with slug "${slug}" not found`);
 
         // Fetch inventory levels for all variants
@@ -158,12 +160,15 @@ export const ProductService = {
         const supabase = await createAdminClient();
         if (!id) throw AppError.badRequest('Product ID is required');
 
-        // Fetch product first to get image URLs
-        const { data: product } = await supabase
+        const { data: product, error: fetchError } = await supabase
             .from('products')
             .select('images')
             .eq('id', id)
             .single();
+
+        if (fetchError && fetchError.code !== 'PGRST116') {
+            throw new AppError(fetchError.message, 'DB_ERROR', 500);
+        }
 
         // Delete from database
         const { error } = await supabase
@@ -171,7 +176,10 @@ export const ProductService = {
             .delete()
             .eq('id', id);
 
-        if (error) throw new AppError(error.message, 'DB_ERROR', 500);
+        if (error) {
+            if (error.code === 'PGRST116') return; // Already deleted or doesn't exist
+            throw new AppError(error.message, 'DB_ERROR', 500);
+        }
 
         // Delete all associated images from storage
         if (product?.images && Array.isArray(product.images)) {
@@ -283,6 +291,9 @@ export const ProductService = {
             .single();
 
         if (error) {
+            if (error.code === 'PGRST116') {
+                throw AppError.notFound(`Product with ID "${id}" not found`);
+            }
             if (error.code === '23505') {
                 throw AppError.badRequest('Product with this slug or SKU already exists');
             }
@@ -302,7 +313,10 @@ export const ProductService = {
     async updateVariant(id: string, variant: Partial<ProductVariant>): Promise<ProductVariant> {
         const supabase = await createAdminClient();
         const { data, error } = await supabase.from('product_variants').update(variant).eq('id', id).select().single();
-        if (error) throw new AppError(error.message, 'DB_ERROR');
+        if (error) {
+            if (error.code === 'PGRST116') throw AppError.notFound(`Variant with ID "${id}" not found`);
+            throw new AppError(error.message, 'DB_ERROR');
+        }
         return data as ProductVariant;
     },
 
@@ -678,6 +692,9 @@ export const ProductService = {
             .single();
 
         if (error) {
+            if (error.code === 'PGRST116') {
+                throw AppError.notFound(`Product with ID "${id}" not found`);
+            }
             if (error.code === '23505') {
                 throw AppError.badRequest('Product with this slug or SKU already exists');
             }

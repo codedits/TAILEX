@@ -21,7 +21,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { processImage, generateImageFilename } from '@/lib/image-processor';
 import { createAdminClient, ensureBucketExists } from '@/lib/supabase/admin';
 
-const MAX_FILE_SIZE = 12 * 1024 * 1024; // 12 MB
+const MAX_FILE_SIZE = 16 * 1024 * 1024; // 16 MB (slightly higher than client limit)
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif'];
 
 export async function POST(request: NextRequest) {

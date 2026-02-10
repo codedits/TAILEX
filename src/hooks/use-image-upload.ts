@@ -79,7 +79,7 @@ export interface UseImageUploadReturn {
 export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUploadReturn {
   const {
     maxImages = 10,
-    maxFileSize = 10 * 1024 * 1024,
+    maxFileSize = 15 * 1024 * 1024,
     maxConcurrent = 3,
     initialImages = [],
     onValidationError,

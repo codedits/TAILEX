@@ -249,7 +249,7 @@ export function revokePreviewUrl(url: string) {
 // ─── File validation ─────────────────────────────────────────────────────
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15 MB
 const MAX_IMAGES = 10;
 
 export interface FileValidationResult {
