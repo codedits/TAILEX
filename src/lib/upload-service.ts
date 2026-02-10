@@ -150,66 +150,54 @@ export function getUploadQueue(maxConcurrent = 3): UploadQueue {
 
 // ─── Core upload function with XHR for progress ─────────────────────────
 
+import { uploadImage, type UploadResponse } from '@/app/actions/upload-image';
+
+// ─── Core upload function with Server Action ─────────────────────────────
+
 async function uploadFileWithProgress(
   file: File,
   signal: AbortSignal,
   onProgress: (progress: number) => void,
 ): Promise<UploadResult> {
   return new Promise<UploadResult>((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
+    // Server Actions don't support XHR-style progress yet, so we simulate it
+    let progress = 0;
+    const interval = setInterval(() => {
+      // Fast start, slow finish simulation
+      if (progress < 40) progress += 10;
+      else if (progress < 70) progress += 5;
+      else if (progress < 90) progress += 2;
+
+      if (progress > 90) progress = 90; // Hold at 90% until done
+      onProgress(progress);
+    }, 300);
+
     const formData = new FormData();
     formData.append('file', file);
 
-    // Abort handling
-    const abortHandler = () => {
-      xhr.abort();
-      reject(new DOMException('Upload cancelled', 'AbortError'));
-    };
-    signal.addEventListener('abort', abortHandler);
+    // Call the Server Action
+    uploadImage(formData)
+      .then((response: UploadResponse) => {
+        clearInterval(interval);
 
-    xhr.upload.addEventListener('progress', (e) => {
-      if (e.lengthComputable) {
-        const percent = Math.round((e.loaded / e.total) * 100);
-        onProgress(percent);
-      }
-    });
-
-    xhr.addEventListener('load', () => {
-      signal.removeEventListener('abort', abortHandler);
-
-      if (xhr.status >= 200 && xhr.status < 300) {
-        try {
-          const response = JSON.parse(xhr.responseText);
-          if (response.error) {
-            reject(new Error(response.error));
-          } else {
-            resolve(response.data as UploadResult);
-          }
-        } catch {
-          reject(new Error('Invalid response from server'));
+        if ('error' in response) {
+          reject(new Error(response.error));
+        } else {
+          onProgress(100);
+          resolve(response.data as UploadResult);
         }
-      } else {
-        try {
-          const errBody = JSON.parse(xhr.responseText);
-          reject(new Error(errBody.error || `Upload failed (${xhr.status})`));
-        } catch {
-          reject(new Error(`Upload failed (${xhr.status})`));
-        }
-      }
-    });
+      })
+      .catch((err) => {
+        clearInterval(interval);
+        console.error('Upload Action failed:', err);
+        reject(new Error(err.message || 'Upload failed'));
+      });
 
-    xhr.addEventListener('error', () => {
-      signal.removeEventListener('abort', abortHandler);
-      reject(new Error('Network error during upload'));
-    });
-
-    xhr.addEventListener('abort', () => {
-      signal.removeEventListener('abort', abortHandler);
+    // Handle abort
+    signal.addEventListener('abort', () => {
+      clearInterval(interval);
       reject(new DOMException('Upload cancelled', 'AbortError'));
     });
-
-    xhr.open('POST', '/api/uploads/process');
-    xhr.send(formData);
   });
 }
 
