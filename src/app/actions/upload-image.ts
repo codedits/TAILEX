@@ -95,7 +95,7 @@ export async function uploadImage(formData: FormData): Promise<UploadResponse> {
         };
 
     } catch (err) {
-        console.error('Upload action error:', err);
-        return { error: 'Internal server error during upload' };
+        console.error('Upload action critical error:', err);
+        return { error: err instanceof Error ? err.message : 'Internal server error during upload' };
     }
 }

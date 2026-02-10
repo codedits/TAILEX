@@ -49,7 +49,7 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
   const upload = useImageUpload({
     maxImages: 10,
     maxFileSize: 10 * 1024 * 1024,
-    maxConcurrent: 3,
+    maxConcurrent: 1,
     initialImages,
     onValidationError: (errors) => {
       errors.forEach(err => toast.error(err));
