@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     // 1. Admin Protection Logic
     if (request.nextUrl.pathname.startsWith('/admin')) {
         // Exclude the login page itself to avoid loops

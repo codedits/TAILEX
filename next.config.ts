@@ -23,6 +23,8 @@ const nextConfig: NextConfig = {
       '@dnd-kit/core',
       '@dnd-kit/sortable',
       '@dnd-kit/utilities',
+      '@supabase/supabase-js',
+      'jose',
     ],
   },
 

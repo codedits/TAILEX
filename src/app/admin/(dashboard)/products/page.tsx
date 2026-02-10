@@ -14,7 +14,7 @@ async function ProductsTable({
   const supabase = await createAdminClient();
   const page = Number(searchParams?.page) || 1;
   const search = searchParams?.query || "";
-  const limit = 10;
+  const limit = 50;
   const offset = (page - 1) * limit;
 
   // 1. Fetch Paginated Products
@@ -70,7 +70,13 @@ async function ProductsTable({
   );
 }
 
-export default function ProductsPage() {
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; query?: string }>;
+}) {
+  const resolvedParams = await searchParams;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -105,7 +111,7 @@ export default function ProductsPage() {
       </div>
 
       <Suspense fallback={<TableSkeleton rows={8} />}>
-        <ProductsTable />
+        <ProductsTable searchParams={resolvedParams} />
       </Suspense>
     </div>
   );
