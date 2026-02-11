@@ -18,13 +18,12 @@ const defaultConfig: FooterConfig = {
 };
 
 /**
- * Footer - Server Component
+ * Footer - Superfluid Style
  * 
- * Optimized for streaming:
- * - No "use client" - rendered on server
- * - CSS animations instead of Framer Motion
- * - Interactivity (scroll-to-top) in client island
- * - Wrapped in Suspense by parent - streams last
+ * distinct 3-layer design:
+ * 1. Big Navigation (Shop, About, Contact)
+ * 2. Interaction Layer (Newsletter + Utilities)
+ * 3. Brand Statement (Massive Typography)
  */
 const Footer = ({
   config = defaultConfig,
@@ -47,77 +46,139 @@ const Footer = ({
   ].filter(Boolean) as { name: string; href: string; Icon: typeof Facebook }[];
 
   return (
-    <footer className="bg-black text-white border-t border-white/10 font-sans relative overflow-hidden section-fade-in">
-      {/* Subtle Background Pattern */}
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+    <footer className="bg-black text-white font-sans flex flex-col w-full relative z-10">
 
-      <div className="max-w-[1920px] mx-auto px-6 md:px-12 pt-24 pb-12">
-        <div className="flex flex-col lg:flex-row justify-between gap-16 lg:gap-24 mb-24">
-
-          {/* Brand Column */}
-          <div className="max-w-sm">
-            <Link href="/" className="inline-block text-4xl font-light tracking-tighter mb-6 hover:opacity-80 transition-opacity">
-              {brandName}
-            </Link>
-            <p className="text-white/60 font-light leading-relaxed text-sm">
-              {config.tagline}
-            </p>
-
-            <NewsletterForm />
-          </div>
-
-          {/* Links Grid */}
-          <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
-            {(config.columns || []).map((column, idx) => (
-              <div key={idx} className="flex flex-col gap-6">
-                <h4 className="font-medium text-xs text-white uppercase tracking-[0.2em]">
-                  {column.title}
-                </h4>
-                <ul className="flex flex-col gap-3">
-                  {column.links?.map((link) => (
-                    <li key={link.label}>
-                      <Link
-                        href={link.url}
-                        className="text-sm font-light text-white/50 hover:text-white transition-colors block w-fit"
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Footer Bottom */}
-        <div className="flex flex-col md:flex-row justify-between items-end md:items-center pt-8 border-t border-white/5 gap-8">
-          <div className="flex flex-col gap-4">
-            <div className="flex gap-4">
-              {socialLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white/40 hover:text-white transition-colors"
-                  aria-label={`Visit our ${link.name} page`}
-                >
-                  <link.Icon className="w-4 h-4" />
-                </a>
-              ))}
-            </div>
-            <p className="text-xs text-white/30 font-light">
-              {copyrightText}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-6">
-            <ScrollToTopButton />
-          </div>
-        </div>
-
+      {/* 1. TOP SECTION: Primary Navigation */}
+      {/* Grid: 3 columns on desktop, stacked on mobile. Borders for the 'grid' look. */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 border-t border-white">
+        {['SHOP', 'ABOUT', 'CONTACT'].map((item, idx) => (
+          <Link
+            href={`/${item.toLowerCase()}`}
+            key={item}
+            className={`
+              group relative h-[30vh] lg:h-[40vh] flex items-center justify-center 
+              border-b border-white lg:border-b-0
+              ${idx !== 2 ? 'lg:border-r border-white' : ''}
+              hover:bg-white hover:text-black transition-colors duration-500
+            `}
+          >
+            <span className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+              {item}
+            </span>
+          </Link>
+        ))}
       </div>
+
+      {/* 2. MIDDLE SECTION: Newsletter & Utilities */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 w-full border-t border-white">
+
+        {/* Left: Newsletter / Movement */}
+        <div className="p-8 md:p-16 lg:p-24 border-b lg:border-b-0 border-white lg:border-r flex flex-col justify-between">
+          <div>
+            <h3 className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase leading-[0.9] tracking-tight max-w-xl">
+              JOIN THE <br />
+              {brandName} <br />
+              MOVEMENT
+            </h3>
+          </div>
+          <div className="mt-12 w-full max-w-md">
+            <p className="text-sm font-bold uppercase tracking-widest mb-2">EMAIL</p>
+            <NewsletterForm placeholder="ENTER YOUR EMAIL" />
+            <p className="text-[10px] uppercase mt-4 text-white/60">
+              By subscribing you agree to our privacy policy.
+            </p>
+          </div>
+        </div>
+
+        {/* Right: Utility Links Grid */}
+        <div className="p-8 md:p-16 lg:p-24 bg-black">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-12">
+            {/* Help Column */}
+            <div className="flex flex-col gap-4">
+              <h4 className="font-bold text-sm uppercase tracking-widest mb-2">HELP</h4>
+              <ul className="flex flex-col gap-2">
+                {['Contact Us', 'FAQ', 'Shipments', 'Payments', 'Track Your Order', 'Returns'].map(link => (
+                  <li key={link}>
+                    <Link href="#" className="text-sm text-white/70 hover:text-white transition-colors">
+                      {link}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Legal Column */}
+            <div className="flex flex-col gap-4">
+              <h4 className="font-bold text-sm uppercase tracking-widest mb-2">LEGAL INFO</h4>
+              <ul className="flex flex-col gap-2">
+                {['Privacy Policy', 'Terms & Conditions', 'Return Policy', 'Cookie Policy'].map(link => (
+                  <li key={link}>
+                    <Link href="#" className="text-sm text-white/70 hover:text-white transition-colors">
+                      {link}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Social Column */}
+            <div className="flex flex-col gap-4">
+              <h4 className="font-bold text-sm uppercase tracking-widest mb-2">FOLLOW US</h4>
+              <ul className="flex flex-col gap-2">
+                {[...socialLinks, { name: 'Tiktok', href: '#' }].map((link, i) => (
+                  <li key={link.name || i}>
+                    <Link href={link.href} className="text-sm text-white/70 hover:text-white transition-colors">
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. BRAND SECTION: Massive Typography */}
+      <div className="relative w-full overflow-hidden border-t border-white py-4 lg:py-0">
+        <h1 className="text-[15vw] leading-none font-bold tracking-tighter text-center uppercase select-none">
+          {brandName}
+        </h1>
+      </div>
+
+      {/* 4. BOTTOM BAR */}
+      <div className="w-full px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-4 border-t border-white/20">
+        {/* Icons / Values */}
+        <div className="flex gap-8">
+          <div className="flex flex-col items-center gap-1 group">
+            <span className="w-6 h-6 rounded-full border border-white flex items-center justify-center text-xs group-hover:bg-white group-hover:text-black transition-colors">⚡</span>
+            <span className="text-[8px] uppercase tracking-widest">FAST</span>
+          </div>
+          <div className="flex flex-col items-center gap-1 group">
+            <span className="w-6 h-6 rounded-full border border-white flex items-center justify-center text-xs group-hover:bg-white group-hover:text-black transition-colors">∞</span>
+            <span className="text-[8px] uppercase tracking-widest">DURABLE</span>
+          </div>
+          <div className="flex flex-col items-center gap-1 group">
+            <span className="w-6 h-6 rounded-full border border-white flex items-center justify-center text-xs group-hover:bg-white group-hover:text-black transition-colors">★</span>
+            <span className="text-[8px] uppercase tracking-widest">PREMIUM</span>
+          </div>
+        </div>
+
+        {/* Scroll Top */}
+        <div className="absolute left-1/2 -translate-x-1/2 -top-6">
+          <ScrollToTopButton />
+        </div>
+
+        {/* Copyright & Cards */}
+        <div className="flex flex-col md:flex-row items-center gap-4 text-[10px] uppercase text-white/60">
+          <span>{copyrightText}</span>
+          <div className="flex gap-2">
+            <span className="w-8 h-5 bg-white/10 rounded" />
+            <span className="w-8 h-5 bg-white/10 rounded" />
+            <span className="w-8 h-5 bg-white/10 rounded" />
+          </div>
+        </div>
+      </div>
+
     </footer>
   );
 };

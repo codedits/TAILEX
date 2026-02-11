@@ -56,7 +56,7 @@ const nextConfig: NextConfig = {
     // Cache optimized images for 1 year
     minimumCacheTTL: 31536000,
     // Explicitly allow qualities used in the app
-    qualities: [75, 90, 100],
+    qualities: [75, 85, 90, 100],
   },
 
 

@@ -5,7 +5,12 @@ import { ArrowRight, Loader2, Check } from "lucide-react";
 import { subscribeToNewsletter } from "@/lib/api/newsletter";
 import { cn } from "@/lib/utils";
 
-export function NewsletterForm() {
+interface NewsletterFormProps {
+    className?: string;
+    placeholder?: string;
+}
+
+export function NewsletterForm({ className, placeholder = "Email Address" }: NewsletterFormProps) {
     const [email, setEmail] = useState("");
     const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
     const [message, setMessage] = useState("");
@@ -36,44 +41,42 @@ export function NewsletterForm() {
     };
 
     return (
-        <div className="mt-8 pt-8 border-t border-white/10">
-            <p className="text-xs uppercase tracking-widest text-white/40 mb-4">Newsletter</p>
-
+        <div className={cn("w-full", className)}>
             {status === "success" ? (
-                <div className="flex items-center gap-2 text-emerald-400 text-sm">
-                    <Check className="w-4 h-4" />
+                <div className="flex items-center gap-2 text-emerald-400 text-sm font-medium py-2">
+                    <Check className="w-5 h-5" />
                     <span>{message}</span>
                 </div>
             ) : (
-                <form onSubmit={handleSubmit}>
-                    <div className="flex gap-2">
+                <form onSubmit={handleSubmit} className="relative group">
+                    <div className="flex items-center border-b-2 border-white/20 focus-within:border-white transition-colors duration-300 pb-2">
                         <input
                             type="email"
-                            placeholder="Email Address"
+                            placeholder={placeholder}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             disabled={status === "loading"}
                             className={cn(
-                                "bg-transparent border-b border-white/20 text-white placeholder:text-white/20 py-2 text-sm w-full focus:outline-none focus:border-white transition-colors",
+                                "bg-transparent text-white placeholder:text-white/40 text-lg md:text-xl font-medium w-full focus:outline-none transition-colors",
                                 status === "loading" && "opacity-50"
                             )}
                         />
                         <button
                             type="submit"
                             disabled={status === "loading" || !email.trim()}
-                            className="text-white hover:text-white/70 transition-colors disabled:opacity-50"
-                            aria-label="Subscribe to newsletter"
+                            className="text-white hover:text-white/70 transition-colors disabled:opacity-30 ml-4 font-bold uppercase tracking-wider text-sm"
+                            aria-label="Subscribe"
                         >
                             {status === "loading" ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <Loader2 className="w-5 h-5 animate-spin" />
                             ) : (
-                                <ArrowRight className="w-4 h-4" />
+                                "OK"
                             )}
                         </button>
                     </div>
 
                     {status === "error" && message && (
-                        <p className="text-red-400 text-xs mt-2">{message}</p>
+                        <p className="absolute -bottom-6 left-0 text-red-500 text-xs font-medium">{message}</p>
                     )}
                 </form>
             )}
