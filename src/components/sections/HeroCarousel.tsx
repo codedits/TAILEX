@@ -159,31 +159,54 @@ const HeroCarousel = ({
             {/* Content Layer */}
             <div className="absolute inset-0 flex flex-col items-center justify-center w-full px-6 md:px-10 z-30 text-center h-full max-w-[1920px] mx-auto pointer-events-none">
                 <AnimatePresence mode="wait">
-                    <m.div
-                        key={currentIndex}
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
-                        variants={textVariants}
-                        className="flex flex-col items-center justify-center space-y-4 pointer-events-auto"
-                    >
-                        <p className="text-white/90 text-xs tracking-[0.2em] uppercase font-bold">
-                            {currentSlide?.subheading || defaultSubheading || "SPRING/SUMMER '26"}
-                        </p>
+                    {currentIndex === 0 ? (
+                        /* FIRST SLIDE: Use CSS Animations for Instant LCP/FCP (No JS Dependency for entrance) */
+                        <div key="slide-0" className="flex flex-col items-center justify-center space-y-4 pointer-events-auto">
+                            <p className="hero-subtext text-white/90 text-[10px] md:text-xs tracking-[0.2em] uppercase font-bold">
+                                {currentSlide?.subheading || defaultSubheading || "SPRING/SUMMER '26"}
+                            </p>
 
-                        <h1 className="text-white text-5xl md:text-8xl font-medium tracking-tight">
-                            {currentSlide?.heading || defaultHeading || brandName}
-                        </h1>
+                            <h1 className="hero-text text-white text-5xl md:text-8xl font-medium tracking-tight">
+                                {currentSlide?.heading || defaultHeading || brandName}
+                            </h1>
 
-                        <div className="pt-4">
-                            <Link
-                                href={currentSlide?.ctaLink || "/shop"}
-                                className="inline-block px-8 py-3 rounded-full border border-white/50 text-white text-[10px] md:text-xs font-semibold tracking-[0.15em] hover:bg-white hover:text-black transition-all duration-300 uppercase"
-                            >
-                                Shop Now
-                            </Link>
+                            <div className="hero-cta pt-4">
+                                <Link
+                                    href={currentSlide?.ctaLink || "/shop"}
+                                    className="inline-block px-8 py-3 rounded-full border border-white/50 text-white text-[10px] md:text-xs font-semibold tracking-[0.15em] hover:bg-white hover:text-black transition-all duration-300 uppercase"
+                                >
+                                    Shop Now
+                                </Link>
+                            </div>
                         </div>
-                    </m.div>
+                    ) : (
+                        /* SUBSEQUENT SLIDES: Use Framer Motion for smooth transitions */
+                        <m.div
+                            key={currentIndex}
+                            initial="hidden"
+                            animate="visible"
+                            exit="exit"
+                            variants={textVariants}
+                            className="flex flex-col items-center justify-center space-y-4 pointer-events-auto"
+                        >
+                            <p className="text-white/90 text-xs tracking-[0.2em] uppercase font-bold">
+                                {currentSlide?.subheading || defaultSubheading || "SPRING/SUMMER '26"}
+                            </p>
+
+                            <h1 className="text-white text-5xl md:text-8xl font-medium tracking-tight">
+                                {currentSlide?.heading || defaultHeading || brandName}
+                            </h1>
+
+                            <div className="pt-4">
+                                <Link
+                                    href={currentSlide?.ctaLink || "/shop"}
+                                    className="inline-block px-8 py-3 rounded-full border border-white/50 text-white text-[10px] md:text-xs font-semibold tracking-[0.15em] hover:bg-white hover:text-black transition-all duration-300 uppercase"
+                                >
+                                    Shop Now
+                                </Link>
+                            </div>
+                        </m.div>
+                    )}
                 </AnimatePresence>
 
                 {/* Bottom CTA */}

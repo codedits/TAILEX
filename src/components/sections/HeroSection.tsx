@@ -1,12 +1,6 @@
-'use client';
-
-import { useState } from 'react';
 import Image from "next/image";
 import Link from "next/link";
-import { m, AnimatePresence } from "framer-motion";
 import HeroCarousel, { HeroSlide } from './HeroCarousel';
-import { useIsMobile } from '@/hooks/use-media-query';
-import { cn } from "@/lib/utils";
 
 type HeroSectionProps = {
   heading?: string;
@@ -27,11 +21,11 @@ type HeroSectionProps = {
 const DEFAULT_HERO_IMAGE = "https://framerusercontent.com/images/T0Z10o3Yaf4JPrk9f5lhcmJJwno.jpg";
 
 /**
- * HeroSection - Client Component
+ * HeroSection - Now a Server Component for maximum Performance
  * 
- * Supports two modes:
- * 1. Single image (legacy) - uses heading, image props directly
- * 2. Carousel (new) - uses slides array
+ * Strategy:
+ * 1. Single layout (SSR): Uses pure CSS animations for instant paint (FCP/LCP win).
+ * 2. Carousel mode (Client): Only loads client-side JS if multiple slides exist.
  */
 const HeroSection = ({
   heading,
@@ -46,10 +40,8 @@ const HeroSection = ({
   slides,
   autoPlayInterval = 5000
 }: HeroSectionProps) => {
-  const isMobile = useIsMobile();
-  const [imageLoaded, setImageLoaded] = useState(false);
 
-  // If slides array is provided and has items, use carousel mode
+  // If slides array is provided and has items, use carousel mode (Client Component)
   if (slides && slides.length > 0) {
     return (
       <HeroCarousel
@@ -63,100 +55,58 @@ const HeroSection = ({
     );
   }
 
-  // Legacy single image mode
-  const [imageError, setImageError] = useState(false);
-
+  // Legacy single image mode (Now fully Server-Rendered with CSS animations)
   const displayHeading = heading || brandName;
-  const displaySubheading = subheading || "Timeless Wardrobe.\nEveryday Power.";
 
-  const handleImageError = () => {
-    console.warn('Hero image failed to load, using fallback');
-    setImageError(true);
-  };
-
-  const getEffectiveImage = () => {
-    if (imageError) return DEFAULT_HERO_IMAGE;
-    if (isMobile && mobileImage) return mobileImage.trim();
-    return (image?.trim() || DEFAULT_HERO_IMAGE);
-  };
-
-  const effectiveImage = getEffectiveImage();
+  const effectiveImage = image?.trim() || DEFAULT_HERO_IMAGE;
+  const effectiveMobileImage = mobileImage?.trim();
 
   return (
-    <section className="relative w-full h-[100vh] overflow-hidden bg-white">
+    <section className="relative w-full h-[100vh] overflow-hidden bg-background">
       <div className="absolute inset-0 h-full w-full">
-        {effectiveImage && (
-          <div className="absolute inset-0 h-full w-full">
-            <m.div
-              initial={{ opacity: 0, scale: 1.1 }}
-              animate={{
-                opacity: imageLoaded ? 1 : 0,
-                scale: imageLoaded ? 1 : 1.1
-              }}
-              transition={{ duration: 1.5, ease: [0.33, 1, 0.68, 1] }}
-              className="absolute inset-0 h-full w-full"
-            >
-              <Image
-                src={effectiveImage}
-                alt={displayHeading || "Hero Image"}
-                fill
-                priority
-                fetchPriority="high"
-                quality={75}
-                sizes="100vw"
-                className="object-cover object-top"
-                placeholder={blurDataURL ? "blur" : "empty"}
-                blurDataURL={blurDataURL}
-                onLoad={() => setImageLoaded(true)}
-                onError={handleImageError}
-              />
-            </m.div>
-          </div>
-        )}
+        {/* Background Image with Entrance Animation */}
+        <div className="absolute inset-0 h-full w-full animate-image-entrance">
+          {/* Responsive images handled via Next.js Image sizes/priority */}
+          <Image
+            src={effectiveImage}
+            alt={displayHeading || "Hero Image"}
+            fill
+            priority
+            fetchPriority="high"
+            quality={90}
+            sizes="100vw"
+            className="object-cover object-top"
+            placeholder={blurDataURL ? "blur" : "empty"}
+            blurDataURL={blurDataURL}
+          />
+        </div>
 
-        {/* Overlay */}
-        <m.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: imageLoaded ? overlayOpacity : 0 }}
-          transition={{ duration: 1.2, ease: "easeInOut" }}
+        {/* CSS-only Overlay (Instant paint) */}
+        <div
           className="absolute inset-0 bg-black z-[5]"
+          style={{ opacity: overlayOpacity }}
         />
       </div>
 
-      {/* Content Container */}
+      {/* Content Container - CSS Animated for zero hydration cost */}
       <div className="relative flex flex-col items-center justify-center w-full px-6 md:px-10 z-10 text-center h-[100vh] max-w-[1920px] mx-auto">
         <div className="flex flex-col items-center justify-center space-y-8">
-          <m.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={imageLoaded ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8, delay: 0.4, ease: [0.33, 1, 0.68, 1] }}
-            className="text-white/90 text-xs md:text-xs tracking-[0.2em] uppercase font-bold"
-          >
+          <p className="hero-subtext text-white/90 text-[10px] md:text-xs tracking-[0.2em] uppercase font-bold">
             {subheading || "SPRING/SUMMER '26"}
-          </m.p>
+          </p>
 
-          <m.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={imageLoaded ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 1, delay: 0.6, ease: [0.33, 1, 0.68, 1] }}
-            className="text-white text-5xl md:text-8xl font-medium tracking-tight"
-          >
+          <h1 className="hero-text text-white text-5xl md:text-8xl font-medium tracking-tight">
             {displayHeading}
-          </m.h1>
+          </h1>
 
-          <m.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={imageLoaded ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8, delay: 0.8, ease: [0.33, 1, 0.68, 1] }}
-            className="pt-4"
-          >
+          <div className="hero-cta pt-4">
             <Link
               href={ctaLink || "/shop"}
               className="inline-block px-8 py-3 rounded-full border border-white/50 text-white text-[10px] md:text-xs font-semibold tracking-[0.15em] hover:bg-white hover:text-black transition-all duration-300 uppercase"
             >
               {ctaText || "Shop Now"}
             </Link>
-          </m.div>
+          </div>
         </div>
       </div>
     </section>
