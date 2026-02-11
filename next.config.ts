@@ -59,6 +59,8 @@ const nextConfig: NextConfig = {
     qualities: [75, 90, 100],
   },
 
+
+
   // Enable gzip compression
   compress: true,
 
@@ -78,16 +80,7 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      {
-        // Cache optimized images
-        source: '/_next/image',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
+      // REMOVED: /_next/image cache header to avoid conflict with 'minimumCacheTTL' setting above
       {
         // Public static files
         source: '/images/:path*',

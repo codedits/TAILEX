@@ -115,6 +115,8 @@ export default async function ProductPage({ params }: Props) {
       for (const inv of inventory) {
         inventoryMap[inv.variant_id] = (inventoryMap[inv.variant_id] || 0) + (inv.available || 0);
       }
+      console.log('DEBUG: Inventory Map for ' + productData.slug, inventoryMap);
+
       // Attach inventory_quantity to each variant
       productData = {
         ...productData,
@@ -123,7 +125,13 @@ export default async function ProductPage({ params }: Props) {
           inventory_quantity: inventoryMap[v.id] || 0
         }))
       };
+
+      console.log('DEBUG: Variants with inventory:', productData.variants.map((v: any) => ({ id: v.id, qty: v.inventory_quantity })));
+    } else {
+      console.log('DEBUG: No inventory found for variantIds:', variantIds);
     }
+  } else {
+    console.log('DEBUG: No variants found for product ' + productData.slug);
   }
 
   const typedProduct = productData as Product;

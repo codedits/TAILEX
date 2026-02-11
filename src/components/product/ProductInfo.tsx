@@ -114,6 +114,16 @@ export default function ProductInfo({ product }: ProductInfoProps) {
     const currentStock = selectedVariant?.inventory_quantity ?? 0;
     const isOutOfStock = product.track_inventory && currentStock <= 0 && !product.allow_backorder;
 
+    useEffect(() => {
+        console.log('DEBUG: ProductInfo State', {
+            paramsOptions: selectedOptions,
+            selectedVariantId: selectedVariant?.id,
+            currentStock,
+            isOutOfStock,
+            track_inventory: product.track_inventory
+        });
+    }, [selectedOptions, selectedVariant, currentStock, isOutOfStock, product.track_inventory]);
+
     // Handlers
     const handleOptionSelect = (name: string, value: string) => {
         setSelectedOptions(prev => ({ ...prev, [name]: value }));

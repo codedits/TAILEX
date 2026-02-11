@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Image from "next/image";
 import Link from "next/link";
-import { m, AnimatePresence } from "framer-motion";
+import { m } from "framer-motion";
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import { cn } from "@/lib/utils";
@@ -76,12 +76,7 @@ const HeroCarousel = ({
 
     const currentSlide = slides[currentIndex];
 
-    // Text Animation Variants
-    const textVariants: import("framer-motion").Variants = {
-        hidden: { opacity: 0, y: 30 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.33, 1, 0.68, 1] } },
-        exit: { opacity: 0, y: -20, transition: { duration: 0.5, ease: [0.33, 1, 0.68, 1] } }
-    };
+
 
     return (
         <section className="relative w-full h-[100vh] overflow-hidden bg-white group">
@@ -110,7 +105,7 @@ const HeroCarousel = ({
                                                 loading={index === 0 ? "eager" : "lazy"}
                                                 fetchPriority={index === 0 ? "high" : "auto"}
                                                 quality={75}
-                                                sizes="100vw"
+                                                sizes="(max-width: 1080px) 100vw, 1080px"
                                                 placeholder={slide.blurDataURL ? "blur" : "empty"}
                                                 blurDataURL={slide.blurDataURL}
                                                 onLoad={() => index === 0 && setImageLoaded(true)}
@@ -137,7 +132,7 @@ const HeroCarousel = ({
                                             loading={index === 0 ? "eager" : "lazy"}
                                             fetchPriority={index === 0 ? "high" : "auto"}
                                             quality={75}
-                                            sizes="100vw"
+                                            sizes="(max-width: 1080px) 100vw, 1080px"
                                             placeholder={slide.blurDataURL ? "blur" : "empty"}
                                             blurDataURL={slide.blurDataURL}
                                             onLoad={() => index === 0 && setImageLoaded(true)}
@@ -158,80 +153,40 @@ const HeroCarousel = ({
 
             {/* Content Layer */}
             <div className="absolute inset-0 flex flex-col items-center justify-center w-full px-6 md:px-10 z-30 text-center h-full max-w-[1920px] mx-auto pointer-events-none">
-                <AnimatePresence mode="wait">
-                    {currentIndex === 0 ? (
-                        /* FIRST SLIDE: Use CSS Animations for Instant LCP/FCP (No JS Dependency for entrance) */
-                        <div key="slide-0" className="flex flex-col items-center justify-center space-y-4 pointer-events-auto">
-                            <p className="hero-subtext text-white/90 text-[10px] md:text-xs tracking-[0.2em] uppercase font-bold">
-                                {currentSlide?.subheading || defaultSubheading || "SPRING/SUMMER '26"}
-                            </p>
+                <div key={currentSlide.id} className="flex flex-col items-center justify-center space-y-4 pointer-events-auto">
+                    <p className="hero-subtext text-white/90 text-[10px] md:text-xs tracking-[0.2em] uppercase font-bold">
+                        {currentSlide?.subheading || defaultSubheading || "SPRING/SUMMER '26"}
+                    </p>
 
-                            <h1 className="hero-text text-white text-5xl md:text-8xl font-medium tracking-tight">
-                                {currentSlide?.heading || defaultHeading || brandName}
-                            </h1>
+                    <h1 className="hero-text text-white text-5xl md:text-8xl font-medium tracking-tight">
+                        {currentSlide?.heading || defaultHeading || brandName}
+                    </h1>
 
-                            <div className="hero-cta pt-4">
-                                <Link
-                                    href={currentSlide?.ctaLink || "/shop"}
-                                    className="inline-block px-8 py-3 rounded-full border border-white/50 text-white text-[10px] md:text-xs font-semibold tracking-[0.15em] hover:bg-white hover:text-black transition-all duration-300 uppercase"
-                                >
-                                    Shop Now
-                                </Link>
-                            </div>
-                        </div>
-                    ) : (
-                        /* SUBSEQUENT SLIDES: Use Framer Motion for smooth transitions */
-                        <m.div
-                            key={currentIndex}
-                            initial="hidden"
-                            animate="visible"
-                            exit="exit"
-                            variants={textVariants}
-                            className="flex flex-col items-center justify-center space-y-4 pointer-events-auto"
+                    <div className="hero-cta pt-4">
+                        <Link
+                            href={currentSlide?.ctaLink || "/shop"}
+                            className="inline-block px-8 py-3 rounded-full border border-white/50 text-white text-[10px] md:text-xs font-semibold tracking-[0.15em] hover:bg-white hover:text-black transition-all duration-300 uppercase"
                         >
-                            <p className="text-white/90 text-xs tracking-[0.2em] uppercase font-bold">
-                                {currentSlide?.subheading || defaultSubheading || "SPRING/SUMMER '26"}
-                            </p>
-
-                            <h1 className="text-white text-5xl md:text-8xl font-medium tracking-tight">
-                                {currentSlide?.heading || defaultHeading || brandName}
-                            </h1>
-
-                            <div className="pt-4">
-                                <Link
-                                    href={currentSlide?.ctaLink || "/shop"}
-                                    className="inline-block px-8 py-3 rounded-full border border-white/50 text-white text-[10px] md:text-xs font-semibold tracking-[0.15em] hover:bg-white hover:text-black transition-all duration-300 uppercase"
-                                >
-                                    Shop Now
-                                </Link>
-                            </div>
-                        </m.div>
-                    )}
-                </AnimatePresence>
+                            Shop Now
+                        </Link>
+                    </div>
+                </div>
 
                 {/* Bottom CTA */}
                 <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-40 w-full flex justify-center pointer-events-auto">
-                    <AnimatePresence mode="wait">
-                        {currentSlide?.ctaText && (
-                            <m.div
-                                key={`bottom-${currentIndex}`}
-                                initial={{ opacity: 0, y: 15 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                transition={{ duration: 0.7, delay: 0.5, ease: [0.33, 1, 0.68, 1] }}
+                    {currentSlide?.ctaText && (
+                        <div key={`bottom-${currentSlide.id}`} className="hero-cta">
+                            <Link
+                                href={currentSlide.ctaLink || "/shop"}
+                                className="group flex items-center gap-2 text-white/80 hover:text-white transition-colors duration-300"
                             >
-                                <Link
-                                    href={currentSlide.ctaLink || "/shop"}
-                                    className="group flex items-center gap-2 text-white/80 hover:text-white transition-colors duration-300"
-                                >
-                                    <span className="text-xs md:text-sm tracking-[0.15em] uppercase font-medium">
-                                        {currentSlide.ctaText}
-                                    </span>
-                                    <ArrowRightIcon className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" />
-                                </Link>
-                            </m.div>
-                        )}
-                    </AnimatePresence>
+                                <span className="text-xs md:text-sm tracking-[0.15em] uppercase font-medium">
+                                    {currentSlide.ctaText}
+                                </span>
+                                <ArrowRightIcon className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" />
+                            </Link>
+                        </div>
+                    )}
                 </div>
 
                 {/* Pagination */}
