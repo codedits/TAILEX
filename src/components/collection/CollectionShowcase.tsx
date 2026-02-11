@@ -5,7 +5,14 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Product } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { CollectionShowcaseCarousel } from "./CollectionShowcaseCarousel";
+import dynamic from 'next/dynamic';
+
+const CollectionShowcaseCarousel = dynamic(
+    () => import('./CollectionShowcaseCarousel').then(mod => mod.CollectionShowcaseCarousel),
+    {
+        loading: () => <div className="w-full h-96 bg-neutral-50 animate-pulse" />
+    }
+);
 import { m } from "framer-motion";
 import { useState } from "react";
 
@@ -55,7 +62,7 @@ export default function CollectionShowcase({
                         alt={title}
                         fill
                         className="object-cover"
-                        sizes="100vw"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 768px, 1080px"
                         quality={75}
                         loading="lazy"
                         onError={() => setImgSrc("https://framerusercontent.com/images/BjQfJy7nQoVxvCYTFzwZxprDWiQ.jpg")}

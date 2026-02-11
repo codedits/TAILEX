@@ -64,6 +64,9 @@ const nextConfig: NextConfig = {
   // Enable gzip compression
   compress: true,
 
+  // Validate trailing slashes
+  trailingSlash: false,
+
   // Strip X-Powered-By header
   poweredByHeader: false,
 

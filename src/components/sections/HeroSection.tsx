@@ -1,6 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import HeroCarousel, { HeroSlide } from './HeroCarousel';
+import dynamic from 'next/dynamic';
+import { HeroSlide } from './HeroCarousel';
+
+const HeroCarousel = dynamic(() => import('./HeroCarousel'), {
+  loading: () => <div className="absolute inset-0 bg-neutral-100" /> // Placeholder to prevent layout shift
+});
 
 type HeroSectionProps = {
   heading?: string;
@@ -74,7 +79,7 @@ const HeroSection = ({
             priority
             fetchPriority="high"
             quality={75}
-            sizes="(max-width: 1080px) 100vw, 1080px"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 768px, 1080px"
             className="object-cover object-top"
             placeholder={blurDataURL ? "blur" : "empty"}
             blurDataURL={blurDataURL}

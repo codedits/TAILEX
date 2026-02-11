@@ -141,23 +141,7 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://framerusercontent.com" />
         <link rel="dns-prefetch" href="https://framerusercontent.com" />
 
-        {/* Preload Hero Image for instant LCP - Responsive */}
-        {mobileHeroImage && (
-          <link
-            rel="preload"
-            as="image"
-            href={mobileHeroImage}
-            media="(max-width: 768px)"
-            fetchPriority="high"
-          />
-        )}
-        <link
-          rel="preload"
-          as="image"
-          href={heroImage}
-          media={mobileHeroImage ? "(min-width: 769px)" : undefined}
-          fetchPriority="high"
-        />
+
 
         {/* Organization Schema */}
         <script

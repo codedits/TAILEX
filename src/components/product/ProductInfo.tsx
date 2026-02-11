@@ -112,17 +112,27 @@ export default function ProductInfo({ product }: ProductInfoProps) {
     const currentSalePrice = selectedVariant?.sale_price ?? product.sale_price;
     const hasSale = !!currentSalePrice && currentSalePrice < currentPrice;
     const currentStock = selectedVariant?.inventory_quantity ?? 0;
-    const isOutOfStock = product.track_inventory && currentStock <= 0 && !product.allow_backorder;
 
-    useEffect(() => {
-        console.log('DEBUG: ProductInfo State', {
-            paramsOptions: selectedOptions,
-            selectedVariantId: selectedVariant?.id,
-            currentStock,
-            isOutOfStock,
-            track_inventory: product.track_inventory
-        });
-    }, [selectedOptions, selectedVariant, currentStock, isOutOfStock, product.track_inventory]);
+    // Fix: If no variant is selected, check if ANY variant has stock.
+    // Otherwise it defaults to 0 and shows "Sold Out" during SSR/initial render.
+    const isOutOfStock = useMemo(() => {
+        if (!product.track_inventory) return false;
+        if (product.allow_backorder) return false;
+
+        if (selectedVariant) {
+            return currentStock <= 0;
+        }
+
+        // No variant selected: Check if all variants are OOS
+        if (product.variants && product.variants.length > 0) {
+            return product.variants.every(v => (v.inventory_quantity ?? 0) <= 0);
+        }
+
+        // Fallback for simple products (though DB seems to use variants for all)
+        return (product.stock ?? 0) <= 0;
+    }, [product.track_inventory, product.allow_backorder, selectedVariant, currentStock, product.variants, product.stock]);
+
+
 
     // Handlers
     const handleOptionSelect = (name: string, value: string) => {
