@@ -71,11 +71,8 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
           ? "border-white/70 group-hover/nav:border-black"
           : "border-black"
           }`}>
-          {/* Left: Search (Desktop) / Menu (Mobile) */}
-          <div className="flex-1 flex items-center justify-start">
-            <div className="hidden md:block">
-              <SearchModal />
-            </div>
+          {/* Left: Search & Menu (Mobile) / Search (Desktop) */}
+          <div className="flex-1 flex items-center justify-start gap-4">
             <button
               className="md:hidden hover:opacity-70 transition-opacity"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -83,6 +80,9 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
+            <div className="block">
+              <SearchModal />
+            </div>
           </div>
 
           {/* Center: Navigation Links (Desktop) / Logo (Mobile) */}
