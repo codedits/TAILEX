@@ -104,7 +104,7 @@ const HeroCarousel = ({
                                                 priority={index === 0}
                                                 loading={index === 0 ? "eager" : "lazy"}
                                                 fetchPriority={index === 0 ? "high" : "auto"}
-                                                quality={90}
+                                                quality={85}
                                                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 768px, 1080px"
                                                 placeholder={slide.blurDataURL ? "blur" : "empty"}
                                                 blurDataURL={slide.blurDataURL}
