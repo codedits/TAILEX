@@ -1,14 +1,8 @@
 import {
-    getHeroConfig,
-    getBenefitsConfig,
-    getFooterConfig,
-    getSocialConfig,
     getLatestPosts,
     getFeaturedCollections,
     getCollectionsWithProducts,
-    getFeaturedProducts,
-    getBrandConfig,
-    getHomepageLayout
+    getFeaturedProducts
 } from "@/lib/theme";
 
 import {
@@ -25,24 +19,9 @@ import {
 import { StoreConfigService, StoreConfig } from "@/services/config";
 
 export async function getHomeData(): Promise<HomeData> {
-    // 1. Critical Data - Await these immediately for the Hero & Layout
-    const [
-        hero,
-        benefits,
-        footer,
-        social,
-        brand,
-        layout,
-        config
-    ] = await Promise.all([
-        getHeroConfig(),
-        getBenefitsConfig(),
-        getFooterConfig(),
-        getSocialConfig(),
-        getBrandConfig(),
-        getHomepageLayout(),
-        StoreConfigService.getStoreConfig()
-    ]);
+    // 1. Critical Data - Single efficient call to get all config
+    // This replaces 6+ separate DB calls with 1 call (which is also cached)
+    const config = await StoreConfigService.getStoreConfig();
 
     // 2. Deferred Data - Start fetching but DO NOT await
     // These promises will be passed to Suspense boundaries
@@ -53,13 +32,13 @@ export async function getHomeData(): Promise<HomeData> {
     const storeConfig = config as StoreConfig;
 
     return {
-        // Critical (Resolved)
-        hero: hero as HeroConfig,
-        benefits: benefits as BenefitsConfig,
-        footer: footer as FooterConfig,
-        social: social as SocialConfig,
-        brand: brand as BrandConfig,
-        layout,
+        // Critical (From Config)
+        hero: storeConfig.hero,
+        benefits: storeConfig.benefits,
+        footer: storeConfig.footer,
+        social: storeConfig.social,
+        brand: storeConfig.brand,
+        layout: storeConfig.homepageLayout,
         categoryGrid: storeConfig.categoryGrid,
 
         // Deferred (Promises)
@@ -67,7 +46,7 @@ export async function getHomeData(): Promise<HomeData> {
         collectionsPromise,
         productsPromise,
 
-        // Keep types compatible for now, but valid values will come from promises
+        // Deprecated (kept for temporary compat, will be empty)
         posts: [],
         collections: [],
         products: []
