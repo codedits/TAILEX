@@ -78,6 +78,7 @@ const HeroSection = ({
             fill
             priority
             fetchPriority="high"
+            unoptimized={false}
             quality={90}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 768px, 1080px"
             className="object-cover object-top"
