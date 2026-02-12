@@ -78,7 +78,7 @@ const HeroSection = ({
             fill
             priority
             fetchPriority="high"
-            quality={85}
+            quality={80}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 768px, 1080px"
             className="object-cover object-top"
             placeholder={blurDataURL ? "blur" : "empty"}

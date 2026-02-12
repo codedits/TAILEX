@@ -57,6 +57,7 @@ export default function Featuring({ images }: FeaturingProps) {
                         className="object-cover object-center opacity-100"
                         priority
                         sizes="(max-width: 1024px) 100vw, 50vw"
+                        quality={80}
                     />
                 </div>
 
@@ -124,6 +125,7 @@ export default function Featuring({ images }: FeaturingProps) {
                             fill
                             className="object-cover object-center opacity-100"
                             sizes="(max-width: 1024px) 100vw, 50vw"
+                            quality={80}
                         />
                     </div>
                     <div className="relative">
@@ -204,6 +206,7 @@ export default function Featuring({ images }: FeaturingProps) {
                         fill
                         className="object-cover opacity-80"
                         sizes="(max-width: 1024px) 100vw, 50vw"
+                        quality={80}
                     />
 
                     <motion.div

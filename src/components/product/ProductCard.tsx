@@ -89,7 +89,7 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
                 fill
                 priority={priority}
                 sizes={sizes}
-                quality={90}
+                quality={80}
                 placeholder={primaryBlur ? "blur" : "empty"}
                 blurDataURL={primaryBlur}
                 onLoad={() => setImageLoaded(true)}
@@ -108,7 +108,7 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
                 alt=""
                 fill
                 sizes={sizes}
-                quality={90}
+                quality={80}
                 className="absolute inset-0 object-cover opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100"
               />
             )}

@@ -85,6 +85,7 @@ export function DiscountPopup() {
                                 fill
                                 className="object-cover"
                                 priority
+                                quality={80}
                             />
                         </div>
                     )}

@@ -51,13 +51,11 @@ const nextConfig: NextConfig = {
 
     // Optimize image formats — AVIF first (smallest), WebP fallback
     formats: ['image/avif', 'image/webp'],
-    // Responsive device sizes for srcset generation
-    deviceSizes: [400, 640, 750, 828, 1080, 1200, 1440, 1920, 2048, 2560],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 300, 384, 450, 512, 640],
+    // Leaner sizes to reduce Vercel transformations
+    deviceSizes: [640, 1080, 1920, 2560],
+    imageSizes: [128, 256, 384, 512, 640],
     // Cache optimized images for 1 year
     minimumCacheTTL: 31536000,
-    // Explicitly allow qualities used in the app
-    qualities: [75, 85, 90, 100],
   },
 
 

@@ -104,7 +104,7 @@ const CategoryGrid = ({
                       fill
                       className="object-cover transition-all duration-700 ease-out group-hover:grayscale-[20%]"
                       sizes="(max-width: 768px) 100vw, 50vw"
-                      quality={75}
+                      quality={80}
                     />
                     {/* Dark overlay for contrast if mix-blend fails on certain backgrounds */}
                     <div className="absolute inset-0 bg-black/10 transition-colors group-hover:bg-black/0" />

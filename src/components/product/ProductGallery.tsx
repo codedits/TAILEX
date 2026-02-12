@@ -70,7 +70,7 @@ export default function ProductGallery({ images, title, blurDataUrl, blurDataUrl
                                 fill
                                 className="object-cover"
                                 sizes="96px"
-                                quality={90}
+                                quality={80}
                             />
                         </button>
                     ))}
@@ -98,7 +98,7 @@ export default function ProductGallery({ images, title, blurDataUrl, blurDataUrl
                                         className="object-cover"
                                         priority={idx === 0}
                                         sizes="100vw"
-                                        quality={90}
+                                        quality={80}
                                         placeholder={getBlurUrl(img, idx) ? "blur" : "empty"}
                                         blurDataURL={getBlurUrl(img, idx) ?? undefined}
                                     />

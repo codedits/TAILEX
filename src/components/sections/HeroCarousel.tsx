@@ -104,8 +104,8 @@ const HeroCarousel = ({
                                                 priority={index === 0}
                                                 loading={index === 0 ? "eager" : "lazy"}
                                                 fetchPriority={index === 0 ? "high" : "auto"}
-                                                quality={85}
-                                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 768px, 1080px"
+                                                quality={80}
+                                                sizes="100vw"
                                                 placeholder={slide.blurDataURL ? "blur" : "empty"}
                                                 blurDataURL={slide.blurDataURL}
                                                 onLoad={() => index === 0 && setImageLoaded(true)}
@@ -131,8 +131,8 @@ const HeroCarousel = ({
                                             priority={index === 0}
                                             loading={index === 0 ? "eager" : "lazy"}
                                             fetchPriority={index === 0 ? "high" : "auto"}
-                                            quality={90}
-                                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 768px, 1080px"
+                                            quality={80}
+                                            sizes="100vw"
                                             placeholder={slide.blurDataURL ? "blur" : "empty"}
                                             blurDataURL={slide.blurDataURL}
                                             onLoad={() => index === 0 && setImageLoaded(true)}

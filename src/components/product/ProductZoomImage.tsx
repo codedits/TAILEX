@@ -137,7 +137,7 @@ export function ProductZoomImage({
         fill
         className="object-cover"
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 55vw, 700px"
-        quality={90}
+        quality={80}
         priority={priority}
         placeholder={blurDataUrl ? 'blur' : 'empty'}
         blurDataURL={blurDataUrl || undefined}
