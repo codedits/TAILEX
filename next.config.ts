@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
 
   // Increase timeout for static generation (ISR/SSG pages)
-  staticPageGenerationTimeout: 120,
+  staticPageGenerationTimeout: 240,
 
   // Server Actions config
   experimental: {
@@ -56,6 +56,8 @@ const nextConfig: NextConfig = {
     imageSizes: [128, 256, 384, 512, 640],
     // Cache optimized images for 1 year
     minimumCacheTTL: 31536000,
+    // Explicitly allow qualities used in the app
+    qualities: [75, 80],
   },
 
 
