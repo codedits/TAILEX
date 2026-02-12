@@ -3,8 +3,10 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { verifyAdmin } from '@/lib/admin-auth'
 
 export async function createPage() {
+    if (!await verifyAdmin()) throw new Error('Unauthorized');
     const supabase = await createAdminClient()
 
     const { data, error } = await supabase.from('pages').insert({
@@ -20,12 +22,14 @@ export async function createPage() {
 }
 
 export async function deletePage(id: string) {
+    if (!await verifyAdmin()) throw new Error('Unauthorized');
     const supabase = await createAdminClient()
     await supabase.from('pages').delete().eq('id', id)
     revalidatePath('/admin/pages')
 }
 
 export async function updatePage(id: string, data: any) {
+    if (!await verifyAdmin()) throw new Error('Unauthorized');
     const supabase = await createAdminClient()
     const { error } = await supabase
         .from('pages')

@@ -32,15 +32,16 @@ export function DiscountForm({ initialConfig }: DiscountFormProps) {
 
     const handleDeleteImage = async () => {
         if (confirm('Are you sure you want to delete this image?')) {
+            const toastId = toast.loading('Deleting image...');
             startTransition(async () => {
                 const result = await deleteDiscountImage();
                 if (result.success) {
                     setImagePreview('');
                     setImageFile(null);
                     setConfig({ ...config, imageUrl: '' });
-                    toast.success('Image deleted');
+                    toast.success('Image deleted', { id: toastId });
                 } else {
-                    toast.error(result.error || 'Failed to delete image');
+                    toast.error(result.error || 'Failed to delete image', { id: toastId });
                 }
             });
         }
@@ -48,6 +49,7 @@ export function DiscountForm({ initialConfig }: DiscountFormProps) {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        const toastId = toast.loading('Saving discount settings...');
 
         startTransition(async () => {
             const formData = new FormData();
@@ -65,10 +67,10 @@ export function DiscountForm({ initialConfig }: DiscountFormProps) {
             const result = await updateGlobalDiscount(formData);
 
             if (result.success) {
-                toast.success('Discount settings saved successfully');
+                toast.success('Discount settings saved', { id: toastId });
                 setImageFile(null);
             } else {
-                toast.error(result.error || 'Failed to save settings');
+                toast.error(result.error || 'Failed to save settings', { id: toastId });
             }
         });
     };

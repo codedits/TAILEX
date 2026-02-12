@@ -141,6 +141,7 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
     formData.set('variants', JSON.stringify(variants));
 
     startTransition(async () => {
+      const toastId = toast.loading('Saving product...');
       try {
         let res;
         if (initialData?.id) {
@@ -151,9 +152,9 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
         }
 
         if (res?.error) {
-          toast.error("Error saving product", { description: res.error });
+          toast.error("Error saving product", { id: toastId, description: res.error });
         } else {
-          toast.success(initialData?.id ? "Product updated" : "Product created");
+          toast.success(initialData?.id ? "Product updated" : "Product created", { id: toastId });
 
           // Clear upload state to free memory
           upload.cleanup();
@@ -165,7 +166,7 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
         }
       } catch (error) {
         console.error("Submit Error", error);
-        toast.error("Something went wrong");
+        toast.error("Something went wrong", { id: toastId });
       }
     });
   }

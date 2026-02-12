@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { createHmac } from 'crypto'
 
 export async function proxy(request: NextRequest) {
     // 1. Admin Protection Logic
@@ -6,9 +7,11 @@ export async function proxy(request: NextRequest) {
         // Exclude the login page itself to avoid loops
         if (!request.nextUrl.pathname.startsWith('/admin/login')) {
             const adminCookie = request.cookies.get('admin_access_token')
+            const adminPass = process.env.ADMIN_PASS || ''
+            const expected = createHmac('sha256', adminPass).update('admin_session').digest('hex')
 
-            // Strict check: cookie must exist and have value 'true'
-            if (!adminCookie || adminCookie.value !== 'true') {
+            // Cookie value must be the HMAC-signed token (unforgeable without ADMIN_PASS)
+            if (!adminCookie || adminCookie.value !== expected) {
                 const url = request.nextUrl.clone()
                 url.pathname = '/admin/login'
                 return NextResponse.redirect(url)

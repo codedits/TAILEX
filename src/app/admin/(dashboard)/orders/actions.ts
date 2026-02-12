@@ -2,13 +2,13 @@
 
 import { OrderService } from '@/services/orders';
 import { revalidatePath } from 'next/cache';
+import { verifyAdmin } from '@/lib/admin-auth';
 
 export async function deleteOrderAction(orderId: string) {
     try {
+        if (!await verifyAdmin()) throw new Error('Unauthorized');
         console.log('Action: Deleting order', orderId);
         await OrderService.deleteOrder(orderId);
-        // We will rely on the client refreshing itself via router.refresh() 
-        // to avoid potential streaming errors in dev mode with revalidatePath.
         return {
             success: true,
             timestamp: Date.now()
@@ -23,6 +23,7 @@ export async function deleteOrderAction(orderId: string) {
 }
 export async function updateOrderStatusAction(orderId: string, status: string, paymentStatus?: string) {
     try {
+        if (!await verifyAdmin()) throw new Error('Unauthorized');
         await OrderService.updateStatus(orderId, {
             status: status as any,
             payment_status: paymentStatus as any

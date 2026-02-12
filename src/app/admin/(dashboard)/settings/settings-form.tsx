@@ -37,6 +37,7 @@ export function SettingsForm({ hero, theme, brand }: SettingsFormProps) {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    const toastId = toast.loading('Saving settings...');
 
     // Remove the file input and add the actual file if exists
     formData.delete('heroImageFile');
@@ -50,12 +51,14 @@ export function SettingsForm({ hero, theme, brand }: SettingsFormProps) {
     startTransition(async () => {
       try {
         await updateSiteConfig(formData);
-        toast.success("Settings saved", {
-          description: "Your store preferences have been updated successfully.",
+        toast.success('Settings saved', {
+          id: toastId,
+          description: 'Your store preferences have been updated.',
         });
       } catch (error) {
-        toast.error("Error saving settings", {
-          description: "Failed to update store configuration. Please try again.",
+        toast.error('Error saving settings', {
+          id: toastId,
+          description: 'Failed to update store configuration. Please try again.',
         });
       }
     });

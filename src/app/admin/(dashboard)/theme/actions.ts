@@ -3,8 +3,10 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
+import { verifyAdmin } from '@/lib/admin-auth'
 
 export async function updateThemeConfig(formData: FormData) {
+  if (!await verifyAdmin()) throw new Error('Unauthorized');
   const supabase = await createAdminClient()
   const cookieStore = await cookies()
 

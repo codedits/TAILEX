@@ -6,7 +6,8 @@ import MobileCollectionList from "@/components/shop/MobileCollectionList";
 import { Product, Collection } from "@/lib/types";
 import { notFound } from "next/navigation";
 import { StoreConfigService } from "@/services/config";
-import { createStaticClient } from "@/lib/supabase/static";
+import * as collectionsApi from "@/lib/api/collections";
+import { ProductService } from "@/services/products";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -21,13 +22,10 @@ import {
 export const revalidate = 120; // ISR: 2 minutes — collections change less frequently
 
 // Pre-build all visible collection pages at deploy time
+// Pre-build all visible collection pages at deploy time
 export async function generateStaticParams() {
-  const supabase = createStaticClient();
-  const { data } = await supabase
-    .from('collections')
-    .select('slug')
-    .eq('is_visible', true);
-  return (data || []).map((c) => ({ slug: c.slug }));
+    const { data } = await collectionsApi.getCollections({ visible: true });
+    return (data || []).map((c) => ({ slug: c.slug }));
 }
 
 export const dynamicParams = true;
@@ -39,13 +37,8 @@ type Props = {
 // High-end store: Generate metadata for SEO
 export async function generateMetadata({ params }: Props) {
     const { slug } = await params;
-    const supabase = createStaticClient();
 
-    const { data: collection } = await supabase
-        .from('collections')
-        .select('title, seo_title, seo_description, description')
-        .eq('slug', slug)
-        .single();
+    const { data: collection } = await collectionsApi.getCollection(slug);
 
     if (!collection) {
         return { title: 'Collection Not Found' };
@@ -59,24 +52,10 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function CollectionDetailPage({ params }: Props) {
     const { slug } = await params;
-    const supabase = createStaticClient();
-
-    const collectionPromise = supabase
-        .from('collections')
-        .select('*')
-        .eq('slug', slug)
-        .single();
-
-    const collectionsListPromise = supabase
-        .from('collections')
-        .select('id, title, slug')
-        .eq('is_visible', true)
-        .order('sort_order', { ascending: true })
-        .order('title');
 
     const [collectionResult, collectionsListResult, config] = await Promise.all([
-        collectionPromise,
-        collectionsListPromise,
+        collectionsApi.getCollection(slug),
+        collectionsApi.getCollections({ visible: true }),
         StoreConfigService.getStoreConfig()
     ]);
 
@@ -90,14 +69,13 @@ export default async function CollectionDetailPage({ params }: Props) {
     const socialConfig = config.social;
     const navItems = config.navigation.main;
 
-    const productsPromise = supabase
-        .from('products')
-        .select('*')
-        .eq('category_id', collection.id)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .limit(20)
-        .then(res => (res.data || []) as Product[]) as Promise<Product[]>;
+    const productsPromise = ProductService.getProducts({
+        categoryId: collection.id,
+        status: 'active',
+        orderBy: 'created_at',
+        order: 'desc',
+        limit: 20
+    }).then(res => res.data);
 
     return (
         <main className="min-h-screen bg-background text-foreground selection:bg-black selection:text-white font-sans overflow-visible">

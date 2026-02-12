@@ -6,9 +6,10 @@
 
 import { createAdminClient, ensureBucketExists } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
-import { revalidatePath } from 'next/cache'
+import { createStaticClient } from '@/lib/supabase/static'
+import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'
 import { redirect } from 'next/navigation'
-import type { Collection, ApiResponse } from '@/lib/types'
+import type { Collection, ApiResponse, Product } from '@/lib/types'
 import { processImage, generateImageFilename } from '@/lib/image-processor'
 
 
@@ -175,10 +176,11 @@ export async function createCollection(formData: FormData): Promise<ApiResponse<
       return { error: error.message }
     }
 
-    revalidatePath('/admin/collections')
-    revalidatePath('/collection')
-    revalidatePath('/shop')
-    revalidatePath('/')
+    revalidatePath('/admin/collections');
+    revalidatePath('/collection');
+    revalidatePath('/shop');
+    revalidatePath('/');
+    (revalidateTag as any)('collections', 'max'); // Invalidate cached collections
 
     return { data: data as Collection }
   } catch (error) {
@@ -277,11 +279,12 @@ export async function updateCollection(formData: FormData): Promise<ApiResponse<
       await deleteImageFromStorage(oldImageUrl)
     }
 
-    revalidatePath('/admin/collections')
-    revalidatePath(`/admin/collections/${id}`)
-    revalidatePath('/collection')
-    revalidatePath('/shop')
-    revalidatePath('/')
+    revalidatePath('/admin/collections');
+    revalidatePath(`/admin/collections/${id}`);
+    revalidatePath('/collection');
+    revalidatePath('/shop');
+    revalidatePath('/');
+    (revalidateTag as any)('collections', 'max'); // Invalidate cached collections
 
     return { data: data as Collection }
   } catch (error) {
@@ -318,10 +321,11 @@ export async function deleteCollection(id: string): Promise<ApiResponse<null>> {
       await deleteImageFromStorage(collection.image_url)
     }
 
-    revalidatePath('/admin/collections')
-    revalidatePath('/collection')
-    revalidatePath('/shop')
-    revalidatePath('/')
+    revalidatePath('/admin/collections');
+    revalidatePath('/collection');
+    revalidatePath('/shop');
+    revalidatePath('/');
+    (revalidateTag as any)('collections', 'max'); // Invalidate cached collections
 
     return { message: 'Collection deleted successfully' }
   } catch (error) {
@@ -330,77 +334,85 @@ export async function deleteCollection(id: string): Promise<ApiResponse<null>> {
 }
 
 // ==========================================
-// GET COLLECTIONS
+// GET COLLECTIONS (Cached)
 // ==========================================
 
-export async function getCollections(options?: {
-  visible?: boolean
-  limit?: number
-}): Promise<ApiResponse<Collection[]>> {
-  try {
-    const supabase = await createClient()
+export const getCollections = unstable_cache(
+  async (options?: {
+    visible?: boolean
+    limit?: number
+  }): Promise<ApiResponse<Collection[]>> => {
+    try {
+      const supabase = createStaticClient()
 
-    let query = supabase
-      .from('collections')
-      .select('*')
-      .order('sort_order', { ascending: true })
-      .order('title', { ascending: true })
+      let query = supabase
+        .from('collections')
+        .select('*')
+        .order('sort_order', { ascending: true })
+        .order('title', { ascending: true })
 
-    if (options?.visible !== undefined) {
-      query = query.eq('is_visible', options.visible)
+      if (options?.visible !== undefined) {
+        query = query.eq('is_visible', options.visible)
+      }
+
+      if (options?.limit) {
+        query = query.limit(options.limit)
+      }
+
+      const { data, error } = await query
+
+      if (error) {
+        return { error: error.message }
+      }
+
+      return { data: data as Collection[] }
+    } catch (error) {
+      return { error: 'Failed to fetch collections' }
     }
-
-    if (options?.limit) {
-      query = query.limit(options.limit)
-    }
-
-    const { data, error } = await query
-
-    if (error) {
-      return { error: error.message }
-    }
-
-    return { data: data as Collection[] }
-  } catch (error) {
-    return { error: 'Failed to fetch collections' }
-  }
-}
+  },
+  ['collections-list'], // Key parts
+  { tags: ['collections'], revalidate: 3600 }
+)
 
 // ==========================================
-// GET SINGLE COLLECTION
+// GET SINGLE COLLECTION (Cached)
 // ==========================================
 
-export async function getCollection(slug: string): Promise<ApiResponse<Collection & { products: unknown[] }>> {
-  try {
-    const supabase = await createClient()
+export const getCollection = unstable_cache(
+  async (slug: string): Promise<ApiResponse<Collection & { products: unknown[] }>> => {
+    try {
+      const supabase = createStaticClient()
 
-    const { data: collection, error } = await supabase
-      .from('collections')
-      .select('*')
-      .eq('slug', slug)
-      .single()
+      const { data: collection, error } = await supabase
+        .from('collections')
+        .select('*')
+        .eq('slug', slug)
+        .single()
 
-    if (error) {
-      return { error: error.message }
+      if (error) {
+        return { error: error.message }
+      }
+
+      // Fetch products in this collection
+      const { data: products } = await supabase
+        .from('products')
+        .select('*')
+        .eq('category_id', collection.id)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(20)
+
+
+      return {
+        data: {
+          ...collection,
+          products: products || []
+        } as Collection & { products: unknown[] }
+      }
+    } catch (error) {
+      return { error: 'Failed to fetch collection' }
     }
-
-    // Fetch products in this collection
-    const { data: products } = await supabase
-      .from('products')
-      .select('*')
-      .eq('category_id', collection.id)
-      .eq('status', 'active')
-      .order('created_at', { ascending: false })
-      .limit(20)
-
-
-    return {
-      data: {
-        ...collection,
-        products: products || []
-      } as Collection & { products: unknown[] }
-    }
-  } catch (error) {
-    return { error: 'Failed to fetch collection' }
-  }
-}
+  },
+  ['collection-by-slug'], // Key parts
+  { tags: ['collections', 'products'], revalidate: 3600 } // Invalidate if collection OR products list changes
+)

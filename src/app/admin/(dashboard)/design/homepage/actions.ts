@@ -3,8 +3,10 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { HomepageSection } from "@/lib/types";
+import { verifyAdmin } from "@/lib/admin-auth";
 
 export async function updateHomepageLayout(sections: HomepageSection[]) {
+    if (!await verifyAdmin()) throw new Error('Unauthorized');
     const supabase = await createAdminClient();
 
     const { error } = await supabase

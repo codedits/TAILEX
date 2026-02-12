@@ -20,15 +20,16 @@ export function HomepageBuilderClient({ initialSections }: HomepageBuilderClient
 
     const handleSave = async () => {
         setIsSaving(true);
+        const toastId = toast.loading('Saving layout...');
         // Update order index before saving
         const orderedSections = sections.map((s, i) => ({ ...s, order: i }));
         const result = await updateHomepageLayout(orderedSections);
         setIsSaving(false);
 
         if (result.success) {
-            toast.success("Homepage layout saved");
+            toast.success("Homepage layout saved", { id: toastId });
         } else {
-            toast.error("Failed to save layout");
+            toast.error("Failed to save layout", { id: toastId });
         }
     };
 

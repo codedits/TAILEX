@@ -12,7 +12,7 @@ import { Upload, Trash2, Crop as CropIcon, Plus, ChevronUp, ChevronDown, GripVer
 import { ImageCropper } from '@/components/ui/image-cropper';
 import { StoreConfig } from '@/services/config';
 import { BenefitItem } from '@/lib/types';
-import { convertFileToWebP } from '@/lib/image-utils';
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 
@@ -44,17 +44,9 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
         // Handle File Upload for Hero
         if (section === 'hero' && heroFile) {
             const formData = new FormData();
-            toastId = toast.loading('Optimizing image...'); // Start loading toast
+            toastId = toast.loading('Uploading hero image...');
+            formData.append('file', heroFile);
 
-            try {
-                const webpFile = await convertFileToWebP(heroFile, 0.9);
-                formData.append('file', webpFile);
-            } catch (error) {
-                console.error('WebP conversion failed', error);
-                formData.append('file', heroFile);
-            }
-
-            toast.loading('Uploading image...', { id: toastId }); // Update message
             const uploadRes = await uploadSiteAsset(formData);
 
             if (uploadRes.success && uploadRes.url) {
@@ -74,18 +66,11 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
         // Handle File Upload for Mobile Hero
         if (section === 'hero' && mobileHeroFile) {
             const formData = new FormData();
-            // Start or update toast
-            if (!toastId) toastId = toast.loading('Optimizing mobile image...');
-            else toast.loading('Optimizing mobile image...', { id: toastId });
+            if (!toastId) toastId = toast.loading('Uploading mobile image...');
+            else toast.loading('Uploading mobile image...', { id: toastId });
 
-            try {
-                const webpFile = await convertFileToWebP(mobileHeroFile, 0.85);
-                formData.append('file', webpFile);
-            } catch {
-                formData.append('file', mobileHeroFile);
-            }
+            formData.append('file', mobileHeroFile);
 
-            toast.loading('Uploading mobile image...', { id: toastId });
             const uploadRes = await uploadSiteAsset(formData);
 
             if (uploadRes.success && uploadRes.url) {
@@ -113,18 +98,12 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
 
                 // Upload desktop image
                 if (files.desktop) {
-                    if (!toastId) toastId = toast.loading(`Optimizing slide ${slideIndex + 1}...`);
-                    else toast.loading(`Optimizing slide ${slideIndex + 1}...`, { id: toastId });
+                    if (!toastId) toastId = toast.loading(`Uploading slide ${slideIndex + 1}...`);
+                    else toast.loading(`Uploading slide ${slideIndex + 1}...`, { id: toastId });
 
                     const formData = new FormData();
-                    try {
-                        const webpFile = await convertFileToWebP(files.desktop, 0.9);
-                        formData.append('file', webpFile);
-                    } catch {
-                        formData.append('file', files.desktop);
-                    }
+                    formData.append('file', files.desktop);
 
-                    toast.loading(`Uploading slide ${slideIndex + 1}...`, { id: toastId });
                     const uploadRes = await uploadSiteAsset(formData);
 
                     if (uploadRes.success && uploadRes.url) {
@@ -141,12 +120,7 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
                     toast.loading(`Uploading mobile for slide ${slideIndex + 1}...`, { id: toastId });
 
                     const formData = new FormData();
-                    try {
-                        const webpFile = await convertFileToWebP(files.mobile, 0.85);
-                        formData.append('file', webpFile);
-                    } catch {
-                        formData.append('file', files.mobile);
-                    }
+                    formData.append('file', files.mobile);
 
                     const uploadRes = await uploadSiteAsset(formData);
 

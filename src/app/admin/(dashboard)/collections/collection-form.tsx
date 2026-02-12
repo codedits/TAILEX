@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import Image from "next/image";
 import { ImageCropper } from "@/components/ui/image-cropper";
 import { useSearchParams, useRouter } from "next/navigation";
-import { convertFileToWebP } from '@/lib/image-utils';
+
 
 export function CollectionForm({ initialData }: { initialData?: any }) {
     const router = useRouter();
@@ -41,33 +41,18 @@ export function CollectionForm({ initialData }: { initialData?: any }) {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
-        // We need to handle the async conversion before we can submit
-        // Since we cannot make the form handler async nicely without preventing default immediately (which we did),
-        // we will wrap the logic in an async function.
-
         const form = e.currentTarget;
 
         const submitLogic = async () => {
             const formData = new FormData(form);
+            const toastId = toast.loading('Saving collection...');
 
-            // Use the cropped blob if available
+            // Send raw cropped blob — server processes through Sharp
             if (croppedBlob) {
-                try {
-                    toast.loading('Optimizing collection image...');
-                    // Convert blob to File first
-                    const fileFromBlob = new File([croppedBlob], "collection-image.jpg", { type: "image/jpeg" });
-                    const webpFile = await convertFileToWebP(fileFromBlob, 0.9);
-                    formData.set('imageFile', webpFile);
-                    toast.dismiss();
-                } catch (error) {
-                    console.error("WebP conversion failed", error);
-                    formData.set('imageFile', croppedBlob, 'collection-image.jpg');
-                }
+                const fileFromBlob = new File([croppedBlob], 'collection-image.jpg', { type: 'image/jpeg' });
+                formData.set('imageFile', fileFromBlob);
             }
 
-            // Trust native form behavior for Switch (Radix UI puts a hidden input)
-            // If it's not in formData, it's off.
             if (!formData.has('is_visible')) {
                 formData.set('is_visible', 'off');
             }
@@ -83,25 +68,20 @@ export function CollectionForm({ initialData }: { initialData?: any }) {
                     }
 
                     if (res?.error) {
-                        toast.error("Error saving collection", {
-                            description: res.error
-                        });
+                        toast.error('Error saving collection', { id: toastId, description: res.error });
                     } else {
-                        toast.success(initialData?.id ? "Collection updated" : "Collection created", {
+                        toast.success(initialData?.id ? 'Collection updated' : 'Collection created', {
+                            id: toastId,
                             description: `${formData.get('title')} has been saved.`
                         });
-
-                        // Redirect after a short delay
                         setTimeout(() => {
                             router.push('/admin/collections');
                             router.refresh();
                         }, 1000);
                     }
                 } catch (err) {
-                    console.error("Submission error:", err);
-                    toast.error("Unexpected error", {
-                        description: "Please try again later"
-                    });
+                    console.error('Submission error:', err);
+                    toast.error('Something went wrong', { id: toastId, description: 'Please try again later' });
                 }
             });
         };

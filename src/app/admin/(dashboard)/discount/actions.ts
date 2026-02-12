@@ -4,9 +4,12 @@ import { StoreConfigService } from '@/services/config';
 import { revalidatePath } from 'next/cache';
 import { createAdminClient, ensureBucketExists } from '@/lib/supabase/admin';
 import { GlobalDiscountConfig } from '@/lib/types';
+import { verifyAdmin } from '@/lib/admin-auth';
+import { processImage, generateImageFilename } from '@/lib/image-processor';
 
 export async function updateGlobalDiscount(formData: FormData) {
     try {
+        if (!await verifyAdmin()) throw new Error('Unauthorized');
         const enabled = formData.get('enabled') === 'true';
         const title = formData.get('title') as string || '';
         const percentage = parseInt(formData.get('percentage') as string) || 0;
@@ -22,13 +25,14 @@ export async function updateGlobalDiscount(formData: FormData) {
             await ensureBucketExists('site-assets');
             const supabase = await createAdminClient();
 
-            const fileExt = imageFile.name.split('.').pop()?.toLowerCase() || 'jpg';
-            const fileName = `discount/${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+            // Process through Sharp: resize to card size, convert to WebP, generate blur
+            const processed = await processImage(imageFile, 'card');
+            const fileName = generateImageFilename('discount');
 
             const { error: uploadError } = await supabase.storage
                 .from('site-assets')
-                .upload(fileName, imageFile, {
-                    contentType: imageFile.type,
+                .upload(fileName, processed.buffer, {
+                    contentType: processed.contentType,
                     cacheControl: '31536000'
                 });
 
@@ -59,6 +63,7 @@ export async function updateGlobalDiscount(formData: FormData) {
 
 export async function deleteDiscountImage() {
     try {
+        if (!await verifyAdmin()) throw new Error('Unauthorized');
         const supabase = await createAdminClient();
 
         // Get current config

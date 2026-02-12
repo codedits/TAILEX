@@ -2,6 +2,7 @@
 
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { generateAdminToken } from '@/lib/admin-auth'
 
 export async function login(prevState: any, formData: FormData) {
     const password = formData.get('password') as string
@@ -13,9 +14,9 @@ export async function login(prevState: any, formData: FormData) {
     }
 
     if (password === adminPass) {
-        // Set cookie valid for 24 hours
+        const token = generateAdminToken(adminPass)
         const cookieStore = await cookies()
-        cookieStore.set('admin_access_token', 'true', {
+        cookieStore.set('admin_access_token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             maxAge: 60 * 60 * 24,

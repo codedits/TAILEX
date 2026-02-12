@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { createStaticClient } from "@/lib/supabase/static";
+import { ProductService } from "@/services/products";
 import Navbar from "@/components/layout/Navbar";
 
 import ProductDetail from "@/components/product/ProductDetail";
@@ -39,14 +40,14 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = createStaticClient();
 
-  // Fetch product for metadata
-  const { data: product } = await supabase
-    .from("products")
-    .select("title, description, cover_image")
-    .eq("slug", slug)
-    .single();
+  // Fetch product for metadata (Cached)
+  let product: Product | null = null;
+  try {
+    product = await ProductService.getProductBySlug(slug);
+  } catch (e) {
+    // ignore error
+  }
 
   if (!product) {
     return {
@@ -80,53 +81,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
-  const supabase = createStaticClient();
 
   // Fetch product and all config in parallel
-  const [productResult, config] = await Promise.all([
-    supabase
-      .from("products")
-      .select(`*, options:product_options(*), variants:product_variants(*)`)
-      .eq("slug", slug)
-      .maybeSingle(),
+  const [product, config] = await Promise.all([
+    ProductService.getProductBySlug(slug).catch(() => null),
     StoreConfigService.getStoreConfig()
   ]);
 
-  if (productResult.error || !productResult.data) {
-    if (productResult.error) {
-      console.error("Product fetch error:", productResult.error);
-    }
+  if (!product) {
     notFound();
   }
 
-  let productData = productResult.data;
-
-  // Fetch inventory levels for variants
-  if (productData.variants && productData.variants.length > 0) {
-    const variantIds = productData.variants.map((v: any) => v.id);
-    const { data: inventory } = await supabase
-      .from("inventory_levels")
-      .select("variant_id, available")
-      .in("variant_id", variantIds);
-
-    if (inventory) {
-      // Build inventory map (sum across locations)
-      const inventoryMap: Record<string, number> = {};
-      for (const inv of inventory) {
-        inventoryMap[inv.variant_id] = (inventoryMap[inv.variant_id] || 0) + (inv.available || 0);
-      }
-
-      // Attach inventory_quantity to each variant
-      productData = {
-        ...productData,
-        variants: productData.variants.map((v: any) => ({
-          ...v,
-          inventory_quantity: inventoryMap[v.id] || 0
-        }))
-      };
-    }
-  }
-
+  const productData = product;
   const typedProduct = productData as Product;
 
   const brand = config.brand;
@@ -134,14 +100,12 @@ export default async function ProductPage({ params }: Props) {
   const socialConfig = config.social;
   const navItems = config.navigation.main;
 
-  // Fetch Related Products (excluding current product, same category preferred)
-  const { data: relatedProducts } = await supabase
-    .from("products")
-    .select("id, title, slug, price, sale_price, cover_image, images")
-    .eq("status", "active")
-    .eq("category_id", typedProduct.category_id)
-    .neq("id", typedProduct.id)
-    .limit(4);
+  // Fetch Related Products (Cached)
+  const relatedProducts = await ProductService.getProducts({
+    categoryId: typedProduct.category_id || undefined,
+    status: 'active',
+    limit: 4
+  }).then(res => res.data.filter(p => p.id !== typedProduct.id));
 
   const safeRelated = (relatedProducts || []) as Product[];
 

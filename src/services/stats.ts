@@ -36,11 +36,16 @@ export const StatsService = {
             const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
 
             const [
-                { data: orders },
+                { data: allOrders },
+                { data: recentOrders },
                 { data: products },
                 { count: productCount },
                 { data: inventory }
             ] = await Promise.all([
+                // Fetch ALL non-cancelled orders for lifetime totals
+                supabase.from('orders')
+                    .select('total')
+                    .neq('status', 'cancelled'),
                 // Fetch only last two months for change calculation
                 supabase.from('orders')
                     .select('total, created_at')
@@ -54,13 +59,14 @@ export const StatsService = {
             ]);
 
 
-            const safeOrders = orders || [];
+            const safeAllOrders = allOrders || [];
+            const safeOrders = recentOrders || [];
             const safeProducts = products || [];
             const safeInventory = inventory || [];
 
-            // Calculate Revenue & Order Counts
-            const totalRevenue = safeOrders.reduce((sum, order) => sum + (order.total || 0), 0);
-            const totalOrders = safeOrders.length;
+            // Calculate Lifetime Revenue & Order Counts (ALL orders)
+            const totalRevenue = safeAllOrders.reduce((sum, order) => sum + (order.total || 0), 0);
+            const totalOrders = safeAllOrders.length;
             const totalProducts = productCount || 0;
             const activeProducts = safeProducts.filter(p => p.status === 'active').length;
 
@@ -119,14 +125,14 @@ export const StatsService = {
 
             const revenueByMonth: Record<string, number> = {};
 
-            orders.forEach(order => {
-                const date = new Date(order.created_at);
-                const month = date.toLocaleString('default', { month: 'short' }); // "Jan"
-                revenueByMonth[month] = (revenueByMonth[month] || 0) + (order.total || 0);
-            });
-
             // Ensure standard month order provided manually or map/sort
             const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+            orders.forEach(order => {
+                const date = new Date(order.created_at);
+                const month = months[date.getMonth()]; // Direct array lookup — locale-independent
+                revenueByMonth[month] = (revenueByMonth[month] || 0) + (order.total || 0);
+            });
 
             return months.map(m => ({
                 name: m,

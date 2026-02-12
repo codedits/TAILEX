@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin';
+import { createStaticClient } from '@/lib/supabase/static';
 import { AppError } from './errors';
 import { unstable_cache } from 'next/cache';
 import { HomepageSection, FooterConfig, SocialConfig, BenefitsConfig, GlobalDiscountConfig } from '@/lib/types';
@@ -51,7 +52,7 @@ export type StoreConfig = {
 export const StoreConfigService = {
     getStoreConfig: unstable_cache(
         async (): Promise<StoreConfig> => {
-            const supabase = await createAdminClient();
+            const supabase = createStaticClient();
 
             const createConfigPromise = supabase.from('site_config').select('key, value');
             const createNavPromise = supabase.from('navigation_menus').select('*');

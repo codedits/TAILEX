@@ -47,7 +47,7 @@ export async function POST(req: Request) {
 
     // Revalidate by cache tag
     if (tag) {
-      (revalidateTag as any)(tag, 'max');
+      revalidateTag(tag, 'max');
       revalidated.push(`tag:${tag}`);
     }
 

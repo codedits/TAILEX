@@ -34,7 +34,7 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
   const blurDataUrls = (metadata as Record<string, unknown>)?.blurDataUrls as Record<string, string> | undefined;
   const primaryBlur = blurDataUrls?.[imagePrimary] || undefined;
 
-  const sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw";
+  const sizes = "(max-width: 768px) 50vw, (max-width: 1200px) 40vw, 25vw";
 
   // Logic
   const isSale = !!(sale_price && sale_price < price);

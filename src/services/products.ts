@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { createStaticClient } from '@/lib/supabase/static';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { AppError } from './errors';
 import { Product, ProductVariant, PaginatedResponse } from '@/lib/types';
@@ -70,91 +71,103 @@ function normalizeProductPayload(data: ProductInput) {
 }
 
 export const ProductService = {
-    async getProducts(options?: {
-        status?: 'active' | 'draft' | 'archived';
-        categoryId?: string;
-        featured?: boolean;
-        limit?: number;
-        offset?: number;
-        search?: string;
-        orderBy?: 'created_at' | 'price' | 'title';
-        order?: 'asc' | 'desc';
-    }): Promise<PaginatedResponse<Product>> {
-        const supabase = await createClient();
+    getProducts: unstable_cache(
+        async (options?: {
+            status?: 'active' | 'draft' | 'archived';
+            categoryId?: string;
+            featured?: boolean;
+            limit?: number;
+            offset?: number;
+            search?: string;
+            orderBy?: 'created_at' | 'price' | 'title';
+            order?: 'asc' | 'desc';
+        }): Promise<PaginatedResponse<Product>> => {
+            const supabase = createStaticClient();
 
-        let query = supabase.from('products').select('*', { count: 'exact' });
+            let query = supabase.from('products').select('*', { count: 'exact' });
 
-        if (options?.status) query = query.eq('status', options.status);
-        if (options?.categoryId) query = query.eq('category_id', options.categoryId);
-        if (options?.featured !== undefined) query = query.eq('is_featured', options.featured);
-        if (options?.search) {
-            query = query.or(`title.ilike.%${options.search}%,description.ilike.%${options.search}%`);
-        }
-
-        const orderBy = options?.orderBy || 'created_at';
-        const order = options?.order || 'desc';
-        query = query.order(orderBy, { ascending: order === 'asc' });
-
-        const limit = options?.limit || 20;
-        const offset = options?.offset || 0;
-        query = query.range(offset, offset + limit - 1);
-
-        const { data, error, count } = await query;
-
-        if (error) throw new AppError(error.message, 'DB_ERROR', 500);
-
-        return {
-            data: data as Product[],
-            total: count || 0,
-            page: Math.floor(offset / limit) + 1,
-            pageSize: limit,
-            totalPages: Math.ceil((count || 0) / limit),
-        };
-    },
-
-    async getProductBySlug(slug: string): Promise<Product> {
-        const supabase = await createClient();
-
-        // Optimized query: Fetch product and minimal relation data
-        const { data, error } = await supabase
-            .from('products')
-            .select(`
-        *,
-        collection:collections(id, title, slug),
-        variants:product_variants(*),
-        options:product_options(*)
-      `)
-            .eq('slug', slug)
-            .maybeSingle();
-
-        if (error) {
-            throw new AppError(error.message, 'DB_ERROR', 500);
-        }
-        if (!data) throw AppError.notFound(`Product with slug "${slug}" not found`);
-
-        // Fetch inventory levels for all variants
-        if (data.variants && data.variants.length > 0) {
-            const variantIds = data.variants.map((v: any) => v.id);
-            const { data: inventory } = await supabase
-                .from('inventory_levels')
-                .select('variant_id, available')
-                .in('variant_id', variantIds);
-
-            // Map inventory to variants
-            if (inventory) {
-                const inventoryMap: Record<string, number> = {};
-                for (const inv of inventory) {
-                    inventoryMap[inv.variant_id] = (inventoryMap[inv.variant_id] || 0) + (inv.available || 0);
-                }
-                data.variants = data.variants.map((v: any) => ({
-                    ...v,
-                    inventory_quantity: inventoryMap[v.id] || 0
-                }));
+            if (options?.status) query = query.eq('status', options.status);
+            if (options?.categoryId) query = query.eq('category_id', options.categoryId);
+            if (options?.featured !== undefined) query = query.eq('is_featured', options.featured);
+            if (options?.search) {
+                const sanitized = options.search.replace(/[%_\\]/g, '\\$&');
+                query = query.or(`title.ilike.%${sanitized}%,description.ilike.%${sanitized}%`);
             }
-        }
 
-        return data as Product;
-    },
+            const orderBy = options?.orderBy || 'created_at';
+            const order = options?.order || 'desc';
+            query = query.order(orderBy, { ascending: order === 'asc' });
+
+            const limit = options?.limit || 20;
+            const offset = options?.offset || 0;
+            query = query.range(offset, offset + limit - 1);
+
+            const { data, error, count } = await query;
+
+            if (error) throw new AppError(error.message, 'DB_ERROR', 500);
+
+            return {
+                data: data as Product[],
+                total: count || 0,
+                page: Math.floor(offset / limit) + 1,
+                pageSize: limit,
+                totalPages: Math.ceil((count || 0) / limit),
+            };
+        },
+        ['products-list'],
+        { tags: ['products'], revalidate: 3600 }
+    ),
+
+    getProductBySlug: unstable_cache(
+        async (slug: string): Promise<Product> => {
+            const supabase = createStaticClient();
+
+            // Optimized query: Fetch product and minimal relation data
+            const { data, error } = await supabase
+                .from('products')
+                .select(`
+            *,
+            collection:collections(id, title, slug),
+            variants:product_variants(*),
+            options:product_options(*)
+          `)
+                .eq('slug', slug)
+                .maybeSingle();
+
+            if (error) {
+                throw new AppError(error.message, 'DB_ERROR', 500);
+            }
+            if (!data) throw AppError.notFound(`Product with slug "${slug}" not found`);
+
+            // Fetch inventory levels for all variants
+            if (data.variants && data.variants.length > 0) {
+                const variantIds = data.variants.map((v: any) => v.id);
+                const { data: inventory } = await supabase
+                    .from('inventory_levels')
+                    .select('variant_id, available')
+                    .in('variant_id', variantIds);
+
+                // Map inventory to variants
+                if (inventory) {
+                    const inventoryMap: Record<string, number> = {};
+                    for (const inv of inventory) {
+                        inventoryMap[inv.variant_id] = (inventoryMap[inv.variant_id] || 0) + (inv.available || 0);
+                    }
+                    data.variants = data.variants.map((v: any) => ({
+                        ...v,
+                        inventory_quantity: inventoryMap[v.id] || 0
+                    }));
+                }
+            }
+
+            return data as Product;
+        },
+        ['product-by-slug'],
+        { tags: ['products'], revalidate: 3600 } // Dynamic tags are not directly supported in options object of unstable_cache wrapper easily without helper, but we can rely on 'products' tag for now as we invalidate 'products' globally on update.
+        // Actually, unstable_cache key parts (2nd arg) distinguish the calls.
+        // For tags, we can't easily make them dynamic based on arguments in this signature structure without a wrapper function.
+        // But 'products' tag is sufficient for now since we invalidate 'products' on any change.
+    ),
 
     async deleteProduct(id: string): Promise<void> {
         const supabase = await createAdminClient();

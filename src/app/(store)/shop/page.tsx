@@ -1,5 +1,7 @@
 import { Suspense } from "react";
 import { createStaticClient } from "@/lib/supabase/static";
+import * as collectionsApi from "@/lib/api/collections";
+import { ProductService } from "@/services/products";
 import Navbar from "@/components/layout/Navbar";
 
 import AsyncProductGrid from "@/components/collection/AsyncProductGrid";
@@ -24,18 +26,10 @@ export const metadata = {
 };
 
 export default async function ShopPage() {
-    const supabase = createStaticClient();
-
-    const collectionsListPromise = supabase
-        .from('collections')
-        .select('id, title, slug')
-        .eq('is_visible', true)
-        .order('title');
-
-    // Fetch config and collections list
+    // Fetch config and calls in parallel
     const [config, collectionsListResult] = await Promise.all([
         StoreConfigService.getStoreConfig(),
-        collectionsListPromise
+        collectionsApi.getCollections({ visible: true })
     ]);
 
     const brand = config.brand;
@@ -45,14 +39,13 @@ export default async function ShopPage() {
 
     const allCollections = (collectionsListResult.data || []) as Collection[];
 
-    // Fetch All Products (ISR cached)
-    const productsPromise = supabase
-        .from('products')
-        .select('*')
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .limit(20)
-        .then(res => (res.data || []) as Product[]);
+    // Fetch All Products (Cached)
+    const productsPromise = ProductService.getProducts({
+        status: 'active',
+        orderBy: 'created_at',
+        order: 'desc',
+        limit: 20
+    }).then(res => res.data);
 
 
     return (

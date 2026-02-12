@@ -62,7 +62,7 @@ export default function CollectionShowcase({
                         alt={title}
                         fill
                         className="object-cover"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 768px, 1080px"
+                        sizes="100vw"
                         quality={80}
                         loading="lazy"
                         onError={() => setImgSrc("https://framerusercontent.com/images/BjQfJy7nQoVxvCYTFzwZxprDWiQ.jpg")}

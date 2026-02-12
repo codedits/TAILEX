@@ -3,10 +3,11 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { EmailService } from '@/services/email';
 import { sendOtpSchema } from '@/lib/validators';
 import { z } from 'zod';
+import { randomInt } from 'crypto';
 
-// Generate 6-digit code
+// Generate cryptographically secure 6-digit code
 function generateCode(): string {
-    return Math.floor(100000 + Math.random() * 900000).toString();
+    return randomInt(100000, 999999).toString();
 }
 
 export async function POST(request: NextRequest) {
@@ -33,8 +34,8 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // 3. Invalidate Previous Unused OTPs (Optional but good practice)
-        // We simply generate a new one; the verify endpoint checks for the latest valid one.
+        // 3. Invalidate Previous Unused OTPs
+        await supabase.from('user_otps').delete().eq('email', email);
 
         // 4. Generate and Insert New OTP
         const code = generateCode();
