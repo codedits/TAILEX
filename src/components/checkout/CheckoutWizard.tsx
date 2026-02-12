@@ -210,13 +210,12 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
                 email: email || shippingAddress?.email,
                 items: orderItems,
                 shipping_address: shippingAddress,
-                billing_address: shippingAddress, // Simple version
+                billing_address: shippingAddress,
                 phone: shippingAddress?.phone,
                 shipping_method: shippingMethod,
                 payment_method: paymentMethod,
                 payment_proof_url: proofUrl,
                 transaction_id: transactionId,
-                payment_status: paymentMethod === 'COD' ? 'cod_pending' : 'pending_verification'
             };
 
             // 3. API Call

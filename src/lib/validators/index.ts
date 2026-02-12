@@ -27,6 +27,8 @@ export const createOrderSchema = z.object({
     items: z.array(orderItemSchema).min(1, 'Order must contain at least one item'),
     shipping_address: addressSchema,
     billing_address: addressSchema.optional(),
+    shipping_method: z.enum(['standard', 'express']).default('standard'),
+    customer_note: z.string().optional().nullable(),
     payment_method: z.enum(['card', 'COD', 'bank_transfer', 'easypaisa', 'jazzcash']).default('card'),
     payment_proof_url: z.string().optional().nullable(),
     transaction_id: z.string().optional().nullable(),

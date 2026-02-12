@@ -12,6 +12,26 @@ export async function checkVariantStock(variantId: string, quantity: number): Pr
     try {
         const supabase = await createAdminClient();
 
+        // First check if the product tracks inventory
+        const { data: variant } = await supabase
+            .from('product_variants')
+            .select('product_id')
+            .eq('id', variantId)
+            .single();
+
+        if (variant) {
+            const { data: product } = await supabase
+                .from('products')
+                .select('track_inventory')
+                .eq('id', variant.product_id)
+                .single();
+
+            // If product doesn't track inventory, always available
+            if (product && product.track_inventory === false) {
+                return { available: 999, isAvailable: true };
+            }
+        }
+
         // Check inventory_levels
         const { data, error } = await supabase
             .from('inventory_levels')
@@ -20,10 +40,7 @@ export async function checkVariantStock(variantId: string, quantity: number): Pr
             .single();
 
         if (error || !data) {
-            // If no record, assume 0 stock or error
-            // Check if product track_inventory is false? 
-            // Ideally we should know product context, but strict mode implies 0 if missing.
-            // For now, let's duplicate the logic: if no inventory record, it's safer to say 0.
+            // No inventory record and product tracks inventory → 0 stock
             return { available: 0, isAvailable: false };
         }
 

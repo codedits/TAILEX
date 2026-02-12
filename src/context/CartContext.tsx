@@ -84,7 +84,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 }
               }
             }).catch(console.error);
-          }, 8000); // Wait 8 seconds after mount to ensure server is ready and hydration is complete
+          }, 3000); // Wait 3 seconds after mount to validate prices/stock
 
           return () => clearTimeout(timeoutId);
         }

@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { jwtVerify } from 'jose';
-import { EmailService } from '@/services/email';
-import { StoreConfigService } from '@/services/config';
 import { OrderService } from '@/services/orders';
 import { createOrderSchema } from '@/lib/validators';
 import { z } from 'zod';
@@ -25,11 +23,6 @@ async function getUserFromToken(request: NextRequest) {
     }
 }
 
-// Helper to generate order number
-function generateOrderNumber() {
-    return Math.floor(100000 + Math.random() * 900000);
-}
-
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
@@ -45,7 +38,7 @@ export async function POST(request: NextRequest) {
         // Zod Validation
         const input = createOrderSchema.parse(body);
 
-        const order = await OrderService.createOrder(input);
+        const order = await OrderService.createOrder(input as any);
 
         return NextResponse.json({
             success: true,
