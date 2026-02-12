@@ -48,7 +48,7 @@ const nextConfig: NextConfig = {
         hostname: '**.supabase.co',
       },
     ],
-    unoptimized: true,
+
     // Optimize image formats — AVIF first (smallest), WebP fallback
     formats: ['image/avif', 'image/webp'],
     // Responsive device sizes for srcset generation
