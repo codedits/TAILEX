@@ -40,8 +40,8 @@ export default function MobileMenuOverlay({ navLinks, onClose }: MobileMenuOverl
                     {navLinks.map((link, i) => (
                         <div
                             key={link.label}
-                            className="animate-in fade-in slide-in-from-left-4 duration-500 fill-mode-forwards opacity-0"
-                            style={{ animationDelay: `${100 + i * 50}ms` }}
+                            className="animate-in fade-in slide-in-from-left-4 duration-500"
+                            style={{ animationDelay: `${100 + i * 50}ms`, animationFillMode: 'both' }}
                         >
                             <Link
                                 href={link.url}

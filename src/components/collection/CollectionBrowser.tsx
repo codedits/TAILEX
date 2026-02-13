@@ -330,8 +330,8 @@ export default function CollectionBrowser({
             {filteredProducts.map((product, index) => (
               <div
                 key={product.id}
-                className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-forwards opacity-0"
-                style={{ animationDelay: `${index * 50}ms` }}
+                className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+                style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'both' }}
               >
                 <ProductCard {...product} />
               </div>

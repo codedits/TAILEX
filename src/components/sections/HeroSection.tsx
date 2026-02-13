@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 // Reliable default image (external CDN, always available)
@@ -16,10 +19,12 @@ type HeroSectionProps = {
 };
 
 /**
- * HeroSection - Server Component
+ * HeroSection - Client Component
  * 
  * Strategy:
- * 1. Single layout (SSR): Uses pure CSS animations for instant paint (FCP/LCP win).
+ * 1. Uses onLoad to track image loading status.
+ * 2. Only triggers the entrance animation (scale + fade) after image is ready.
+ * 3. Prevents "empty box" animation or flash of unstyled content.
  */
 const HeroSection = ({
   heading,
@@ -32,18 +37,20 @@ const HeroSection = ({
   ctaLink,
   blurDataURL,
 }: HeroSectionProps) => {
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Legacy single image mode (Now fully Server-Rendered with CSS animations)
+  // Legacy single image mode
   const displayHeading = heading || brandName;
-
   const effectiveImage = image?.trim() || DEFAULT_HERO_IMAGE;
   const effectiveMobileImage = mobileImage?.trim();
 
   return (
     <section className="relative w-full h-[100vh] overflow-hidden bg-background">
-      <div className="absolute inset-0 h-full w-full">
+      <div className="absolute inset-0 h-full w-full bg-black">
         {/* Background Image with Entrance Animation */}
-        <div className="absolute inset-0 h-full w-full animate-image-entrance">
+        <div
+          className={`absolute inset-0 h-full w-full transition-opacity duration-700 ${isLoaded ? 'animate-image-entrance' : 'opacity-0'}`}
+        >
           {/* Responsive images handled via Next.js Image sizes/priority */}
           <Image
             src={effectiveImage}
@@ -56,6 +63,7 @@ const HeroSection = ({
             className="object-cover object-top"
             placeholder={blurDataURL ? "blur" : "empty"}
             blurDataURL={blurDataURL}
+            onLoad={() => setIsLoaded(true)}
           />
         </div>
 

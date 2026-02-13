@@ -16,8 +16,8 @@ export function ProductGridClient({ products }: ProductGridClientProps) {
             {products.map((product, index) => (
                 <div
                     key={product.id}
-                    className="animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-forwards opacity-0"
-                    style={{ animationDelay: `${index * 100}ms` }}
+                    className="animate-in fade-in slide-in-from-bottom-4 duration-700"
+                    style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'both' }}
                 >
                     <ProductCard
                         {...product}
