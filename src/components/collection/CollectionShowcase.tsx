@@ -52,7 +52,7 @@ export default function CollectionShowcase({
     return (
         <section className={cn("w-full flex flex-col relative z-10", className)}>
             {/* Section 1: The Collection Hero */}
-            <div className="relative w-full h-[70vh] md:h-[115vh] overflow-hidden group bg-background" ref={heroRef}>
+            <div className="relative w-full h-[100vh] md:h-[115vh] overflow-hidden group bg-background" ref={heroRef}>
                 <div
                     className={cn(
                         "absolute inset-0 h-full w-full bg-white",

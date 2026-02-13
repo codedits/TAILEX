@@ -49,7 +49,7 @@ export default async function ShopPage() {
 
 
     return (
-        <main className="min-h-screen bg-background text-foreground overflow-visible">
+        <main className="min-h-screen bg-background text-foreground">
             <Navbar brandName={brand.name} navItems={navItems} />
 
             <div className="pt-4 pb-24 px-6 md:px-12">

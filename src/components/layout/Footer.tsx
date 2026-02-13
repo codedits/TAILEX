@@ -97,10 +97,17 @@ const Footer = ({
             <div className="flex flex-col gap-4">
               <h4 className="font-bold text-sm uppercase tracking-widest mb-2">HELP</h4>
               <ul className="flex flex-col gap-2">
-                {['Contact Us', 'FAQ', 'Shipments', 'Payments', 'Track Your Order', 'Returns'].map(link => (
-                  <li key={link}>
-                    <Link href="#" className="text-sm text-white/70 hover:text-white transition-colors">
-                      {link}
+                {[
+                  { name: 'Contact Us', href: '/contact' },
+                  { name: 'FAQ', href: '/contact' },
+                  { name: 'Shipments', href: '/contact' },
+                  { name: 'Payments', href: '/contact' },
+                  { name: 'Track Your Order', href: '/account' },
+                  { name: 'Returns', href: '/contact' },
+                ].map(link => (
+                  <li key={link.name}>
+                    <Link href={link.href} className="text-sm text-white/70 hover:text-white transition-colors">
+                      {link.name}
                     </Link>
                   </li>
                 ))}
@@ -111,10 +118,15 @@ const Footer = ({
             <div className="flex flex-col gap-4">
               <h4 className="font-bold text-sm uppercase tracking-widest mb-2">LEGAL INFO</h4>
               <ul className="flex flex-col gap-2">
-                {['Privacy Policy', 'Terms & Conditions', 'Return Policy', 'Cookie Policy'].map(link => (
-                  <li key={link}>
-                    <Link href="#" className="text-sm text-white/70 hover:text-white transition-colors">
-                      {link}
+                {[
+                  { name: 'Privacy Policy', href: '/privacy' },
+                  { name: 'Terms & Conditions', href: '/terms' },
+                  { name: 'Return Policy', href: '/terms' },
+                  { name: 'Cookie Policy', href: '/cookies' },
+                ].map(link => (
+                  <li key={link.name}>
+                    <Link href={link.href} className="text-sm text-white/70 hover:text-white transition-colors">
+                      {link.name}
                     </Link>
                   </li>
                 ))}
@@ -125,9 +137,9 @@ const Footer = ({
             <div className="flex flex-col gap-4">
               <h4 className="font-bold text-sm uppercase tracking-widest mb-2">FOLLOW US</h4>
               <ul className="flex flex-col gap-2">
-                {[...socialLinks, { name: 'Tiktok', href: '#' }].map((link, i) => (
+                {[...socialLinks, { name: 'Tiktok', href: 'https://tiktok.com/@tailex' }].map((link, i) => (
                   <li key={link.name || i}>
-                    <Link href={link.href} className="text-sm text-white/70 hover:text-white transition-colors">
+                    <Link href={link.href} className="text-sm text-white/70 hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">
                       {link.name}
                     </Link>
                   </li>

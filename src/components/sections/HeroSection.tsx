@@ -37,19 +37,21 @@ const HeroSection = ({
   ctaLink,
   blurDataURL,
 }: HeroSectionProps) => {
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isDesktopLoaded, setIsDesktopLoaded] = useState(false);
+  const [isMobileLoaded, setIsMobileLoaded] = useState(false);
 
   // Legacy single image mode
   const displayHeading = heading || brandName;
   const effectiveImage = image?.trim() || DEFAULT_HERO_IMAGE;
   const effectiveMobileImage = mobileImage?.trim();
+  const hasMobileImage = !!effectiveMobileImage;
 
   return (
     <section className="relative w-full h-[100vh] overflow-hidden bg-background">
       <div className="absolute inset-0 h-full w-full bg-black">
-        {/* Background Image with Entrance Animation */}
+        {/* Desktop Image (or default if no mobile image) */}
         <div
-          className={`absolute inset-0 h-full w-full transition-opacity duration-700 ${isLoaded ? 'animate-image-entrance' : 'opacity-0'}`}
+          className={`absolute inset-0 h-full w-full ${hasMobileImage ? 'hidden md:block' : ''} ${isDesktopLoaded ? 'animate-image-entrance' : 'opacity-0'}`}
         >
           {/* Responsive images handled via Next.js Image sizes/priority */}
           <Image
@@ -63,9 +65,30 @@ const HeroSection = ({
             className="object-cover object-top"
             placeholder={blurDataURL ? "blur" : "empty"}
             blurDataURL={blurDataURL}
-            onLoad={() => setIsLoaded(true)}
+            onLoad={() => setIsDesktopLoaded(true)}
           />
         </div>
+
+        {/* Mobile Image (if provided) */}
+        {hasMobileImage && (
+          <div
+            className={`absolute inset-0 h-full w-full md:hidden ${isMobileLoaded ? 'animate-image-entrance' : 'opacity-0'}`}
+          >
+            <Image
+              src={effectiveMobileImage}
+              alt={displayHeading || "Hero Image"}
+              fill
+              priority
+              fetchPriority="high"
+              quality={80}
+              sizes="100vw"
+              className="object-cover object-center"
+              placeholder={blurDataURL ? "blur" : "empty"}
+              blurDataURL={blurDataURL}
+              onLoad={() => setIsMobileLoaded(true)}
+            />
+          </div>
+        )}
 
         {/* CSS-only Overlay (Instant paint) */}
         <div
