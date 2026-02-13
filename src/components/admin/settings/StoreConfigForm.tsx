@@ -33,8 +33,7 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
     const [mobileHeroFile, setMobileHeroFile] = useState<File | null>(null);
     const [tempMobileCropImage, setTempMobileCropImage] = useState<string | null>(null);
 
-    // Track pending file uploads for carousel slides { [slideId]: { desktop?: File, mobile?: File } }
-    const [slideFiles, setSlideFiles] = useState<Record<string, { desktop?: File; mobile?: File }>>({});
+
 
     const handleSave = async (section: keyof StoreConfig) => {
         setIsSaving(true);
@@ -87,61 +86,7 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
             }
         }
 
-        // Handle slide file uploads
-        if (section === 'hero' && Object.keys(slideFiles).length > 0) {
-            const slidesToUpload = Object.entries(slideFiles);
-            let updatedSlides = [...(currentConfig.hero?.slides || [])];
 
-            for (const [slideId, files] of slidesToUpload) {
-                const slideIndex = updatedSlides.findIndex(s => s.id === slideId);
-                if (slideIndex === -1) continue;
-
-                // Upload desktop image
-                if (files.desktop) {
-                    if (!toastId) toastId = toast.loading(`Uploading slide ${slideIndex + 1}...`);
-                    else toast.loading(`Uploading slide ${slideIndex + 1}...`, { id: toastId });
-
-                    const formData = new FormData();
-                    formData.append('file', files.desktop);
-
-                    const uploadRes = await uploadSiteAsset(formData);
-
-                    if (uploadRes.success && uploadRes.url) {
-                        updatedSlides[slideIndex] = { ...updatedSlides[slideIndex], image: uploadRes.url };
-                    } else {
-                        toast.error(`Failed to upload slide ${slideIndex + 1}`, { id: toastId });
-                        setIsSaving(false);
-                        return;
-                    }
-                }
-
-                // Upload mobile image
-                if (files.mobile) {
-                    toast.loading(`Uploading mobile for slide ${slideIndex + 1}...`, { id: toastId });
-
-                    const formData = new FormData();
-                    formData.append('file', files.mobile);
-
-                    const uploadRes = await uploadSiteAsset(formData);
-
-                    if (uploadRes.success && uploadRes.url) {
-                        updatedSlides[slideIndex] = { ...updatedSlides[slideIndex], mobileImage: uploadRes.url };
-                    } else {
-                        toast.error(`Failed to upload mobile for slide ${slideIndex + 1}`, { id: toastId });
-                        setIsSaving(false);
-                        return;
-                    }
-                }
-            }
-
-            // Update config with new URLs
-            currentConfig = {
-                ...currentConfig,
-                hero: { ...currentConfig.hero, slides: updatedSlides }
-            };
-            setConfig(currentConfig);
-            setSlideFiles({}); // Clear pending files
-        }
 
         // If no file upload happened yet, start saving toast
         if (!toastId) toastId = toast.loading('Saving settings...');
@@ -290,339 +235,215 @@ export function StoreConfigForm({ initialConfig }: StoreConfigFormProps) {
             <TabsContent value="hero">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Hero Carousel</CardTitle>
-                        <CardDescription>Manage homepage banner slides. Add multiple images that auto-advance.</CardDescription>
+                        <CardTitle>Hero Configuration</CardTitle>
+                        <CardDescription>Manage your homepage hero section. Set a main image, heading, and call-to-action.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                        {/* Global Settings */}
-                        <div className="grid grid-cols-2 gap-4 pb-4 border-b border-white/10">
+
+                        {/* Heading & Text */}
+                        <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label>Default Heading</Label>
+                                <Label>Main Heading</Label>
                                 <Input
                                     value={config.hero?.heading || ''}
                                     onChange={(e) => setConfig({ ...config, hero: { ...config.hero, heading: e.target.value } })}
                                     placeholder="e.g. TAILEX"
                                 />
-                                <p className="text-xs text-muted-foreground">Shown if slide has no heading</p>
                             </div>
                             <div className="space-y-2">
-                                <Label>Default Subheading</Label>
+                                <Label>Subheading</Label>
                                 <Input
                                     value={config.hero?.subheading || ''}
                                     onChange={(e) => setConfig({ ...config, hero: { ...config.hero, subheading: e.target.value } })}
-                                    placeholder="e.g. Spring/Summer '26"
+                                    placeholder="e.g. Spring/Summer Collection"
                                 />
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4 pb-4 border-b border-white/10">
+                        {/* CTA */}
+                        <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <Label>Overlay Opacity</Label>
-                                    <span className="text-sm text-muted-foreground">
-                                        {Math.round((config.hero?.overlayOpacity ?? 0.3) * 100)}%
-                                    </span>
-                                </div>
-                                <Slider
-                                    value={[config.hero?.overlayOpacity ?? 0.3]}
-                                    min={0}
-                                    max={0.9}
-                                    step={0.05}
-                                    onValueChange={(vals) => setConfig({ ...config, hero: { ...config.hero, overlayOpacity: vals[0] } })}
+                                <Label>Button Text</Label>
+                                <Input
+                                    value={config.hero?.ctaText || ''}
+                                    onChange={(e) => setConfig({ ...config, hero: { ...config.hero, ctaText: e.target.value } })}
+                                    placeholder="Shop Now"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label>Auto-Play Interval</Label>
-                                <Select
-                                    value={String(config.hero?.autoPlayInterval || 5000)}
-                                    onValueChange={(val) => setConfig({ ...config, hero: { ...config.hero, autoPlayInterval: Number(val) } })}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="3000">3 seconds</SelectItem>
-                                        <SelectItem value="5000">5 seconds</SelectItem>
-                                        <SelectItem value="7000">7 seconds</SelectItem>
-                                        <SelectItem value="10000">10 seconds</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <Label>Button Link</Label>
+                                <Input
+                                    value={config.hero?.ctaLink || ''}
+                                    onChange={(e) => setConfig({ ...config, hero: { ...config.hero, ctaLink: e.target.value } })}
+                                    placeholder="/shop"
+                                />
                             </div>
                         </div>
 
-                        {/* Slides Management */}
+                        {/* Overlay Opacity */}
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                                <Label className="text-base font-semibold">Slides ({config.hero?.slides?.length || 0}/6)</Label>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    disabled={(config.hero?.slides?.length || 0) >= 6}
-                                    onClick={() => {
-                                        const newSlide = {
-                                            id: `slide-${Date.now()}`,
-                                            image: '',
-                                            heading: '',
-                                            subheading: '',
-                                            ctaText: 'Shop Now',
-                                            ctaLink: '/shop'
-                                        };
-                                        setConfig({
-                                            ...config,
-                                            hero: {
-                                                ...config.hero,
-                                                slides: [...(config.hero?.slides || []), newSlide]
-                                            }
-                                        });
-                                    }}
-                                >
-                                    <Plus className="w-4 h-4 mr-1" /> Add Slide
-                                </Button>
+                                <Label>Overlay Opacity</Label>
+                                <span className="text-sm text-muted-foreground">
+                                    {Math.round((config.hero?.overlayOpacity ?? 0.3) * 100)}%
+                                </span>
                             </div>
-
-                            {(!config.hero?.slides || config.hero.slides.length === 0) && (
-                                <div className="text-center py-8 border-2 border-dashed border-white/10 rounded-xl">
-                                    <p className="text-muted-foreground mb-2">No slides yet</p>
-                                    <p className="text-xs text-muted-foreground">Add slides to create a carousel, or leave empty to use legacy single image.</p>
-                                </div>
-                            )}
-
-                            {config.hero?.slides?.map((slide, index) => (
-                                <div key={slide.id} className="p-4 border border-white/10 rounded-xl space-y-4 bg-black/20">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium text-muted-foreground">Slide {index + 1}</span>
-                                        <div className="flex items-center gap-1">
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8"
-                                                disabled={index === 0}
-                                                onClick={() => {
-                                                    const slides = [...(config.hero?.slides || [])];
-                                                    [slides[index - 1], slides[index]] = [slides[index], slides[index - 1]];
-                                                    setConfig({ ...config, hero: { ...config.hero, slides } });
-                                                }}
-                                            >
-                                                <ChevronUp className="w-4 h-4" />
-                                            </Button>
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8"
-                                                disabled={index === (config.hero?.slides?.length || 1) - 1}
-                                                onClick={() => {
-                                                    const slides = [...(config.hero?.slides || [])];
-                                                    [slides[index], slides[index + 1]] = [slides[index + 1], slides[index]];
-                                                    setConfig({ ...config, hero: { ...config.hero, slides } });
-                                                }}
-                                            >
-                                                <ChevronDown className="w-4 h-4" />
-                                            </Button>
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 text-destructive hover:text-destructive"
-                                                onClick={() => {
-                                                    if (slide.image) queueImageForDeletion(slide.image);
-                                                    if (slide.mobileImage) queueImageForDeletion(slide.mobileImage);
-                                                    const slides = config.hero?.slides?.filter((_, i) => i !== index) || [];
-                                                    setConfig({ ...config, hero: { ...config.hero, slides } });
-                                                    toast.info('Slide removed. Images will be deleted when you save.');
-                                                }}
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        {/* Desktop Image */}
-                                        <div className="space-y-2">
-                                            <Label className="text-xs">Desktop Image</Label>
-                                            {(slide.image || slideFiles[slide.id]?.desktop) ? (
-                                                <div className="relative h-32 rounded-lg overflow-hidden border border-white/10 group">
-                                                    <img
-                                                        src={slideFiles[slide.id]?.desktop ? URL.createObjectURL(slideFiles[slide.id].desktop!) : slide.image}
-                                                        alt={`Slide ${index + 1}`}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                        <Button
-                                                            type="button"
-                                                            variant="destructive"
-                                                            size="icon"
-                                                            className="rounded-full w-8 h-8"
-                                                            onClick={() => {
-                                                                if (slideFiles[slide.id]?.desktop) {
-                                                                    const newFiles = { ...slideFiles };
-                                                                    delete newFiles[slide.id]?.desktop;
-                                                                    if (!newFiles[slide.id]?.mobile) delete newFiles[slide.id];
-                                                                    setSlideFiles(newFiles);
-                                                                } else if (slide.image) {
-                                                                    queueImageForDeletion(slide.image);
-                                                                    const slides = [...(config.hero?.slides || [])];
-                                                                    slides[index] = { ...slides[index], image: '' };
-                                                                    setConfig({ ...config, hero: { ...config.hero, slides } });
-                                                                }
-                                                            }}
-                                                        >
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-white/10 rounded-lg cursor-pointer hover:border-white/30 transition-all bg-black/20">
-                                                    <Upload className="w-6 h-6 text-white/40 mb-1" />
-                                                    <span className="text-xs text-white/40">Upload</span>
-                                                    <input
-                                                        type="file"
-                                                        accept="image/*"
-                                                        className="hidden"
-                                                        onChange={(e) => {
-                                                            if (e.target.files?.[0]) {
-                                                                setSlideFiles({
-                                                                    ...slideFiles,
-                                                                    [slide.id]: { ...slideFiles[slide.id], desktop: e.target.files[0] }
-                                                                });
-                                                            }
-                                                        }}
-                                                    />
-                                                </label>
-                                            )}
-                                        </div>
-                                        {/* Mobile Image */}
-                                        <div className="space-y-2">
-                                            <Label className="text-xs">Mobile Image (optional)</Label>
-                                            {(slide.mobileImage || slideFiles[slide.id]?.mobile) ? (
-                                                <div className="relative h-32 rounded-lg overflow-hidden border border-white/10 group">
-                                                    <img
-                                                        src={slideFiles[slide.id]?.mobile ? URL.createObjectURL(slideFiles[slide.id].mobile!) : slide.mobileImage}
-                                                        alt={`Slide ${index + 1} mobile`}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                        <Button
-                                                            type="button"
-                                                            variant="destructive"
-                                                            size="icon"
-                                                            className="rounded-full w-8 h-8"
-                                                            onClick={() => {
-                                                                if (slideFiles[slide.id]?.mobile) {
-                                                                    const newFiles = { ...slideFiles };
-                                                                    delete newFiles[slide.id]?.mobile;
-                                                                    if (!newFiles[slide.id]?.desktop) delete newFiles[slide.id];
-                                                                    setSlideFiles(newFiles);
-                                                                } else if (slide.mobileImage) {
-                                                                    queueImageForDeletion(slide.mobileImage);
-                                                                    const slides = [...(config.hero?.slides || [])];
-                                                                    slides[index] = { ...slides[index], mobileImage: '' };
-                                                                    setConfig({ ...config, hero: { ...config.hero, slides } });
-                                                                }
-                                                            }}
-                                                        >
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-white/10 rounded-lg cursor-pointer hover:border-white/30 transition-all bg-black/20">
-                                                    <Upload className="w-6 h-6 text-white/40 mb-1" />
-                                                    <span className="text-xs text-white/40">Upload</span>
-                                                    <input
-                                                        type="file"
-                                                        accept="image/*"
-                                                        className="hidden"
-                                                        onChange={(e) => {
-                                                            if (e.target.files?.[0]) {
-                                                                setSlideFiles({
-                                                                    ...slideFiles,
-                                                                    [slide.id]: { ...slideFiles[slide.id], mobile: e.target.files[0] }
-                                                                });
-                                                            }
-                                                        }}
-                                                    />
-                                                </label>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label className="text-xs">Heading (optional)</Label>
-                                            <Input
-                                                value={slide.heading || ''}
-                                                onChange={(e) => {
-                                                    const slides = [...(config.hero?.slides || [])];
-                                                    slides[index] = { ...slides[index], heading: e.target.value };
-                                                    setConfig({ ...config, hero: { ...config.hero, slides } });
-                                                }}
-                                                placeholder="Override default heading"
-                                                className="text-sm"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label className="text-xs">Subheading (optional)</Label>
-                                            <Input
-                                                value={slide.subheading || ''}
-                                                onChange={(e) => {
-                                                    const slides = [...(config.hero?.slides || [])];
-                                                    slides[index] = { ...slides[index], subheading: e.target.value };
-                                                    setConfig({ ...config, hero: { ...config.hero, slides } });
-                                                }}
-                                                placeholder="Override default subheading"
-                                                className="text-sm"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label className="text-xs">Tagline (bottom link)</Label>
-                                            <Input
-                                                value={slide.ctaText || ''}
-                                                onChange={(e) => {
-                                                    const slides = [...(config.hero?.slides || [])];
-                                                    slides[index] = { ...slides[index], ctaText: e.target.value };
-                                                    setConfig({ ...config, hero: { ...config.hero, slides } });
-                                                }}
-                                                placeholder="e.g. New Arrivals"
-                                                className="text-sm"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label className="text-xs">Link URL</Label>
-                                            <Input
-                                                value={slide.ctaLink || ''}
-                                                onChange={(e) => {
-                                                    const slides = [...(config.hero?.slides || [])];
-                                                    slides[index] = { ...slides[index], ctaLink: e.target.value };
-                                                    setConfig({ ...config, hero: { ...config.hero, slides } });
-                                                }}
-                                                placeholder="/collection/new-arrivals"
-                                                className="text-sm"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
+                            <Slider
+                                value={[config.hero?.overlayOpacity ?? 0.3]}
+                                min={0}
+                                max={0.9}
+                                step={0.05}
+                                onValueChange={(vals) => setConfig({ ...config, hero: { ...config.hero, overlayOpacity: vals[0] } })}
+                            />
                         </div>
 
-                        {/* Legacy Single Image Fallback */}
-                        {(!config.hero?.slides || config.hero.slides.length === 0) && (
-                            <div className="space-y-4 pt-4 border-t border-white/10">
-                                <Label className="text-sm font-medium">Legacy Single Image (used if no slides)</Label>
-                                <Input
-                                    value={config.hero?.image || ''}
-                                    onChange={(e) => setConfig({ ...config, hero: { ...config.hero, image: e.target.value } })}
-                                    placeholder="Paste image URL..."
-                                    className="text-sm"
-                                />
-                            </div>
-                        )}
+                        {/* Hero Image */}
+                        <div className="space-y-4 pt-4 border-t border-white/10">
+                            <Label className="text-base font-semibold">Desktop Image</Label>
+
+                            {(config.hero?.image || heroFile) ? (
+                                <div className="relative aspect-video w-full rounded-lg overflow-hidden border border-white/10 group">
+                                    <img
+                                        src={heroFile ? URL.createObjectURL(heroFile) : config.hero?.image}
+                                        alt="Hero Desktop"
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                        <label className="cursor-pointer p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors">
+                                            <Upload className="w-4 h-4" />
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={(e) => {
+                                                    if (e.target.files?.[0]) {
+                                                        const file = e.target.files[0];
+                                                        const reader = new FileReader();
+                                                        reader.onload = (ev) => {
+                                                            if (ev.target?.result && typeof ev.target.result === 'string') {
+                                                                setTempCropImage(ev.target.result);
+                                                            }
+                                                        };
+                                                        reader.readAsDataURL(file);
+                                                    }
+                                                }}
+                                            />
+                                        </label>
+                                        <Button
+                                            type="button"
+                                            variant="secondary"
+                                            size="icon"
+                                            onClick={() => {
+                                                if (heroFile) {
+                                                    setHeroFile(null);
+                                                } else if (config.hero?.image) {
+                                                    queueImageForDeletion(config.hero.image);
+                                                    setConfig({ ...config, hero: { ...config.hero, image: '' } });
+                                                }
+                                            }}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <label className="flex flex-col items-center justify-center w-full aspect-video border-2 border-dashed border-white/10 rounded-lg cursor-pointer hover:border-white/30 transition-all bg-black/20">
+                                    <Upload className="w-8 h-8 text-white/40 mb-2" />
+                                    <span className="text-sm text-white/40">Click to upload desktop image (16:9 recommended)</span>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            if (e.target.files?.[0]) {
+                                                const file = e.target.files[0];
+                                                const reader = new FileReader();
+                                                reader.onload = (ev) => {
+                                                    if (ev.target?.result && typeof ev.target.result === 'string') {
+                                                        setTempCropImage(ev.target.result);
+                                                    }
+                                                };
+                                                reader.readAsDataURL(file);
+                                            }
+                                        }}
+                                    />
+                                </label>
+                            )}
+                        </div>
+
+                        {/* Mobile Image */}
+                        <div className="space-y-4 pt-4 border-t border-white/10">
+                            <Label className="text-base font-semibold">Mobile Image (Optional)</Label>
+
+                            {(config.hero?.mobileImage || mobileHeroFile) ? (
+                                <div className="relative aspect-[9/16] w-full max-w-xs mx-auto rounded-lg overflow-hidden border border-white/10 group">
+                                    <img
+                                        src={mobileHeroFile ? URL.createObjectURL(mobileHeroFile) : config.hero?.mobileImage}
+                                        alt="Hero Mobile"
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                        <label className="cursor-pointer p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors">
+                                            <Upload className="w-4 h-4" />
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={(e) => {
+                                                    if (e.target.files?.[0]) {
+                                                        const file = e.target.files[0];
+                                                        const reader = new FileReader();
+                                                        reader.onload = (ev) => {
+                                                            if (ev.target?.result && typeof ev.target.result === 'string') {
+                                                                setTempMobileCropImage(ev.target.result);
+                                                            }
+                                                        };
+                                                        reader.readAsDataURL(file);
+                                                    }
+                                                }}
+                                            />
+                                        </label>
+                                        <Button
+                                            type="button"
+                                            variant="secondary"
+                                            size="icon"
+                                            onClick={() => {
+                                                if (mobileHeroFile) {
+                                                    setMobileHeroFile(null);
+                                                } else if (config.hero?.mobileImage) {
+                                                    queueImageForDeletion(config.hero.mobileImage);
+                                                    setConfig({ ...config, hero: { ...config.hero, mobileImage: '' } });
+                                                }
+                                            }}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <label className="flex flex-col items-center justify-center w-full max-w-xs mx-auto aspect-[9/16] border-2 border-dashed border-white/10 rounded-lg cursor-pointer hover:border-white/30 transition-all bg-black/20">
+                                    <Upload className="w-6 h-6 text-white/40 mb-2" />
+                                    <span className="text-xs text-white/40">Click to upload mobile image (9:16)</span>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            if (e.target.files?.[0]) {
+                                                const file = e.target.files[0];
+                                                const reader = new FileReader();
+                                                reader.onload = (ev) => {
+                                                    if (ev.target?.result && typeof ev.target.result === 'string') {
+                                                        setTempMobileCropImage(ev.target.result);
+                                                    }
+                                                };
+                                                reader.readAsDataURL(file);
+                                            }
+                                        }}
+                                    />
+                                </label>
+                            )}
+                        </div>
 
                         {imagesToDelete.length > 0 && (
                             <p className="text-xs text-amber-500">

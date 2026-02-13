@@ -44,7 +44,7 @@ export const CollectionCard = ({ collection }: CollectionCardProps) => {
             {/* Content */}
             <div className="absolute inset-x-0 bottom-0 p-6 flex items-end justify-between text-white">
                 <div className="flex flex-col gap-1">
-                    <h3 className="font-manrope text-sm md:text-base font-bold uppercase tracking-[0.1em]">
+                    <h3 className="font-body text-sm md:text-base font-bold uppercase tracking-[0.1em]">
                         {collection.title}
                     </h3>
                     {collection.product_count !== undefined && (

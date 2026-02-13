@@ -140,7 +140,7 @@ export function ProductLightbox({
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY
       );
-      
+
       const delta = (distance - lastTouchDistance.current) / 100;
       setZoomLevel(prev => {
         const next = Math.max(1, Math.min(prev + delta * 1.5, 4));
@@ -230,7 +230,7 @@ export function ProductLightbox({
                   <ZoomIn className="w-5 h-5" />
                 </button>
               </div>
-              
+
               <button
                 onClick={onClose}
                 className="w-10 h-10 flex items-center justify-center bg-white text-black rounded-full hover:bg-neutral-200 transition-colors shadow-lg"

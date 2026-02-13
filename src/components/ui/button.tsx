@@ -15,10 +15,10 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        cta: "bg-cta text-cta-foreground font-manrope font-black tracking-[0.2em] uppercase text-[11px] rounded-none hover:bg-cta/90 transition-all",
-        ctaOutline: "border border-cta bg-transparent text-cta font-manrope font-black tracking-[0.2em] uppercase text-[11px] rounded-none hover:bg-cta hover:text-cta-foreground transition-all",
-        ctaHero: "bg-white text-black font-manrope font-black tracking-[0.2em] uppercase text-[11px] rounded-none hover:bg-white/90 transition-all",
-        ctaHeroOutline: "border border-white bg-transparent text-white font-manrope font-black tracking-[0.2em] uppercase text-[11px] rounded-none hover:bg-white hover:text-black transition-all",
+        cta: "bg-cta text-cta-foreground font-body font-black tracking-[0.2em] uppercase text-[11px] rounded-none hover:bg-cta/90 transition-all",
+        ctaOutline: "border border-cta bg-transparent text-cta font-body font-black tracking-[0.2em] uppercase text-[11px] rounded-none hover:bg-cta hover:text-cta-foreground transition-all",
+        ctaHero: "bg-white text-black font-body font-black tracking-[0.2em] uppercase text-[11px] rounded-none hover:bg-white/90 transition-all",
+        ctaHeroOutline: "border border-white bg-transparent text-white font-body font-black tracking-[0.2em] uppercase text-[11px] rounded-none hover:bg-white hover:text-black transition-all",
       },
       size: {
         default: "h-10 px-4 py-2",
@@ -37,7 +37,7 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 

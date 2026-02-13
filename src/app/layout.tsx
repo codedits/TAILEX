@@ -99,12 +99,10 @@ export default async function RootLayout({
 
   const font = getFont(fontName.toLowerCase());
 
-  // Hero Images (Prioritize Slides for LCP)
+  // Hero Images
   const defaultHeroImage = "https://framerusercontent.com/images/T0Z10o3Yaf4JPrk9f5lhcmJJwno.jpg";
-  const firstSlide = config.hero.slides?.[0];
+  // Variables removed as calculated but unused, and they referenced 'slides' which is now removed.
 
-  const heroImage = firstSlide?.image || config.hero.image || defaultHeroImage;
-  const mobileHeroImage = firstSlide?.mobileImage || config.hero.mobileImage;
 
   // Map Brand colors to shadcn HSL variables
   const hslPrimary = hexToHslValues(primaryColor);

@@ -13,7 +13,7 @@ const CollectionShowcaseCarousel = dynamic(
         loading: () => <div className="w-full h-96 bg-neutral-50 animate-pulse" />
     }
 );
-import { m } from "framer-motion";
+import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useState } from "react";
 
 interface CollectionShowcaseProps {
@@ -42,6 +42,9 @@ export default function CollectionShowcase({
     collectionHref,
     className,
 }: CollectionShowcaseProps) {
+    const { ref: heroRef, isVisible: isHeroVisible } = useScrollReveal({ threshold: 0.1 });
+    const { ref: contentRef, isVisible: isContentVisible } = useScrollReveal({ threshold: 0.2 });
+
     // Limit products for initial render
     const carouselProducts = products.slice(0, 8);
     const [imgSrc, setImgSrc] = useState(coverImage || "https://framerusercontent.com/images/BjQfJy7nQoVxvCYTFzwZxprDWiQ.jpg");
@@ -49,13 +52,12 @@ export default function CollectionShowcase({
     return (
         <section className={cn("w-full flex flex-col relative z-10", className)}>
             {/* Section 1: The Collection Hero */}
-            <div className="relative w-full h-[70vh] md:h-[115vh] overflow-hidden group bg-background">
-                <m.div
-                    initial={{ opacity: 0, scale: 1.1 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true, amount: 0.1 }}
-                    transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                    className="absolute inset-0 h-full w-full bg-white"
+            <div className="relative w-full h-[70vh] md:h-[115vh] overflow-hidden group bg-background" ref={heroRef}>
+                <div
+                    className={cn(
+                        "absolute inset-0 h-full w-full bg-white",
+                        isHeroVisible ? "animate-image-entrance" : "opacity-0 scale-[1.5]"
+                    )}
                 >
                     <Image
                         src={imgSrc}
@@ -67,52 +69,37 @@ export default function CollectionShowcase({
                         loading="lazy"
                         onError={() => setImgSrc("https://framerusercontent.com/images/BjQfJy7nQoVxvCYTFzwZxprDWiQ.jpg")}
                     />
-                </m.div>
+                </div>
 
                 {/* Content - Text Independent of Image */}
-                <div className="absolute inset-x-0 bottom-0 top-0 flex flex-col items-center justify-center text-center px-4 md:px-6 text-white p-12 z-10">
-                    <m.div
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true, amount: 0.2 }}
-                        variants={{
-                            hidden: { opacity: 0 },
-                            visible: {
-                                opacity: 1,
-                                transition: {
-                                    staggerChildren: 0.2,
-                                    delayChildren: 0.3
-                                }
-                            }
-                        }}
-                        className="space-y-6 max-w-4xl"
-                    >
-                        <m.h2
-                            variants={{
-                                hidden: { opacity: 0, y: 30 },
-                                visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.33, 1, 0.68, 1] } }
-                            }}
-                            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-[200] uppercase tracking-[0.05em] leading-tight script-font"
+                <div
+                    ref={contentRef}
+                    className="absolute inset-x-0 bottom-0 top-0 flex flex-col items-center justify-center text-center px-4 md:px-6 text-white p-12 z-10"
+                >
+                    <div className="space-y-6 max-w-4xl">
+                        <h2
+                            className={cn(
+                                "text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-[200] uppercase tracking-[0.05em] leading-tight script-font",
+                                isContentVisible ? "hero-text" : "opacity-0 translate-y-[30px]"
+                            )}
                         >
                             {title}
-                        </m.h2>
+                        </h2>
                         {description && (
-                            <m.p
-                                variants={{
-                                    hidden: { opacity: 0, y: 20 },
-                                    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.33, 1, 0.68, 1] } }
-                                }}
-                                className="text-sm sm:text-base md:text-lg font-light tracking-wide text-white/90 text-balance max-w-2xl mx-auto leading-relaxed drop-shadow-md"
+                            <p
+                                className={cn(
+                                    "text-sm sm:text-base md:text-lg font-light tracking-wide text-white/90 text-balance max-w-2xl mx-auto leading-relaxed drop-shadow-md",
+                                    isContentVisible ? "hero-subtext" : "opacity-0 translate-y-[30px]"
+                                )}
                             >
                                 {description}
-                            </m.p>
+                            </p>
                         )}
-                        <m.div
-                            variants={{
-                                hidden: { opacity: 0, y: 20 },
-                                visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.33, 1, 0.68, 1] } }
-                            }}
-                            className="pt-8"
+                        <div
+                            className={cn(
+                                "pt-8",
+                                isContentVisible ? "hero-cta" : "opacity-0 translate-y-[30px]"
+                            )}
                         >
                             <Link
                                 href={collectionHref}
@@ -120,8 +107,8 @@ export default function CollectionShowcase({
                             >
                                 View Collection
                             </Link>
-                        </m.div>
-                    </m.div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

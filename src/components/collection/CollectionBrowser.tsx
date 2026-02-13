@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+
 import ProductCard from "@/components/product/ProductCard";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -45,17 +45,17 @@ interface CollectionBrowserProps {
   showGenderTabs?: boolean;
 }
 
-export default function CollectionBrowser({ 
-  products, 
-  collections, 
+export default function CollectionBrowser({
+  products,
+  collections,
   initialCollectionId,
-  showGenderTabs = true 
+  showGenderTabs = true
 }: CollectionBrowserProps) {
   const formatCurrency = useFormatCurrency();
   const [selectedCategories, setSelectedCategories] = useState<string[]>(initialCollectionId ? [initialCollectionId] : []);
   const [selectedGender, setSelectedGender] = useState<string>('all');
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
-  
+
   // Calculate max price from products
   const maxPrice = useMemo(() => {
     return Math.max(...products.map(p => p.price), 500);
@@ -103,16 +103,16 @@ export default function CollectionBrowser({
         // Filter by collection (category_id)
         const matchesCategory =
           selectedCategories.length === 0 || selectedCategories.includes(product.category_id || '');
-        
+
         // Filter by gender - check tags or product_type for gender info
-        const matchesGender = selectedGender === 'all' || 
+        const matchesGender = selectedGender === 'all' ||
           product.tags?.some(tag => tag.toLowerCase() === selectedGender) ||
           product.product_type?.toLowerCase().includes(selectedGender);
-        
+
         // Filter by price
         const matchesPrice =
           product.price >= priceRange[0] && product.price <= priceRange[1];
-        
+
         return matchesCategory && matchesGender && matchesPrice;
       })
       .sort((a, b) => {
@@ -132,21 +132,21 @@ export default function CollectionBrowser({
       {/* Active Filters */}
       {activeFilterCount > 0 && (
         <div className="flex flex-wrap gap-2 pb-6 border-b border-border">
-          <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-manrope font-black">Active:</span>
+          <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-body font-black">Active:</span>
           {selectedCategories.map(catId => {
             const col = collections.find(c => c.id === catId);
             return col ? (
-              <Badge key={catId} variant="secondary" className="cursor-pointer rounded-none font-manrope font-bold text-[10px] uppercase tracking-wider" onClick={() => toggleCategory(catId)}>
+              <Badge key={catId} variant="secondary" className="cursor-pointer rounded-none font-body font-bold text-[10px] uppercase tracking-wider" onClick={() => toggleCategory(catId)}>
                 {col.title} <X className="w-3 h-3 ml-1" />
               </Badge>
             ) : null;
           })}
           {selectedGender !== 'all' && (
-            <Badge variant="secondary" className="cursor-pointer rounded-none font-manrope font-bold text-[10px] uppercase tracking-wider" onClick={() => setSelectedGender('all')}>
+            <Badge variant="secondary" className="cursor-pointer rounded-none font-body font-bold text-[10px] uppercase tracking-wider" onClick={() => setSelectedGender('all')}>
               {selectedGender} <X className="w-3 h-3 ml-1" />
             </Badge>
           )}
-          <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-[10px] h-6 uppercase tracking-widest font-manrope font-black hover:bg-transparent underline underline-offset-4">
+          <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-[10px] h-6 uppercase tracking-widest font-body font-black hover:bg-transparent underline underline-offset-4">
             Clear all
           </Button>
         </div>
@@ -154,19 +154,19 @@ export default function CollectionBrowser({
 
       {/* Collection Filter */}
       <div>
-        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] mb-6 text-foreground font-manrope">Collection</h4>
+        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] mb-6 text-foreground font-body">Collection</h4>
         <div className="space-y-4">
           {collections.map((col) => (
             <div key={col.id} className="flex items-center space-x-3 group cursor-pointer">
-              <Checkbox 
-                id={`filter-${col.slug}`} 
+              <Checkbox
+                id={`filter-${col.slug}`}
                 checked={selectedCategories.includes(col.id)}
                 onCheckedChange={() => toggleCategory(col.id)}
                 className="rounded-none border-border data-[state=checked]:bg-foreground data-[state=checked]:border-foreground transition-all"
               />
-              <Label 
-                htmlFor={`filter-${col.slug}`} 
-                className="text-xs font-manrope font-bold uppercase tracking-widest cursor-pointer group-hover:text-foreground transition-colors text-muted-foreground"
+              <Label
+                htmlFor={`filter-${col.slug}`}
+                className="text-xs font-body font-bold uppercase tracking-widest cursor-pointer group-hover:text-foreground transition-colors text-muted-foreground"
               >
                 {col.title}
               </Label>
@@ -178,19 +178,19 @@ export default function CollectionBrowser({
       {/* Gender/Category Filter */}
       {showGenderTabs && (
         <div>
-          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] mb-6 text-foreground font-manrope">Category</h4>
+          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] mb-6 text-foreground font-body">Category</h4>
           <div className="space-y-4">
             {GENDER_OPTIONS.map((option) => (
               <div key={option.id} className="flex items-center space-x-3 group cursor-pointer">
-                <Checkbox 
+                <Checkbox
                   id={`gender-${option.id}`}
                   checked={selectedGender === option.id}
                   onCheckedChange={() => setSelectedGender(selectedGender === option.id ? 'all' : option.id)}
                   className="rounded-none border-border data-[state=checked]:bg-foreground data-[state=checked]:border-foreground transition-all"
                 />
-                <Label 
+                <Label
                   htmlFor={`gender-${option.id}`}
-                  className="text-xs font-manrope font-bold uppercase tracking-widest cursor-pointer group-hover:text-foreground transition-colors text-muted-foreground"
+                  className="text-xs font-body font-bold uppercase tracking-widest cursor-pointer group-hover:text-foreground transition-colors text-muted-foreground"
                 >
                   {option.label}
                 </Label>
@@ -202,17 +202,16 @@ export default function CollectionBrowser({
 
       {/* Size Filter */}
       <div>
-        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] mb-6 text-foreground font-manrope">Size</h4>
+        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] mb-6 text-foreground font-body">Size</h4>
         <div className="grid grid-cols-3 gap-2">
           {SIZE_OPTIONS.map((size) => (
             <button
               key={size}
               onClick={() => toggleSize(size)}
-              className={`py-2 px-3 text-xs border rounded transition-all ${
-                selectedSizes.includes(size)
-                  ? 'bg-foreground text-background border-foreground'
-                  : 'border-border hover:border-foreground/50'
-              }`}
+              className={`py-2 px-3 text-xs border rounded transition-all ${selectedSizes.includes(size)
+                ? 'bg-foreground text-background border-foreground'
+                : 'border-border hover:border-foreground/50'
+                }`}
             >
               {size}
             </button>
@@ -257,15 +256,15 @@ export default function CollectionBrowser({
         {/* Toolbar - Like high-end stores */}
         <div className="flex justify-between items-center mb-12 pb-6 border-b border-border">
           <div className="flex items-center gap-6">
-            <span className="text-[10px] font-manrope font-black uppercase tracking-[0.2em] text-muted-foreground">
+            <span className="text-[10px] font-body font-black uppercase tracking-[0.2em] text-muted-foreground">
               {filteredProducts.length} {filteredProducts.length === 1 ? 'Product' : 'Products'}
             </span>
-            
+
             {/* Mobile Filter Sheet */}
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="lg:hidden gap-2 rounded-none border-foreground hover:bg-foreground hover:text-background transition-all font-manrope font-black uppercase tracking-widest text-[10px] h-10 px-6">
-                  <SlidersHorizontal className="w-3 h-3" /> 
+                <Button variant="outline" size="sm" className="lg:hidden gap-2 rounded-none border-foreground hover:bg-foreground hover:text-background transition-all font-body font-black uppercase tracking-widest text-[10px] h-10 px-6">
+                  <SlidersHorizontal className="w-3 h-3" />
                   Refine
                   {activeFilterCount > 0 && (
                     <span className="ml-2 bg-foreground text-background h-4 w-4 flex items-center justify-center text-[9px]">
@@ -276,8 +275,8 @@ export default function CollectionBrowser({
               </SheetTrigger>
               <SheetContent side="left" className="w-[320px] sm:w-[400px] overflow-y-auto">
                 <SheetHeader className="mb-8">
-                  <SheetTitle className="font-manrope font-black uppercase tracking-[0.2em] text-xl">Filters</SheetTitle>
-                  <SheetDescription className="font-manrope font-medium text-xs uppercase tracking-widest">Tailor your selection</SheetDescription>
+                  <SheetTitle className="font-body font-black uppercase tracking-[0.2em] text-xl">Filters</SheetTitle>
+                  <SheetDescription className="font-body font-medium text-xs uppercase tracking-widest">Tailor your selection</SheetDescription>
                 </SheetHeader>
                 <div className="mt-8">
                   <FilterContent />
@@ -305,60 +304,51 @@ export default function CollectionBrowser({
 
             {/* Sort Dropdown */}
             <Select value={sortOption} onValueChange={setSortOption}>
-              <SelectTrigger className="w-[180px] border-0 bg-transparent focus:ring-0 font-manrope font-black uppercase tracking-widest text-[10px] h-10">
+              <SelectTrigger className="w-[180px] border-0 bg-transparent focus:ring-0 font-body font-black uppercase tracking-widest text-[10px] h-10">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent className="rounded-none border-foreground">
-                <SelectItem value="featured" className="font-manrope font-bold uppercase tracking-widest text-[10px]">Featured</SelectItem>
-                <SelectItem value="newest" className="font-manrope font-bold uppercase tracking-widest text-[10px]">Newest</SelectItem>
-                <SelectItem value="price-asc" className="font-manrope font-bold uppercase tracking-widest text-[10px]">Price: Low to High</SelectItem>
-                <SelectItem value="price-desc" className="font-manrope font-bold uppercase tracking-widest text-[10px]">Price: High to Low</SelectItem>
-                <SelectItem value="name-asc" className="font-manrope font-bold uppercase tracking-widest text-[10px]">Name: A to Z</SelectItem>
-                <SelectItem value="name-desc" className="font-manrope font-bold uppercase tracking-widest text-[10px]">Name: Z to A</SelectItem>
+                <SelectItem value="featured" className="font-body font-bold uppercase tracking-widest text-[10px]">Featured</SelectItem>
+                <SelectItem value="newest" className="font-body font-bold uppercase tracking-widest text-[10px]">Newest</SelectItem>
+                <SelectItem value="price-asc" className="font-body font-bold uppercase tracking-widest text-[10px]">Price: Low to High</SelectItem>
+                <SelectItem value="price-desc" className="font-body font-bold uppercase tracking-widest text-[10px]">Price: High to Low</SelectItem>
+                <SelectItem value="name-asc" className="font-body font-bold uppercase tracking-widest text-[10px]">Name: A to Z</SelectItem>
+                <SelectItem value="name-desc" className="font-body font-bold uppercase tracking-widest text-[10px]">Name: Z to A</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
 
         {/* Products Grid */}
-        <AnimatePresence mode="wait">
-          <motion.div 
-            key={`grid-${gridCols}-${filteredProducts.length}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className={`grid gap-y-16 gap-x-8 ${
-              gridCols === 2 
-                ? 'grid-cols-1 sm:grid-cols-2' 
-                : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-            }`}
+        <div key={`grid-${gridCols}-${filteredProducts.length}`} className="animate-in fade-in duration-300">
+          <div
+            className={`grid gap-y-16 gap-x-8 ${gridCols === 2
+              ? 'grid-cols-1 sm:grid-cols-2'
+              : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+              }`}
           >
             {filteredProducts.map((product, index) => (
-              <motion.div
+              <div
                 key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.05 }}
+                className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-forwards opacity-0"
+                style={{ animationDelay: `${index * 50}ms` }}
               >
                 <ProductCard {...product} />
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
-        </AnimatePresence>
+          </div>
+        </div>
 
         {filteredProducts.length === 0 && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="py-32 text-center"
+          <div
+            className="py-32 text-center animate-in fade-in duration-300"
           >
-            <p className="text-xl font-manrope font-black tracking-tight mb-4">No results found</p>
-            <p className="text-sm font-manrope text-muted-foreground/60 mb-8 uppercase tracking-widest">Adjust your filters to discover more</p>
-            <Button variant="outline" onClick={clearAllFilters} className="rounded-none border-foreground font-manrope font-black uppercase tracking-widest text-xs h-12 px-8">
+            <p className="text-xl font-body font-black tracking-tight mb-4">No results found</p>
+            <p className="text-sm font-body text-muted-foreground/60 mb-8 uppercase tracking-widest">Adjust your filters to discover more</p>
+            <Button variant="outline" onClick={clearAllFilters} className="rounded-none border-foreground font-body font-black uppercase tracking-widest text-xs h-12 px-8">
               Clear all filters
             </Button>
-          </motion.div>
+          </div>
         )}
       </div>
     </div>

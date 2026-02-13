@@ -10,7 +10,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+
 import { CheckCircle, Loader2, ChevronRight, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/context/UserAuthContext";
 import { useFormatCurrency } from "@/context/StoreConfigContext";
@@ -270,174 +270,170 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
 
                     <h1 className="text-4xl font-display mb-8">Checkout</h1>
 
-                    <AnimatePresence mode="wait">
-
-                        {/* 1. EMAIL */}
-                        {step === 'email' && (
-                            <motion.div key="email" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                                <div className="p-8 border border-black/10 bg-white shadow-sm">
-                                    <h2 className="text-sm font-semibold tracking-[0.2em] uppercase mb-8 border-b border-black/5 pb-4">Contact</h2>
-                                    <form onSubmit={handleSendOTP} className="space-y-6">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="email" className="text-[10px] tracking-[0.1em] uppercase text-neutral-500">Email</Label>
-                                            <Input
-                                                id="email" type="email" required
-                                                value={email} onChange={(e) => setEmail(e.target.value)}
-                                                className="rounded-none border-black/20 focus:border-black h-12 uppercase text-xs tracking-widest"
-                                            />
-                                        </div>
-                                        <Button type="submit" variant="cta" size="xl" className="w-full text-xs" disabled={isProcessing}>
-                                            {isProcessing ? <Loader2 className="animate-spin w-4 h-4" /> : "CONTINUE"}
-                                        </Button>
-                                    </form>
-                                </div>
-                            </motion.div>
-                        )}
-
-                        {/* 2. OTP */}
-                        {step === 'otp' && (
-                            <motion.div key="otp" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                                <div className="p-8 border border-black/10 bg-white shadow-sm">
-                                    <h2 className="text-sm font-semibold tracking-[0.2em] uppercase mb-8 border-b border-black/5 pb-4">Verify</h2>
-                                    <p className="text-xs text-neutral-500 mb-8">Code sent to <b>{email}</b></p>
-                                    <form onSubmit={handleVerifyOTP} className="space-y-6">
+                    {/* 1. EMAIL */}
+                    {step === 'email' && (
+                        <div key="email" className="animate-in fade-in slide-in-from-right-8 duration-500">
+                            <div className="p-8 border border-black/10 bg-white shadow-sm">
+                                <h2 className="text-sm font-semibold tracking-[0.2em] uppercase mb-8 border-b border-black/5 pb-4">Contact</h2>
+                                <form onSubmit={handleSendOTP} className="space-y-6">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="email" className="text-[10px] tracking-[0.1em] uppercase text-neutral-500">Email</Label>
                                         <Input
-                                            value={otp} onChange={(e) => setOtp(e.target.value)}
-                                            className="text-center tracking-[0.8em] text-xl font-mono h-14 rounded-none border-black/20"
-                                            placeholder="••••••" maxLength={6}
+                                            id="email" type="email" required
+                                            value={email} onChange={(e) => setEmail(e.target.value)}
+                                            className="rounded-none border-black/20 focus:border-black h-12 uppercase text-xs tracking-widest"
                                         />
-                                        <Button type="submit" variant="cta" size="xl" className="w-full text-xs" disabled={isProcessing}>
-                                            {isProcessing ? <Loader2 className="animate-spin w-4 h-4" /> : "VERIFY"}
-                                        </Button>
-                                    </form>
-                                </div>
-                            </motion.div>
-                        )}
-
-                        {/* 3. ADDRESS */}
-                        {step === 'address' && (
-                            <motion.div key="address" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }}>
-                                {activeUser && (
-                                    <div className="flex items-center gap-3 text-[10px] tracking-[0.2em] uppercase text-neutral-600 bg-neutral-100 p-4 border border-black/5 mb-8">
-                                        <CheckCircle className="w-4 h-4" />
-                                        <span>Logged in as {activeUser.email}</span>
                                     </div>
-                                )}
-                                <form onSubmit={form.handleSubmit(onAddressSubmit)} className="space-y-6">
-                                    <div className="grid grid-cols-2 gap-6">
-                                        <div className="col-span-2 md:col-span-1 space-y-2">
-                                            <Label className="text-[10px] uppercase text-neutral-500">First Name</Label>
-                                            <Input {...form.register("first_name")} className="rounded-none h-12 text-xs border-black/20" />
-                                            {form.formState.errors.first_name && <p className="text-xs text-red-500">{form.formState.errors.first_name.message}</p>}
-                                        </div>
-                                        <div className="col-span-2 md:col-span-1 space-y-2">
-                                            <Label className="text-[10px] uppercase text-neutral-500">Last Name</Label>
-                                            <Input {...form.register("last_name")} className="rounded-none h-12 text-xs border-black/20" />
-                                            {form.formState.errors.last_name && <p className="text-xs text-red-500">{form.formState.errors.last_name.message}</p>}
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label className="text-[10px] uppercase text-neutral-500">Address</Label>
-                                        <Input {...form.register("address1")} className="rounded-none h-12 text-xs border-black/20" placeholder="Street address" />
-                                        {form.formState.errors.address1 && <p className="text-xs text-red-500">{form.formState.errors.address1.message}</p>}
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <Label className="text-[10px] uppercase text-neutral-500">City</Label>
-                                            <Input {...form.register("city")} className="rounded-none h-12 text-xs border-black/20" />
-                                            {form.formState.errors.city && <p className="text-xs text-red-500">{form.formState.errors.city.message}</p>}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label className="text-[10px] uppercase text-neutral-500">Postal Code</Label>
-                                            <Input {...form.register("zip")} className="rounded-none h-12 text-xs border-black/20" />
-                                            {form.formState.errors.zip && <p className="text-xs text-red-500">{form.formState.errors.zip.message}</p>}
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label className="text-[10px] uppercase text-neutral-500">Phone</Label>
-                                        <Input {...form.register("phone")} className="rounded-none h-12 text-xs border-black/20" placeholder="+92..." />
-                                        {form.formState.errors.phone && <p className="text-xs text-red-500">{form.formState.errors.phone.message}</p>}
-                                    </div>
-
-                                    <Button type="submit" variant="cta" size="xl" className="w-full text-xs">CONTINUE TO SHIPPING</Button>
+                                    <Button type="submit" variant="cta" size="xl" className="w-full text-xs" disabled={isProcessing}>
+                                        {isProcessing ? <Loader2 className="animate-spin w-4 h-4" /> : "CONTINUE"}
+                                    </Button>
                                 </form>
-                            </motion.div>
-                        )}
+                            </div>
+                        </div>
+                    )}
 
-                        {/* 4. SHIPPING */}
-                        {step === 'shipping' && (
-                            <motion.div key="shipping" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                                <div className="space-y-8">
-                                    <div className="border border-black/5 p-4 text-xs space-y-2 bg-neutral-50/50">
-                                        <div className="flex justify-between border-b border-black/5 pb-2">
-                                            <span className="text-neutral-500">Contact</span>
-                                            <span>{email || shippingAddress?.email}</span>
-                                        </div>
-                                        <div className="flex justify-between border-b border-black/5 pb-2">
-                                            <span className="text-neutral-500">Ship to</span>
-                                            <span className="text-right truncate max-w-[200px]">{shippingAddress?.address1}, {shippingAddress?.city}</span>
-                                        </div>
-                                        <div className="pt-2 text-[10px] uppercase tracking-widest text-neutral-400 cursor-pointer hover:text-black underline" onClick={() => setStep('address')}>
-                                            Change
-                                        </div>
-                                    </div>
-
-                                    <ShippingMethodStep
-                                        selectedMethod={shippingMethod}
-                                        onSelect={setShippingMethod}
-                                        deliveryConfig={deliveryConfig}
-                                        cartTotal={cartTotal}
+                    {/* 2. OTP */}
+                    {step === 'otp' && (
+                        <div key="otp" className="animate-in fade-in slide-in-from-right-8 duration-500">
+                            <div className="p-8 border border-black/10 bg-white shadow-sm">
+                                <h2 className="text-sm font-semibold tracking-[0.2em] uppercase mb-8 border-b border-black/5 pb-4">Verify</h2>
+                                <p className="text-xs text-neutral-500 mb-8">Code sent to <b>{email}</b></p>
+                                <form onSubmit={handleVerifyOTP} className="space-y-6">
+                                    <Input
+                                        value={otp} onChange={(e) => setOtp(e.target.value)}
+                                        className="text-center tracking-[0.8em] text-xl font-mono h-14 rounded-none border-black/20"
+                                        placeholder="••••••" maxLength={6}
                                     />
+                                    <Button type="submit" variant="cta" size="xl" className="w-full text-xs" disabled={isProcessing}>
+                                        {isProcessing ? <Loader2 className="animate-spin w-4 h-4" /> : "VERIFY"}
+                                    </Button>
+                                </form>
+                            </div>
+                        </div>
+                    )}
 
-                                    <div className="flex gap-4">
-                                        <Button variant="outline" className="flex-1" onClick={() => setStep('address')}>
-                                            <ArrowLeft className="w-4 h-4 mr-2" /> Back
-                                        </Button>
-                                        <Button variant="cta" className="flex-[2]" onClick={() => setStep('payment')}>
-                                            CONTINUE TO PAYMENT
-                                        </Button>
+                    {/* 3. ADDRESS */}
+                    {step === 'address' && (
+                        <div key="address" className="animate-in fade-in slide-in-from-right-8 duration-500">
+                            {activeUser && (
+                                <div className="flex items-center gap-3 text-[10px] tracking-[0.2em] uppercase text-neutral-600 bg-neutral-100 p-4 border border-black/5 mb-8">
+                                    <CheckCircle className="w-4 h-4" />
+                                    <span>Logged in as {activeUser.email}</span>
+                                </div>
+                            )}
+                            <form onSubmit={form.handleSubmit(onAddressSubmit)} className="space-y-6">
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="col-span-2 md:col-span-1 space-y-2">
+                                        <Label className="text-[10px] uppercase text-neutral-500">First Name</Label>
+                                        <Input {...form.register("first_name")} className="rounded-none h-12 text-xs border-black/20" />
+                                        {form.formState.errors.first_name && <p className="text-xs text-red-500">{form.formState.errors.first_name.message}</p>}
+                                    </div>
+                                    <div className="col-span-2 md:col-span-1 space-y-2">
+                                        <Label className="text-[10px] uppercase text-neutral-500">Last Name</Label>
+                                        <Input {...form.register("last_name")} className="rounded-none h-12 text-xs border-black/20" />
+                                        {form.formState.errors.last_name && <p className="text-xs text-red-500">{form.formState.errors.last_name.message}</p>}
                                     </div>
                                 </div>
-                            </motion.div>
-                        )}
-
-                        {/* 5. PAYMENT */}
-                        {step === 'payment' && (
-                            <motion.div key="payment" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-                                <div className="space-y-8">
-                                    <PaymentMethodStep
-                                        selectedMethod={paymentMethod}
-                                        onSelect={setPaymentMethod}
-                                        proofFile={proofFile}
-                                        setProofFile={setProofFile}
-                                        transactionId={transactionId}
-                                        setTransactionId={setTransactionId}
-                                    />
-
-                                    <div className="flex gap-4">
-                                        <Button variant="outline" className="flex-1" onClick={() => setStep('shipping')} disabled={isProcessing}>
-                                            <ArrowLeft className="w-4 h-4 mr-2" /> Back
-                                        </Button>
-                                        <Button
-                                            variant="cta"
-                                            size="xl"
-                                            className="flex-[2] text-xs"
-                                            onClick={handlePlaceOrder}
-                                            disabled={isProcessing || (paymentMethod !== 'COD' && !proofFile)}
-                                        >
-                                            {isProcessing ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : `PAY ${formatCurrency(finalTotal)}`}
-                                        </Button>
+                                <div className="space-y-2">
+                                    <Label className="text-[10px] uppercase text-neutral-500">Address</Label>
+                                    <Input {...form.register("address1")} className="rounded-none h-12 text-xs border-black/20" placeholder="Street address" />
+                                    {form.formState.errors.address1 && <p className="text-xs text-red-500">{form.formState.errors.address1.message}</p>}
+                                </div>
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label className="text-[10px] uppercase text-neutral-500">City</Label>
+                                        <Input {...form.register("city")} className="rounded-none h-12 text-xs border-black/20" />
+                                        {form.formState.errors.city && <p className="text-xs text-red-500">{form.formState.errors.city.message}</p>}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-[10px] uppercase text-neutral-500">Postal Code</Label>
+                                        <Input {...form.register("zip")} className="rounded-none h-12 text-xs border-black/20" />
+                                        {form.formState.errors.zip && <p className="text-xs text-red-500">{form.formState.errors.zip.message}</p>}
                                     </div>
                                 </div>
-                            </motion.div>
-                        )}
+                                <div className="space-y-2">
+                                    <Label className="text-[10px] uppercase text-neutral-500">Phone</Label>
+                                    <Input {...form.register("phone")} className="rounded-none h-12 text-xs border-black/20" placeholder="+92..." />
+                                    {form.formState.errors.phone && <p className="text-xs text-red-500">{form.formState.errors.phone.message}</p>}
+                                </div>
 
-                    </AnimatePresence>
+                                <Button type="submit" variant="cta" size="xl" className="w-full text-xs">CONTINUE TO SHIPPING</Button>
+                            </form>
+                        </div>
+                    )}
+
+                    {/* 4. SHIPPING */}
+                    {step === 'shipping' && (
+                        <div key="shipping" className="animate-in fade-in slide-in-from-right-8 duration-500">
+                            <div className="space-y-8">
+                                <div className="border border-black/5 p-4 text-xs space-y-2 bg-neutral-50/50">
+                                    <div className="flex justify-between border-b border-black/5 pb-2">
+                                        <span className="text-neutral-500">Contact</span>
+                                        <span>{email || shippingAddress?.email}</span>
+                                    </div>
+                                    <div className="flex justify-between border-b border-black/5 pb-2">
+                                        <span className="text-neutral-500">Ship to</span>
+                                        <span className="text-right truncate max-w-[200px]">{shippingAddress?.address1}, {shippingAddress?.city}</span>
+                                    </div>
+                                    <div className="pt-2 text-[10px] uppercase tracking-widest text-neutral-400 cursor-pointer hover:text-black underline" onClick={() => setStep('address')}>
+                                        Change
+                                    </div>
+                                </div>
+
+                                <ShippingMethodStep
+                                    selectedMethod={shippingMethod}
+                                    onSelect={setShippingMethod}
+                                    deliveryConfig={deliveryConfig}
+                                    cartTotal={cartTotal}
+                                />
+
+                                <div className="flex gap-4">
+                                    <Button variant="outline" className="flex-1" onClick={() => setStep('address')}>
+                                        <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                                    </Button>
+                                    <Button variant="cta" className="flex-[2]" onClick={() => setStep('payment')}>
+                                        CONTINUE TO PAYMENT
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 5. PAYMENT */}
+                    {step === 'payment' && (
+                        <div key="payment" className="animate-in fade-in slide-in-from-right-8 duration-500">
+                            <div className="space-y-8">
+                                <PaymentMethodStep
+                                    selectedMethod={paymentMethod}
+                                    onSelect={setPaymentMethod}
+                                    proofFile={proofFile}
+                                    setProofFile={setProofFile}
+                                    transactionId={transactionId}
+                                    setTransactionId={setTransactionId}
+                                />
+
+                                <div className="flex gap-4">
+                                    <Button variant="outline" className="flex-1" onClick={() => setStep('shipping')} disabled={isProcessing}>
+                                        <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                                    </Button>
+                                    <Button
+                                        variant="cta"
+                                        size="xl"
+                                        className="flex-[2] text-xs"
+                                        onClick={handlePlaceOrder}
+                                        disabled={isProcessing || (paymentMethod !== 'COD' && !proofFile)}
+                                    >
+                                        {isProcessing ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : `PAY ${formatCurrency(finalTotal)}`}
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* RIGHT: SUMMARY */}
                 <div className="bg-neutral-50 p-8 h-fit sticky top-32 border border-neutral-100 hidden lg:block">
-                    <h2 className="text-xl font-manrope font-black uppercase tracking-widest mb-6 border-b border-black/5 pb-4">Order Summary</h2>
+                    <h2 className="text-xl font-body font-black uppercase tracking-widest mb-6 border-b border-black/5 pb-4">Order Summary</h2>
                     <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                         {items.map((item) => (
                             <div key={`${item.id}-${item.size}`} className="flex gap-4">

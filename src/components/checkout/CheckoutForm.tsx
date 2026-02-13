@@ -274,8 +274,8 @@ export default function CheckoutForm({ user }: CheckoutFormProps) {
                     <Separator className="my-6" />
 
                     <div className="flex justify-between items-center">
-                        <span className="font-manrope font-black uppercase tracking-widest">Total</span>
-                        <span className="font-manrope font-black text-2xl">{formatCurrency(cartTotal)}</span>
+                        <span className="font-body font-black uppercase tracking-widest">Total</span>
+                        <span className="font-body font-black text-2xl">{formatCurrency(cartTotal)}</span>
                     </div>
                 </div>
             </div>

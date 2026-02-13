@@ -16,7 +16,7 @@ export default function ProductDetail({
   return (
     <div className="max-w-[1400px] mx-auto animate-in fade-in duration-700">
       {/* Breadcrumbs */}
-      <nav className="flex items-center gap-3 text-[10px] font-manrope font-black uppercase tracking-[0.3em] text-muted-foreground mb-4 md:mb-12 px-6 md:px-0 py-4 md:py-0">
+      <nav className="flex items-center gap-3 text-[10px] font-body font-black uppercase tracking-[0.3em] text-muted-foreground mb-4 md:mb-12 px-6 md:px-0 py-4 md:py-0">
         <Link href="/" className="hover:text-foreground transition-colors">Studio</Link>
         <span className="opacity-30">/</span>
         <Link href="/shop" className="hover:text-foreground transition-colors">Catalog</Link>

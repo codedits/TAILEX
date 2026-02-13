@@ -14,21 +14,14 @@ export default function MobileMenuOverlay({ navLinks, onClose }: MobileMenuOverl
     return (
         <div className="fixed inset-0 z-[1000] overflow-hidden">
             {/* Backdrop */}
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+            <div
                 onClick={onClose}
-                className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300"
             />
 
             {/* Sidebar Content */}
-            <motion.div
-                initial={{ x: "-100%" }}
-                animate={{ x: 0 }}
-                exit={{ x: "-100%" }}
-                transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                className="absolute top-0 left-0 h-full w-[85%] max-w-[400px] bg-white text-black shadow-2xl flex flex-col"
+            <div
+                className="absolute top-0 left-0 h-full w-[85%] max-w-[400px] bg-white text-black shadow-2xl flex flex-col animate-in slide-in-from-left duration-500 ease-out-expo"
             >
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-100">
@@ -45,11 +38,10 @@ export default function MobileMenuOverlay({ navLinks, onClose }: MobileMenuOverl
                 {/* Navigation Links */}
                 <nav className="flex-1 overflow-y-auto px-6 py-10 flex flex-col gap-6">
                     {navLinks.map((link, i) => (
-                        <motion.div
+                        <div
                             key={link.label}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.1 + i * 0.05, duration: 0.5 }}
+                            className="animate-in fade-in slide-in-from-left-4 duration-500 fill-mode-forwards opacity-0"
+                            style={{ animationDelay: `${100 + i * 50}ms` }}
                         >
                             <Link
                                 href={link.url}
@@ -61,7 +53,7 @@ export default function MobileMenuOverlay({ navLinks, onClose }: MobileMenuOverl
                                 </span>
                                 <ArrowRight className="w-5 h-5 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
                             </Link>
-                        </motion.div>
+                        </div>
                     ))}
                 </nav>
 
@@ -84,7 +76,7 @@ export default function MobileMenuOverlay({ navLinks, onClose }: MobileMenuOverl
                         </p>
                     </div>
                 </div>
-            </motion.div>
+            </div>
         </div>
     );
 }

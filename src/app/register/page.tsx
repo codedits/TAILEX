@@ -10,7 +10,7 @@ import * as z from "zod";
 import { Loader2, ArrowLeft, ArrowRight, Mail, ShieldCheck, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 // import { sendOTP, verifyOTP } from "@/app/login/actions"; // REMOVED
-import { motion, AnimatePresence } from "framer-motion";
+
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -146,15 +146,9 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <AnimatePresence mode="wait">
+          <div>
             {step === "email" ? (
-              <motion.div
-                key="email-step"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="space-y-8"
-              >
+              <div key="email-step" className="space-y-8 animate-in fade-in slide-in-from-right-8 duration-300">
                 <Form {...emailForm}>
                   <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-8">
                     <FormField
@@ -198,15 +192,9 @@ export default function RegisterPage() {
                     Already a member? Login
                   </Link>
                 </div>
-              </motion.div>
+              </div>
             ) : (
-              <motion.div
-                key="otp-step"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="space-y-10"
-              >
+              <div key="otp-step" className="space-y-10 animate-in fade-in slide-in-from-right-8 duration-300">
                 <Form {...otpForm}>
                   <form onSubmit={otpForm.handleSubmit(onOTPSubmit)} className="space-y-10">
                     <div className="space-y-4">
@@ -255,9 +243,9 @@ export default function RegisterPage() {
                     </div>
                   </form>
                 </Form>
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
+          </div>
 
           {/* Footer Branding */}
           <div className="pt-24 text-center lg:text-left">

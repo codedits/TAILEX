@@ -54,12 +54,12 @@ function DebouncedCartItem({ item }: { item: CartItem }) {
             <div className="flex-1 flex flex-col justify-between">
                 <div className="flex justify-between items-start">
                     <div>
-                        <h3 className="font-manrope font-black text-[11px] uppercase tracking-widest leading-tight">{item.name}</h3>
+                        <h3 className="font-body font-black text-[11px] uppercase tracking-widest leading-tight">{item.name}</h3>
                         {item.size && (
                             <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">Size: {item.size}</p>
                         )}
                     </div>
-                    <p className="font-manrope font-black text-sm">{formatCurrency(item.price)}</p>
+                    <p className="font-body font-black text-sm">{formatCurrency(item.price)}</p>
                 </div>
             </div>
 
@@ -120,8 +120,8 @@ export function CartContents({ onClose }: { onClose: () => void }) {
             <div className="space-y-4 pt-4 mt-auto">
                 <Separator />
                 <div className="flex justify-between items-center">
-                    <span className="font-manrope font-black uppercase tracking-widest text-xs">Subtotal</span>
-                    <span className="font-manrope font-black text-lg">{formatCurrency(cartTotal)}</span>
+                    <span className="font-body font-black uppercase tracking-widest text-xs">Subtotal</span>
+                    <span className="font-body font-black text-lg">{formatCurrency(cartTotal)}</span>
                 </div>
                 <p className="text-[10px] uppercase tracking-widest text-muted-foreground text-center">
                     Shipping and taxes calculated at checkout.

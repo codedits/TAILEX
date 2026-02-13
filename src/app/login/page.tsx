@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, ArrowLeft, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/UserAuthContext";
-import { motion, AnimatePresence } from "framer-motion";
+
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,7 +65,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center overflow-hidden font-inter">
+    <div className="min-h-screen relative flex items-center justify-center overflow-hidden font-body">
       {/* Background Video */}
       <div className="absolute inset-0 z-0 bg-black">
         <div className="absolute inset-0 bg-black/60 z-10" /> {/* Dark Overlay */}
@@ -82,12 +82,7 @@ export default function LoginPage() {
 
       {/* Glass Card */}
       <div className="relative z-20 w-full max-w-md px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl p-8 md:p-12 shadow-2xl"
-        >
+        <div className="bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl p-8 md:p-12 shadow-2xl animate-in fade-in zoom-in-95 duration-700">
           {/* Header */}
           <div className="text-center mb-10">
             <Link href="/" className="inline-block hover:opacity-70 transition-opacity">
@@ -100,15 +95,9 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <AnimatePresence mode="wait">
+          <div>
             {step === "email" ? (
-              <motion.div
-                key="email"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-              >
+              <div key="email" className="animate-in fade-in slide-in-from-right-8 duration-300">
                 <div className="mb-8 text-center">
                   <h1 className="text-2xl font-bold text-white mb-2">Welcome Back</h1>
                   <p className="text-white/60 text-sm">Enter your email to sign in.</p>
@@ -142,15 +131,9 @@ export default function LoginPage() {
                     )}
                   </Button>
                 </form>
-              </motion.div>
+              </div>
             ) : (
-              <motion.div
-                key="otp"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-              >
+              <div key="otp" className="animate-in fade-in slide-in-from-right-8 duration-300">
                 <div className="mb-8 text-center">
                   <button
                     onClick={() => setStep("email")}
@@ -195,10 +178,10 @@ export default function LoginPage() {
                 <p className="text-center text-xs text-white/40 mt-6">
                   No code? <button type="button" onClick={handleSendOTP} className="text-white underline underline-offset-2 hover:opacity-80 font-bold">Resend</button>
                 </p>
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
-        </motion.div>
+          </div>
+        </div>
 
         <div className="mt-8 text-center">
           <p className="text-white/30 text-[10px] uppercase tracking-wider">
@@ -206,6 +189,6 @@ export default function LoginPage() {
           </p>
         </div>
       </div>
-    </div>
+    </div >
   );
 }

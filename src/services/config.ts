@@ -27,16 +27,6 @@ export type StoreConfig = {
         ctaText?: string;
         ctaLink?: string;
         overlayOpacity?: number;
-        slides?: Array<{
-            id: string;
-            image: string;
-            mobileImage?: string;
-            heading?: string;
-            subheading?: string;
-            ctaText?: string;
-            ctaLink?: string;
-        }>;
-        autoPlayInterval?: number;
     };
     benefits: BenefitsConfig;
     categoryGrid: { aspectRatio: string };

@@ -501,20 +501,9 @@ export type BrandConfig = {
   logoUrl?: string
 }
 
-// Individual hero slide for carousel
-export type HeroSlide = {
-  id: string;
-  image: string;
-  mobileImage?: string;
-  heading?: string;
-  subheading?: string;
-  ctaText?: string;
-  ctaLink?: string;
-};
-
-// Hero section config (supports single image OR slides array)
+// Hero section config (supports single image)
 export type HeroConfig = {
-  // Legacy single image (backward compat)
+  // Single image
   heading?: string;
   subheading?: string;
   image?: string;
@@ -522,10 +511,6 @@ export type HeroConfig = {
   ctaLink?: string;
   overlayOpacity?: number;
   mobileImage?: string;
-
-  // New carousel settings
-  slides?: HeroSlide[];
-  autoPlayInterval?: number; // ms, default 5000
 }
 
 export type ThemeConfig = {

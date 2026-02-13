@@ -6,7 +6,7 @@ import ProductCard from "@/components/product/ProductCard";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 
 interface CollectionShowcaseCarouselProps {
     products: Product[];
@@ -25,53 +25,38 @@ export const CollectionShowcaseCarousel = ({
         align: "start",
     });
 
+    const { ref, isVisible } = useScrollReveal({ threshold: 0.1 });
+
     return (
-        <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.1 }}
-            variants={{
-                hidden: { opacity: 0 },
-                visible: {
-                    opacity: 1,
-                    transition: {
-                        staggerChildren: 0.1,
-                        delayChildren: 0.2
-                    }
-                }
-            }}
-            className="overflow-hidden"
+        <div
+            ref={ref}
+            className={cn(
+                "overflow-hidden transition-opacity duration-1000",
+                isVisible ? "opacity-100" : "opacity-0"
+            )}
         >
             <div className="cursor-grab active:cursor-grabbing" ref={emblaRef}>
                 <div className="flex touch-pan-y py-4 -ml-4 md:-ml-6">
-                    {products.map((product) => (
-                        <motion.div
+                    {products.map((product, index) => (
+                        <div
                             key={product.id}
-                            variants={{
-                                hidden: { opacity: 0, y: 30 },
-                                visible: {
-                                    opacity: 1,
-                                    y: 0,
-                                    transition: { duration: 0.8, ease: [0.33, 1, 0.68, 1] }
-                                }
-                            }}
-                            className="flex-shrink-0 pl-4 md:pl-6 basis-[50%] md:basis-[40%] lg:basis-[30%] xl:basis-[25%]"
+                            className={cn(
+                                "flex-shrink-0 pl-4 md:pl-6 basis-[50%] md:basis-[40%] lg:basis-[30%] xl:basis-[25%] reveal-hidden",
+                                isVisible && "reveal-visible"
+                            )}
+                            style={{ transitionDelay: `${index * 100}ms` }}
                         >
                             <ProductCard {...product} />
-                        </motion.div>
+                        </div>
                     ))}
 
                     {/* "See More" Card */}
-                    <motion.div
-                        variants={{
-                            hidden: { opacity: 0, y: 30 },
-                            visible: {
-                                opacity: 1,
-                                y: 0,
-                                transition: { duration: 0.8, ease: [0.33, 1, 0.68, 1] }
-                            }
-                        }}
-                        className="flex-shrink-0 pl-4 md:pl-6 basis-[50%] md:basis-[40%] lg:basis-[30%] xl:basis-[25%]"
+                    <div
+                        className={cn(
+                            "flex-shrink-0 pl-4 md:pl-6 basis-[50%] md:basis-[40%] lg:basis-[30%] xl:basis-[25%] reveal-hidden",
+                            isVisible && "reveal-visible"
+                        )}
+                        style={{ transitionDelay: `${products.length * 100}ms` }}
                     >
                         <Link
                             href={collectionHref}
@@ -86,9 +71,9 @@ export const CollectionShowcaseCarousel = ({
                                 </div>
                             </div>
                         </Link>
-                    </motion.div>
+                    </div>
                 </div>
             </div>
-        </motion.div>
+        </div>
     );
 };

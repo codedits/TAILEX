@@ -11,9 +11,9 @@ interface MagneticButtonProps {
   range?: number;    // How far the "magnetic pull" extends (default 0.6)
 }
 
-export const MagneticButton = ({ 
-  children, 
-  className, 
+export const MagneticButton = ({
+  children,
+  className,
   onClick,
   strength = 0.4,
   range = 0.6
@@ -39,11 +39,11 @@ export const MagneticButton = ({
 
     const { clientX, clientY } = e;
     const { height, width, left, top } = ref.current.getBoundingClientRect();
-    
+
     // Calculate center distance
     const centerX = left + width / 2;
     const centerY = top + height / 2;
-    
+
     const distanceX = clientX - centerX;
     const distanceY = clientY - centerY;
 
@@ -87,7 +87,7 @@ export const MagneticButton = ({
       </motion.button>
 
       {/* Optional: High-end hover glow effect */}
-      <motion.div 
+      <motion.div
         className="absolute inset-0 bg-white/10 rounded-full blur-xl -z-10 opacity-0 group-hover:opacity-100 transition-opacity"
         style={{ x: textX, y: textY }}
       />

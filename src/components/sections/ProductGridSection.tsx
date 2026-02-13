@@ -41,7 +41,7 @@ const ProductGridSection = ({
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 w-full overflow-hidden border-b border-foreground/10 pb-12">
               {/* Title - Left */}
               <h2
-                className="text-foreground whitespace-pre-line font-manrope font-black tracking-tight leading-[0.9] transition-all duration-700 ease-out group-[.is-visible]/reveal:opacity-100 group-[.is-visible]/reveal:translate-y-0 opacity-0 translate-y-8"
+                className="text-foreground whitespace-pre-line font-display font-black tracking-tight leading-[0.9] transition-all duration-700 ease-out group-[.is-visible]/reveal:opacity-100 group-[.is-visible]/reveal:translate-y-0 opacity-0 translate-y-8"
                 style={{
                   fontSize: 'clamp(48px, 8vw, 120px)',
                 }}
@@ -52,7 +52,7 @@ const ProductGridSection = ({
               {/* Description - Right */}
               <div className="md:w-1/3 transition-all duration-700 delay-200 ease-out opacity-0 translate-y-4 group-[.is-visible]/reveal:opacity-100 group-[.is-visible]/reveal:translate-y-0">
                 <p
-                  className="text-muted-foreground font-manrope font-medium italic mb-6"
+                  className="text-muted-foreground font-body font-medium italic mb-6"
                   style={{
                     fontSize: 'clamp(16px, 1.8vw, 22px)',
                     lineHeight: '130%'
@@ -62,7 +62,7 @@ const ProductGridSection = ({
                 </p>
                 <Link
                   href={viewAllLink}
-                  className="inline-flex items-center gap-2 text-xs font-manrope font-black uppercase tracking-[0.2em] group border-b border-foreground pb-2 hover:opacity-70 transition-all"
+                  className="inline-flex items-center gap-2 text-xs font-body font-black uppercase tracking-[0.2em] group border-b border-foreground pb-2 hover:opacity-70 transition-all"
                 >
                   Explore Collection
                   <div className="w-4 h-4 rounded-full border border-foreground flex items-center justify-center group-hover:translate-x-1 transition-transform">

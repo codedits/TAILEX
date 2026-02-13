@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { motion, Variants } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 
 // Default fallback images from public folder
 const DEFAULT_IMAGES = {
@@ -15,34 +16,15 @@ interface FeaturingProps {
     images?: string[];
 }
 
-const container: Variants = {
-    hidden: { opacity: 1 },
-    visible: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.15,
-            delayChildren: 0.2
-        }
-    }
-};
-
-const child: Variants = {
-    hidden: { y: "110%", opacity: 0 },
-    visible: {
-        y: "0%",
-        opacity: 1,
-        transition: {
-            duration: 1.2,
-            ease: [0.16, 1, 0.3, 1]
-        }
-    }
-};
-
 export default function Featuring({ images }: FeaturingProps) {
     // Use product images if provided, otherwise use defaults
     const heroImage = images?.[0] || DEFAULT_IMAGES.hero;
     const topRightImage = images?.[1] || DEFAULT_IMAGES.topRight;
     const bottomRightImage = images?.[2] || DEFAULT_IMAGES.bottomRight;
+
+    const { ref: heroRef, isVisible: isHeroVisible } = useScrollReveal({ threshold: 0.2 });
+    const { ref: topRef, isVisible: isTopVisible } = useScrollReveal({ threshold: 0.2 });
+    const { ref: bottomRef, isVisible: isBottomVisible } = useScrollReveal({ threshold: 0.2 });
 
     return (
         <section className="w-full min-h-screen flex flex-col lg:flex-row font-sans bg-black overflow-hidden">
@@ -73,42 +55,24 @@ export default function Featuring({ images }: FeaturingProps) {
                         </div>
                     </div>
 
-                    <div className="mt-auto mb-12 lg:mb-24 relative">
-                        <motion.h1
-                            className="text-[clamp(3rem,11vw,7.5rem)] font-black text-white leading-[0.8] tracking-tighter uppercase"
-                            variants={container}
-                            initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: true, margin: "-10%" }}
-                        >
+                    <div className="mt-auto mb-12 lg:mb-24 relative" ref={heroRef}>
+                        <h1 className="text-[clamp(3rem,11vw,7.5rem)] font-black text-white leading-[0.8] tracking-tighter uppercase">
                             <span className="block overflow-hidden">
-                                <motion.span
-                                    variants={child}
-                                    className="block"
-
-                                >
+                                <span className={cn("block clip-text-hidden", isHeroVisible && "clip-text-visible reveal-delay-100")}>
                                     Fabric
-                                </motion.span>
+                                </span>
                             </span>
                             <span className="block overflow-hidden">
-                                <motion.span
-                                    variants={child}
-                                    className="block"
-
-                                >
+                                <span className={cn("block clip-text-hidden", isHeroVisible && "clip-text-visible reveal-delay-200")}>
                                     Is The
-                                </motion.span>
+                                </span>
                             </span>
                             <span className="block overflow-hidden">
-                                <motion.span
-                                    variants={child}
-                                    className="block"
-
-                                >
+                                <span className={cn("block clip-text-hidden", isHeroVisible && "clip-text-visible reveal-delay-300")}>
                                     Narrative
-                                </motion.span>
+                                </span>
                             </span>
-                        </motion.h1>
+                        </h1>
                     </div>
                 </div>
             </div>
@@ -128,43 +92,36 @@ export default function Featuring({ images }: FeaturingProps) {
                             quality={80}
                         />
                     </div>
-                    <div className="relative">
-                        <motion.h2
+                    <div className="relative" ref={topRef}>
+                        <h2
                             className="text-[clamp(2.5rem,5vw,5rem)] font-black uppercase leading-[0.85] tracking-tight text-white"
                             style={{ mixBlendMode: 'difference' }}
-                            variants={container}
-                            initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: true, margin: "-10%" }}
                         >
                             <span className="block overflow-hidden">
-                                <motion.span
-                                    variants={child}
-                                    className="block"
+                                <span
+                                    className={cn("block clip-text-hidden", isTopVisible && "clip-text-visible reveal-delay-100")}
                                     style={{ mixBlendMode: 'difference' }}
                                 >
                                     Modern
-                                </motion.span>
+                                </span>
                             </span>
                             <span className="block overflow-hidden">
-                                <motion.span
-                                    variants={child}
-                                    className="block"
+                                <span
+                                    className={cn("block clip-text-hidden", isTopVisible && "clip-text-visible reveal-delay-200")}
                                     style={{ mixBlendMode: 'difference' }}
                                 >
                                     Urban
-                                </motion.span>
+                                </span>
                             </span>
                             <span className="block overflow-hidden">
-                                <motion.span
-                                    variants={child}
-                                    className="block"
+                                <span
+                                    className={cn("block clip-text-hidden", isTopVisible && "clip-text-visible reveal-delay-300")}
                                     style={{ mixBlendMode: 'difference' }}
                                 >
                                     Armor
-                                </motion.span>
+                                </span>
                             </span>
-                        </motion.h2>
+                        </h2>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4 relative">
@@ -209,46 +166,37 @@ export default function Featuring({ images }: FeaturingProps) {
                         quality={80}
                     />
 
-                    <motion.div
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true, margin: "-10%" }}
-                        variants={container}
-                        className="relative max-w-xl mx-auto"
-                    >
+                    <div className="relative max-w-xl mx-auto" ref={bottomRef}>
                         <h3
                             className="text-[clamp(1.75rem,5vw,3rem)] font-black text-white uppercase leading-[0.95] tracking-tight"
                             style={{ mixBlendMode: 'difference' }}
                         >
                             <span className="block overflow-hidden">
-                                <motion.span
-                                    variants={child}
-                                    className="block"
+                                <span
+                                    className={cn("block clip-text-hidden", isBottomVisible && "clip-text-visible reveal-delay-100")}
                                     style={{ mixBlendMode: 'difference' }}
                                 >
                                     Clothing is the interface
-                                </motion.span>
+                                </span>
                             </span>
                             <span className="block overflow-hidden">
-                                <motion.span
-                                    variants={child}
-                                    className="block"
+                                <span
+                                    className={cn("block clip-text-hidden", isBottomVisible && "clip-text-visible reveal-delay-200")}
                                     style={{ mixBlendMode: 'difference' }}
                                 >
                                     between you and the world.
-                                </motion.span>
+                                </span>
                             </span>
                             <span className="block overflow-hidden">
-                                <motion.span
-                                    variants={child}
-                                    className="block"
+                                <span
+                                    className={cn("block clip-text-hidden", isBottomVisible && "clip-text-visible reveal-delay-300")}
                                     style={{ mixBlendMode: 'difference' }}
                                 >
                                     Upgrade your skin.
-                                </motion.span>
+                                </span>
                             </span>
                         </h3>
-                    </motion.div>
+                    </div>
 
                 </div>
             </div>
