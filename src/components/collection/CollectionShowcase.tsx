@@ -79,19 +79,22 @@ export default function CollectionShowcase({
                         isContentVisible ? "is-visible" : ""
                     )}
                 >
-                    <div className="space-y-6 max-w-4xl">
-                        <h2 className="hero-text text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-[200] uppercase tracking-[0.05em] leading-tight script-font">
+                    <div className="space-y-0.5 max-w-4xl">
+                        <p className="font-great-vibes text-2xl md:text-4xl text-white/90 leading-none">
+                            Explore The Collection
+                        </p>
+                        <h2 className="hero-text text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-[0.1em] leading-tight">
                             {title}
                         </h2>
                         {description && (
-                            <p className="hero-subtext text-sm sm:text-base md:text-lg font-light tracking-wide text-white/90 text-balance max-w-2xl mx-auto leading-relaxed drop-shadow-md">
+                            <p className="hero-subtext text-[10px] md:text-xs font-light tracking-widest text-white/80 text-balance max-w-xl mx-auto leading-relaxed pt-2">
                                 {description}
                             </p>
                         )}
-                        <div className="hero-cta pt-8">
+                        <div className="hero-cta pt-4">
                             <Link
                                 href={collectionHref}
-                                className="inline-flex items-center gap-2 text-[9px] md:text-[11px] uppercase tracking-[0.08em] border-b border-white pb-1 hover:text-white/80 hover:border-white/80 transition-all font-medium"
+                                className="inline-flex items-center gap-2 text-[10px] md:text-[11px] uppercase tracking-[0.2em] border-b border-white pb-1 hover:text-white/80 hover:border-white/80 transition-all font-semibold"
                             >
                                 View Collection
                             </Link>

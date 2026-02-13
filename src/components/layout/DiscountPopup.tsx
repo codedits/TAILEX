@@ -84,7 +84,7 @@ export function DiscountPopup() {
                                 alt={globalDiscount.title}
                                 fill
                                 className="object-cover"
-                                priority
+                                loading="lazy"
                                 quality={80}
                             />
                         </div>

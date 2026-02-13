@@ -29,8 +29,10 @@ export function StoreConfigProvider({
     // During SSR, we no longer need to set a global variable.
     // The currency is passed down via the Context to the useFormatCurrency hook consumers.
 
+    const contextValue = useMemo(() => ({ config }), [config]);
+
     return (
-        <StoreConfigContext.Provider value={{ config }}>
+        <StoreConfigContext.Provider value={contextValue}>
             {children}
         </StoreConfigContext.Provider>
     );

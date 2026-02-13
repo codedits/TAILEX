@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect } from "react";
+import React, { createContext, useContext, useCallback, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -60,7 +60,7 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     // Send OTP to email
-    const sendOTP = async (email: string) => {
+    const sendOTP = useCallback(async (email: string) => {
         try {
             const response = await fetch('/api/auth/send-otp', {
                 method: 'POST',
@@ -79,10 +79,10 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
             console.error('Send OTP Error:', error);
             return { success: false, error: 'Network error' };
         }
-    };
+    }, []);
 
     // Verify OTP and establish session
-    const verifyOTP = async (email: string, code: string) => {
+    const verifyOTP = useCallback(async (email: string, code: string) => {
         try {
             const response = await fetch('/api/auth/verify-otp', {
                 method: 'POST',
@@ -112,10 +112,10 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
             console.error('Verify OTP Error:', error);
             return { success: false, error: 'Network error' };
         }
-    };
+    }, [queryClient]);
 
     // Logout
-    const logout = async () => {
+    const logout = useCallback(async () => {
         try {
             await fetch('/api/auth/me', {
                 method: 'POST', // POST to /me is logout
@@ -128,20 +128,20 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
             queryClient.setQueryData(['auth-session'], null);
             toast.message("Logged out", { description: "You have been signed out." });
         }
-    };
+    }, [queryClient]);
+
+    const contextValue = useMemo(() => ({
+        user,
+        isLoading,
+        isAuthenticated: !!user,
+        sendOTP,
+        verifyOTP,
+        logout,
+        refreshUser: async () => { await refreshUser(); },
+    }), [user, isLoading, sendOTP, verifyOTP, logout, refreshUser]);
 
     return (
-        <UserAuthContext.Provider
-            value={{
-                user,
-                isLoading,
-                isAuthenticated: !!user,
-                sendOTP,
-                verifyOTP,
-                logout,
-                refreshUser: async () => { await refreshUser(); },
-            }}
-        >
+        <UserAuthContext.Provider value={contextValue}>
             {children}
         </UserAuthContext.Provider>
     );

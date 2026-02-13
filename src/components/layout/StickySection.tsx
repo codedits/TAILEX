@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
+import { m, useScroll, useTransform, MotionValue } from "framer-motion";
 import { useRef } from "react";
 
 interface StickySectionProps {
@@ -30,12 +30,12 @@ export default function StickySection({
 
     return (
         <div ref={ref} className={`h-screen sticky top-0 flex items-center justify-center overflow-hidden ${className}`}>
-            <motion.div
+            <m.div
                 style={{ scale, opacity }}
                 className="relative w-full h-full transform-gpu origin-top"
             >
                 {children}
-            </motion.div>
+            </m.div>
         </div>
     );
 }

@@ -120,7 +120,7 @@ export default function ProductGallery({ images, title, blurDataUrl, blurDataUrl
                                         fill
                                         className="object-cover"
                                         priority={idx === 0}
-                                        sizes="100vw"
+                                        sizes="(max-width: 768px) 100vw, 55vw"
                                         quality={80}
                                         placeholder={getBlurUrl(img, idx) ? "blur" : "empty"}
                                         blurDataURL={getBlurUrl(img, idx) ?? undefined}

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 
 export function FadeInView({
     children,
@@ -12,7 +12,7 @@ export function FadeInView({
     delay?: number;
 }) {
     return (
-        <motion.div
+        <m.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
@@ -20,6 +20,6 @@ export function FadeInView({
             className={className}
         >
             {children}
-        </motion.div>
+        </m.div>
     );
 }

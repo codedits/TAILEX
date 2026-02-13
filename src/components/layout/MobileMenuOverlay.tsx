@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
 import { X, Instagram, Facebook, ArrowRight } from "lucide-react";
 import { MenuItem } from "@/lib/types";
 

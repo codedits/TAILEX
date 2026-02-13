@@ -80,10 +80,10 @@ export default async function getCroppedImg(
   // paste generated rotate image with correct offsets for x,y crop values.
   ctx.putImageData(data, 0, 0)
 
-  // As a blob
+  // As a blob — output WebP for smaller file size (fallback to JPEG if unsupported)
   return new Promise((resolve, reject) => {
     canvas.toBlob((file) => {
       resolve(file)
-    }, 'image/jpeg')
+    }, 'image/webp', 0.8)
   })
 }

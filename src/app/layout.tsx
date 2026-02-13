@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { manrope, inter, playfair, spaceMono, getFont } from "@/lib/fonts";
+import { manrope, inter, playfair, spaceMono, greatVibes, getFont } from "@/lib/fonts";
 import "./globals.css";
 import { Providers } from "@/components/layout/Providers";
 import { hexToHslValues } from "@/lib/utils";
@@ -130,7 +130,7 @@ export default async function RootLayout({
       suppressHydrationWarning
       data-theme={theme}
       style={dynamicStyles}
-      className={`${theme} ${manrope.variable} ${inter.variable} ${playfair.variable} ${spaceMono.variable}`}
+      className={`${theme} ${manrope.variable} ${inter.variable} ${playfair.variable} ${spaceMono.variable} ${greatVibes.variable}`}
     >
       <head>
         {/* Preconnect to critical CDNs for faster resource loading */}

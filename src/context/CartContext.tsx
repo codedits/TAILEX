@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
 import { toast } from "sonner";
 import { validateCartItems } from "@/lib/api/products";
 import { CartValidationItem } from "@/lib/types";
@@ -100,7 +100,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, isMounted]);
 
-  const addItem = async (newItem: Omit<CartItem, "quantity">, openCart: boolean = true) => {
+  const addItem = useCallback(async (newItem: Omit<CartItem, "quantity">, openCart: boolean = true) => {
     // Optimistic check? No, let's be safe.
     // Ideally we should know the current quantity in cart to check (current + 1)
 
@@ -159,15 +159,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         description: `${newItem.name} has been added to your cart.`
       });
     }
-  };
+  }, [items]);
 
-  const removeItem = (id: string, size?: string) => {
+  const removeItem = useCallback((id: string, size?: string) => {
     setItems((prevItems) =>
       prevItems.filter((item) => !(item.id === id && item.size === size))
     );
-  };
+  }, []);
 
-  const updateQuantity = (id: string, size: string | undefined, quantity: number) => {
+  const updateQuantity = useCallback((id: string, size: string | undefined, quantity: number) => {
     if (quantity < 1) {
       removeItem(id, size);
       return;
@@ -177,29 +177,29 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         item.id === id && item.size === size ? { ...item, quantity } : item
       )
     );
-  };
+  }, [removeItem]);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setItems([]);
-  };
+  }, []);
 
-  const cartCount = items.reduce((total, item) => total + item.quantity, 0);
-  const cartTotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
+  const cartCount = useMemo(() => items.reduce((total, item) => total + item.quantity, 0), [items]);
+  const cartTotal = useMemo(() => items.reduce((total, item) => total + item.price * item.quantity, 0), [items]);
+
+  const contextValue = useMemo(() => ({
+    items,
+    addItem,
+    removeItem,
+    updateQuantity,
+    clearCart,
+    cartCount,
+    cartTotal,
+    isCartOpen,
+    setIsCartOpen,
+  }), [items, addItem, removeItem, updateQuantity, clearCart, cartCount, cartTotal, isCartOpen]);
 
   return (
-    <CartContext.Provider
-      value={{
-        items,
-        addItem,
-        removeItem,
-        updateQuantity,
-        clearCart,
-        cartCount,
-        cartTotal,
-        isCartOpen,
-        setIsCartOpen,
-      }}
-    >
+    <CartContext.Provider value={contextValue}>
       {children}
     </CartContext.Provider>
   );

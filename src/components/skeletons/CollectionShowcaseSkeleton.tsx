@@ -8,7 +8,7 @@ export function CollectionShowcaseSkeleton() {
     return (
         <section className="w-full flex flex-col relative z-10">
             {/* Hero Image Placeholder */}
-            <div className="relative w-full h-[70vh] md:h-[115vh] overflow-hidden bg-neutral-100">
+            <div className="relative w-full h-[100vh] md:h-[115vh] overflow-hidden bg-neutral-100">
                 <Skeleton className="absolute inset-0 w-full h-full rounded-none" />
 
                 {/* Text Placeholder - Matches CollectionShowcase content layout */}

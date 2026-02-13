@@ -21,6 +21,7 @@ export default {
         inter: ['var(--font-inter)', 'sans-serif'],
         playfair: ['var(--font-playfair)', 'serif'],
         mono: ['var(--font-mono)', 'monospace'],
+        'great-vibes': ['var(--font-great-vibes)', 'cursive'],
       },
       colors: {
         border: "hsl(var(--border))",

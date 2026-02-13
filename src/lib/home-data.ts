@@ -45,11 +45,6 @@ export async function getHomeData(): Promise<HomeData> {
         postsPromise,
         collectionsPromise,
         productsPromise,
-
-        // Deprecated (kept for temporary compat, will be empty)
-        posts: [],
-        collections: [],
-        products: []
     };
 }
 
@@ -67,9 +62,4 @@ export interface HomeData {
     postsPromise: Promise<any[]>;
     collectionsPromise: Promise<Collection[]>;
     productsPromise: Promise<Product[]>;
-
-    // Deprecated (kept for temporary compat, will be empty)
-    posts: any[];
-    collections: Collection[];
-    products: Product[];
 }

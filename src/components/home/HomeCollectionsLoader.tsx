@@ -28,7 +28,7 @@ export async function HomeCollectionsLoader({ collectionsPromise, startIndex = 0
                     coverImage={collection.image_url || ""}
                     products={collection.products || []}
                     collectionHref={`/collection/${collection.slug}`}
-                    className="mb-0"
+                    className="mb-0 cv-auto"
                 />
             ))}
         </div>

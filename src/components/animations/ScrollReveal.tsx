@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import { cn } from "@/lib/utils";
+import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 
 interface ScrollRevealProps {
     children: React.ReactNode;
@@ -14,7 +15,7 @@ interface ScrollRevealProps {
 /**
  * ScrollReveal - Client Component
  * 
- * Uses Intersection Observer to detect when elements enter the viewport.
+ * Uses shared IntersectionObserver pool to detect when elements enter the viewport.
  * Adds 'is-visible' class to the container when in view.
  */
 export function ScrollReveal({
@@ -24,36 +25,11 @@ export function ScrollReveal({
     threshold = 0.01,
     rootMargin = "0px"
 }: ScrollRevealProps) {
-    const [isVisible, setIsVisible] = useState(false);
-    const ref = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) {
-                    setIsVisible(true);
-                    if (once) {
-                        observer.unobserve(entry.target);
-                    }
-                } else {
-                    if (!once) {
-                        setIsVisible(false);
-                    }
-                }
-            },
-            { threshold, rootMargin }
-        );
-
-        if (ref.current) {
-            observer.observe(ref.current);
-        }
-
-        return () => {
-            if (ref.current) {
-                observer.unobserve(ref.current);
-            }
-        };
-    }, [once, threshold, rootMargin]);
+    const { ref, isVisible } = useScrollReveal({
+        threshold,
+        rootMargin,
+        triggerOnce: once,
+    });
 
     return (
         <div

@@ -239,22 +239,35 @@ export const getCollectionsWithProducts = unstable_cache(
                 .order('sort_order', { ascending: true })
                 .limit(limit)
 
-            if (!collections) return []
+            if (!collections || collections.length === 0) return []
 
-            // 2. Hydrate with products
-            const hydratedCollections = await Promise.all(
-                (collections as Collection[]).map(async (col) => {
-                    const { data: products } = await supabase
-                        .from('products')
-                        .select('id, title, slug, price, sale_price, cover_image, images, category_id, tags')
-                        .eq('category_id', col.id)
-                        .eq('status', 'active')
-                        .limit(productLimit)
-                        .order('created_at', { ascending: false })
+            // 2. Fetch ALL products for ALL collections in a single query (eliminates N+1)
+            const collectionIds = (collections as Collection[]).map(col => col.id)
+            const { data: allProducts } = await supabase
+                .from('products')
+                .select('id, title, slug, price, sale_price, cover_image, images, category_id, tags')
+                .in('category_id', collectionIds)
+                .eq('status', 'active')
+                .order('created_at', { ascending: false })
 
-                    return { ...col, products: (products as Product[]) || [] }
-                })
-            )
+            // 3. Group products by collection and apply per-collection limit
+            const productsByCollection = new Map<string, Product[]>()
+            for (const product of (allProducts || []) as Product[]) {
+                const catId = (product as any).category_id
+                if (!productsByCollection.has(catId)) {
+                    productsByCollection.set(catId, [])
+                }
+                const arr = productsByCollection.get(catId)!
+                if (arr.length < productLimit) {
+                    arr.push(product)
+                }
+            }
+
+            // 4. Hydrate collections with grouped products
+            const hydratedCollections = (collections as Collection[]).map(col => ({
+                ...col,
+                products: productsByCollection.get(col.id) || []
+            }))
 
             return hydratedCollections
         } catch {

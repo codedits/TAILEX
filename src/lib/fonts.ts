@@ -2,7 +2,7 @@
 import { Manrope, Inter, Playfair_Display, Space_Mono } from 'next/font/google'
 
 export const manrope = Manrope({
-  weight: ['200', '300', '400', '500', '600', '700', '800'],
+  weight: ['400', '500', '600', '700', '800'],
   subsets: ['latin'],
   variable: '--font-manrope',
   display: 'swap',
@@ -27,6 +27,15 @@ export const spaceMono = Space_Mono({
   display: 'swap',
 })
 
+import { Great_Vibes } from 'next/font/google'
+
+export const greatVibes = Great_Vibes({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-great-vibes',
+  display: 'swap',
+})
+
 const fonts = {
   manrope,
   inter,
@@ -35,6 +44,7 @@ const fonts = {
   spacemono: spaceMono,
   mono: spaceMono,
   script: manrope,
+  greatVibes,
   helvetica: { variable: '--font-helvetica', className: 'font-helvetica' }
 }
 

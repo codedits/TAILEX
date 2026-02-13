@@ -347,12 +347,12 @@
   .hero-cta {
     opacity: 0;
     transform: translateY(30px);
-    will-change: transform, opacity;
   }
 
   .is-visible .hero-subtext,
   .is-visible .hero-text,
   .is-visible .hero-cta {
+    will-change: transform, opacity; /* Promote only during animation */
     animation: heroTextReveal 1s cubic-bezier(0.33, 1, 0.68, 1) forwards;
   }
 
@@ -374,4 +374,53 @@
       transform: translateY(0);
     }
   }
+}
+
+/* Missing Text Reveal Classes */
+.clip-text-hidden {
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.clip-text-visible {
+  transform: translateY(0);
+  opacity: 1;
+  will-change: auto; /* Release compositor layer after transition */
+}
+
+/* Staggered reveal delays for text line-by-line animations */
+.reveal-delay-100 {
+  transition-delay: 100ms;
+}
+.reveal-delay-200 {
+  transition-delay: 200ms;
+}
+.reveal-delay-300 {
+  transition-delay: 300ms;
+}
+
+/* Carousel / grid card entrance animation */
+.reveal-hidden {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Subtle pulse for announcement bar */
+@keyframes pulseSubtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+.animate-pulse-subtle {
+  animation: pulseSubtle 3s ease-in-out infinite;
+}
+
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 100vh;
 }

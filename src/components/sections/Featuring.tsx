@@ -37,7 +37,7 @@ export default function Featuring({ images }: FeaturingProps) {
                         alt="Tailex Model"
                         fill
                         className="object-cover object-center opacity-100"
-                        priority
+                        loading="lazy"
                         sizes="(max-width: 1024px) 100vw, 50vw"
                         quality={80}
                     />
@@ -88,6 +88,7 @@ export default function Featuring({ images }: FeaturingProps) {
                             alt="Urban Context"
                             fill
                             className="object-cover object-center opacity-100"
+                            loading="lazy"
                             sizes="(max-width: 1024px) 100vw, 50vw"
                             quality={80}
                         />
@@ -162,6 +163,7 @@ export default function Featuring({ images }: FeaturingProps) {
                         alt="Texture"
                         fill
                         className="object-cover opacity-80"
+                        loading="lazy"
                         sizes="(max-width: 1024px) 100vw, 50vw"
                         quality={80}
                     />

@@ -15,6 +15,15 @@ import {
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 
+// Singleton supabase client — avoids re-creating on every render
+let _supabaseClient: ReturnType<typeof createClient> | null = null;
+function getSupabaseClient() {
+    if (!_supabaseClient) {
+        _supabaseClient = createClient();
+    }
+    return _supabaseClient;
+}
+
 export function SearchModal() {
     const [open, setOpen] = React.useState(false);
     const [query, setQuery] = React.useState("");
@@ -22,7 +31,7 @@ export function SearchModal() {
     const [loading, setLoading] = React.useState(false);
     const [hasSearched, setHasSearched] = React.useState(false);
     const router = useRouter();
-    const supabase = createClient();
+    const supabase = getSupabaseClient();
     const inputRef = React.useRef<HTMLInputElement>(null);
     const containerRef = React.useRef<HTMLDivElement>(null);
 

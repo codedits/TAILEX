@@ -1,7 +1,6 @@
 "use client";
 
 import { ReactLenis } from "lenis/react";
-import { useEffect } from "react";
 
 /**
  * SmoothScroll - Client Component
@@ -10,10 +9,6 @@ import { useEffect } from "react";
  * Essential for the premium "high-end store" feel.
  */
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    console.log("Lenis SmoothScroll wrapper mounted");
-  }, []);
-
   return (
     <ReactLenis
       root

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Link from "next/link";
 import Image from "next/image";
 import { Eye, Heart, Star, ShoppingBag, Plus } from "lucide-react";
@@ -15,7 +15,7 @@ interface ProductCardProps extends Product {
   priority?: boolean;
 }
 
-const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
+const ProductCard = React.memo(({ priority = false, ...product }: ProductCardProps) => {
   const formatCurrency = useFormatCurrency();
   const { openQuickView } = useQuickView();
   const { addItem } = useCart();
@@ -34,7 +34,7 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
   const blurDataUrls = (metadata as Record<string, unknown>)?.blurDataUrls as Record<string, string> | undefined;
   const primaryBlur = blurDataUrls?.[imagePrimary] || undefined;
 
-  const sizes = "(max-width: 768px) 50vw, (max-width: 1200px) 40vw, 25vw";
+  const sizes = "(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw";
 
   // Logic
   const isSale = !!(sale_price && sale_price < price);
@@ -94,7 +94,7 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
                 blurDataURL={primaryBlur}
                 onLoad={() => setImageLoaded(true)}
                 className={cn(
-                  "object-cover transition-all duration-700 ease-in-out will-change-transform",
+                  "object-cover transition-all duration-700 ease-in-out",
                   imageLoaded ? "opacity-100" : "opacity-0",
                   // Zoom effect on hover
                   "group-hover:scale-105"
@@ -107,6 +107,7 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
                 src={imageSecondary}
                 alt=""
                 fill
+                loading="lazy"
                 sizes={sizes}
                 quality={80}
                 className="absolute inset-0 object-cover opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100"
@@ -209,6 +210,8 @@ const ProductCard = ({ priority = false, ...product }: ProductCardProps) => {
       </div>
     </div>
   );
-};
+});
+
+ProductCard.displayName = 'ProductCard';
 
 export default ProductCard;

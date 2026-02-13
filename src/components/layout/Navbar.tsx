@@ -4,13 +4,18 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import { ShoppingBag, Menu, X, User, Instagram, Facebook } from "lucide-react";
-import { AnimatePresence } from "framer-motion";
+import { ShoppingBag, Menu, X, User } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/UserAuthContext";
 const CartSheet = dynamic(() => import("@/components/layout/CartSheet").then(mod => mod.CartSheet), { ssr: false });
 const SearchModal = dynamic(() => import("@/components/layout/SearchModal").then(mod => mod.SearchModal), { ssr: false });
 import { MenuItem } from "@/lib/types";
+
+// Lazy-load AnimatePresence — framer-motion chunk only needed when mobile menu is used
+const AnimatePresence = dynamic(
+  () => import("framer-motion").then(mod => mod.AnimatePresence),
+  { ssr: false }
+);
 
 // Lazy-load the mobile menu to reduce initial bundle size
 const MobileMenuOverlay = dynamic(() => import("./MobileMenuOverlay"), {
@@ -19,10 +24,16 @@ const MobileMenuOverlay = dynamic(() => import("./MobileMenuOverlay"), {
 });
 
 const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navItems?: MenuItem[] }) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const { cartCount, setIsCartOpen } = useCart();
   const { isAuthenticated } = useAuth();
   const pathname = usePathname();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isCartSheetLoaded, setIsCartSheetLoaded] = useState(false);
   // Ensure isHome is true for root and handles potential trailing slashes
   const isHome = pathname === "/" || pathname === "" || pathname === "/index";
 
@@ -37,7 +48,8 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
 
   return (
     <>
-      <CartSheet />
+      {/* Only mount CartSheet after user interacts with cart */}
+      {isCartSheetLoaded && <CartSheet />}
       <header
         className={`w-full z-50 transition-all duration-500 border-b group/nav ${isHome
           ? "absolute top-full left-0 bg-transparent text-white border-white/70 hover:bg-white hover:text-black hover:border-black"
@@ -48,10 +60,10 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
         <div className="hidden md:flex justify-end px-6 md:px-12 py-1">
           <div className="flex items-center gap-4">
             <Link href="https://facebook.com" target="_blank" className="hover:opacity-60 transition-opacity">
-              <Facebook className="w-4 h-4" />
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
             </Link>
             <Link href="https://www.instagram.com/tailex.pakistan/" target="_blank" className="hover:opacity-60 transition-opacity">
-              <Instagram className="w-4 h-4" />
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5"/></svg>
             </Link>
           </div>
         </div>
@@ -120,13 +132,18 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
 
             <button
               className="relative hover:opacity-60 transition-opacity"
-              onClick={() => setIsCartOpen(true)}
+              onClick={() => {
+                if (!isCartSheetLoaded) setIsCartSheetLoaded(true);
+                setIsCartOpen(true);
+              }}
               aria-label={`Open cart${cartCount > 0 ? `, ${cartCount} items` : ''}`}
             >
               <ShoppingBag className="w-6 h-6 stroke-[1.5]" />
-              <span className="absolute -bottom-1.5 -right-1.5 w-4.5 h-4.5 bg-black text-white text-[9px] flex items-center justify-center rounded-full font-bold">
-                {cartCount}
-              </span>
+              {isMounted && cartCount > 0 && (
+                <span className="absolute -bottom-1.5 -right-1.5 w-4.5 h-4.5 bg-black text-white text-[9px] flex items-center justify-center rounded-full font-bold">
+                  {cartCount}
+                </span>
+              )}
             </button>
           </div>
         </div>

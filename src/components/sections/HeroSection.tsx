@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 // Reliable default image (external CDN, always available)
@@ -22,9 +22,9 @@ type HeroSectionProps = {
  * HeroSection - Client Component
  * 
  * Strategy:
- * 1. Uses onLoad to track image loading status.
- * 2. Only triggers the entrance animation (scale + fade) after image is ready.
- * 3. Prevents "empty box" animation or flash of unstyled content.
+ * 1. Image is visible immediately via CSS (no opacity-0 until JS loads).
+ * 2. onLoad triggers an entrance animation as a progressive enhancement.
+ * 3. Without JS, the image is still fully visible (no black box).
  */
 const HeroSection = ({
   heading,
@@ -53,7 +53,7 @@ const HeroSection = ({
       <div className="absolute inset-0 h-full w-full bg-black">
         {/* Desktop Image (or default if no mobile image) */}
         <div
-          className={`absolute inset-0 h-full w-full ${hasMobileImage ? 'hidden md:block' : ''} ${isDesktopLoaded ? 'animate-image-entrance' : 'opacity-0'}`}
+          className={`absolute inset-0 h-full w-full ${hasMobileImage ? 'hidden md:block' : ''} ${isDesktopLoaded ? 'animate-image-entrance' : ''}`}
         >
           {/* Responsive images handled via Next.js Image sizes/priority */}
           <Image
@@ -74,7 +74,7 @@ const HeroSection = ({
         {/* Mobile Image (if provided) */}
         {hasMobileImage && (
           <div
-            className={`absolute inset-0 h-full w-full md:hidden ${isMobileLoaded ? 'animate-image-entrance' : 'opacity-0'}`}
+            className={`absolute inset-0 h-full w-full md:hidden ${isMobileLoaded ? 'animate-image-entrance' : ''}`}
           >
             <Image
               src={effectiveMobileImage}

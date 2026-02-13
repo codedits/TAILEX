@@ -1,5 +1,3 @@
-"use client";
-
 
 
 export function AnnouncementBar({ text }: { text: string }) {

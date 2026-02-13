@@ -59,6 +59,7 @@ export default function HomeLayout({ data }: HomeLayoutProps) {
                         mobileImage={heroSection.content?.mobileImage || hero.mobileImage}
                         brandName={brand.name}
                         overlayOpacity={heroSection.content?.overlayOpacity ?? hero.overlayOpacity}
+                        blurDataURL={heroSection.content?.blurDataURL}
                     />
                 )}
 

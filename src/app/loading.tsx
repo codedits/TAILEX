@@ -1,11 +1,9 @@
 export default function Loading() {
   return (
-    <div className="fixed inset-0 bg-background z-[9999] flex items-center justify-center">
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[9999] flex items-center justify-center pointer-events-none">
       <div className="flex flex-col items-center gap-4">
-        {/* Simple Brand Pulse */}
-        <div className="text-2xl font-black tracking-tighter uppercase animate-pulse">
-          TAILEX
-        </div>
+        {/* Minimal loading indicator — less jarring than full white blocker */}
+        <div className="w-6 h-6 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />
       </div>
     </div>
   );
