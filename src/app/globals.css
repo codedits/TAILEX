@@ -347,19 +347,24 @@
   .hero-cta {
     opacity: 0;
     transform: translateY(30px);
-    animation: heroTextReveal 1s cubic-bezier(0.33, 1, 0.68, 1) forwards;
     will-change: transform, opacity;
   }
 
-  .hero-subtext {
+  .is-visible .hero-subtext,
+  .is-visible .hero-text,
+  .is-visible .hero-cta {
+    animation: heroTextReveal 1s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+  }
+
+  .is-visible .hero-subtext {
     animation-delay: 0.4s;
   }
 
-  .hero-text {
+  .is-visible .hero-text {
     animation-delay: 0.6s;
   }
 
-  .hero-cta {
+  .is-visible .hero-cta {
     animation-delay: 0.8s;
   }
 

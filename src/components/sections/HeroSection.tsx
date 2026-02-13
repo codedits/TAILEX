@@ -46,6 +46,8 @@ const HeroSection = ({
   const effectiveMobileImage = mobileImage?.trim();
   const hasMobileImage = !!effectiveMobileImage;
 
+  const isLoaded = isDesktopLoaded || isMobileLoaded;
+
   return (
     <section className="relative w-full h-[100vh] overflow-hidden bg-background">
       <div className="absolute inset-0 h-full w-full bg-black">
@@ -98,7 +100,7 @@ const HeroSection = ({
       </div>
 
       {/* Content Container - CSS Animated for zero hydration cost */}
-      <div className="relative flex flex-col items-center justify-center w-full px-6 md:px-10 z-10 text-center h-[100vh] max-w-[1920px] mx-auto">
+      <div className={`relative flex flex-col items-center justify-center w-full px-6 md:px-10 z-10 text-center h-[100vh] max-w-[1920px] mx-auto ${isLoaded ? 'is-visible' : ''}`}>
         <div className="flex flex-col items-center justify-center space-y-8">
           <p className="hero-subtext text-white/90 text-[10px] md:text-xs tracking-[0.2em] uppercase font-bold">
             {subheading || "SPRING/SUMMER '26"}

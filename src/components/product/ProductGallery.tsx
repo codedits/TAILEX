@@ -15,6 +15,11 @@ interface ProductGalleryProps {
     blurDataUrls?: Record<string, string>;
 }
 
+// Helper to construct Next.js optimized URL
+const getOptimizedUrl = (src: string, width: number, quality: number) => {
+    return `/_next/image?url=${encodeURIComponent(src)}&w=${width}&q=${quality}`;
+};
+
 export default function ProductGallery({ images, title, blurDataUrl, blurDataUrls }: ProductGalleryProps) {
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -29,6 +34,7 @@ export default function ProductGallery({ images, title, blurDataUrl, blurDataUrl
         setSelectedIndex(emblaApi.selectedScrollSnap());
     }, [emblaApi]);
 
+    // Sync Embla carousel selection
     useEffect(() => {
         if (!emblaApi) return;
         emblaApi.on("select", onSelect);
@@ -36,6 +42,23 @@ export default function ProductGallery({ images, title, blurDataUrl, blurDataUrl
             emblaApi.off("select", onSelect);
         };
     }, [emblaApi, onSelect]);
+
+    // Preload high-quality master images & optimized stack images for instant interaction
+    useEffect(() => {
+        if (!images.length) return;
+
+        images.forEach((src) => {
+            // 1. Preload High-Res Master (for Zoom/Lightbox)
+            const imgHighRes = new window.Image();
+            imgHighRes.src = src;
+
+            // 2. Preload Optimized Version (for Desktop Stack switching)
+            // Approx width 700px -> Next.js likely picks 1080w or 1920w source set.
+            // We preload 1080w to cover most desktop cases.
+            const imgOptimized = new window.Image();
+            imgOptimized.src = getOptimizedUrl(src, 1080, 80);
+        });
+    }, [images]);
 
     const scrollTo = (index: number) => {
         setSelectedIndex(index);
@@ -107,17 +130,32 @@ export default function ProductGallery({ images, title, blurDataUrl, blurDataUrl
                         </div>
                     </div>
 
-                    {/* Desktop: Hi-Res Zoom View */}
-                    <div className="hidden md:block absolute inset-0 w-full h-full z-10">
-                        <ProductZoomImage
-                            src={images[selectedIndex]}
-                            alt={title}
-                            blurDataUrl={getBlurUrl(images[selectedIndex], selectedIndex)}
-                            priority={selectedIndex === 0}
-                            zoomScale={2.5}
-                            className="w-full h-full"
-                            onClick={() => setLightboxOpen(true)}
-                        />
+                    {/* Desktop: Stacked Hi-Res Zoom Views (Shopify Style) */}
+                    {/* Render ALL images, toggle opacity for instant switching */}
+                    <div className="hidden md:block absolute inset-0 w-full h-full">
+                        {images.map((img, idx) => (
+                            <div
+                                key={idx}
+                                className={cn(
+                                    "absolute inset-0 w-full h-full transition-opacity duration-300 ease-in-out",
+                                    selectedIndex === idx ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                                )}
+                            >
+                                <ProductZoomImage
+                                    src={img}
+                                    alt={title}
+                                    blurDataUrl={getBlurUrl(img, idx)}
+                                    // Optimized Strategy:
+                                    // 1. Priority=true only for FIRST image (LCP).
+                                    // 2. Loading="eager" for all others ensures they fetch immediately (in parallel) without blocking LCP.
+                                    priority={idx === 0}
+                                    loading="eager"
+                                    zoomScale={2.5}
+                                    className="w-full h-full"
+                                    onClick={() => setLightboxOpen(true)}
+                                />
+                            </div>
+                        ))}
                     </div>
 
                     {/* Expand to fullscreen button */}

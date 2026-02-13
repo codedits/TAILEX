@@ -74,33 +74,21 @@ export default function CollectionShowcase({
                 {/* Content - Text Independent of Image */}
                 <div
                     ref={contentRef}
-                    className="absolute inset-x-0 bottom-0 top-0 flex flex-col items-center justify-center text-center px-4 md:px-6 text-white p-12 z-10"
+                    className={cn(
+                        "absolute inset-x-0 bottom-0 top-0 flex flex-col items-center justify-center text-center px-4 md:px-6 text-white p-12 z-10",
+                        isContentVisible ? "is-visible" : ""
+                    )}
                 >
                     <div className="space-y-6 max-w-4xl">
-                        <h2
-                            className={cn(
-                                "text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-[200] uppercase tracking-[0.05em] leading-tight script-font",
-                                isContentVisible ? "hero-text" : "opacity-0 translate-y-[30px]"
-                            )}
-                        >
+                        <h2 className="hero-text text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-[200] uppercase tracking-[0.05em] leading-tight script-font">
                             {title}
                         </h2>
                         {description && (
-                            <p
-                                className={cn(
-                                    "text-sm sm:text-base md:text-lg font-light tracking-wide text-white/90 text-balance max-w-2xl mx-auto leading-relaxed drop-shadow-md",
-                                    isContentVisible ? "hero-subtext" : "opacity-0 translate-y-[30px]"
-                                )}
-                            >
+                            <p className="hero-subtext text-sm sm:text-base md:text-lg font-light tracking-wide text-white/90 text-balance max-w-2xl mx-auto leading-relaxed drop-shadow-md">
                                 {description}
                             </p>
                         )}
-                        <div
-                            className={cn(
-                                "pt-8",
-                                isContentVisible ? "hero-cta" : "opacity-0 translate-y-[30px]"
-                            )}
-                        >
+                        <div className="hero-cta pt-8">
                             <Link
                                 href={collectionHref}
                                 className="inline-flex items-center gap-2 text-[9px] md:text-[11px] uppercase tracking-[0.08em] border-b border-white pb-1 hover:text-white/80 hover:border-white/80 transition-all font-medium"

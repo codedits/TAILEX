@@ -40,6 +40,8 @@ interface ProductZoomImageProps {
   blurDataUrl?: string | null;
   /** Whether this is the priority (LCP) image */
   priority?: boolean;
+  /** Image loading behavior */
+  loading?: "eager" | "lazy";
   /** Zoom magnification level (default: 2.5) */
   zoomScale?: number;
   /** CSS class for the container */
@@ -68,6 +70,7 @@ export function ProductZoomImage({
   alt,
   blurDataUrl,
   priority = false,
+  loading,
   zoomScale = 2.5,
   className,
   onClick,
@@ -139,6 +142,7 @@ export function ProductZoomImage({
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 55vw, 700px"
         quality={80}
         priority={priority}
+        loading={loading}
         placeholder={blurDataUrl ? 'blur' : 'empty'}
         blurDataURL={blurDataUrl || undefined}
       />
