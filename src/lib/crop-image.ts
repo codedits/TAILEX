@@ -80,10 +80,11 @@ export default async function getCroppedImg(
   // paste generated rotate image with correct offsets for x,y crop values.
   ctx.putImageData(data, 0, 0)
 
-  // As a blob — output WebP for smaller file size (fallback to JPEG if unsupported)
+  // As a blob — output WebP at near-lossless quality to avoid double lossy compression
+  // (server-side Sharp handles the final quality reduction to 80)
   return new Promise((resolve, reject) => {
     canvas.toBlob((file) => {
       resolve(file)
-    }, 'image/webp', 0.8)
+    }, 'image/webp', 0.95)
   })
 }

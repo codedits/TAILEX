@@ -144,7 +144,10 @@ export default async function ProductPage({ params }: Props) {
       </div>
 
       <div className="w-full mb-20">
-        <Featuring images={[typedProduct.cover_image, ...(typedProduct.images || [])].filter(Boolean) as string[]} />
+        <Featuring
+          images={[typedProduct.cover_image, ...(typedProduct.images || [])].filter(Boolean) as string[]}
+          blurDataUrls={(typedProduct.metadata as Record<string, unknown>)?.blurDataUrls as Record<string, string> | undefined}
+        />
       </div>
 
       <div className="max-w-[1400px] mx-auto px-6 md:px-12 mb-32">

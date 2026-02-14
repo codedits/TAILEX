@@ -23,6 +23,7 @@ interface CollectionShowcaseProps {
     products: Product[];
     collectionHref: string;
     className?: string;
+    blurDataURL?: string;
 }
 
 /**
@@ -41,6 +42,7 @@ export default function CollectionShowcase({
     products,
     collectionHref,
     className,
+    blurDataURL,
 }: CollectionShowcaseProps) {
     const { ref: heroRef, isVisible: isHeroVisible } = useScrollReveal({ threshold: 0.1 });
     const { ref: contentRef, isVisible: isContentVisible } = useScrollReveal({ threshold: 0.2 });
@@ -67,6 +69,8 @@ export default function CollectionShowcase({
                         sizes="100vw"
                         quality={80}
                         loading="lazy"
+                        placeholder={blurDataURL ? "blur" : "empty"}
+                        blurDataURL={blurDataURL}
                         onError={() => setImgSrc("https://framerusercontent.com/images/BjQfJy7nQoVxvCYTFzwZxprDWiQ.jpg")}
                     />
                 </div>

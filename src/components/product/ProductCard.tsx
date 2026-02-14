@@ -116,6 +116,8 @@ const ProductCard = React.memo(({ priority = false, ...product }: ProductCardPro
                 loading="lazy"
                 sizes={sizes}
                 quality={75}
+                placeholder={blurDataUrls?.[imageSecondary] ? "blur" : "empty"}
+                blurDataURL={blurDataUrls?.[imageSecondary]}
                 className="absolute inset-0 object-cover opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100 hidden md:block"
               />
             )}

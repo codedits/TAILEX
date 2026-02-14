@@ -68,6 +68,7 @@ export default async function NewsDetailPage({ params }: { params: { slug: strin
                             alt={post.title}
                             fill
                             className="object-cover"
+                            sizes="(max-width: 1024px) 100vw, 896px"
                         />
                     </div>
                 )}

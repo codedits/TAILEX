@@ -108,6 +108,7 @@ export default function RegisterPage() {
           fill
           className="object-cover opacity-60 grayscale hover:grayscale-0 transition-all duration-1000 ease-in-out"
           priority
+          sizes="50vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/40" />
         <div className="absolute inset-0 flex flex-col justify-between p-12">

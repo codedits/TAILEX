@@ -84,6 +84,8 @@ const CategoryGrid = ({
         >
           {items.map((collection) => {
             const imageUrl = collection.image_url || fallbackImage;
+            const blurDataUrls = (collection.metadata as Record<string, unknown>)?.blurDataUrls as Record<string, string> | undefined;
+            const blurSrc = collection.image_url ? blurDataUrls?.[collection.image_url] : undefined;
 
             return (
               <motion.div key={collection.id} variants={cardVariants} className="w-full">
@@ -105,6 +107,8 @@ const CategoryGrid = ({
                       className="object-cover transition-all duration-700 ease-out group-hover:grayscale-[20%]"
                       sizes="(max-width: 768px) 100vw, 50vw"
                       quality={80}
+                      placeholder={blurSrc ? "blur" : "empty"}
+                      blurDataURL={blurSrc}
                     />
                     {/* Dark overlay for contrast if mix-blend fails on certain backgrounds */}
                     <div className="absolute inset-0 bg-black/10 transition-colors group-hover:bg-black/0" />

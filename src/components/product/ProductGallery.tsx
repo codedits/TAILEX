@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import useEmblaCarousel from "embla-carousel-react";
 import { cn } from "@/lib/utils";
@@ -28,6 +28,7 @@ export default function ProductGallery({ images, title, blurDataUrl, blurDataUrl
         loop: true
     });
     const [lightboxOpen, setLightboxOpen] = useState(false);
+    const preloadedRef = useRef<Set<string>>(new Set());
 
     const onSelect = useCallback(() => {
         if (!emblaApi) return;
@@ -43,25 +44,24 @@ export default function ProductGallery({ images, title, blurDataUrl, blurDataUrl
         };
     }, [emblaApi, onSelect]);
 
-    // Optimized Preloading Logic:
-    // Instead of loading everything at once (which kills initial page speed),
-    // we prioritize the current view and intelligently peek ahead.
+    // Smart Preloading: Only preload the next optimized image on desktop.
+    // Hi-res zoom is handled on-demand by ProductZoomImage on hover.
     useEffect(() => {
         if (!images.length) return;
 
-        // 1. Current High-Res (for zoom)
-        const currentSrc = images[selectedIndex];
-        if (currentSrc) {
-            const imgHighRes = new window.Image();
-            imgHighRes.src = currentSrc;
-        }
+        // Skip preloading on mobile (no zoom, no benefit)
+        const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+        if (!isDesktop) return;
 
-        // 2. Next Optimized Image (for smooth transition)
+        // Preload the next image for smooth carousel transition
         const nextIndex = (selectedIndex + 1) % images.length;
         if (nextIndex !== selectedIndex) {
             const nextSrc = images[nextIndex];
-            const imgOptimized = new window.Image();
-            imgOptimized.src = getOptimizedUrl(nextSrc, 1080, 80);
+            if (!preloadedRef.current.has(nextSrc)) {
+                preloadedRef.current.add(nextSrc);
+                const imgOptimized = new window.Image();
+                imgOptimized.src = getOptimizedUrl(nextSrc, 1080, 80);
+            }
         }
     }, [images, selectedIndex]);
 
@@ -99,6 +99,8 @@ export default function ProductGallery({ images, title, blurDataUrl, blurDataUrl
                                 className="object-cover"
                                 sizes="96px"
                                 quality={80}
+                                placeholder={getBlurUrl(img, idx) ? "blur" : "empty"}
+                                blurDataURL={getBlurUrl(img, idx) ?? undefined}
                             />
                         </button>
                     ))}

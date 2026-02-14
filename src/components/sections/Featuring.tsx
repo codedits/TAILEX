@@ -14,9 +14,11 @@ const DEFAULT_IMAGES = {
 interface FeaturingProps {
     /** Product images to use instead of defaults. Falls back to static images if not provided. */
     images?: string[];
+    /** Blur data URLs keyed by image URL for instant placeholders. */
+    blurDataUrls?: Record<string, string>;
 }
 
-export default function Featuring({ images }: FeaturingProps) {
+export default function Featuring({ images, blurDataUrls }: FeaturingProps) {
     // Use product images if provided, otherwise use defaults
     const heroImage = images?.[0] || DEFAULT_IMAGES.hero;
     const topRightImage = images?.[1] || DEFAULT_IMAGES.topRight;
@@ -40,6 +42,8 @@ export default function Featuring({ images }: FeaturingProps) {
                         loading="lazy"
                         sizes="(max-width: 1024px) 100vw, 50vw"
                         quality={80}
+                        placeholder={blurDataUrls?.[heroImage] ? "blur" : "empty"}
+                        blurDataURL={blurDataUrls?.[heroImage]}
                     />
                 </div>
 
@@ -91,6 +95,8 @@ export default function Featuring({ images }: FeaturingProps) {
                             loading="lazy"
                             sizes="(max-width: 1024px) 100vw, 50vw"
                             quality={80}
+                            placeholder={blurDataUrls?.[topRightImage] ? "blur" : "empty"}
+                            blurDataURL={blurDataUrls?.[topRightImage]}
                         />
                     </div>
                     <div className="relative" ref={topRef}>
@@ -166,6 +172,8 @@ export default function Featuring({ images }: FeaturingProps) {
                         loading="lazy"
                         sizes="(max-width: 1024px) 100vw, 50vw"
                         quality={80}
+                        placeholder={blurDataUrls?.[bottomRightImage] ? "blur" : "empty"}
+                        blurDataURL={blurDataUrls?.[bottomRightImage]}
                     />
 
                     <div className="relative max-w-xl mx-auto" ref={bottomRef}>

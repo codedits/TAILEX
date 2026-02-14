@@ -86,6 +86,7 @@ export function DiscountPopup() {
                                 className="object-cover"
                                 loading="lazy"
                                 quality={80}
+                                sizes="340px"
                             />
                         </div>
                     )}

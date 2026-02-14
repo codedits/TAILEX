@@ -241,6 +241,7 @@ export default function CheckoutForm({ user }: CheckoutFormProps) {
                                             alt={item.name}
                                             fill
                                             className="object-cover"
+                                            sizes="64px"
                                         />
                                     ) : (
                                         <div className="w-full h-full bg-neutral-200" />

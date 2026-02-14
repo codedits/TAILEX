@@ -34,6 +34,7 @@ export default async function AboutPage() {
             fill
             className="object-cover object-top"
             priority
+            sizes="100vw"
           />
           <div className="absolute inset-0 bg-black/60" />
         </div>
@@ -72,6 +73,7 @@ export default async function AboutPage() {
               alt="Quality Craftsmanship"
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-105"
+              sizes="(max-width: 768px) 100vw, 50vw"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-8 md:p-12">
               <h3 className="text-white font-display text-3xl mb-2">Heritage</h3>

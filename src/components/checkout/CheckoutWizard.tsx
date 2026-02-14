@@ -438,7 +438,7 @@ export default function CheckoutWizard({ user: initialUser, customer, savedAddre
                         {items.map((item) => (
                             <div key={`${item.id}-${item.size}`} className="flex gap-4">
                                 <div className="relative w-14 h-16 bg-white border border-neutral-200">
-                                    {item.image && <Image src={item.image} alt={item.name} fill className="object-cover" quality={80} />}
+                                    {item.image && <Image src={item.image} alt={item.name} fill className="object-cover" quality={80} sizes="56px" />}
                                     <span className="absolute -top-2 -right-2 bg-black text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full">
                                         {item.quantity}
                                     </span>

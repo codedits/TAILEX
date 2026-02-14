@@ -274,7 +274,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                         </button>
                     </div>
 
-                    <div className="flex -space-x-px">
+                    <div className="flex flex-wrap gap-2">
                         {STANDARD_SIZES.map((size) => {
                             const isEnabled = product.available_sizes?.includes(size);
                             const outOfStock = isEnabled && isOptionOutOfStock('Size', size);
@@ -286,11 +286,11 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                                     onClick={() => isEnabled && !outOfStock && handleOptionSelect('Size', size)}
                                     disabled={!isEnabled || outOfStock}
                                     className={cn(
-                                        "relative flex-1 py-3 text-[11px] font-bold uppercase transition-all border border-neutral-200 min-w-[3.5rem] flex items-center justify-center h-12",
+                                        "relative py-3 text-[11px] font-bold uppercase transition-all border min-w-[3.5rem] flex items-center justify-center h-12",
                                         isSelected
-                                            ? "z-10 border-black ring-1 ring-black"
-                                            : isEnabled && !outOfStock ? "hover:bg-neutral-50" : "",
-                                        (!isEnabled || outOfStock) && "text-neutral-400 bg-neutral-50/50 cursor-not-allowed"
+                                            ? "border-black bg-black text-white"
+                                            : "border-neutral-200 hover:border-neutral-400 text-neutral-900",
+                                        (!isEnabled || outOfStock) && "text-neutral-400 bg-neutral-50/50 cursor-not-allowed border-neutral-200"
                                     )}
                                 >
                                     <span>{size}</span>

@@ -94,6 +94,7 @@ export default async function NewsPage() {
                     alt={article.title}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    sizes="(max-width: 768px) 100vw, 50vw"
                   />
                 ) : (
                   <div className="absolute inset-0 bg-gradient-to-br from-neutral-200 to-neutral-300" />

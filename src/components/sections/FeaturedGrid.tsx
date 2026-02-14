@@ -34,6 +34,8 @@ const FeaturedGrid = ({ products }: FeaturedGridProps) => {
       <div className="flex h-full w-full overflow-x-auto no-scrollbar md:snap-x md:snap-mandatory md:grid md:grid-cols-4 md:gap-0 md:overflow-visible">
         {itemsToRender.map((product) => {
           const image = product.cover_image || (product.images && product.images?.[0]) || "";
+          const blurDataUrls = (product.metadata as Record<string, unknown>)?.blurDataUrls as Record<string, string> | undefined;
+          const blurSrc = image ? blurDataUrls?.[image] : undefined;
           
           return (
             <Link
@@ -49,6 +51,8 @@ const FeaturedGrid = ({ products }: FeaturedGridProps) => {
                   className="object-cover opacity-90 transition-transform duration-&lsqb;1200ms&rsqb; ease-&lsqb;cubic-bezier(.22,.9,.34,1)&rsqb; group-hover:scale-105 will-change-transform"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   quality={75}
+                  placeholder={blurSrc ? "blur" : "empty"}
+                  blurDataURL={blurSrc}
                 />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center bg-neutral-950">

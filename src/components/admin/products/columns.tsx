@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { MoreHorizontal, ArrowUpDown, Edit } from "lucide-react"
+import Image from "next/image"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -73,7 +74,7 @@ export const columns: ColumnDef<Product>[] = [
             return (
                 <div className="flex items-center gap-4">
                     {product.cover_image ? (
-                        <img src={product.cover_image} alt={product.title} className="w-10 h-10 object-cover rounded-lg border border-border" />
+                        <Image src={product.cover_image} alt={product.title} width={40} height={40} sizes="40px" quality={75} className="w-10 h-10 object-cover rounded-lg border border-border" />
                     ) : (
                         <div className="w-10 h-10 bg-gray-100 rounded-lg border border-border flex items-center justify-center">
                             <span className="text-gray-400 text-[10px]">Img</span>
