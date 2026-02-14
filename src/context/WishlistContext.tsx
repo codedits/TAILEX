@@ -15,6 +15,7 @@ export type WishlistItem = {
         price: number;
         sale_price?: number | null;
         cover_image?: string | null;
+        metadata?: Record<string, unknown>;
     };
 };
 

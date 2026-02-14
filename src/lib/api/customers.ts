@@ -244,7 +244,7 @@ export async function getWishlist(): Promise<ApiResponse<any[]>> {
       .from('wishlists')
       .select(`
         *,
-        product:products(id, title, slug, price, sale_price, cover_image)
+        product:products(id, title, slug, price, sale_price, cover_image, metadata)
       `)
       .eq('customer_id', customer.id)
 
