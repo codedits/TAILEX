@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useMemo, useCallback } from 'react';
 import { StoreConfig } from '@/services/config';
 import { formatCurrency as utilsFormatCurrency, CurrencyConfig } from '@/lib/utils';
 
@@ -17,17 +17,9 @@ export function StoreConfigProvider({
     children: React.ReactNode;
     initialConfig: StoreConfig;
 }) {
-    // We use a state only to allow client-side updates if needed (e.g. previewing in admin)
-    // But for SSR, initialConfig is what matters.
-    const [config, setConfig] = useState<StoreConfig>(initialConfig);
-
-    // Sync state with props when they change (critical for admin preview/navigation)
-    useEffect(() => {
-        setConfig(initialConfig);
-    }, [initialConfig]);
-
-    // During SSR, we no longer need to set a global variable.
-    // The currency is passed down via the Context to the useFormatCurrency hook consumers.
+    // Use initialConfig directly — no state needed since config comes from server via props.
+    // Avoids unnecessary re-render cycle from useEffect → setState.
+    const config = initialConfig;
 
     const contextValue = useMemo(() => ({ config }), [config]);
 

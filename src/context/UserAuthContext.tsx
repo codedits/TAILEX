@@ -46,6 +46,9 @@ const fetchUserSession = async (): Promise<UserProfile | null> => {
 export function UserAuthProvider({ children }: { children: React.ReactNode }) {
     const queryClient = useQueryClient();
 
+    // Only fetch session if the auth cookie exists — saves a network round-trip for ~80% of anonymous visitors
+    const hasAuthCookie = typeof document !== 'undefined' && document.cookie.includes('auth_token');
+
     // Use React Query for session management
     const {
         data: user = null,
@@ -54,6 +57,7 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
     } = useQuery({
         queryKey: ['auth-session'],
         queryFn: fetchUserSession,
+        enabled: hasAuthCookie, // Skip fetch entirely for anonymous users
         staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
         retry: false, // Don't retry on 401/404
         refetchOnWindowFocus: true, // Re-check when user comes back

@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useMemo, useCall
 import { toast } from "sonner";
 import { validateCartItems } from "@/lib/api/products";
 import { CartValidationItem } from "@/lib/types";
+import { checkVariantStock } from "@/actions/stock";
 
 export type CartItem = {
   id: string; // Unique key for cart (e.g. "prod_1-var_2")
@@ -118,9 +119,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       // Let's assume variantId is always present for now as per "Standardize Backend" task. 
 
       if (newItem.variantId) {
-        // Dynamic import to avoid server action issues in client component if not handled well? 
-        // Next.js handles this.
-        const { checkVariantStock } = await import('@/actions/stock');
         const stock = await checkVariantStock(newItem.variantId, nextQty);
 
         if (!stock.isAvailable) {

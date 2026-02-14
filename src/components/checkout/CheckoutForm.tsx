@@ -11,6 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
 import { createOrderAction } from "@/actions/order";
+import { checkVariantStock } from "@/actions/stock";
 import { useRouter } from "next/navigation";
 import { User } from "@supabase/supabase-js";
 import { useFormatCurrency } from "@/context/StoreConfigContext";
@@ -42,7 +43,6 @@ export default function CheckoutForm({ user }: CheckoutFormProps) {
 
         // Pre-validate Stock
         try {
-            const { checkVariantStock } = await import('@/actions/stock');
             for (const item of orderItems) {
                 if (item.variant_id) {
                     const stock = await checkVariantStock(item.variant_id, item.quantity);

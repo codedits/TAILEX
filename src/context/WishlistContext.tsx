@@ -52,6 +52,14 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         setIsMounted(true);
+
+        // Only fetch wishlist if user is authenticated — no point fetching for anonymous visitors
+        const hasAuthCookie = typeof document !== 'undefined' && document.cookie.includes('auth_token');
+        if (!hasAuthCookie) {
+            setIsLoading(false);
+            return;
+        }
+
         // Defer wishlist fetch to avoid blocking initial render
         const timeoutId = setTimeout(() => {
             fetchWishlist();

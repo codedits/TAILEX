@@ -2,7 +2,7 @@
 import { Manrope, Inter, Playfair_Display, Space_Mono } from 'next/font/google'
 
 export const manrope = Manrope({
-  weight: ['400', '500', '600', '700', '800'],
+  weight: ['400', '500', '600', '700'],
   subsets: ['latin'],
   variable: '--font-manrope',
   display: 'swap',
