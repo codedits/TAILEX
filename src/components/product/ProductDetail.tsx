@@ -14,14 +14,14 @@ export default function ProductDetail({
   const distinctImages = Array.from(new Set(validImages)); // De-duplicate
 
   return (
-    <div className="max-w-[1400px] mx-auto animate-in fade-in duration-700">
+    <div className="max-w-[1280px] mx-auto animate-in fade-in duration-700">
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-3 text-[10px] font-body font-black uppercase tracking-[0.3em] text-muted-foreground mb-4 md:mb-12 px-6 md:px-0 py-4 md:py-0">
-        <Link href="/" className="hover:text-foreground transition-colors">Studio</Link>
+        <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
         <span className="opacity-30">/</span>
-        <Link href="/shop" className="hover:text-foreground transition-colors">Catalog</Link>
+        <Link href="/shop" className="hover:text-foreground transition-colors">Shop</Link>
         <span className="opacity-30">/</span>
-        <span className="text-foreground truncate line-clamp-1 max-w-[200px] md:max-w-none">{product.title}</span>
+        <span className="text-foreground truncate line-clamp-1 max-w-[200px] md:max-w-none font-medium">{product.title}</span>
       </nav>
 
       {/* Main Grid */}
@@ -37,13 +37,15 @@ export default function ProductDetail({
         </div>
 
         {/* Mobile Header (Vendor + Title) - BELOW gallery on mobile */}
-        <div className="lg:hidden space-y-2 order-2 px-6">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-            {product.vendor || "TAILEX Standard"}
-          </p>
-          <h1 className="text-3xl font-black tracking-tight text-neutral-900 leading-tight">
+        <div className="lg:hidden space-y-1.5 order-2 px-6">
+          <h1 className="text-xl font-bold tracking-[0.05em] text-neutral-900 leading-tight uppercase">
             {product.title}
           </h1>
+          <div className="flex items-baseline gap-2">
+            <p className="text-sm font-medium">
+              RS.{product.sale_price || product.price}
+            </p>
+          </div>
         </div>
 
         {/* Right Column: Information (Sticky) */}

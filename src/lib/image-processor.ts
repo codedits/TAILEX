@@ -27,7 +27,7 @@ export const IMAGE_CONFIG = {
   /** Max width for thumbnails / card images */
   CARD_MAX_WIDTH: 1200,
   /** WebP quality for stored source images (Next.js re-encodes on delivery) */
-  WEBP_QUALITY: 90,
+  WEBP_QUALITY: 80,
   /** LQIP blur placeholder width (tiny — base64 encoded inline) */
   BLUR_WIDTH: 20,
   /** LQIP blur JPEG quality */

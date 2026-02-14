@@ -62,7 +62,7 @@ const HeroSection = ({
             fill
             priority
             fetchPriority="high"
-            quality={80}
+            quality={75}
             sizes="100vw"
             className="object-cover object-top"
             placeholder={blurDataURL ? "blur" : "empty"}
@@ -82,7 +82,7 @@ const HeroSection = ({
               fill
               priority
               fetchPriority="high"
-              quality={80}
+              quality={75}
               sizes="100vw"
               className="object-cover object-center"
               placeholder={blurDataURL ? "blur" : "empty"}

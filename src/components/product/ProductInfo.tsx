@@ -7,7 +7,12 @@ import {
     Plus,
     Heart,
     Share2,
-    Ruler
+    Ruler,
+    Truck,
+    Clock,
+    Zap,
+    ChevronDown,
+    ChevronUp
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useFormatCurrency } from "@/context/StoreConfigContext";
@@ -34,6 +39,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
     const [isFavorite, setIsFavorite] = useState(false);
     const [isPending, setIsPending] = useState(false);
     const [showSizeGuide, setShowSizeGuide] = useState(false);
+    const [isDescOpen, setIsDescOpen] = useState(false);
 
 
     const { addItem } = useCart();
@@ -188,66 +194,19 @@ export default function ProductInfo({ product }: ProductInfoProps) {
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
-            {/* Header */}
-            <div className="space-y-4 hidden lg:block">
-                <div className="flex justify-between items-start">
-                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                        {product.vendor || "TAILEX Standard"}
-                    </p>
-                    <div className="flex gap-2">
-                        <button onClick={toggleFavorite} className="p-2 hover:bg-neutral-100 rounded-full transition-colors">
-                            <Heart className={cn("w-5 h-5", isFavorite ? "fill-black text-black" : "text-neutral-600")} />
-                        </button>
-                        <button className="p-2 hover:bg-neutral-100 rounded-full transition-colors">
-                            <Share2 className="w-5 h-5 text-neutral-600" />
-                        </button>
-                    </div>
-                </div>
-
-                <h1 className="text-4xl md:text-5xl font-black tracking-tight text-neutral-900 leading-[1.1]">
+        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-700">
+            {/* Header - Desktop */}
+            <div className="space-y-2 hidden lg:block">
+                <h1 className="text-xl md:text-2xl font-bold tracking-[0.05em] text-neutral-900 leading-tight uppercase">
                     {product.title}
                 </h1>
-            </div>
-
-            {/* Price & Favorites (Always visible on mobile, under carousel) */}
-            <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        <div className="flex items-baseline gap-2">
-                            {hasSale ? (
-                                <>
-                                    <span className="text-2xl font-bold text-black">
-                                        {formatCurrency(currentSalePrice!)}
-                                    </span>
-                                    <span className="text-lg line-through text-neutral-400">
-                                        {formatCurrency(currentPrice)}
-                                    </span>
-                                </>
-                            ) : (
-                                <span className="text-2xl font-bold text-neutral-900">
-                                    {formatCurrency(currentPrice)}
-                                </span>
-                            )}
-                        </div>
-                        {hasSale && (
-                            <span className="px-2 py-1 bg-black text-white text-[10px] font-bold uppercase tracking-widest">
-                                Sale
-                            </span>
-                        )}
-                    </div>
-
-                    {/* Mobile Favorites/Share */}
-                    <div className="flex gap-1 lg:hidden">
-                        <button onClick={toggleFavorite} className="p-2 hover:bg-neutral-100 rounded-full transition-colors">
-                            <Heart className={cn("w-5 h-5", isFavorite ? "fill-black text-black" : "text-neutral-600")} />
-                        </button>
-                        <button className="p-2 hover:bg-neutral-100 rounded-full transition-colors">
-                            <Share2 className="w-5 h-5 text-neutral-600" />
-                        </button>
-                    </div>
+                <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium">
+                        RS.{formatCurrency(currentSalePrice || currentPrice).replace(/[^0-9.,]/g, '')}
+                    </span>
                 </div>
             </div>
+
 
             {/* Description Short */}
             <div className="prose prose-sm text-neutral-600 leading-relaxed">
@@ -291,15 +250,15 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             {product.enable_size_variants && product.available_sizes && product.available_sizes.length > 0 && (
                 <div className="space-y-4">
                     <div className="flex justify-between items-end">
-                        <span className="text-[13px] font-medium text-neutral-900">Select size</span>
+                        <span className="text-[11px] uppercase tracking-widest font-bold text-neutral-900">Select size</span>
                         <button
                             onClick={() => setShowSizeGuide(true)}
-                            className="flex items-center gap-1.5 text-[13px] text-neutral-900 hover:opacity-70 transition-opacity border-b border-black pb-0.5"
+                            className="flex items-center gap-1.5 text-[11px] uppercase tracking-widest font-bold text-neutral-900 hover:opacity-70 transition-opacity border-b border-black/20 pb-0.5"
                         >
-                            <span className="flex gap-[1px] items-end h-3">
-                                <span className="w-[1.5px] h-1.5 bg-black"></span>
-                                <span className="w-[1.5px] h-2.5 bg-black"></span>
-                                <span className="w-[1.5px] h-2 bg-black"></span>
+                            <span className="flex gap-[1.5px] items-end h-2.5 mb-0.5">
+                                <span className="w-[1px] h-1.5 bg-black"></span>
+                                <span className="w-[1px] h-2.5 bg-black"></span>
+                                <span className="w-[1px] h-2 bg-black"></span>
                             </span>
                             Sizing
                         </button>
@@ -317,19 +276,19 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                                     onClick={() => isEnabled && !outOfStock && handleOptionSelect('Size', size)}
                                     disabled={!isEnabled || outOfStock}
                                     className={cn(
-                                        "relative flex-1 py-4 text-sm font-medium transition-all border border-neutral-200 min-w-[3rem] items-center justify-center",
+                                        "relative flex-1 py-3 text-[11px] font-bold uppercase transition-all border border-neutral-200 min-w-[3.5rem] flex items-center justify-center h-12",
                                         isSelected
-                                            ? "z-10 border-neutral-900 border-[2px] -m-[1px]" // Bold border for selection
+                                            ? "z-10 border-black ring-1 ring-black"
                                             : isEnabled && !outOfStock ? "hover:bg-neutral-50" : "",
-                                        (!isEnabled || outOfStock) && "text-neutral-500 bg-neutral-100/50 cursor-not-allowed"
+                                        (!isEnabled || outOfStock) && "text-neutral-400 bg-neutral-50/50 cursor-not-allowed"
                                     )}
                                 >
-                                    <span className={cn(isSelected && "translate-y-[0.5px]")}>{size}</span>
+                                    <span>{size}</span>
 
                                     {/* Diagonal Slash for Disabled/Out of Stock */}
                                     {(!isEnabled || outOfStock) && (
                                         <div className="absolute inset-0 pointer-events-none">
-                                            <svg className="w-full h-full text-neutral-400" preserveAspectRatio="none">
+                                            <svg className="w-full h-full text-neutral-300" preserveAspectRatio="none">
                                                 <line x1="0" y1="100%" x2="100%" y2="0" stroke="currentColor" strokeWidth="1" />
                                             </svg>
                                         </div>
@@ -380,39 +339,57 @@ export default function ProductInfo({ product }: ProductInfoProps) {
             ))}
 
             {/* Actions */}
-            <div className="flex flex-col gap-3 pt-4">
-                <div className="flex gap-3 h-12">
-                    {/* Quantity */}
-                    <div className="flex items-center w-32 border border-neutral-200 bg-neutral-50/50">
-                        <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-10 h-full flex items-center justify-center hover:bg-neutral-100 transition-colors">
-                            <Minus className="w-3 h-3" />
-                        </button>
-                        <span className="flex-1 text-center font-medium text-sm">{quantity}</span>
-                        <button onClick={() => setQuantity(quantity + 1)} className="w-10 h-full flex items-center justify-center hover:bg-neutral-100 transition-colors">
-                            <Plus className="w-3 h-3" />
-                        </button>
-                    </div>
-
-                    {/* Add to Cart */}
-                    <Button
-                        onClick={() => handleAddToCart(true)}
-                        disabled={isOutOfStock || isPending}
-                        className="flex-1 h-full rounded-none bg-white text-black hover:bg-neutral-50 border border-black uppercase tracking-widest font-bold text-xs transition-transform active:scale-95 disabled:opacity-70"
-                    >
-                        {isPending ? "Adding..." : isOutOfStock ? "Sold Out" : "Add to Bag"}
-                    </Button>
-                </div>
-
-                {/* Buy Now */}
+            <div className="flex flex-col gap-4 pt-4">
                 <Button
-                    onClick={() => {
-                        if (handleAddToCart(false)) router.push('/checkout');
-                    }}
-                    disabled={isOutOfStock}
-                    className="w-full h-12 rounded-none bg-black text-white hover:bg-neutral-900 border border-black uppercase tracking-widest font-bold text-xs transition-transform active:scale-95"
+                    onClick={() => handleAddToCart(true)}
+                    disabled={isOutOfStock || isPending}
+                    className={cn(
+                        "w-full h-12 rounded-none uppercase tracking-[0.2em] font-bold text-[11px] transition-all duration-300",
+                        isOutOfStock
+                            ? "bg-[#AFAFAF] text-white border-none cursor-not-allowed"
+                            : "bg-black text-white hover:bg-neutral-800"
+                    )}
                 >
-                    Buy Now
+                    {isPending ? "Adding..." : isOutOfStock ? "SOLD OUT" : "ADD TO CART"}
                 </Button>
+
+                <p className="text-[11px] text-neutral-600 text-center">
+                    <span className="underline cursor-pointer">Shipping</span> calculated at checkout.
+                </p>
+
+                <div className="flex items-center justify-center gap-2 pt-2">
+                    <div className="w-2 h-2 rounded-full bg-neutral-900"></div>
+                    <span className="text-[11px] font-medium text-neutral-900">Out of stock</span>
+                    <Share2 className="w-3.5 h-3.5 text-neutral-500 ml-2 cursor-pointer" />
+                </div>
+            </div>
+
+            {/* Trust Badges */}
+            <div className="space-y-4 pt-6 border-t border-neutral-100">
+                <div className="flex items-center gap-4 text-neutral-700">
+                    <Truck className="w-5 h-5 stroke-[1.5px]" />
+                    <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-900">Free shipping nationwide</span>
+                </div>
+                <div className="flex items-center gap-4 text-neutral-700">
+                    <Zap className="w-5 h-5 stroke-[1.5px]" />
+                    <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-900">Limited Drop · A One-Time Release</span>
+                </div>
+            </div>
+
+            {/* Collapsible Tabs */}
+            <div className="pt-4">
+                <button
+                    onClick={() => setIsDescOpen(!isDescOpen)}
+                    className="w-full flex justify-between items-center py-4 border-t border-neutral-100 text-[11px] font-bold uppercase tracking-widest text-neutral-900"
+                >
+                    <span>Description</span>
+                    <span>{isDescOpen ? "-" : "+"}</span>
+                </button>
+                {isDescOpen && (
+                    <div className="pb-6 text-sm text-neutral-600 leading-relaxed animate-in fade-in slide-in-from-top-2">
+                        {product.description || "No detailed description available."}
+                    </div>
+                )}
             </div>
 
             {/* Mobile Sticky Add to Cart */}

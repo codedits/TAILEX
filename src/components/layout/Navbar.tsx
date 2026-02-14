@@ -25,7 +25,7 @@ const MobileMenuOverlay = dynamic(() => import("./MobileMenuOverlay"), {
 
 const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navItems?: MenuItem[] }) => {
   const [isMounted, setIsMounted] = useState(false);
-  const { cartCount, setIsCartOpen } = useCart();
+  const { cartCount, setIsCartOpen, isCartOpen } = useCart();
   const { isAuthenticated } = useAuth();
   const pathname = usePathname();
 
@@ -36,6 +36,13 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
   const [isCartSheetLoaded, setIsCartSheetLoaded] = useState(false);
   // Ensure isHome is true for root and handles potential trailing slashes
   const isHome = pathname === "/" || pathname === "" || pathname === "/index";
+
+  // Auto-load cart sheet when open (e.g. from Add to Cart)
+  useEffect(() => {
+    if (isCartOpen && !isCartSheetLoaded) {
+      setIsCartSheetLoaded(true);
+    }
+  }, [isCartOpen, isCartSheetLoaded]);
 
   const defaultLinks: MenuItem[] = [
     { label: "HOME", url: "/" },
@@ -60,10 +67,10 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
         <div className="hidden md:flex justify-end px-6 md:px-12 py-1">
           <div className="flex items-center gap-4">
             <Link href="https://facebook.com" target="_blank" className="hover:opacity-60 transition-opacity">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" /></svg>
             </Link>
             <Link href="https://www.instagram.com/tailex.pakistan/" target="_blank" className="hover:opacity-60 transition-opacity">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5"/></svg>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" /><circle cx="12" cy="12" r="5" /><circle cx="17.5" cy="6.5" r="1.5" /></svg>
             </Link>
           </div>
         </div>

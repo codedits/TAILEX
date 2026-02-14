@@ -21,6 +21,7 @@ const ProductCard = React.memo(({ priority = false, ...product }: ProductCardPro
   const { addItem } = useCart();
   const { isInWishlist, toggleItem } = useWishlist();
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [hasHovered, setHasHovered] = useState(false);
 
   const { title, price, images, slug, cover_image, sale_price, tags, id, review_count, average_rating, metadata, variants } = product;
 
@@ -34,7 +35,7 @@ const ProductCard = React.memo(({ priority = false, ...product }: ProductCardPro
   const blurDataUrls = (metadata as Record<string, unknown>)?.blurDataUrls as Record<string, string> | undefined;
   const primaryBlur = blurDataUrls?.[imagePrimary] || undefined;
 
-  const sizes = "(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw";
+  const sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1536px) 25vw, 20vw";
 
   // Logic
   const isSale = !!(sale_price && sale_price < price);
@@ -75,7 +76,11 @@ const ProductCard = React.memo(({ priority = false, ...product }: ProductCardPro
   };
 
   return (
-    <div className="group relative flex flex-col w-full">
+    <div
+      className="group relative flex flex-col w-full"
+      onMouseEnter={() => setHasHovered(true)}
+      onTouchStart={() => setHasHovered(true)} // Optional: for immediate feedback on tap if desired, though usually hover is enough
+    >
       {/* --- Image Container --- */}
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-100 rounded-sm"> {/* Standard fashion aspect ratio */}
 
@@ -89,7 +94,7 @@ const ProductCard = React.memo(({ priority = false, ...product }: ProductCardPro
                 fill
                 priority={priority}
                 sizes={sizes}
-                quality={80}
+                quality={75}
                 placeholder={primaryBlur ? "blur" : "empty"}
                 blurDataURL={primaryBlur}
                 onLoad={() => setImageLoaded(true)}
@@ -102,15 +107,16 @@ const ProductCard = React.memo(({ priority = false, ...product }: ProductCardPro
               />
             )}
             {/* Secondary Image (Swap on Hover) */}
-            {isValidImage(imageSecondary) && (
+            {/* Secondary Image (Swap on Hover) - Lazy Loaded & Desktop Only */}
+            {hasHovered && isValidImage(imageSecondary) && (
               <Image
                 src={imageSecondary}
                 alt=""
                 fill
                 loading="lazy"
                 sizes={sizes}
-                quality={80}
-                className="absolute inset-0 object-cover opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100"
+                quality={75}
+                className="absolute inset-0 object-cover opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100 hidden md:block"
               />
             )}
           </div>
