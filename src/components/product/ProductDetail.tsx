@@ -14,7 +14,7 @@ export default function ProductDetail({
   const distinctImages = Array.from(new Set(validImages)); // De-duplicate
 
   return (
-    <div className="max-w-[1280px] mx-auto animate-in fade-in duration-700">
+    <div className="max-w-[1280px] mx-auto animate-in fade-in duration-500">
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-3 text-[10px] font-body font-black uppercase tracking-[0.3em] text-muted-foreground mb-4 md:mb-12 px-6 md:px-0 py-4 md:py-0">
         <Link href="/" className="hover:text-foreground transition-colors">Home</Link>

@@ -46,20 +46,13 @@ export const StoreConfigService = {
 
             const createConfigPromise = supabase.from('site_config').select('key, value');
             const createNavPromise = supabase.from('navigation_menus').select('*');
-            const createCollectionsPromise = supabase
-                .from('collections')
-                .select('title, slug')
-                .eq('is_visible', true)
-                .order('sort_order', { ascending: true });
 
             const [
                 { data: configData, error: configError },
-                { data: navMenus },
-                { data: collections }
+                { data: navMenus }
             ] = await Promise.all([
                 createConfigPromise,
-                createNavPromise,
-                createCollectionsPromise
+                createNavPromise
             ]);
 
             if (configError) throw new AppError(configError.message, 'DB_ERROR');
@@ -71,19 +64,10 @@ export const StoreConfigService = {
                 dbConfig[row.key] = row.value;
             });
 
-            // Format dynamic collections as navigation items
-            const collectionNavItems = collections?.map(c => ({
-                label: c.title.toUpperCase(),
-                url: `/collection/${c.slug}`
-            })) || [];
-
-            // Combine manual links with dynamic collections
-            // We want: HOME, Collections..., SHOP
-            // Current manual main menu might have some of these, but we'll prepend HOME and inject collections
-            const rawMainNav = navMenus?.find(n => n.handle === 'main-menu')?.items || [];
+            // Navigation Items
             const mainNav = [
                 { label: 'HOME', url: '/' },
-                ...collectionNavItems,
+                { label: 'COLLECTIONS', url: '/collection' },
                 { label: 'SHOP', url: '/shop' }
             ];
 

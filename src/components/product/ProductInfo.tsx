@@ -14,7 +14,7 @@ import {
     ChevronDown,
     ChevronUp
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, getColorValue } from "@/lib/utils";
 import { useFormatCurrency } from "@/context/StoreConfigContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -221,25 +221,35 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                     <div className="flex justify-between items-center text-xs uppercase tracking-widest font-bold text-neutral-900">
                         <span>Color: <span className="text-neutral-500 font-medium">{selectedOptions['Color']}</span></span>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-3">
                         {product.available_colors.map((color) => {
                             const outOfStock = isOptionOutOfStock('Color', color);
+                            const isSelected = selectedOptions['Color'] === color;
+                            const colorValue = getColorValue(color);
+
                             return (
                                 <button
                                     key={color}
                                     onClick={() => !outOfStock && handleOptionSelect('Color', color)}
                                     disabled={outOfStock}
+                                    title={color}
                                     className={cn(
-                                        "px-6 py-3 text-xs font-bold uppercase tracking-wider transition-all border min-w-[3rem]",
-                                        selectedOptions['Color'] === color
-                                            ? "border-black bg-white text-black font-bold"
-                                            : outOfStock
-                                                ? "border-neutral-100 text-neutral-300 bg-neutral-50 cursor-not-allowed line-through"
-                                                : "border-neutral-200 hover:border-neutral-400 text-neutral-900 bg-transparent"
+                                        "w-8 h-8 rounded-full border border-neutral-200 transition-all duration-200 relative",
+                                        isSelected
+                                            ? "ring-2 ring-offset-2 ring-neutral-900 scale-110"
+                                            : !outOfStock && "hover:scale-110 hover:border-neutral-400",
+                                        outOfStock && "opacity-40 cursor-not-allowed",
+                                        // Specific border for white/light colors to be visible
+                                        (colorValue.toLowerCase() === '#ffffff' || colorValue.toLowerCase() === 'white') && "border-neutral-300"
                                     )}
+                                    style={{ backgroundColor: colorValue }}
                                 >
-                                    {color}
-                                    {outOfStock && <span className="ml-1 text-[10px]">(Out)</span>}
+                                    {outOfStock && (
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="w-full h-px bg-neutral-400 -rotate-45" />
+                                        </div>
+                                    )}
+                                    <span className="sr-only">{color}</span>
                                 </button>
                             );
                         })}

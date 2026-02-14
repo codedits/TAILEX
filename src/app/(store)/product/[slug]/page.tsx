@@ -149,7 +149,7 @@ export default async function ProductPage({ params }: Props) {
 
       <div className="max-w-[1400px] mx-auto px-6 md:px-12 mb-32">
         <div className="flex flex-col items-center justify-center mb-12 gap-4">
-          <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-black">
+          <h2 className="font-great-vibes text-red-900 text-4xl md:text-5xl leading-normal select-none">
             You May Also Like
           </h2>
           <Link href="/shop" className="text-[10px] font-medium uppercase tracking-[0.1em] text-neutral-500 hover:text-black transition-colors underline underline-offset-4">

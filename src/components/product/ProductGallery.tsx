@@ -43,22 +43,27 @@ export default function ProductGallery({ images, title, blurDataUrl, blurDataUrl
         };
     }, [emblaApi, onSelect]);
 
-    // Preload high-quality master images & optimized stack images for instant interaction
+    // Optimized Preloading Logic:
+    // Instead of loading everything at once (which kills initial page speed),
+    // we prioritize the current view and intelligently peek ahead.
     useEffect(() => {
         if (!images.length) return;
 
-        images.forEach((src) => {
-            // 1. Preload High-Res Master (for Zoom/Lightbox)
+        // 1. Current High-Res (for zoom)
+        const currentSrc = images[selectedIndex];
+        if (currentSrc) {
             const imgHighRes = new window.Image();
-            imgHighRes.src = src;
+            imgHighRes.src = currentSrc;
+        }
 
-            // 2. Preload Optimized Version (for Desktop Stack switching)
-            // Approx width 700px -> Next.js likely picks 1080w or 1920w source set.
-            // We preload 1080w to cover most desktop cases.
+        // 2. Next Optimized Image (for smooth transition)
+        const nextIndex = (selectedIndex + 1) % images.length;
+        if (nextIndex !== selectedIndex) {
+            const nextSrc = images[nextIndex];
             const imgOptimized = new window.Image();
-            imgOptimized.src = getOptimizedUrl(src, 1080, 80);
-        });
-    }, [images]);
+            imgOptimized.src = getOptimizedUrl(nextSrc, 1080, 80);
+        }
+    }, [images, selectedIndex]);
 
     const scrollTo = (index: number) => {
         setSelectedIndex(index);
@@ -145,11 +150,12 @@ export default function ProductGallery({ images, title, blurDataUrl, blurDataUrl
                                     src={img}
                                     alt={title}
                                     blurDataUrl={getBlurUrl(img, idx)}
-                                    // Optimized Strategy:
-                                    // 1. Priority=true only for FIRST image (LCP).
-                                    // 2. Loading="eager" for all others ensures they fetch immediately (in parallel) without blocking LCP.
+                                    // Optimized Strategy (Shopify Style):
+                                    // 1. Priority=true only for FIRST image (LCP). This maps to fetchpriority="high".
+                                    // 2. Loading="eager" only for the currently selected image if not LCP.
+                                    // 3. All other images "lazy" to save bandwidth for initial load.
                                     priority={idx === 0}
-                                    loading="eager"
+                                    loading={idx === 0 ? undefined : (idx === selectedIndex ? "eager" : "lazy")}
                                     zoomScale={2.5}
                                     className="w-full h-full"
                                     onClick={() => setLightboxOpen(true)}

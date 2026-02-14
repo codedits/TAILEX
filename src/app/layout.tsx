@@ -136,8 +136,6 @@ export default async function RootLayout({
         {/* Preconnect to critical CDNs for faster resource loading */}
         <link rel="preconnect" href="https://ipumyrjzquyglyesiuur.supabase.co" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://ipumyrjzquyglyesiuur.supabase.co" />
-        <link rel="preconnect" href="https://framerusercontent.com" />
-        <link rel="dns-prefetch" href="https://framerusercontent.com" />
 
 
 

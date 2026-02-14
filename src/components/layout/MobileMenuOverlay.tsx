@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { X, Instagram, Facebook, ArrowRight } from "lucide-react";
 import { MenuItem } from "@/lib/types";
+import { useLenis } from "lenis/react";
+import { usePathname } from "next/navigation";
 
 interface MobileMenuOverlayProps {
     navLinks: MenuItem[];
@@ -10,6 +12,9 @@ interface MobileMenuOverlayProps {
 }
 
 export default function MobileMenuOverlay({ navLinks, onClose }: MobileMenuOverlayProps) {
+    const lenis = useLenis();
+    const pathname = usePathname();
+
     return (
         <div className="fixed inset-0 z-[1000] overflow-hidden">
             {/* Backdrop */}
@@ -44,7 +49,22 @@ export default function MobileMenuOverlay({ navLinks, onClose }: MobileMenuOverl
                         >
                             <Link
                                 href={link.url}
-                                onClick={onClose}
+                                onClick={(e) => {
+                                    if (link.url.startsWith('/#') && pathname === '/') {
+                                        e.preventDefault();
+                                        onClose();
+                                        const targetId = link.url.replace('/#', '');
+                                        const element = document.getElementById(targetId);
+                                        if (element && lenis) {
+                                            // Delays slightly to let the menu close animation start
+                                            setTimeout(() => {
+                                                lenis.scrollTo(element, { offset: -40, duration: 1.5 });
+                                            }, 100);
+                                        }
+                                    } else {
+                                        onClose();
+                                    }
+                                }}
                                 className="group flex items-center justify-between py-2 border-b border-neutral-50"
                             >
                                 <span className="text-3xl font-bold uppercase tracking-tighter font-helvetica group-hover:pl-2 transition-all duration-300">

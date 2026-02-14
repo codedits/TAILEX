@@ -91,14 +91,11 @@ export default function HomeLayout({ data }: HomeLayoutProps) {
             {/* ============================================ */}
             {/* FEATURED PRODUCTS: Streamed via Suspense    */}
             {/* ============================================ */}
-            {productSection?.enabled && (
-                <Suspense fallback={<ProductGridSkeleton />}>
-                    <HomeProductsLoader
-                        productsPromise={data.productsPromise}
-                        content={productSection.content}
-                    />
-                </Suspense>
-            )}
+            <Suspense fallback={<ProductGridSkeleton />}>
+                <HomeProductsLoader
+                    productsPromise={data.productsPromise}
+                />
+            </Suspense>
 
             {/* ============================================ */}
             {/* FEATURING: Client Component                 */}

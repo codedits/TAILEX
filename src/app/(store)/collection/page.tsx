@@ -60,12 +60,12 @@ export default async function CollectionPage() {
     <main className="min-h-screen bg-background">
       <Navbar brandName={brand.name} navItems={navItems} />
 
-      <div className="pt-40 pb-24 px-6 md:px-12 max-w-[1440px] mx-auto">
+      <div className="pt-8 md:pt-12 pb-24 px-6 md:px-12 max-w-[1440px] mx-auto">
         {/* Minimal Header */}
-        <div className="mb-12">
-          <h1 className="text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-400">
-            Collection
-          </h1>
+        <div className="mb-12 text-center">
+          <h2 className="font-great-vibes text-red-900 text-6xl md:text-7xl leading-normal select-none">
+            Collections
+          </h2>
         </div>
 
         {/* Collections Grid - High-end editorial style */}

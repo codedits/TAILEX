@@ -73,3 +73,40 @@ export function formatCurrency(amount: number, config: CurrencyConfig = DEFAULT_
     : `${config.symbol} ${formattedAmount}`;
 }
 
+
+export const COLOR_MAP: Record<string, string> = {
+  "Black": "#000000",
+  "White": "#FFFFFF",
+  "Navy": "#000080",
+  "Red": "#EF4444",
+  "Blue": "#3B82F6",
+  "Grey": "#808080",
+  "Gray": "#808080",
+  "Heather Grey": "#9AA2AE",
+  "Charcoal": "#36454F",
+  "Beige": "#F5F5DC",
+  "Green": "#22C55E",
+  "Olive": "#808000",
+  "Maroon": "#800000",
+  "Burgundy": "#800020",
+  "Pink": "#EC4899",
+  "Purple": "#A855F7",
+  "Yellow": "#EAB308",
+  "Orange": "#F97316",
+  "Teal": "#14B8A6",
+  "Cyan": "#06B6D4",
+  "Brown": "#78350F",
+};
+
+export function getColorValue(colorName: string): string {
+  // Check exact match
+  if (COLOR_MAP[colorName]) return COLOR_MAP[colorName];
+
+  // Check case-insensitive
+  const lowerName = colorName.toLowerCase();
+  const key = Object.keys(COLOR_MAP).find(k => k.toLowerCase() === lowerName);
+  if (key) return COLOR_MAP[key];
+
+  // Return original if likely a valid CSS color, otherwise gray
+  return colorName;
+}
