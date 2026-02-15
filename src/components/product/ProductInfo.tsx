@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import {
     Minus,
@@ -44,6 +45,88 @@ export default function ProductInfo({ product }: ProductInfoProps) {
 
     const { addItem } = useCart();
 
+    // Realtime Product State
+    const [liveProduct, setLiveProduct] = useState(product);
+
+    // Initial sync
+    useEffect(() => {
+        setLiveProduct(product);
+    }, [product]);
+
+    // Supabase Realtime Subscription for Inventory
+    useEffect(() => {
+        const supabase = createClient();
+        const channel = supabase.channel(`product-inventory-${product.id}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'inventory_levels'
+                },
+                (payload) => {
+                    const newStock = payload.new as { variant_id: string; available: number };
+
+                    setLiveProduct((current) => {
+                        // Check if update is relevant to this product
+                        const isRelevant = current.variants?.some(v => v.id === newStock.variant_id);
+                        if (!isRelevant) return current;
+
+                        // Update specific variant inventory
+                        const updatedVariants = current.variants?.map(v => {
+                            if (v.id === newStock.variant_id) {
+                                return { ...v, inventory_quantity: newStock.available };
+                            }
+                            return v;
+                        });
+
+                        return { ...current, variants: updatedVariants };
+                    });
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [product.id]);
+
+    // Initial Stock Fetch (Client-side) to ensure freshness
+    useEffect(() => {
+        const fetchStock = async () => {
+            if (!product.variants || product.variants.length === 0) return;
+
+            const supabase = createClient();
+            const variantIds = product.variants.map(v => v.id);
+
+            const { data, error } = await supabase
+                .from('inventory_levels')
+                .select('variant_id, available')
+                .in('variant_id', variantIds);
+
+            if (error || !data) {
+                console.error('Error fetching initial stock:', error);
+                return;
+            }
+
+            // Aggregate stock by variant_id
+            const stockMap: Record<string, number> = {};
+            for (const record of data) {
+                stockMap[record.variant_id] = (stockMap[record.variant_id] || 0) + (record.available || 0);
+            }
+
+            setLiveProduct(current => {
+                const updatedVariants = current.variants?.map(v => ({
+                    ...v,
+                    inventory_quantity: stockMap[v.id] ?? v.inventory_quantity ?? 0
+                }));
+                return { ...current, variants: updatedVariants };
+            });
+        };
+
+        fetchStock();
+    }, [product.id, product.variants]);
+
     // Default Options - supports both legacy options and new clothing variants
     useEffect(() => {
         if (Object.keys(selectedOptions).length > 0) return;
@@ -72,42 +155,54 @@ export default function ProductInfo({ product }: ProductInfoProps) {
 
     // Derived State (Variants, Price, Stock)
     const selectedVariant = useMemo(() => {
-        if (!product.variants || product.variants.length === 0) return null;
+        if (!liveProduct.variants || liveProduct.variants.length === 0) return null;
 
         // New clothing variant system (color/size fields)
-        if (product.enable_color_variants || product.enable_size_variants) {
-            return product.variants.find(v => {
-                const colorMatch = !product.enable_color_variants || v.color === selectedOptions['Color'];
-                const sizeMatch = !product.enable_size_variants || v.size === selectedOptions['Size'];
+        if (liveProduct.enable_color_variants || liveProduct.enable_size_variants) {
+            return liveProduct.variants.find(v => {
+                // Resilient matching: If a flag is enabled but the variant lacks the corresponding data, 
+                // we treat it as a match to prevent hard-locking the UI due to configuration errors.
+                const colorMatch = !product.enable_color_variants ||
+                    !v.color ||
+                    v.color === selectedOptions['Color'] ||
+                    !selectedOptions['Color'];
+
+                const sizeMatch = !product.enable_size_variants ||
+                    !v.size ||
+                    v.size === selectedOptions['Size'] ||
+                    !selectedOptions['Size'];
+
                 const isActive = v.status !== 'disabled';
                 return colorMatch && sizeMatch && isActive;
             }) || null;
         }
 
         // Legacy option system (option1/2/3 fields)
-        return product.variants.find(v => {
+        return liveProduct.variants.find(v => {
             const match1 = !v.option1_name || v.option1_value === selectedOptions[v.option1_name];
             const match2 = !v.option2_name || v.option2_value === selectedOptions[v.option2_name];
             const match3 = !v.option3_name || v.option3_value === selectedOptions[v.option3_name];
             return match1 && match2 && match3;
         }) || null;
-    }, [selectedOptions, product.variants, product.enable_color_variants, product.enable_size_variants]);
+    }, [selectedOptions, liveProduct.variants, product.enable_color_variants, product.enable_size_variants]);
 
     // Helper to check if a specific option value is out of stock
     const isOptionOutOfStock = (optionType: 'Color' | 'Size', value: string): boolean => {
-        if (!product.variants || !product.track_inventory) return false;
+        if (!liveProduct.variants || !product.track_inventory) return false;
 
-        const relevantVariants = product.variants.filter(v => {
+        const relevantVariants = liveProduct.variants.filter(v => {
             if (optionType === 'Color') {
-                const colorMatch = v.color === value;
-                const sizeMatch = !product.enable_size_variants || v.size === selectedOptions['Size'];
+                const colorMatch = v.color === value || (!v.color && !product.available_colors?.length);
+                const sizeMatch = !product.enable_size_variants || v.size === selectedOptions['Size'] || !v.size;
                 return colorMatch && sizeMatch;
             } else {
-                const sizeMatch = v.size === value;
-                const colorMatch = !product.enable_color_variants || v.color === selectedOptions['Color'];
+                const sizeMatch = v.size === value || (!v.size && !product.available_sizes?.length);
+                const colorMatch = !product.enable_color_variants || v.color === selectedOptions['Color'] || !v.color;
                 return colorMatch && sizeMatch;
             }
         });
+
+        if (relevantVariants.length === 0) return false;
 
         return relevantVariants.every(v =>
             v.status === 'disabled' || (v.inventory_quantity ?? 0) <= 0
@@ -130,13 +225,22 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         }
 
         // No variant selected: Check if all variants are OOS
-        if (product.variants && product.variants.length > 0) {
-            return product.variants.every(v => (v.inventory_quantity ?? 0) <= 0);
+        if (liveProduct.variants && liveProduct.variants.length > 0) {
+            return liveProduct.variants.every(v => (v.inventory_quantity ?? 0) <= 0);
         }
 
         // Fallback for simple products (though DB seems to use variants for all)
         return (product.stock ?? 0) <= 0;
-    }, [product.track_inventory, product.allow_backorder, selectedVariant, currentStock, product.variants, product.stock]);
+    }, [product.track_inventory, product.allow_backorder, selectedVariant, currentStock, liveProduct.variants, product.stock]);
+
+    const isLowStock = useMemo(() => {
+        if (!product.track_inventory) return false;
+        if (isOutOfStock) return false;
+        if (selectedVariant) {
+            return currentStock > 0 && currentStock <= 5;
+        }
+        return false;
+    }, [product.track_inventory, isOutOfStock, selectedVariant, currentStock]);
 
 
 
@@ -367,10 +471,29 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                     <span className="underline cursor-pointer">Shipping</span> calculated at checkout.
                 </p>
 
-                <div className="flex items-center justify-center gap-2 pt-2">
-                    <div className="w-2 h-2 rounded-full bg-neutral-900"></div>
-                    <span className="text-[11px] font-medium text-neutral-900">Out of stock</span>
-                    <Share2 className="w-3.5 h-3.5 text-neutral-500 ml-2 cursor-pointer" />
+                {/* Availability Status */}
+                <div className="flex items-center justify-center gap-2 pt-2 text-[11px] font-medium uppercase tracking-wide">
+                    {isOutOfStock ? (
+                        <>
+                            <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                            <span className="text-red-600">Out of Stock</span>
+                        </>
+                    ) : isLowStock ? (
+                        <>
+                            <div className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                            </div>
+                            <span className="text-amber-600">
+                                Only {currentStock} left - Order Soon
+                            </span>
+                        </>
+                    ) : (
+                        <>
+                            <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                            <span className="text-green-600">In Stock & Ready to Ship</span>
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -383,6 +506,35 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                 <div className="flex items-center gap-4 text-neutral-700">
                     <Zap className="w-5 h-5 stroke-[1.5px]" />
                     <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-900">Limited Drop · A One-Time Release</span>
+                </div>
+                {/* Availability Status */}
+                <div className="flex items-center justify-center gap-2 pt-2">
+                    {isOutOfStock ? (
+                        <>
+                            <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                            <span className="text-[11px] font-medium text-neutral-900">Out of stock</span>
+                        </>
+                    ) : (
+                        <>
+                            <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                            <span className="text-[11px] font-medium text-neutral-900">
+                                {currentStock > 0 && currentStock <= 5 ? `Only ${currentStock} left` : "In stock"}
+                            </span>
+                        </>
+                    )}
+                    <button onClick={() => {
+                        if (navigator.share) {
+                            navigator.share({
+                                title: product.title,
+                                url: window.location.href
+                            }).catch(() => { });
+                        } else {
+                            toast.success("Link copied to clipboard");
+                            navigator.clipboard.writeText(window.location.href);
+                        }
+                    }}>
+                        <Share2 className="w-3.5 h-3.5 text-neutral-500 ml-2 cursor-pointer hover:text-black transition-colors" />
+                    </button>
                 </div>
             </div>
 

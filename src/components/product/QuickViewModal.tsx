@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { X, Minus, Plus, ShoppingBag, ChevronLeft, ChevronRight } from "lucide-react";
@@ -10,6 +10,7 @@ import { useFormatCurrency } from "@/context/StoreConfigContext";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { getFreshProduct } from "@/actions/products";
 
 interface QuickViewModalProps {
     product: Product | null;
@@ -17,15 +18,27 @@ interface QuickViewModalProps {
     onClose: () => void;
 }
 
-export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps) {
+export function QuickViewModal({ product: initialProduct, isOpen, onClose }: QuickViewModalProps) {
     const formatCurrency = useFormatCurrency();
     const { addItem } = useCart();
 
-
+    const [product, setProduct] = useState<Product | null>(initialProduct);
     const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
     const [quantity, setQuantity] = useState(1);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [isPending, setIsPending] = useState(false);
+
+    // Fetch fresh data on open
+    useEffect(() => {
+        if (isOpen && initialProduct?.slug) {
+            setProduct(initialProduct); // Reset to initial to show something immediately
+            getFreshProduct(initialProduct.slug).then((fresh) => {
+                if (fresh) {
+                    setProduct(fresh);
+                }
+            });
+        }
+    }, [isOpen, initialProduct]);
 
     const images = product?.cover_image ? [product.cover_image, ...(product.images || [])].filter(Boolean) as string[] : [];
 
@@ -35,15 +48,24 @@ export function QuickViewModal({ product, isOpen, onClose }: QuickViewModalProps
         return product.variants.find(v => {
             const match1 = !v.option1_name || v.option1_value === selectedOptions[v.option1_name];
             const match2 = !v.option2_name || v.option2_value === selectedOptions[v.option2_name];
+            // Also check new color/size fields if present
+            const matchColor = !product.enable_color_variants || v.color === selectedOptions['Color'];
+            const matchSize = !product.enable_size_variants || v.size === selectedOptions['Size'];
+
+            if (product.enable_color_variants || product.enable_size_variants) {
+                return matchColor && matchSize;
+            }
             return match1 && match2;
         }) || null;
-    }, [selectedOptions, product?.variants]);
+    }, [selectedOptions, product?.variants, product?.enable_color_variants, product?.enable_size_variants]);
 
     if (!product) return null;
 
     const currentPrice = selectedVariant?.price ?? product.price;
     const currentSalePrice = selectedVariant?.sale_price ?? product.sale_price;
     const hasSale = !!currentSalePrice && currentSalePrice < currentPrice;
+
+    // Use inventory_quantity from fresh product data
     const currentStock = selectedVariant?.inventory_quantity ?? 0;
     const isOutOfStock = product.track_inventory && currentStock <= 0;
 

@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Navbar from "@/components/layout/Navbar";
 
 import AsyncProductGrid from "@/components/collection/AsyncProductGrid";
+import ProductFilters from "@/components/collection/ProductFilters";
 import MobileCollectionList from "@/components/shop/MobileCollectionList";
 import { Product, Collection } from "@/lib/types";
 import { notFound } from "next/navigation";
@@ -32,6 +33,7 @@ export const dynamicParams = true;
 
 type Props = {
     params: Promise<{ slug: string }>;
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 // High-end store: Generate metadata for SEO
@@ -50,8 +52,23 @@ export async function generateMetadata({ params }: Props) {
     };
 }
 
-export default async function CollectionDetailPage({ params }: Props) {
+export default async function CollectionDetailPage({ params, searchParams }: Props) {
     const { slug } = await params;
+    const resolvedSearchParams = await searchParams;
+
+    const sizeFilter = typeof resolvedSearchParams.size === 'string' ? resolvedSearchParams.size.split(',') : undefined;
+    const sort = typeof resolvedSearchParams.sort === 'string' ? resolvedSearchParams.sort : 'newest';
+
+    let orderBy: 'created_at' | 'price' | 'title' = 'created_at';
+    let order: 'asc' | 'desc' = 'desc';
+
+    if (sort === 'price-asc') {
+        orderBy = 'price';
+        order = 'asc';
+    } else if (sort === 'price-desc') {
+        orderBy = 'price';
+        order = 'desc';
+    }
 
     const [collectionResult, collectionsListResult, config] = await Promise.all([
         collectionsApi.getCollection(slug),
@@ -72,9 +89,10 @@ export default async function CollectionDetailPage({ params }: Props) {
     const productsPromise = ProductService.getProducts({
         categoryId: collection.id,
         status: 'active',
-        orderBy: 'created_at',
-        order: 'desc',
-        limit: 20
+        orderBy,
+        order,
+        limit: 40,
+        sizes: sizeFilter
     }).then(res => res.data);
 
     return (
@@ -101,9 +119,12 @@ export default async function CollectionDetailPage({ params }: Props) {
                     </Breadcrumb>
                 </div>
                 {/* Collections Menu (Visible on all screens) */}
-                <div className="mb-12">
+                <div className="mb-8">
                     <MobileCollectionList collections={allCollections} />
                 </div>
+
+                {/* Filters */}
+                <ProductFilters />
 
                 {/* Product Grid - Full Width */}
                 <div className="min-h-[50vh]">

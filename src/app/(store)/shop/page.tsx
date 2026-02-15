@@ -1,10 +1,12 @@
 import { Suspense } from "react";
+// rebuild-force-1
 import { createStaticClient } from "@/lib/supabase/static";
 import * as collectionsApi from "@/lib/api/collections";
 import { ProductService } from "@/services/products";
 import Navbar from "@/components/layout/Navbar";
 
 import AsyncProductGrid from "@/components/collection/AsyncProductGrid";
+import ProductFilters from "@/components/collection/ProductFilters";
 import MobileCollectionList from "@/components/shop/MobileCollectionList";
 import { Product, Collection } from "@/lib/types";
 import { StoreConfigService } from "@/services/config";
@@ -25,7 +27,24 @@ export const metadata = {
     description: "Browse our complete collection of premium fashion items.",
 };
 
-export default async function ShopPage() {
+export default async function ShopPage({ searchParams }: {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+    const resolvedSearchParams = await searchParams;
+
+    const sizeFilter = typeof resolvedSearchParams.size === 'string' ? resolvedSearchParams.size.split(',') : undefined;
+    const sort = typeof resolvedSearchParams.sort === 'string' ? resolvedSearchParams.sort : 'newest';
+
+    let orderBy: 'created_at' | 'price' | 'title' = 'created_at';
+    let order: 'asc' | 'desc' = 'desc';
+
+    if (sort === 'price-asc') {
+        orderBy = 'price';
+        order = 'asc';
+    } else if (sort === 'price-desc') {
+        orderBy = 'price';
+        order = 'desc';
+    }
     // Fetch config and calls in parallel
     const [config, collectionsListResult] = await Promise.all([
         StoreConfigService.getStoreConfig(),
@@ -42,9 +61,10 @@ export default async function ShopPage() {
     // Fetch All Products (Cached)
     const productsPromise = ProductService.getProducts({
         status: 'active',
-        orderBy: 'created_at',
-        order: 'desc',
-        limit: 20
+        orderBy,
+        order,
+        limit: 40,
+        sizes: sizeFilter
     }).then(res => res.data);
 
 
@@ -69,9 +89,12 @@ export default async function ShopPage() {
                 </div>
 
                 {/* Collections Menu (Visible on all screens now) */}
-                <div className="mb-12 text-center">
+                <div className="mb-8 text-center">
                     <MobileCollectionList collections={allCollections} />
                 </div>
+
+                {/* Filters */}
+                <ProductFilters />
 
                 {/* Product Grid - Full Width */}
                 <div className="min-h-[50vh]">

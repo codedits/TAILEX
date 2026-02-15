@@ -295,7 +295,7 @@ export async function getProducts(options?: any): Promise<ApiResponse<PaginatedR
 
 export async function getProduct(slug: string): Promise<ApiResponse<Product>> {
   try {
-    const product = await ProductService.getProductBySlug(slug);
+    const product = await ProductService.getProductBySlug(slug, { includeStock: true });
     return { data: product };
   } catch (error) {
     return handleActionError(error);

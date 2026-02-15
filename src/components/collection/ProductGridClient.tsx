@@ -11,7 +11,7 @@ interface ProductGridClientProps {
 export function ProductGridClient({ products }: ProductGridClientProps) {
     return (
         <div
-            className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 gap-y-10 gap-x-6 md:gap-y-16 md:gap-x-8"
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-12 gap-x-3 md:gap-x-4"
         >
             {products.map((product, index) => (
                 <div

@@ -84,7 +84,7 @@ export default async function ProductPage({ params }: Props) {
 
   // Fetch product and all config in parallel
   const [product, config] = await Promise.all([
-    ProductService.getProductBySlug(slug).catch(() => null),
+    ProductService.getProductBySlug(slug, { includeStock: false }).catch(() => null),
     StoreConfigService.getStoreConfig()
   ]);
 

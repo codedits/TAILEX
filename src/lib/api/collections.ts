@@ -393,20 +393,20 @@ export const getCollection = unstable_cache(
         return { error: error.message }
       }
 
-      // Fetch products in this collection
-      const { data: products } = await supabase
-        .from('products')
-        .select('*')
-        .eq('category_id', collection.id)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .limit(20)
+      // Fetch products in this collection - REMOVED for performance (fetched by page via ProductService)
+      // const { data: products } = await supabase
+      //   .from('products')
+      //   .select('*')
+      //   .eq('category_id', collection.id)
+      //   .eq('status', 'active')
+      //   .order('created_at', { ascending: false })
+      //   .limit(20)
 
 
       return {
         data: {
           ...collection,
-          products: products || []
+          products: [] // products || []
         } as Collection & { products: unknown[] }
       }
     } catch (error) {
@@ -414,5 +414,5 @@ export const getCollection = unstable_cache(
     }
   },
   ['collection-by-slug'], // Key parts
-  { tags: ['collections', 'products'], revalidate: 3600 } // Invalidate if collection OR products list changes
+  { tags: ['collections'], revalidate: 3600 } // Invalidate if collection changes (removed products tag dependency)
 )

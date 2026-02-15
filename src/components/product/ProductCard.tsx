@@ -1,4 +1,5 @@
 "use client";
+// optimized
 
 import React, { useState } from 'react';
 import Link from "next/link";
@@ -35,7 +36,7 @@ const ProductCard = React.memo(({ priority = false, ...product }: ProductCardPro
   const blurDataUrls = (metadata as Record<string, unknown>)?.blurDataUrls as Record<string, string> | undefined;
   const primaryBlur = blurDataUrls?.[imagePrimary] || undefined;
 
-  const sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1536px) 25vw, 20vw";
+  const sizes = "(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw";
 
   // Logic
   const isSale = !!(sale_price && sale_price < price);
@@ -82,7 +83,7 @@ const ProductCard = React.memo(({ priority = false, ...product }: ProductCardPro
       onTouchStart={() => setHasHovered(true)} // Optional: for immediate feedback on tap if desired, though usually hover is enough
     >
       {/* --- Image Container --- */}
-      <div className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-100 rounded-sm"> {/* Standard fashion aspect ratio */}
+      <div className="relative aspect-[2/3] w-full overflow-hidden bg-neutral-100 rounded-sm"> {/* Standard fashion aspect ratio */}
 
         <Link href={href} className="absolute inset-0 z-10 block" aria-label={`View ${title}`}>
           {/* Images */}

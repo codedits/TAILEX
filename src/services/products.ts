@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { InventoryService } from '@/services/inventory';
 import { createStaticClient } from '@/lib/supabase/static';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { AppError } from './errors';
@@ -81,7 +82,15 @@ export const ProductService = {
             search?: string;
             orderBy?: 'created_at' | 'price' | 'title';
             order?: 'asc' | 'desc';
+            minPrice?: number;
+            maxPrice?: number;
+            sizes?: string[];
         }): Promise<PaginatedResponse<Product>> => {
+            // Normalize inputs for Consistent Cache Keys
+            if (options?.sizes) {
+                options.sizes.sort();
+            }
+
             const supabase = createStaticClient();
 
             let query = supabase.from('products').select('*', { count: 'exact' });
@@ -92,6 +101,15 @@ export const ProductService = {
             if (options?.search) {
                 const sanitized = options.search.replace(/[%_\\]/g, '\\$&');
                 query = query.or(`title.ilike.%${sanitized}%,description.ilike.%${sanitized}%`);
+            }
+
+            // Price Filters
+            if (options?.minPrice !== undefined) query = query.gte('price', options.minPrice);
+            if (options?.maxPrice !== undefined) query = query.lte('price', options.maxPrice);
+
+            // Size Filters (Array overlap)
+            if (options?.sizes && options.sizes.length > 0) {
+                query = query.overlaps('available_sizes', options.sizes);
             }
 
             const orderBy = options?.orderBy || 'created_at';
@@ -118,56 +136,48 @@ export const ProductService = {
         { tags: ['products'], revalidate: 3600 }
     ),
 
-    getProductBySlug: unstable_cache(
-        async (slug: string): Promise<Product> => {
-            const supabase = createStaticClient();
+    async getProductBySlug(slug: string, options: { includeStock?: boolean } = { includeStock: false }): Promise<Product> {
+        // 1. Fetch static product data (Cached)
+        const getCachedProduct = unstable_cache(
+            async (s: string) => {
+                const supabase = createStaticClient();
+                const { data, error } = await supabase
+                    .from('products')
+                    .select(`
+                        *,
+                        collection:collections(id, title, slug),
+                        variants:product_variants(*),
+                        options:product_options(*)
+                    `)
+                    .eq('slug', s)
+                    .maybeSingle();
 
-            // Optimized query: Fetch product and minimal relation data
-            const { data, error } = await supabase
-                .from('products')
-                .select(`
-            *,
-            collection:collections(id, title, slug),
-            variants:product_variants(*),
-            options:product_options(*)
-          `)
-                .eq('slug', slug)
-                .maybeSingle();
+                if (error) throw new AppError(error.message, 'DB_ERROR', 500);
+                if (!data) return null;
+                return data;
+            },
+            ['product-base-by-slug'],
+            { tags: ['products'], revalidate: 3600 }
+        );
 
-            if (error) {
-                throw new AppError(error.message, 'DB_ERROR', 500);
-            }
-            if (!data) throw AppError.notFound(`Product with slug "${slug}" not found`);
+        const productData = await getCachedProduct(slug);
+        if (!productData) throw AppError.notFound(`Product with slug "${slug}" not found`);
 
-            // Fetch inventory levels for all variants
-            if (data.variants && data.variants.length > 0) {
-                const variantIds = data.variants.map((v: any) => v.id);
-                const { data: inventory } = await supabase
-                    .from('inventory_levels')
-                    .select('variant_id, available')
-                    .in('variant_id', variantIds);
 
-                // Map inventory to variants
-                if (inventory) {
-                    const inventoryMap: Record<string, number> = {};
-                    for (const inv of inventory) {
-                        inventoryMap[inv.variant_id] = (inventoryMap[inv.variant_id] || 0) + (inv.available || 0);
-                    }
-                    data.variants = data.variants.map((v: any) => ({
-                        ...v,
-                        inventory_quantity: inventoryMap[v.id] || 0
-                    }));
-                }
-            }
 
-            return data as Product;
-        },
-        ['product-by-slug'],
-        { tags: ['products'], revalidate: 3600 } // Dynamic tags are not directly supported in options object of unstable_cache wrapper easily without helper, but we can rely on 'products' tag for now as we invalidate 'products' globally on update.
-        // Actually, unstable_cache key parts (2nd arg) distinguish the calls.
-        // For tags, we can't easily make them dynamic based on arguments in this signature structure without a wrapper function.
-        // But 'products' tag is sufficient for now since we invalidate 'products' on any change.
-    ),
+        // 2. Fetch fresh inventory (Live) via Centralized Service (OPTIONAL)
+        if (options.includeStock && productData.variants && productData.variants.length > 0) {
+            const variantIds = productData.variants.map((v: any) => v.id);
+            const inventoryMap = await InventoryService.getVariantsStock(variantIds);
+
+            productData.variants = productData.variants.map((v: any) => ({
+                ...v,
+                inventory_quantity: inventoryMap[v.id] || 0
+            }));
+        }
+
+        return productData as Product;
+    },
 
     async deleteProduct(id: string): Promise<void> {
         const supabase = await createAdminClient();

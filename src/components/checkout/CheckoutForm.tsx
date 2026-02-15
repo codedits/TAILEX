@@ -43,22 +43,25 @@ export default function CheckoutForm({ user }: CheckoutFormProps) {
 
         // Pre-validate Stock
         try {
-            for (const item of orderItems) {
-                if (item.variant_id) {
-                    const stock = await checkVariantStock(item.variant_id, item.quantity);
-                    if (!stock.isAvailable) {
-                        toast.error("Stock Issue", {
-                            description: `Item with variant ID ${item.variant_id} has only ${stock.available} left.`
-                        });
-                        setIsProcessing(false);
-                        return;
-                    }
-                }
+            const validationItems = orderItems.map(item => ({
+                id: item.product_id, // Use product ID or unique item ref
+                variantId: item.variant_id,
+                quantity: item.quantity
+            }));
+
+            // Check all items at once
+            const { isValid, errors } = await import("@/actions/stock").then(mod => mod.validateCart(validationItems));
+
+            if (!isValid) {
+                const firstError = errors[0];
+                toast.error("Stock Issue", {
+                    description: `Item ${firstError.itemId} issue: ${firstError.message}. Available: ${firstError.available}`
+                });
+                setIsProcessing(false);
+                return;
             }
         } catch (e) {
             console.error("Stock pre-validation failed", e);
-            // Proceed? Or block? 
-            // Let's block to be safe.
             toast.error("System Error", {
                 description: "Failed to validate stock. Please try again."
             });

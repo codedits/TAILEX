@@ -33,6 +33,9 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+// ... imports
+import { validateCart } from "@/actions/stock";
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -48,44 +51,43 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setItems(parsedItems);
 
         // Defer non-critical validation to after LCP (3 seconds)
-        // This prevents main-thread blocking during initial render
+        // Checks strictly against server stock
         if (parsedItems.length > 0) {
-          const timeoutId = setTimeout(() => {
-            validateCartItems(parsedItems).then((result) => {
-              // Always update items to ensure prices are fresh, even if stock is fine
-              if (result.items.length > 0 || (parsedItems.length > 0 && result.items.length === 0)) {
-                const mappedItems = result.items.map((vi: CartValidationItem) => ({
-                  id: vi.id,
-                  productId: vi.productId,
-                  variantId: vi.variantId,
-                  name: vi.name,
-                  price: vi.currentPrice,
-                  image: vi.image,
-                  quantity: vi.quantity,
-                  size: vi.size,
-                  color: vi.color,
-                  slug: vi.slug
-                }));
+          const timeoutId = setTimeout(async () => {
+            // Validate against stock
+            const validationParams = parsedItems.map(i => ({
+              id: i.id,
+              variantId: i.variantId, // Ensure mapped correctly
+              quantity: i.quantity
+            }));
 
-                const currentJson = JSON.stringify(parsedItems);
-                const newJson = JSON.stringify(mappedItems);
+            const { isValid, errors } = await validateCart(validationParams);
 
-                if (currentJson !== newJson) {
-                  setItems(mappedItems);
-
-                  if (result.errors.length > 0) {
-                    toast.error("Cart Updated", {
-                      description: "Some items were sold out or changed price and have been updated."
-                    });
-                  } else if (result.items.length !== parsedItems.length) {
-                    toast.error("Cart Updated", {
-                      description: "Some unavailable items were removed."
-                    });
+            if (!isValid) {
+              // Adjust quantities or remove items
+              let toastMessage = "";
+              const updatedItems = parsedItems.map(item => {
+                const error = errors.find(e => e.itemId === item.id);
+                if (error) {
+                  if (error.available === 0) {
+                    toastMessage += `${item.name} is now out of stock. `;
+                    return null; // Remove
+                  } else {
+                    toastMessage += `${item.name} quantity adjusted to ${error.available}. `;
+                    return { ...item, quantity: error.available };
                   }
                 }
+                return item;
+              }).filter(Boolean) as CartItem[];
+
+              setItems(updatedItems);
+              if (toastMessage) {
+                toast.error("Cart Adjusted", { description: toastMessage });
               }
-            }).catch(console.error);
-          }, 3000); // Wait 3 seconds after mount to validate prices/stock
+            }
+
+            // Also re-validate prices if needed via separate API, but stock is priority here.
+          }, 3000);
 
           return () => clearTimeout(timeoutId);
         }
@@ -102,9 +104,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [items, isMounted]);
 
   const addItem = useCallback(async (newItem: Omit<CartItem, "quantity">, openCart: boolean = true) => {
-    // Optimistic check? No, let's be safe.
-    // Ideally we should know the current quantity in cart to check (current + 1)
-
     const currentItem = items.find(
       (item) => item.id === newItem.id && item.size === newItem.size && item.color === newItem.color
     );
@@ -112,12 +111,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const nextQty = currentQty + 1;
 
     try {
-      // We only check if variantId is present. Simple products might not have variantId in cart item if logic differs,
-      // but our unified logic uses variantId for everything now? 
-      // Logic audit said simple products don't have variants? 
-      // Wait, if no variantId, we can't check inventory_levels easily unless we map product_id -> variant_id?
-      // Let's assume variantId is always present for now as per "Standardize Backend" task. 
-
       if (newItem.variantId) {
         const stock = await checkVariantStock(newItem.variantId, nextQty);
 
@@ -130,12 +123,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (e) {
       console.error("Stock check failed", e);
-      // Fallback: allow add, let checkout validate? Or block?
-      // Let's allow for now to not block if network fails, but log it.
     }
 
     setItems((prevItems) => {
-      // Check for exact match including variants
       const existingItem = prevItems.find(
         (item) => item.id === newItem.id && item.size === newItem.size && item.color === newItem.color
       );
@@ -165,17 +155,35 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     );
   }, []);
 
-  const updateQuantity = useCallback((id: string, size: string | undefined, quantity: number) => {
+  const updateQuantity = useCallback(async (id: string, size: string | undefined, quantity: number) => {
     if (quantity < 1) {
       removeItem(id, size);
       return;
     }
+
+    // New: Check stock before increasing
+    const currentItem = items.find(i => i.id === id && i.size === size);
+    if (currentItem && quantity > currentItem.quantity) {
+      // Increasing
+      if (currentItem.variantId) {
+        try {
+          const stock = await checkVariantStock(currentItem.variantId, quantity);
+          if (!stock.isAvailable) {
+            toast.error("Limit Reached", {
+              description: `Only ${stock.available} available in stock.`
+            });
+            return; // Do not update
+          }
+        } catch (e) { console.error(e); }
+      }
+    }
+
     setItems((prevItems) =>
       prevItems.map((item) =>
         item.id === id && item.size === size ? { ...item, quantity } : item
       )
     );
-  }, [removeItem]);
+  }, [removeItem, items]);
 
   const clearCart = useCallback(() => {
     setItems([]);
