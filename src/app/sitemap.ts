@@ -11,6 +11,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .select('slug, updated_at')
     .eq('status', 'active');
 
+  // Fetch all active collections
+  const { data: collections } = await supabase
+    .from('collections')
+    .select('slug, updated_at')
+    .eq('is_visible', true);
+
+  const collectionEntries: MetadataRoute.Sitemap = (collections || []).map((collection) => ({
+    url: `${baseUrl}/collection/${collection.slug}`,
+    lastModified: new Date(collection.updated_at || new Date()),
+    changeFrequency: 'weekly',
+    priority: 0.8,
+  }));
+
   const productEntries: MetadataRoute.Sitemap = (products || []).map((product) => ({
     url: `${baseUrl}/product/${product.slug}`,
     lastModified: new Date(product.updated_at),
@@ -26,13 +39,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
     {
-      url: `${baseUrl}/collection`,
+      url: `${baseUrl}/shop`,
       lastModified: new Date(),
       changeFrequency: 'daily',
-      priority: 0.8,
+      priority: 0.9,
     },
     {
-      url: `${baseUrl}/product`,
+      url: `${baseUrl}/collection`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.8,
@@ -51,5 +64,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  return [...staticEntries, ...productEntries];
+  return [...staticEntries, ...collectionEntries, ...productEntries];
 }
