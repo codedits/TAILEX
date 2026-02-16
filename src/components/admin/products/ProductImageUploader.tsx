@@ -97,9 +97,10 @@ function SortableImageTile({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const isUploading = image.status === 'uploading' || image.status === 'pending';
+  const isUploading = image.status === 'uploading';
   const isError = image.status === 'error';
   const isSuccess = image.status === 'success';
+  const isPending = image.status === 'pending'; // New constant for cleanliness
 
   return (
     <div
@@ -112,7 +113,8 @@ function SortableImageTile({
         isError && 'border-red-300 bg-red-50',
         isSuccess && 'border-border',
         isUploading && 'border-blue-200',
-        !isError && !isUploading && 'border-border',
+        isPending && 'border-amber-200 bg-amber-50/30',
+        !isError && !isUploading && !isPending && 'border-border',
       )}
       {...attributes}
       {...listeners}
@@ -161,6 +163,15 @@ function SortableImageTile({
         </div>
       )}
 
+      {/* Pending (Ready to upload) overlay */}
+      {isPending && !isUploading && (
+        <div className="absolute top-2.5 left-2.5 z-20">
+          <span className="text-[10px] font-bold uppercase tracking-widest bg-amber-500 text-white px-2 py-0.5 rounded-md shadow-sm">
+            Pending
+          </span>
+        </div>
+      )}
+
       {/* Error overlay */}
       {isError && (
         <div className="absolute inset-0 bg-red-50/90 backdrop-blur-[2px] flex flex-col items-center justify-center z-10 p-3 pointer-events-none">
@@ -179,7 +190,7 @@ function SortableImageTile({
       )}
 
       {/* Action buttons */}
-      <div 
+      <div
         className={cn(
           'absolute top-2.5 right-2.5 flex flex-col gap-2 z-20',
           'opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity',
@@ -188,7 +199,7 @@ function SortableImageTile({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Zoom button (desktop) */}
-        {isSuccess && (
+        {(isSuccess || isPending) && (
           <button
             type="button"
             onClick={() => onZoom(image.previewUrl)}
@@ -200,7 +211,7 @@ function SortableImageTile({
         )}
 
         {/* Crop button */}
-        {(isSuccess || image.isExisting) && (
+        {(isSuccess || image.isExisting || isPending) && (
           <button
             type="button"
             onClick={() => onCrop(image.id, image.previewUrl)}
@@ -397,6 +408,16 @@ export function ProductImageUploader({
             <Loader2 className="w-4 h-4 animate-spin" />
             <span>
               Uploading {upload.uploadingCount} image{upload.uploadingCount > 1 ? 's' : ''}...
+            </span>
+          </div>
+        )}
+
+        {/* Pending status summary */}
+        {!upload.isUploading && upload.images.some(img => img.status === 'pending') && (
+          <div className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+            <AlertCircle className="w-4 h-4" />
+            <span>
+              {upload.images.filter(img => img.status === 'pending').length} image(s) ready to upload. Save product to start.
             </span>
           </div>
         )}

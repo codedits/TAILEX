@@ -11,6 +11,7 @@
  * - Memory safety: no raw buffers in state, all blob URLs revoked
  * - Batch cleanup on unmount
  * - Support for existing images (edit mode)
+ * - Option to defer upload (autoUpload: false)
  */
 
 'use client';
@@ -43,6 +44,8 @@ export interface UseImageUploadOptions {
   }>;
   /** Callback when validation errors occur */
   onValidationError?: (errors: string[]) => void;
+  /** Whether to upload immediately upon selection (default: true) */
+  autoUpload?: boolean;
 }
 
 export interface UseImageUploadReturn {
@@ -60,6 +63,8 @@ export interface UseImageUploadReturn {
   getUploadedUrls: () => string[];
   /** Get blur data URL map { remoteUrl: blurDataUrl } */
   getBlurDataUrls: () => Record<string, string>;
+  /** Manually trigger upload for all pending images. Returns promised map of IDs to remote URLs. */
+  startUpload: () => Promise<void>;
   /** Whether all images are done uploading (no pending/uploading) */
   isAllUploaded: boolean;
   /** Whether any image is currently uploading */
@@ -83,6 +88,7 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
     maxConcurrent = 3,
     initialImages = [],
     onValidationError,
+    autoUpload = true,
   } = options;
 
   // Core state: all images (existing + new)
@@ -116,6 +122,40 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
     setImages(prev => prev.map(img => img.id === id ? { ...img, ...updates } : img));
   }, []);
 
+  // ─── Enqueue Helper ───────────────────────────────────────────────────
+
+  const enqueueUpload = useCallback((image: UploadedImage) => {
+    queueRef.current.enqueue({
+      image,
+      onProgress: (id, progress) => {
+        updateImage(id, { progress });
+      },
+      onSuccess: (id, result: UploadResult) => {
+        updateImage(id, {
+          remoteUrl: result.url,
+          blurDataUrl: result.blurDataUrl,
+          progress: 100,
+          status: 'success',
+          error: null,
+          _file: null, // Release file reference
+          _abortController: null,
+        });
+      },
+      onError: (id, error) => {
+        updateImage(id, {
+          status: 'error',
+          error,
+          _file: null,
+          _abortController: null,
+        });
+      },
+      onStatusChange: (id, status) => {
+        updateImage(id, { status });
+      },
+    });
+  }, [updateImage]);
+
+
   // ─── Add files ────────────────────────────────────────────────────────
 
   const addFiles = useCallback((filesInput: FileList | File[]) => {
@@ -148,38 +188,13 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
 
     setImages(prev => [...prev, ...newImages]);
 
-    // Enqueue uploads
-    for (const image of newImages) {
-      queueRef.current.enqueue({
-        image,
-        onProgress: (id, progress) => {
-          updateImage(id, { progress });
-        },
-        onSuccess: (id, result: UploadResult) => {
-          updateImage(id, {
-            remoteUrl: result.url,
-            blurDataUrl: result.blurDataUrl,
-            progress: 100,
-            status: 'success',
-            error: null,
-            _file: null, // Release file reference
-            _abortController: null,
-          });
-        },
-        onError: (id, error) => {
-          updateImage(id, {
-            status: 'error',
-            error,
-            _file: null,
-            _abortController: null,
-          });
-        },
-        onStatusChange: (id, status) => {
-          updateImage(id, { status });
-        },
-      });
+    // Enqueue uploads IMMEDIATELLY if autoUpload is true
+    if (autoUpload) {
+      for (const image of newImages) {
+        enqueueUpload(image);
+      }
     }
-  }, [maxImages, maxFileSize, onValidationError, updateImage]);
+  }, [maxImages, maxFileSize, onValidationError, autoUpload, enqueueUpload]);
 
   // ─── Remove image ─────────────────────────────────────────────────────
 
@@ -235,8 +250,10 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
     revokePreviewUrl(image.previewUrl);
 
     // Delete old remote if uploaded (fire and forget)
+    // IMPORTANT: Even if autoUpload is FALSE, we might have uploaded a previous version? 
+    // Yes, if user clicked 'Upload', then cropped again.
     if (image.remoteUrl && !image.isExisting) {
-      deleteUploadedImage(image.remoteUrl).catch(() => {});
+      deleteUploadedImage(image.remoteUrl).catch(() => { });
     }
 
     const newPreviewUrl = createPreviewUrl(file);
@@ -256,7 +273,6 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
       _abortController: null,
     });
 
-    // Re-fetch the updated image for the queue
     const updatedImage: UploadedImage = {
       ...image,
       id,
@@ -273,33 +289,44 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
       _abortController: null,
     };
 
-    queueRef.current.enqueue({
-      image: updatedImage,
-      onProgress: (imgId, progress) => updateImage(imgId, { progress }),
-      onSuccess: (imgId, result: UploadResult) => {
-        updateImage(imgId, {
-          remoteUrl: result.url,
-          blurDataUrl: result.blurDataUrl,
-          progress: 100,
-          status: 'success',
-          error: null,
-          _file: null,
-          _abortController: null,
-        });
-      },
-      onError: (imgId, error) => {
-        updateImage(imgId, {
-          status: 'error',
-          error,
-          _file: null,
-          _abortController: null,
-        });
-      },
-      onStatusChange: (imgId, status) => {
-        updateImage(imgId, { status });
-      },
+    if (autoUpload) {
+      enqueueUpload(updatedImage);
+    }
+
+  }, [updateImage, autoUpload, enqueueUpload]);
+
+
+  // ─── Start Manual Upload ──────────────────────────────────────────────
+
+  const startUpload = useCallback(async () => {
+    const pendingImages = imagesRef.current.filter(img => img.status === 'pending' || img.status === 'error');
+
+    if (pendingImages.length === 0) return;
+
+    // Enqueue all pending images
+    for (const img of pendingImages) {
+      // Reset error state if retrying
+      if (img.status === 'error') {
+        updateImage(img.id, { status: 'pending', error: null, progress: 0 });
+      }
+      enqueueUpload(img);
+    }
+
+    // Wait for all to finish
+    // We can poll checking if any are still pending/uploading
+    return new Promise<void>((resolve) => {
+      const checkInterval = setInterval(() => {
+        const currentImages = imagesRef.current;
+        const isStillUploading = currentImages.some(img => img.status === 'pending' || img.status === 'uploading');
+        if (!isStillUploading) {
+          clearInterval(checkInterval);
+          resolve();
+        }
+      }, 500);
     });
-  }, [updateImage]);
+
+  }, [enqueueUpload, updateImage]);
+
 
   // ─── Getters ──────────────────────────────────────────────────────────
 
@@ -321,11 +348,19 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
 
   // ─── Computed state ───────────────────────────────────────────────────
 
-  const isUploading = images.some(img => img.status === 'uploading' || img.status === 'pending');
+  const isUploading = images.some(img => img.status === 'uploading' || (autoUpload && img.status === 'pending'));
+  // Note: if autoUpload=false, 'pending' just means sitting there, not actively uploading.
+  // So 'isUploading' strictly means ACTIVE network activity?
+  // Let's make 'isUploading' true ONLY if status is 'uploading'. 
+  // But wait, the queue sets status to 'uploading' when it picks it up. 
+  // 'pending' in queue means waiting for slot.
+  const activeUploads = images.some(img => img.status === 'uploading');
+
   const isAllUploaded = images.length > 0 && images.every(
     img => img.status === 'success' || img.status === 'error' || img.status === 'cancelled'
   );
-  const uploadingCount = images.filter(img => img.status === 'uploading' || img.status === 'pending').length;
+
+  const uploadingCount = images.filter(img => img.status === 'uploading' || (autoUpload && img.status === 'pending')).length;
   const successCount = images.filter(img => img.status === 'success').length;
 
   // ─── Cleanup ──────────────────────────────────────────────────────────
@@ -378,8 +413,9 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
     replaceImage,
     getUploadedUrls,
     getBlurDataUrls,
+    startUpload,
     isAllUploaded,
-    isUploading,
+    isUploading: activeUploads, // Only true if actually uploading
     uploadingCount,
     cleanup,
     cleanupOrphans,

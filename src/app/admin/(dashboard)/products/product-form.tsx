@@ -54,6 +54,7 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
     onValidationError: (errors) => {
       errors.forEach(err => toast.error(err));
     },
+    autoUpload: false, // Wait for save
   });
 
   // Variant configuration state
@@ -99,16 +100,32 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
 
   // ─── Submit Handler ───────────────────────────────────────────────────
   async function onSubmit(data: ProductFormValues) {
-    // Block submission if images are still uploading
+    // 1. Trigger Image Uploads
+    // Check if we have pending images
+    const pendingImages = upload.images.filter(img => img.status === 'pending');
+    if (pendingImages.length > 0) {
+      toast.info(`Uploading ${pendingImages.length} new images...`);
+      try {
+        await upload.startUpload();
+      } catch (err: any) {
+        toast.error("Image upload failed", { description: err.message || "Please try again" });
+        return;
+      }
+    }
+
+    // 2. Block submission if images are still uploading (double check)
+    // startUpload() awaits completion, but just in case
     if (upload.isUploading) {
       toast.error("Please wait for all images to finish uploading");
       return;
     }
 
-    // Check for failed uploads
+    // 3. Check for failed uploads
     const failedImages = upload.images.filter(img => img.status === 'error');
     if (failedImages.length > 0) {
-      toast.error(`${failedImages.length} image(s) failed to upload. Remove them or retry.`);
+      toast.error(`${failedImages.length} image(s) failed to upload.`, {
+        description: "Please remove failed images or try again."
+      });
       return;
     }
 
