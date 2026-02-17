@@ -118,6 +118,11 @@ export function CollectionForm({ initialData }: { initialData?: any }) {
 
                 <div className="space-y-6">
                     <div className="space-y-2">
+                        <Label className="text-gray-500 text-xs font-medium uppercase tracking-widest pl-1">Sort Order (Lower comes first)</Label>
+                        <Input name="sort_order" type="number" defaultValue={initialData?.sort_order ?? 0} className="bg-white border-border rounded-xl py-6 h-12 text-gray-900" />
+                    </div>
+
+                    <div className="space-y-2">
                         <Label className="text-gray-500 text-xs font-medium uppercase tracking-widest pl-1">Description</Label>
                         <Textarea name="description" className="min-h-[150px] bg-white border-border rounded-xl resize-none p-4 text-gray-900" defaultValue={initialData?.description} />
                     </div>

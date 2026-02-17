@@ -71,67 +71,87 @@ function normalizeProductPayload(data: ProductInput) {
     } as Partial<Product>;
 }
 
+const fetchProducts = async (options?: {
+    status?: 'active' | 'draft' | 'archived';
+    categoryId?: string;
+    featured?: boolean;
+    limit?: number;
+    offset?: number;
+    search?: string;
+    orderBy?: 'created_at' | 'price' | 'title';
+    order?: 'asc' | 'desc';
+    minPrice?: number;
+    maxPrice?: number;
+    sizes?: string[];
+}) => {
+    // Normalize inputs for Consistent Cache Keys
+    if (options?.sizes) {
+        options.sizes.sort();
+    }
+
+    const supabase = createStaticClient();
+
+    let query = supabase.from('products').select('*', { count: 'exact' });
+
+    if (options?.status) query = query.eq('status', options.status);
+    if (options?.categoryId) query = query.eq('category_id', options.categoryId);
+    if (options?.featured !== undefined) query = query.eq('is_featured', options.featured);
+    if (options?.search) {
+        const sanitized = options.search.replace(/[%_\\]/g, '\\$&');
+        query = query.or(`title.ilike.%${sanitized}%,description.ilike.%${sanitized}%`);
+    }
+
+    // Price Filters
+    if (options?.minPrice !== undefined) query = query.gte('price', options.minPrice);
+    if (options?.maxPrice !== undefined) query = query.lte('price', options.maxPrice);
+
+    // Size Filters (Array overlap)
+    if (options?.sizes && options.sizes.length > 0) {
+        query = query.overlaps('available_sizes', options.sizes);
+    }
+
+    const orderBy = options?.orderBy || 'created_at';
+    const order = options?.order || 'desc';
+    query = query.order(orderBy, { ascending: order === 'asc' });
+
+    const limit = options?.limit || 20;
+    const offset = options?.offset || 0;
+    query = query.range(offset, offset + limit - 1);
+
+    const { data, error, count } = await query;
+
+    if (error) throw new AppError(error.message, 'DB_ERROR', 500);
+
+    return {
+        data: data as Product[],
+        total: count || 0,
+        page: Math.floor(offset / limit) + 1,
+        pageSize: limit,
+        totalPages: Math.ceil((count || 0) / limit),
+    };
+};
+
+const fetchProductBySlug = async (slug: string) => {
+    const supabase = createStaticClient();
+    const { data, error } = await supabase
+        .from('products')
+        .select(`
+            *,
+            collection:collections(id, title, slug),
+            variants:product_variants(*),
+            options:product_options(*)
+        `)
+        .eq('slug', slug)
+        .maybeSingle();
+
+    if (error) throw new AppError(error.message, 'DB_ERROR', 500);
+    if (!data) return null;
+    return data;
+};
+
 export const ProductService = {
     getProducts: unstable_cache(
-        async (options?: {
-            status?: 'active' | 'draft' | 'archived';
-            categoryId?: string;
-            featured?: boolean;
-            limit?: number;
-            offset?: number;
-            search?: string;
-            orderBy?: 'created_at' | 'price' | 'title';
-            order?: 'asc' | 'desc';
-            minPrice?: number;
-            maxPrice?: number;
-            sizes?: string[];
-        }): Promise<PaginatedResponse<Product>> => {
-            // Normalize inputs for Consistent Cache Keys
-            if (options?.sizes) {
-                options.sizes.sort();
-            }
-
-            const supabase = createStaticClient();
-
-            let query = supabase.from('products').select('*', { count: 'exact' });
-
-            if (options?.status) query = query.eq('status', options.status);
-            if (options?.categoryId) query = query.eq('category_id', options.categoryId);
-            if (options?.featured !== undefined) query = query.eq('is_featured', options.featured);
-            if (options?.search) {
-                const sanitized = options.search.replace(/[%_\\]/g, '\\$&');
-                query = query.or(`title.ilike.%${sanitized}%,description.ilike.%${sanitized}%`);
-            }
-
-            // Price Filters
-            if (options?.minPrice !== undefined) query = query.gte('price', options.minPrice);
-            if (options?.maxPrice !== undefined) query = query.lte('price', options.maxPrice);
-
-            // Size Filters (Array overlap)
-            if (options?.sizes && options.sizes.length > 0) {
-                query = query.overlaps('available_sizes', options.sizes);
-            }
-
-            const orderBy = options?.orderBy || 'created_at';
-            const order = options?.order || 'desc';
-            query = query.order(orderBy, { ascending: order === 'asc' });
-
-            const limit = options?.limit || 20;
-            const offset = options?.offset || 0;
-            query = query.range(offset, offset + limit - 1);
-
-            const { data, error, count } = await query;
-
-            if (error) throw new AppError(error.message, 'DB_ERROR', 500);
-
-            return {
-                data: data as Product[],
-                total: count || 0,
-                page: Math.floor(offset / limit) + 1,
-                pageSize: limit,
-                totalPages: Math.ceil((count || 0) / limit),
-            };
-        },
+        fetchProducts,
         ['products-list'],
         { tags: ['products'], revalidate: 3600 }
     ),
@@ -139,23 +159,7 @@ export const ProductService = {
     async getProductBySlug(slug: string, options: { includeStock?: boolean } = { includeStock: false }): Promise<Product> {
         // 1. Fetch static product data (Cached)
         const getCachedProduct = unstable_cache(
-            async (s: string) => {
-                const supabase = createStaticClient();
-                const { data, error } = await supabase
-                    .from('products')
-                    .select(`
-                        *,
-                        collection:collections(id, title, slug),
-                        variants:product_variants(*),
-                        options:product_options(*)
-                    `)
-                    .eq('slug', s)
-                    .maybeSingle();
-
-                if (error) throw new AppError(error.message, 'DB_ERROR', 500);
-                if (!data) return null;
-                return data;
-            },
+            fetchProductBySlug,
             ['product-base-by-slug'],
             { tags: ['products'], revalidate: 3600 }
         );

@@ -141,18 +141,19 @@ export async function createCollection(formData: FormData): Promise<ApiResponse<
     }
 
     // Handle image uploads
-    const imageFile = formData.get('imageFile') as File
-    let imageUrl: string | null = null
-    let blurDataURL: string | null = null
+    const imageFile = formData.get('imageFile') as File;
+    let imageUrl: string | null = null;
+    let blurDataURL: string | null = null;
+    const sortOrder = parseInt(formData.get('sort_order') as string) || 0;
 
     if (imageFile && imageFile.size > 0) {
       try {
-        const result = await uploadImage(imageFile)
-        imageUrl = result.url
-        blurDataURL = result.blurDataURL
+        const result = await uploadImage(imageFile);
+        imageUrl = result.url;
+        blurDataURL = result.blurDataURL;
       } catch (error) {
-        console.error('Image upload error:', error)
-        return { error: 'Primary image upload failed' }
+        console.error('Image upload error:', error);
+        return { error: 'Primary image upload failed' };
       }
     }
 
@@ -164,12 +165,13 @@ export async function createCollection(formData: FormData): Promise<ApiResponse<
         description: description?.trim() || null,
         image_url: imageUrl,
         is_visible: isVisible,
+        sort_order: sortOrder,
         metadata: blurDataURL && imageUrl ? { blurDataUrls: { [imageUrl]: blurDataURL } } : undefined,
         seo_title: seoTitle?.trim() || null,
         seo_description: seoDescription?.trim() || null,
       })
       .select()
-      .single()
+      .single();
 
     if (error) {
       console.error('Database error:', error)
@@ -231,20 +233,21 @@ export async function updateCollection(formData: FormData): Promise<ApiResponse<
     }
 
     // Handle image uploads
-    const imageFile = formData.get('imageFile') as File
+    const imageFile = formData.get('imageFile') as File;
+    const sortOrder = parseInt(formData.get('sort_order') as string) || 0;
 
-    let imageUrl: string | null = existingImage || null
-    let oldImageUrl: string | null = null
-    let blurDataURL: string | null = null
+    let imageUrl: string | null = existingImage || null;
+    let oldImageUrl: string | null = null;
+    let blurDataURL: string | null = null;
 
     if (imageFile && imageFile.size > 0) {
       try {
-        oldImageUrl = existingImage || null
-        const result = await uploadImage(imageFile)
-        imageUrl = result.url
-        blurDataURL = result.blurDataURL
+        oldImageUrl = existingImage || null;
+        const result = await uploadImage(imageFile);
+        imageUrl = result.url;
+        blurDataURL = result.blurDataURL;
       } catch (error) {
-        return { error: 'Primary image upload failed' }
+        return { error: 'Primary image upload failed' };
       }
     }
 
@@ -254,13 +257,14 @@ export async function updateCollection(formData: FormData): Promise<ApiResponse<
       description: description?.trim() || null,
       image_url: imageUrl,
       is_visible: isVisible,
+      sort_order: sortOrder,
       seo_title: seoTitle?.trim() || null,
       seo_description: seoDescription?.trim() || null,
-    }
+    };
 
     // Store blur in metadata if we uploaded a new image
     if (blurDataURL && imageUrl) {
-      updatePayload.metadata = { blurDataUrls: { [imageUrl]: blurDataURL } }
+      updatePayload.metadata = { blurDataUrls: { [imageUrl]: blurDataURL } };
     }
 
     const { data, error } = await supabase

@@ -101,7 +101,7 @@ const HeroSection = ({
 
       {/* Content Container - CSS Animated for zero hydration cost */}
       <div className={`relative flex flex-col items-center justify-center w-full px-6 md:px-10 z-10 text-center h-[100vh] max-w-[1920px] mx-auto ${isLoaded ? 'is-visible' : ''}`}>
-        <div className="flex flex-col items-center justify-center space-y-8">
+        <div className="flex flex-col items-center justify-center space-y-2">
           <p className="hero-subtext text-white/90 text-[10px] md:text-xs tracking-[0.2em] uppercase font-bold">
             {subheading || "SPRING/SUMMER '26"}
           </p>
@@ -113,7 +113,7 @@ const HeroSection = ({
           <div className="hero-cta pt-4">
             <Link
               href={ctaLink || "/shop"}
-              className="inline-block px-8 py-3 rounded-full border border-white/50 text-white text-[10px] md:text-xs font-semibold tracking-[0.15em] hover:bg-white hover:text-black transition-all duration-300 uppercase"
+              className="inline-block px-6 py-2 rounded-full bg-white text-black md:bg-transparent  md:text-white border border-white/50 text-[9px] md:text-xs font-semibold tracking-[0.15em] hover:bg-white hover:text-black transition-all duration-300 uppercase"
             >
               {ctaText || "Shop Now"}
             </Link>
