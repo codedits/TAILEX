@@ -5,10 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { updateSiteConfig } from "./actions";
-import { useTransition, useState } from "react";
+import { useTransition } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
-import { Upload, X } from "lucide-react";
+import { Upload, X, Loader2 } from "lucide-react";
+import { useImageUpload } from "@/hooks/use-image-upload";
 
 type SettingsFormProps = {
   hero: Record<string, any>;
@@ -18,20 +19,36 @@ type SettingsFormProps = {
 
 export function SettingsForm({ hero, theme, brand }: SettingsFormProps) {
   const [isPending, startTransition] = useTransition();
-  const [heroPreview, setHeroPreview] = useState<string | null>(hero.image || null);
-  const [heroFile, setHeroFile] = useState<File | null>(null);
+
+  // ─── Image Upload System ──────────────────────────────────────────────
+  const initialImages = hero.image ? [{ url: hero.image, blurDataUrl: hero.blurDataURL }] : [];
+
+  const upload = useImageUpload({
+    maxImages: 1,
+    maxFileSize: 10 * 1024 * 1024,
+    maxConcurrent: 1,
+    initialImages,
+    autoUpload: false, // Wait for save
+  });
 
   const handleHeroImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setHeroFile(file);
-      setHeroPreview(URL.createObjectURL(file));
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      // Clear existing first to ensure single image
+      if (upload.images.length > 0) {
+        const currentId = upload.images[0].id;
+        upload.removeImage(currentId);
+      }
+      upload.addFiles(files);
     }
+    // Reset input
+    e.target.value = '';
   };
 
   const clearHeroImage = () => {
-    setHeroFile(null);
-    setHeroPreview(null);
+    if (upload.images.length > 0) {
+      upload.removeImage(upload.images[0].id);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -39,14 +56,45 @@ export function SettingsForm({ hero, theme, brand }: SettingsFormProps) {
     const formData = new FormData(e.currentTarget);
     const toastId = toast.loading('Saving settings...');
 
-    // Remove the file input and add the actual file if exists
-    formData.delete('heroImageFile');
-    if (heroFile) {
-      formData.append('heroImageFile', heroFile);
+    // 1. Trigger Uploads
+    // Check if there are pending images
+    const pendingImages = upload.images.filter(img => img.status === 'pending');
+    if (pendingImages.length > 0) {
+      try {
+        toast.loading('Uploading hero image...', { id: toastId });
+        await upload.startUpload();
+      } catch (err) {
+        toast.error('Image upload failed', { id: toastId });
+        return;
+      }
     }
 
-    // Add existing image if no new file
-    formData.set('existingHeroImage', hero.image || '');
+    if (upload.isUploading) {
+      toast.error('Please wait for uploads to finish', { id: toastId });
+      return;
+    }
+
+    // 2. Get the URL
+    const currentImage = upload.images[0];
+    let heroImageUrl = '';
+    let heroBlurUrl = '';
+
+    if (currentImage && currentImage.status === 'success') {
+      // For existing images, remoteUrl might be set, or it might be just previewUrl (which is the remote url for existing)
+      // The hook sets remoteUrl = img.url for initialImages.
+      heroImageUrl = currentImage.remoteUrl || currentImage.previewUrl;
+      heroBlurUrl = currentImage.blurDataUrl || '';
+    } else if (currentImage && currentImage.isExisting) {
+      heroImageUrl = currentImage.previewUrl;
+      heroBlurUrl = currentImage.blurDataUrl || '';
+    }
+
+    formData.set('heroImage', heroImageUrl);
+    formData.set('heroBlurDataURL', heroBlurUrl);
+
+    // Remove the file input if it exists in formData
+    formData.delete('heroImageFile');
+
 
     startTransition(async () => {
       try {
@@ -63,6 +111,10 @@ export function SettingsForm({ hero, theme, brand }: SettingsFormProps) {
       }
     });
   };
+
+  // Helper to get preview
+  const heroPreview = upload.images.length > 0 ? upload.images[0].previewUrl : null;
+  const isUploading = upload.isUploading;
 
   return (
     <form onSubmit={handleSubmit}>
@@ -131,11 +183,17 @@ export function SettingsForm({ hero, theme, brand }: SettingsFormProps) {
                   >
                     <X className="w-4 h-4" />
                   </button>
+                  {isUploading && (
+                    <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center">
+                      <Loader2 className="w-8 h-8 animate-spin text-gray-900" />
+                    </div>
+                  )}
                 </div>
               )}
 
               <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-gray-400 transition-colors bg-gray-50 hover:bg-gray-100">
                 <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                <span className="text-sm text-gray-500">Drop image or click to upload</span>
                 <span className="text-sm text-gray-500">Drop image or click to upload</span>
                 <span className="text-[10px] text-gray-400 mt-1">PNG, JPG, WebP up to 10MB • Recommended: 1920x1080</span>
                 <input
@@ -171,7 +229,7 @@ export function SettingsForm({ hero, theme, brand }: SettingsFormProps) {
         <div className="flex justify-end pt-4">
           <Button
             type="submit"
-            disabled={isPending}
+            disabled={isPending || isUploading}
             className="bg-gray-900 text-white hover:bg-gray-800 rounded-full px-12 py-6 font-semibold transition-all shadow-xl disabled:opacity-50"
           >
             {isPending ? 'Saving...' : 'Save Preferences'}
@@ -181,4 +239,3 @@ export function SettingsForm({ hero, theme, brand }: SettingsFormProps) {
     </form>
   );
 }
-
