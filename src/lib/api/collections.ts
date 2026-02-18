@@ -123,7 +123,7 @@ export async function createCollection(formData: FormData): Promise<ApiResponse<
     revalidatePath('/collection');
     revalidatePath('/shop');
     revalidatePath('/');
-    (revalidateTag as any)('collections', 'max'); // Invalidate cached collections
+    (revalidateTag as any)('collections');
 
     return { data: data as Collection }
   } catch (error) {
@@ -219,7 +219,7 @@ export async function updateCollection(formData: FormData): Promise<ApiResponse<
     revalidatePath('/collection');
     revalidatePath('/shop');
     revalidatePath('/');
-    (revalidateTag as any)('collections', 'max'); // Invalidate cached collections
+    (revalidateTag as any)('collections');
 
     return { data: data as Collection }
   } catch (error) {
@@ -260,7 +260,7 @@ export async function deleteCollection(id: string): Promise<ApiResponse<null>> {
     revalidatePath('/collection');
     revalidatePath('/shop');
     revalidatePath('/');
-    (revalidateTag as any)('collections', 'max'); // Invalidate cached collections
+    (revalidateTag as any)('collections');
 
     return { message: 'Collection deleted successfully' }
   } catch (error) {

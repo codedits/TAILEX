@@ -19,7 +19,7 @@ import {
 import { Product } from "@/lib/types";
 import { Metadata } from "next";
 
-export const revalidate = 60; // Revalidate every minute
+export const revalidate = 3600; // Revalidate every hour
 
 // Pre-build all active product pages at deploy time (Shopify-style)
 export async function generateStaticParams() {

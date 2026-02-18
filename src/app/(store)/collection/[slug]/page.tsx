@@ -20,7 +20,7 @@ import {
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-export const revalidate = 120; // ISR: 2 minutes — collections change less frequently
+export const revalidate = 3600; // ISR: 1 hour — collections change less frequently
 
 // Pre-build all visible collection pages at deploy time
 // Pre-build all visible collection pages at deploy time

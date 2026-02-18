@@ -20,7 +20,7 @@ import {
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-export const revalidate = 120; // ISR: 2 minutes — cached shop listing
+export const revalidate = 3600; // ISR: 1 hour — cached shop listing
 
 export const metadata = {
     title: "Shop All | TAILEX",
