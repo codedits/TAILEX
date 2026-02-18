@@ -8,8 +8,10 @@ import { updateSiteConfig } from "./actions";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
-import { Upload, X, Loader2 } from "lucide-react";
+import { Upload, X, Loader2, AlertCircle, RefreshCw, Trash2, ImageIcon } from "lucide-react";
 import { useImageUpload } from "@/hooks/use-image-upload";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
 type SettingsFormProps = {
   hero: Record<string, any>;
@@ -34,14 +36,11 @@ export function SettingsForm({ hero, theme, brand }: SettingsFormProps) {
   const handleHeroImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      // Clear existing first to ensure single image
       if (upload.images.length > 0) {
-        const currentId = upload.images[0].id;
-        upload.removeImage(currentId);
+        upload.removeImage(upload.images[0].id);
       }
       upload.addFiles(files);
     }
-    // Reset input
     e.target.value = '';
   };
 
@@ -56,8 +55,6 @@ export function SettingsForm({ hero, theme, brand }: SettingsFormProps) {
     const formData = new FormData(e.currentTarget);
     const toastId = toast.loading('Saving settings...');
 
-    // 1. Trigger Uploads
-    // Check if there are pending images
     const pendingImages = upload.images.filter(img => img.status === 'pending');
     if (pendingImages.length > 0) {
       try {
@@ -80,8 +77,6 @@ export function SettingsForm({ hero, theme, brand }: SettingsFormProps) {
     let heroBlurUrl = '';
 
     if (currentImage && currentImage.status === 'success') {
-      // For existing images, remoteUrl might be set, or it might be just previewUrl (which is the remote url for existing)
-      // The hook sets remoteUrl = img.url for initialImages.
       heroImageUrl = currentImage.remoteUrl || currentImage.previewUrl;
       heroBlurUrl = currentImage.blurDataUrl || '';
     } else if (currentImage && currentImage.isExisting) {
@@ -91,10 +86,7 @@ export function SettingsForm({ hero, theme, brand }: SettingsFormProps) {
 
     formData.set('heroImage', heroImageUrl);
     formData.set('heroBlurDataURL', heroBlurUrl);
-
-    // Remove the file input if it exists in formData
     formData.delete('heroImageFile');
-
 
     startTransition(async () => {
       try {
@@ -112,9 +104,9 @@ export function SettingsForm({ hero, theme, brand }: SettingsFormProps) {
     });
   };
 
-  // Helper to get preview
   const heroPreview = upload.images.length > 0 ? upload.images[0].previewUrl : null;
   const isUploading = upload.isUploading;
+  const currentImage = upload.images.length > 0 ? upload.images[0] : null;
 
   return (
     <form onSubmit={handleSubmit}>
@@ -170,40 +162,120 @@ export function SettingsForm({ hero, theme, brand }: SettingsFormProps) {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-gray-500 text-xs font-medium uppercase tracking-widest pl-1">Hero Background Image</Label>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label className="text-gray-500 text-xs font-medium uppercase tracking-widest pl-1">Hero Background Image</Label>
+                {currentImage?.fileSize ? (
+                  <span className="text-xs text-gray-400">
+                    {(currentImage.fileSize / (1024 * 1024)).toFixed(2)} MB
+                  </span>
+                ) : null}
+              </div>
 
-              {heroPreview && (
-                <div className="relative w-full aspect-[21/9] rounded-xl overflow-hidden border border-border mb-4 group">
-                  <Image src={heroPreview} alt="Hero preview" fill className="object-cover" />
-                  <button
-                    type="button"
-                    onClick={clearHeroImage}
-                    className="absolute top-3 right-3 bg-white/80 text-gray-900 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-100 hover:text-red-600"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+              {heroPreview ? (
+                <div className="relative w-full aspect-[21/9] rounded-xl overflow-hidden border border-border group bg-gray-50">
+                  <Image
+                    src={heroPreview}
+                    alt="Hero preview"
+                    fill
+                    className={cn(
+                      "object-cover transition-all duration-300",
+                      isUploading ? "blur-sm scale-105 opacity-50" : "group-hover:scale-105",
+                      currentImage?.status === 'error' && "grayscale opacity-25"
+                    )}
+                  />
+
+                  {/* Actions */}
+                  {!isUploading && currentImage?.status !== 'error' && (
+                    <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                      <label className="bg-white/90 hover:bg-white text-gray-700 p-2 rounded-lg cursor-pointer shadow-sm border border-gray-200 transition-colors backdrop-blur-sm">
+                        <RefreshCw className="w-4 h-4" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleHeroImageChange}
+                          className="hidden"
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={clearHeroImage}
+                        className="bg-white/90 hover:bg-red-50 text-red-600 p-2 rounded-lg shadow-sm border border-gray-200 transition-colors backdrop-blur-sm"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Uploading State */}
                   {isUploading && (
-                    <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center">
-                      <Loader2 className="w-8 h-8 animate-spin text-gray-900" />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-6 z-10 transition-all duration-300">
+                      <div className="w-full max-w-xs space-y-3 bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-lg border border-gray-100">
+                        <div className="flex items-center justify-between text-xs font-medium text-gray-600">
+                          <span className="flex items-center gap-2">
+                            <Loader2 className="w-3 h-3 animate-spin text-blue-600" />
+                            Uploading...
+                          </span>
+                          <span>{currentImage?.progress || 0}%</span>
+                        </div>
+                        <Progress value={currentImage?.progress || 0} className="h-1.5" />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Error State */}
+                  {currentImage?.status === 'error' && (
+                    <div className="absolute inset-0 bg-white/40 backdrop-blur-sm flex flex-col items-center justify-center p-6 z-30">
+                      <div className="bg-white border border-red-100 rounded-xl p-5 max-w-sm text-center space-y-3 shadow-xl ring-1 ring-red-50">
+                        <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center mx-auto">
+                          <AlertCircle className="w-5 h-5 text-red-600" />
+                        </div>
+                        <div className="space-y-1">
+                          <h4 className="text-sm font-semibold text-gray-900">Upload Failed</h4>
+                          <p className="text-xs text-red-600">{currentImage.error || "Something went wrong"}</p>
+                        </div>
+                        <div className="flex gap-2 justify-center pt-2">
+                          <Button size="sm" variant="outline" onClick={clearHeroImage} className="h-8 text-xs px-4">
+                            Remove
+                          </Button>
+                          <Button size="sm" onClick={() => upload.startUpload()} className="h-8 text-xs bg-red-600 hover:bg-red-700 text-white border-none px-4">
+                            Retry
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
-              )}
+              ) : (
+                <label className={cn(
+                  "relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 group overflow-hidden",
+                  "border-gray-200 bg-gray-50/50 hover:bg-blue-50/50 hover:border-blue-400"
+                )}>
+                  <div className="absolute inset-0 bg-grid-gray-100/50 [mask-image:linear-gradient(0deg,white,transparent)] pointer-events-none" />
 
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-gray-400 transition-colors bg-gray-50 hover:bg-gray-100">
-                <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                <span className="text-sm text-gray-500">Drop image or click to upload</span>
-                <span className="text-sm text-gray-500">Drop image or click to upload</span>
-                <span className="text-[10px] text-gray-400 mt-1">PNG, JPG, WebP up to 10MB • Recommended: 1920x1080</span>
-                <input
-                  type="file"
-                  name="heroImageFile"
-                  accept="image/*"
-                  onChange={handleHeroImageChange}
-                  className="hidden"
-                />
-              </label>
+                  <div className="relative z-10 flex flex-col items-center space-y-3 group-hover:-translate-y-1 transition-transform duration-300">
+                    <div className="w-12 h-12 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <ImageIcon className="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                    </div>
+                    <div className="text-center space-y-1">
+                      <p className="text-sm font-medium text-gray-600 group-hover:text-blue-700 transition-colors">
+                        Click to upload or drag and drop
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        High resolution • Max 10MB
+                      </p>
+                    </div>
+                  </div>
+
+                  <input
+                    type="file"
+                    name="heroImageFile"
+                    accept="image/*"
+                    onChange={handleHeroImageChange}
+                    className="hidden"
+                  />
+                </label>
+              )}
             </div>
           </CardContent>
         </Card>

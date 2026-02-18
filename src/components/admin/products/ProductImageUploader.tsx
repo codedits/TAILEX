@@ -72,6 +72,7 @@ function SortableImageTile({
   onRemove,
   onCrop,
   onZoom,
+  onRetry,
   disabled,
 }: {
   image: UploadedImage;
@@ -79,6 +80,7 @@ function SortableImageTile({
   onRemove: (id: string) => void;
   onCrop: (id: string, url: string) => void;
   onZoom: (url: string) => void;
+  onRetry: (id: string) => void;
   disabled?: boolean;
 }) {
   const {
@@ -226,9 +228,9 @@ function SortableImageTile({
         {isError && (
           <button
             type="button"
-            onClick={() => {
-              // Re-adding the file triggers a re-upload
-              // For now, we just let the user remove and re-add
+            onClick={(e) => {
+              e.stopPropagation();
+              onRetry(image.id);
             }}
             className="bg-white text-amber-600 w-9 h-9 flex items-center justify-center rounded-lg hover:bg-amber-50 transition-colors shadow-xl border border-amber-100"
             title="Retry upload"
@@ -442,6 +444,7 @@ export function ProductImageUploader({
                     onRemove={removeImage}
                     onCrop={(id, url) => setCropData({ id, image: url })}
                     onZoom={(url) => setZoomSrc(url)}
+                    onRetry={upload.retryImage}
                     disabled={disabled}
                   />
                 ))}

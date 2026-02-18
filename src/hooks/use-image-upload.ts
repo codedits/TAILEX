@@ -59,6 +59,8 @@ export interface UseImageUploadReturn {
   reorderImages: (oldIndex: number, newIndex: number) => void;
   /** Replace an image with a new file (e.g., after cropping) */
   replaceImage: (id: string, file: File) => void;
+  /** Retry a failed upload */
+  retryImage: (id: string) => void;
   /** Get all successfully uploaded remote URLs (in order) */
   getUploadedUrls: () => string[];
   /** Get blur data URL map { remoteUrl: blurDataUrl } */
@@ -295,6 +297,30 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
 
   }, [updateImage, autoUpload, enqueueUpload]);
 
+  // ─── Retry image ──────────────────────────────────────────────────────
+
+  const retryImage = useCallback((id: string) => {
+    const image = imagesRef.current.find(img => img.id === id);
+    if (!image) return;
+
+    // Reset status
+    updateImage(id, {
+      status: 'pending',
+      error: null,
+      progress: 0,
+    });
+
+    const updatedImage = { ...image, status: 'pending' as const, error: null, progress: 0 };
+
+    // Trigger upload if auto-upload is enabled, or if we want to force retry behavior?
+    // Usually 'Retry' button implies immediate action.
+    // But to be consistent with 'autoUpload' prop:
+    if (autoUpload) {
+      enqueueUpload(updatedImage);
+    }
+    // If autoUpload is false, it sits in 'pending' and waits for 'startUpload' (Save)
+  }, [updateImage, autoUpload, enqueueUpload]);
+
 
   // ─── Start Manual Upload ──────────────────────────────────────────────
 
@@ -411,6 +437,7 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
     removeImage,
     reorderImages,
     replaceImage,
+    retryImage,
     getUploadedUrls,
     getBlurDataUrls,
     startUpload,

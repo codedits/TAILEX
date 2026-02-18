@@ -17,58 +17,11 @@ import { processImage, generateImageFilename } from '@/lib/image-processor'
 // IMAGE UPLOAD
 // ==========================================
 
-async function uploadImage(file: File): Promise<{ url: string; blurDataURL: string }> {
-  const supabase = await createAdminClient()
+// ==========================================
+// IMAGE UPLOAD
+// ==========================================
 
-  if (!file || file.size === 0) {
-    throw new Error('Invalid file')
-  }
-
-  if (file.size > 6 * 1024 * 1024) {
-    throw new Error('File size exceeds 6MB limit')
-  }
-
-  // Process through Sharp: resize, convert to WebP, generate blur
-  const processed = await processImage(file, 'collection');
-  const fileName = generateImageFilename('collections');
-
-  const { error: uploadError } = await supabase.storage
-    .from('collections')
-    .upload(fileName, processed.buffer, {
-      contentType: processed.contentType,
-      cacheControl: '31536000',
-    })
-
-  if (uploadError) {
-    // If bucket doesn't exist, try to create it and retry once
-    const msg = (uploadError.message || '').toLowerCase()
-    if (msg.includes('bucket not found') || msg.includes('not found')) {
-      try {
-        await ensureBucketExists('collections')
-        const { error: retryErr } = await supabase.storage
-          .from('collections')
-          .upload(fileName, processed.buffer, {
-            contentType: processed.contentType,
-            cacheControl: '31536000',
-          })
-
-        if (retryErr) {
-          throw new Error(`Upload failed after bucket create: ${retryErr.message}`)
-        }
-      } catch (err) {
-        throw new Error(`Upload failed and bucket create attempt failed: ${err instanceof Error ? err.message : String(err)}`)
-      }
-    } else {
-      throw new Error(`Upload failed: ${uploadError.message}`)
-    }
-  }
-
-  const { data: { publicUrl } } = supabase.storage
-    .from('collections')
-    .getPublicUrl(fileName)
-
-  return { url: publicUrl, blurDataURL: processed.blurDataURL }
-}
+// uploadImage function removed - using client-side upload
 
 async function deleteImageFromStorage(url: string) {
   if (!url) return
@@ -120,6 +73,11 @@ export async function createCollection(formData: FormData): Promise<ApiResponse<
     const seoTitle = formData.get('seo_title') as string
     const seoDescription = formData.get('seo_description') as string
 
+    // New: Accept URL directly from client-side upload
+    const imageUrl = formData.get('image_url') as string
+    const blurDataURL = formData.get('blurDataURL') as string
+    const sortOrder = parseInt(formData.get('sort_order') as string) || 0;
+
     // Validation
     if (!title || title.trim().length < 2) {
       return { error: 'Collection title must be at least 2 characters' }
@@ -140,30 +98,13 @@ export async function createCollection(formData: FormData): Promise<ApiResponse<
       return { error: 'A collection with this slug already exists' }
     }
 
-    // Handle image uploads
-    const imageFile = formData.get('imageFile') as File;
-    let imageUrl: string | null = null;
-    let blurDataURL: string | null = null;
-    const sortOrder = parseInt(formData.get('sort_order') as string) || 0;
-
-    if (imageFile && imageFile.size > 0) {
-      try {
-        const result = await uploadImage(imageFile);
-        imageUrl = result.url;
-        blurDataURL = result.blurDataURL;
-      } catch (error) {
-        console.error('Image upload error:', error);
-        return { error: 'Primary image upload failed' };
-      }
-    }
-
     const { data, error } = await supabase
       .from('collections')
       .insert({
         title: title.trim(),
         slug: slug.toLowerCase().trim(),
         description: description?.trim() || null,
-        image_url: imageUrl,
+        image_url: imageUrl || null,
         is_visible: isVisible,
         sort_order: sortOrder,
         metadata: blurDataURL && imageUrl ? { blurDataUrls: { [imageUrl]: blurDataURL } } : undefined,
@@ -209,7 +150,12 @@ export async function updateCollection(formData: FormData): Promise<ApiResponse<
     const isVisible = formData.get('is_visible') === 'on'
     const seoTitle = formData.get('seo_title') as string
     const seoDescription = formData.get('seo_description') as string
-    const existingImage = formData.get('existing_image') as string
+    const existingImage = formData.get('existing_image') as string // Original image URL before edit
+
+    // New: Accept URL directly from client-side upload
+    const imageUrl = formData.get('image_url') as string
+    const blurDataURL = formData.get('blurDataURL') as string
+    const sortOrder = parseInt(formData.get('sort_order') as string) || 0;
 
     // Validation
     if (!title || title.trim().length < 2) {
@@ -232,38 +178,23 @@ export async function updateCollection(formData: FormData): Promise<ApiResponse<
       return { error: 'A collection with this slug already exists' }
     }
 
-    // Handle image uploads
-    const imageFile = formData.get('imageFile') as File;
-    const sortOrder = parseInt(formData.get('sort_order') as string) || 0;
-
-    let imageUrl: string | null = existingImage || null;
-    let oldImageUrl: string | null = null;
-    let blurDataURL: string | null = null;
-
-    if (imageFile && imageFile.size > 0) {
-      try {
-        oldImageUrl = existingImage || null;
-        const result = await uploadImage(imageFile);
-        imageUrl = result.url;
-        blurDataURL = result.blurDataURL;
-      } catch (error) {
-        return { error: 'Primary image upload failed' };
-      }
-    }
-
     const updatePayload: Record<string, any> = {
       title: title.trim(),
       slug: slug.toLowerCase().trim(),
       description: description?.trim() || null,
-      image_url: imageUrl,
+      image_url: imageUrl || null,
       is_visible: isVisible,
       sort_order: sortOrder,
       seo_title: seoTitle?.trim() || null,
       seo_description: seoDescription?.trim() || null,
     };
 
-    // Store blur in metadata if we uploaded a new image
+    // Store blur in metadata if we uploaded a new image (or kept existing and passed blur?)
+    // If it's a new image, we have blurDataURL.
     if (blurDataURL && imageUrl) {
+      // If existing metadata exists, we should merge or replace? 
+      // For collection cover, it's 1:1, but `blurDataUrls` implies map.
+      // Let's just set the map for this image.
       updatePayload.metadata = { blurDataUrls: { [imageUrl]: blurDataURL } };
     }
 
@@ -279,8 +210,8 @@ export async function updateCollection(formData: FormData): Promise<ApiResponse<
     }
 
     // If we successfully updated with a new image, delete the old one
-    if (oldImageUrl && imageUrl !== oldImageUrl) {
-      await deleteImageFromStorage(oldImageUrl)
+    if (existingImage && imageUrl !== existingImage) {
+      await deleteImageFromStorage(existingImage)
     }
 
     revalidatePath('/admin/collections');
