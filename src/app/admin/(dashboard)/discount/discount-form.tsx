@@ -8,9 +8,12 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { Upload, Trash2, Percent, Clock, Eye } from 'lucide-react';
+import { Upload, Trash2, Percent, Clock, Eye, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import Image from 'next/image';
 import { GlobalDiscountConfig } from '@/lib/types';
+import { useImageUpload } from '@/hooks/use-image-upload';
+import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
 
 interface DiscountFormProps {
     initialConfig: GlobalDiscountConfig;
@@ -19,37 +22,63 @@ interface DiscountFormProps {
 export function DiscountForm({ initialConfig }: DiscountFormProps) {
     const [isPending, startTransition] = useTransition();
     const [config, setConfig] = useState<GlobalDiscountConfig>(initialConfig);
-    const [imageFile, setImageFile] = useState<File | null>(null);
-    const [imagePreview, setImagePreview] = useState<string>(initialConfig.imageUrl || '');
+    const initialImages = initialConfig.imageUrl ? [{ url: initialConfig.imageUrl }] : [];
+
+    const upload = useImageUpload({
+        maxImages: 1,
+        maxFileSize: 4 * 1024 * 1024, // 4MB
+        initialImages,
+        autoUpload: false
+    });
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setImageFile(file);
-            setImagePreview(URL.createObjectURL(file));
+        const files = e.target.files;
+        if (files && files.length > 0) {
+            if (upload.images.length > 0) {
+                upload.removeImage(upload.images[0].id);
+            }
+            upload.addFiles(files);
         }
-    };
-
-    const handleDeleteImage = async () => {
-        if (confirm('Are you sure you want to delete this image?')) {
-            const toastId = toast.loading('Deleting image...');
-            startTransition(async () => {
-                const result = await deleteDiscountImage();
-                if (result.success) {
-                    setImagePreview('');
-                    setImageFile(null);
-                    setConfig({ ...config, imageUrl: '' });
-                    toast.success('Image deleted', { id: toastId });
-                } else {
-                    toast.error(result.error || 'Failed to delete image', { id: toastId });
-                }
-            });
-        }
+        e.target.value = ''; // Reset input
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const toastId = toast.loading('Saving discount settings...');
+
+        // 1. Upload logic
+        let currentImages = upload.images;
+        const pending = upload.images.filter(img => img.status === 'pending');
+
+        if (pending.length > 0) {
+            toast.loading('Uploading popup image...', { id: toastId });
+            try {
+                currentImages = await upload.startUpload();
+            } catch (err) {
+                toast.error('Image upload failed', { id: toastId });
+                return;
+            }
+        }
+
+        if (upload.isUploading) {
+            toast.error('Please wait for uploads to finish', { id: toastId });
+            return;
+        }
+
+        // 2. Prepare URL
+        const currentImage = currentImages[0];
+        let finalImageUrl = '';
+
+        if (currentImage) {
+            if (currentImage.status === 'success') {
+                finalImageUrl = currentImage.remoteUrl || '';
+            } else if (currentImage.isExisting) {
+                finalImageUrl = currentImage.previewUrl;
+            } else if (currentImage.status === 'error') {
+                toast.error('Image failed to upload', { id: toastId });
+                return;
+            }
+        }
 
         startTransition(async () => {
             const formData = new FormData();
@@ -58,22 +87,20 @@ export function DiscountForm({ initialConfig }: DiscountFormProps) {
             formData.append('percentage', String(config.percentage));
             formData.append('delaySeconds', String(config.delaySeconds));
             formData.append('showOncePerSession', String(config.showOncePerSession));
-            formData.append('existingImageUrl', config.imageUrl);
-
-            if (imageFile) {
-                formData.append('imageFile', imageFile);
-            }
+            formData.append('imageUrl', finalImageUrl); // Send URL, not file
 
             const result = await updateGlobalDiscount(formData);
 
             if (result.success) {
                 toast.success('Discount settings saved', { id: toastId });
-                setImageFile(null);
             } else {
                 toast.error(result.error || 'Failed to save settings', { id: toastId });
             }
         });
     };
+
+    const currentImage = upload.images[0];
+    const isUploading = upload.isUploading;
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -159,33 +186,81 @@ export function DiscountForm({ initialConfig }: DiscountFormProps) {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    {imagePreview ? (
-                        <div className="relative w-full max-w-md h-48 rounded-xl overflow-hidden border border-border group">
+                    {currentImage ? (
+                        <div className="relative w-full max-w-md aspect-[1/1] rounded-xl overflow-hidden border border-border group bg-gray-50">
                             <Image
-                                src={imagePreview}
+                                src={currentImage.previewUrl}
                                 alt="Discount Preview"
                                 fill
-                                className="object-cover"
+                                className={cn(
+                                    "object-contain transition-all duration-300",
+                                    isUploading && "blur-sm opacity-50 scale-105",
+                                    currentImage.status === 'error' && "grayscale opacity-50"
+                                )}
+                                unoptimized
                             />
-                            <div className="absolute inset-0 bg-white/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                                <Button
-                                    type="button"
-                                    variant="destructive"
-                                    size="icon"
-                                    className="rounded-full shadow-lg"
-                                    onClick={handleDeleteImage}
-                                    disabled={isPending}
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </Button>
-                            </div>
+
+                            {/* Actions */}
+                            {!isUploading && currentImage.status !== 'error' && (
+                                <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                                    <label className="bg-white/90 hover:bg-white text-gray-700 p-2 rounded-lg cursor-pointer shadow-sm border border-gray-200 transition-colors backdrop-blur-sm">
+                                        <RefreshCw className="w-4 h-4" />
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleImageChange}
+                                            className="hidden"
+                                        />
+                                    </label>
+                                    <button
+                                        type="button"
+                                        onClick={() => upload.removeImage(currentImage.id)}
+                                        className="bg-white/90 hover:bg-red-50 text-red-600 p-2 rounded-lg shadow-sm border border-gray-200 transition-colors backdrop-blur-sm"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Uploading Overlay */}
+                            {isUploading && (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 z-10">
+                                    <div className="w-full max-w-[200px] space-y-3 bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-lg border border-gray-100">
+                                        <div className="flex items-center justify-between text-xs font-medium text-gray-600">
+                                            <span className="flex items-center gap-2">
+                                                <Loader2 className="w-3 h-3 animate-spin text-blue-600" />
+                                                Uploading...
+                                            </span>
+                                            <span>{currentImage.progress}%</span>
+                                        </div>
+                                        <Progress value={currentImage.progress} className="h-1.5" />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Error Overlay */}
+                            {currentImage.status === 'error' && (
+                                <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center p-6 z-20">
+                                    <div className="bg-white border border-red-100 rounded-xl p-4 text-center space-y-3 shadow-lg ring-1 ring-red-50">
+                                        <AlertCircle className="w-6 h-6 text-red-600 mx-auto" />
+                                        <div className="space-y-0.5">
+                                            <h4 className="text-sm font-semibold text-gray-900">Upload Failed</h4>
+                                            <p className="text-xs text-red-600 truncate max-w-[150px]">{currentImage.error || "Unknown error"}</p>
+                                        </div>
+                                        <div className="flex gap-2 justify-center">
+                                            <Button size="sm" variant="outline" onClick={() => upload.removeImage(currentImage.id)} className="h-7 text-xs">Remove</Button>
+                                            <Button size="sm" onClick={() => upload.startUpload()} className="h-7 text-xs bg-red-600 hover:bg-red-700 text-white border-none">Retry</Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <label className="flex flex-col items-center justify-center w-full max-w-md h-48 border-2 border-dashed border-input rounded-xl cursor-pointer hover:border-gray-400 transition-colors bg-gray-50 hover:bg-gray-100">
                             <Upload className="w-8 h-8 text-gray-400 mb-2" />
                             <span className="text-sm text-gray-500">Drop image or click to upload</span>
                             <span className="text-[10px] text-gray-400 mt-1">
-                                PNG, JPG, WebP • Recommended: 400x400
+                                PNG, JPG, WebP • Max 4MB
                             </span>
                             <input
                                 type="file"

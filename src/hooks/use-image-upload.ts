@@ -65,8 +65,8 @@ export interface UseImageUploadReturn {
   getUploadedUrls: () => string[];
   /** Get blur data URL map { remoteUrl: blurDataUrl } */
   getBlurDataUrls: () => Record<string, string>;
-  /** Manually trigger upload for all pending images. Returns promised map of IDs to remote URLs. */
-  startUpload: () => Promise<void>;
+  /** Manually trigger upload for all pending images. Returns list of all images with updated status. */
+  startUpload: () => Promise<UploadedImage[]>;
   /** Whether all images are done uploading (no pending/uploading) */
   isAllUploaded: boolean;
   /** Whether any image is currently uploading */
@@ -324,10 +324,12 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
 
   // ─── Start Manual Upload ──────────────────────────────────────────────
 
+  // ─── Start Manual Upload ──────────────────────────────────────────────
+
   const startUpload = useCallback(async () => {
     const pendingImages = imagesRef.current.filter(img => img.status === 'pending' || img.status === 'error');
 
-    if (pendingImages.length === 0) return;
+    if (pendingImages.length === 0) return imagesRef.current;
 
     // Enqueue all pending images
     for (const img of pendingImages) {
@@ -340,13 +342,13 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
 
     // Wait for all to finish
     // We can poll checking if any are still pending/uploading
-    return new Promise<void>((resolve) => {
+    return new Promise<UploadedImage[]>((resolve) => {
       const checkInterval = setInterval(() => {
         const currentImages = imagesRef.current;
         const isStillUploading = currentImages.some(img => img.status === 'pending' || img.status === 'uploading');
         if (!isStillUploading) {
           clearInterval(checkInterval);
-          resolve();
+          resolve(currentImages);
         }
       }, 500);
     });

@@ -101,27 +101,28 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
   // ─── Submit Handler ───────────────────────────────────────────────────
   async function onSubmit(data: ProductFormValues) {
     // 1. Trigger Image Uploads
-    // Check if we have pending images
+    // 1. Trigger Image Uploads
+    let latestImages = upload.images;
     const pendingImages = upload.images.filter(img => img.status === 'pending');
+
     if (pendingImages.length > 0) {
       toast.info(`Uploading ${pendingImages.length} new images...`);
       try {
-        await upload.startUpload();
+        latestImages = await upload.startUpload();
       } catch (err: any) {
         toast.error("Image upload failed", { description: err.message || "Please try again" });
         return;
       }
     }
 
-    // 2. Block submission if images are still uploading (double check)
-    // startUpload() awaits completion, but just in case
+    // 2. Block submission if images are still uploading
     if (upload.isUploading) {
       toast.error("Please wait for all images to finish uploading");
       return;
     }
 
-    // 3. Check for failed uploads
-    const failedImages = upload.images.filter(img => img.status === 'error');
+    // 3. Check for failed uploads using fresh state
+    const failedImages = latestImages.filter(img => img.status === 'error');
     if (failedImages.length > 0) {
       toast.error(`${failedImages.length} image(s) failed to upload.`, {
         description: "Please remove failed images or try again."
@@ -143,11 +144,19 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
     });
 
     // Append pre-uploaded image URLs (in display order)
-    const imageUrls = upload.getUploadedUrls();
+    // Append pre-uploaded image URLs (in display order)
+    const imageUrls = latestImages
+      .filter(img => img.status === 'success' && img.remoteUrl)
+      .map(img => img.remoteUrl!);
     formData.set('image_urls', JSON.stringify(imageUrls));
 
     // Append blur data URLs for LQIP placeholders
-    const blurDataUrls = upload.getBlurDataUrls();
+    const blurDataUrls: Record<string, string> = {};
+    latestImages.forEach(img => {
+      if (img.remoteUrl && img.blurDataUrl) {
+        blurDataUrls[img.remoteUrl] = img.blurDataUrl;
+      }
+    });
     formData.set('blur_data_urls', JSON.stringify(blurDataUrls));
 
     // Append variant configuration

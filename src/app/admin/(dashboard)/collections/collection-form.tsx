@@ -84,11 +84,12 @@ export function CollectionForm({ initialData }: { initialData?: any }) {
         const toastId = toast.loading('Saving collection...');
 
         // 1. Upload Images
+        let currentImages = upload.images;
         const pending = upload.images.filter(img => img.status === 'pending');
         if (pending.length > 0) {
             try {
                 toast.loading('Uploading image...', { id: toastId });
-                await upload.startUpload();
+                currentImages = await upload.startUpload();
             } catch (err) {
                 toast.error('Upload failed', { id: toastId });
                 return;
@@ -101,7 +102,7 @@ export function CollectionForm({ initialData }: { initialData?: any }) {
         }
 
         // 2. Prepare Data
-        const currentImage = upload.images[0];
+        const currentImage = currentImages[0];
         let imageUrl = '';
         let blurDataURL = '';
 
@@ -191,6 +192,7 @@ export function CollectionForm({ initialData }: { initialData?: any }) {
                                         isUploading && "blur-sm opacity-50 scale-105",
                                         currentImage.status === 'error' && "grayscale opacity-50"
                                     )}
+                                    unoptimized
                                 />
 
                                 {/* Actions */}

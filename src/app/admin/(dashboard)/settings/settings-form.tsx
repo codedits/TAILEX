@@ -55,11 +55,14 @@ export function SettingsForm({ hero, theme, brand }: SettingsFormProps) {
     const formData = new FormData(e.currentTarget);
     const toastId = toast.loading('Saving settings...');
 
+    // 1. Upload if needed
+    let currentImages = upload.images;
     const pendingImages = upload.images.filter(img => img.status === 'pending');
+
     if (pendingImages.length > 0) {
       try {
         toast.loading('Uploading hero image...', { id: toastId });
-        await upload.startUpload();
+        currentImages = await upload.startUpload();
       } catch (err) {
         toast.error('Image upload failed', { id: toastId });
         return;
@@ -72,7 +75,7 @@ export function SettingsForm({ hero, theme, brand }: SettingsFormProps) {
     }
 
     // 2. Get the URL
-    const currentImage = upload.images[0];
+    const currentImage = currentImages[0];
     let heroImageUrl = '';
     let heroBlurUrl = '';
 
@@ -183,6 +186,7 @@ export function SettingsForm({ hero, theme, brand }: SettingsFormProps) {
                       isUploading ? "blur-sm scale-105 opacity-50" : "group-hover:scale-105",
                       currentImage?.status === 'error' && "grayscale opacity-25"
                     )}
+                    unoptimized
                   />
 
                   {/* Actions */}
