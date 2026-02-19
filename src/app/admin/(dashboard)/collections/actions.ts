@@ -18,3 +18,8 @@ export async function deleteCollection(id: string) {
   return api.deleteCollection(id)
 }
 
+export async function reorderCollections(items: { id: string; sort_order: number }[]) {
+  if (!await verifyAdmin()) throw new Error('Unauthorized');
+  return api.reorderCollections(items)
+}
+

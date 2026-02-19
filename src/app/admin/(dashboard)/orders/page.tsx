@@ -15,10 +15,10 @@ async function OrdersTable() {
 
 export default function AdminOrdersPage() {
   return (
-    <div className="space-y-8 max-w-[1600px] mx-auto">
+    <div className="space-y-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h2 className="text-2xl md:text-3xl font-light tracking-tight text-gray-900">Orders</h2>
+          <h1 className="text-xl font-semibold text-gray-900">Orders</h1>
           <p className="text-gray-500 mt-1 text-sm">Manage and track customer orders.</p>
         </div>
       </div>

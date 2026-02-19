@@ -30,13 +30,30 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Edit, MoreHorizontal, Eye, EyeOff } from "lucide-react"
-import { deleteCollection } from "@/app/admin/(dashboard)/collections/actions"
+import { Edit, MoreHorizontal, Eye, EyeOff, Loader2 } from "lucide-react"
+import { deleteCollection, reorderCollections } from "@/app/admin/(dashboard)/collections/actions"
 import { useRouter } from "next/navigation"
 import { useIsDesktop } from "@/hooks/use-media-query"
-import { MobileCollectionCard } from "./MobileCollectionCard"
 import { ActionDrawer, ActionDrawerAction } from "@/components/admin/ui/ActionDrawer"
 import { Trash2, Copy } from "lucide-react"
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { SortableRow } from "@/components/admin/collections/SortableRow"
+import { SortableMobileCard } from "@/components/admin/collections/SortableMobileCard"
+import { toast } from "sonner"
 
 interface Collection {
     id: string
@@ -52,15 +69,81 @@ interface CollectionTableClientProps {
     aspectRatio: number
 }
 
-export function CollectionTableClient({ collections, aspectRatio }: CollectionTableClientProps) {
+export function CollectionTableClient({ collections: initialCollections, aspectRatio }: CollectionTableClientProps) {
     const router = useRouter()
     const isDesktop = useIsDesktop()
+    const [collections, setCollections] = React.useState(initialCollections)
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [selectedCollection, setSelectedCollection] = React.useState<Collection | null>(null)
     const [drawerOpen, setDrawerOpen] = React.useState(false)
+    const [isSavingOrder, setIsSavingOrder] = React.useState(false)
+    const [mounted, setMounted] = React.useState(false)
+
+    React.useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    // Sync state with props when props change (e.g. after server revalidation)
+    React.useEffect(() => {
+        setCollections(initialCollections)
+    }, [initialCollections])
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8, // Require 8px movement to start drag (prevents accidental drags on click)
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    async function handleDragEnd(event: DragEndEvent) {
+        const { active, over } = event;
+
+        if (active.id !== over?.id) {
+            const oldIndex = collections.findIndex((item) => item.id === active.id);
+            const newIndex = collections.findIndex((item) => item.id === over?.id);
+
+            const newOrder = arrayMove(collections, oldIndex, newIndex);
+
+            // Optimistic update
+            setCollections(newOrder);
+
+            // Trigger server save
+            saveOrder(newOrder);
+        }
+    }
+
+    const saveOrder = React.useCallback(async (newOrder: Collection[]) => {
+        setIsSavingOrder(true);
+        try {
+            // Create payload: only strictly necessary data
+            const payload = newOrder.map((item, index) => ({
+                id: item.id,
+                sort_order: index
+            }));
+
+            await reorderCollections(payload);
+            toast.success("Order saved");
+        } catch (error) {
+            toast.error("Failed to save order");
+            // Revert state if needed (refetching from server via router.refresh usually easiest)
+            router.refresh();
+        } finally {
+            setIsSavingOrder(false);
+        }
+    }, [router]);
 
     const columns: ColumnDef<Collection>[] = [
+        {
+            id: "drag-handle",
+            header: "",
+            cell: ({ row }) => null, // Handled in SortableRow
+            size: 50,
+        },
         {
             accessorKey: "title",
             header: "Collection",
@@ -72,16 +155,16 @@ export function CollectionTableClient({ collections, aspectRatio }: CollectionTa
                             <img
                                 src={col.image_url}
                                 alt={col.title}
-                                className="object-cover rounded-xl border border-white/10"
+                                className="object-cover rounded-md border"
                                 style={{ width: 48, height: Math.round(48 / aspectRatio) }}
                             />
                         ) : (
                             <div
-                                className="bg-white/5 rounded-xl border border-white/10"
+                                className="bg-muted rounded-md border"
                                 style={{ width: 48, height: Math.round(48 / aspectRatio) }}
                             />
                         )}
-                        <span className="text-white font-medium">{col.title}</span>
+                        <span className="font-medium">{col.title}</span>
                     </div>
                 )
             },
@@ -90,14 +173,7 @@ export function CollectionTableClient({ collections, aspectRatio }: CollectionTa
             accessorKey: "slug",
             header: "Slug",
             cell: ({ row }) => (
-                <span className="text-white/50 text-sm font-mono">{row.original.slug}</span>
-            ),
-        },
-        {
-            accessorKey: "sort_order",
-            header: () => <div className="text-center">Sort Order</div>,
-            cell: ({ row }) => (
-                <div className="text-center text-white/50 font-mono">{row.original.sort_order ?? 0}</div>
+                <span className="text-muted-foreground text-sm font-mono">{row.original.slug}</span>
             ),
         },
         {
@@ -106,11 +182,11 @@ export function CollectionTableClient({ collections, aspectRatio }: CollectionTa
             cell: ({ row }) => {
                 const col = row.original
                 return col.is_visible ? (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
                         <Eye className="h-3 w-3 mr-1" /> Visible
                     </span>
                 ) : (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-white/5 text-white/50 border border-white/10">
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground border">
                         <EyeOff className="h-3 w-3 mr-1" /> Hidden
                     </span>
                 )
@@ -124,21 +200,21 @@ export function CollectionTableClient({ collections, aspectRatio }: CollectionTa
                     <div className="flex justify-end">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-white/10 text-white/60">
+                                <Button variant="ghost" className="h-8 w-8 p-0">
                                     <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-neutral-900 border-white/10">
-                                <DropdownMenuLabel className="text-white">Actions</DropdownMenuLabel>
-                                <DropdownMenuItem className="text-white focus:bg-white/10" asChild>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem asChild>
                                     <Link href={`/admin/collections/${col.id}?ratio=${aspectRatio}`}>
                                         <Edit className="mr-2 h-4 w-4" />
                                         Edit
                                     </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuSeparator className="bg-white/10" />
+                                <DropdownMenuSeparator />
                                 <DropdownMenuItem
-                                    className="text-red-400 focus:bg-red-500/10 focus:text-red-400"
+                                    className="text-red-600 focus:text-red-600 focus:bg-red-50"
                                     onClick={async () => {
                                         if (confirm('Delete this collection?')) {
                                             await deleteCollection(col.id)
@@ -207,25 +283,36 @@ export function CollectionTableClient({ collections, aspectRatio }: CollectionTa
         },
     ]
 
+    if (!mounted) {
+        return null;
+    }
+
     return (
-        <>
+        <DndContext
+            id="collections-dnd-context"
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+        >
             <div className="space-y-4">
-                {/* Filter */}
-                <Input
-                    placeholder="Filter collections..."
-                    value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
-                    onChange={(e) => table.getColumn("title")?.setFilterValue(e.target.value)}
-                    className="max-w-sm bg-white/5 border-white/10 text-white placeholder:text-white/40"
-                />
+                <div className="flex justify-between items-center">
+                    <Input
+                        placeholder="Filter collections..."
+                        value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
+                        onChange={(e) => table.getColumn("title")?.setFilterValue(e.target.value)}
+                        className="max-w-sm"
+                    />
+                    {isSavingOrder && <div className="text-muted-foreground text-sm flex items-center gap-2"><Loader2 className="w-3 h-3 animate-spin" /> Saving order...</div>}
+                </div>
 
                 {isDesktop ? (
-                    <div className="border border-white/10 rounded-2xl bg-neutral-900/40 overflow-hidden">
+                    <div className="border rounded-md overflow-hidden">
                         <Table>
-                            <TableHeader className="bg-white/[0.02]">
+                            <TableHeader>
                                 {table.getHeaderGroups().map((headerGroup) => (
-                                    <TableRow key={headerGroup.id} className="border-white/10 hover:bg-transparent">
+                                    <TableRow key={headerGroup.id} className="hover:bg-transparent">
                                         {headerGroup.headers.map((header) => (
-                                            <TableHead key={header.id} className="text-white/40 font-medium px-6 py-4">
+                                            <TableHead key={header.id} className="font-medium px-6 py-4">
                                                 {header.isPlaceholder
                                                     ? null
                                                     : flexRender(header.column.columnDef.header, header.getContext())}
@@ -235,42 +322,47 @@ export function CollectionTableClient({ collections, aspectRatio }: CollectionTa
                                 ))}
                             </TableHeader>
                             <TableBody>
-                                {table.getRowModel().rows?.length ? (
-                                    table.getRowModel().rows.map((row) => (
-                                        <TableRow key={row.id} className="border-white/5 hover:bg-white/[0.02] transition-colors">
-                                            {row.getVisibleCells().map((cell) => (
-                                                <TableCell key={cell.id} className="px-6 py-4">
-                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                                </TableCell>
-                                            ))}
+                                <SortableContext
+                                    items={collections.map(c => c.id)}
+                                    strategy={verticalListSortingStrategy}
+                                >
+                                    {table.getRowModel().rows?.length ? (
+                                        table.getRowModel().rows.map((row) => (
+                                            <SortableRow key={row.original.id} row={row} />
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell colSpan={columns.length} className="h-48 text-center text-white/30 text-sm">
+                                                No collections created yet.
+                                            </TableCell>
                                         </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell colSpan={columns.length} className="h-48 text-center text-white/30 text-sm">
-                                            No collections created yet.
-                                        </TableCell>
-                                    </TableRow>
-                                )}
+                                    )}
+                                </SortableContext>
                             </TableBody>
                         </Table>
                     </div>
                 ) : (
-                    <div className="space-y-3">
-                        {collections.length > 0 ? (
-                            collections.map((col) => (
-                                <MobileCollectionCard
-                                    key={col.id}
-                                    collection={col}
-                                    aspectRatio={aspectRatio}
-                                    onActionClick={handleActionClick}
-                                />
-                            ))
-                        ) : (
-                            <div className="rounded-xl border border-white/10 bg-neutral-900/40 p-8 text-center text-white/30 text-sm">
-                                No collections created yet.
-                            </div>
-                        )}
+                    <div className="space-y-3 pl-8 relative">
+                        {/* Padding left for drag handles which are absolutely positioned in SortableMobileCard */}
+                        <SortableContext
+                            items={collections.map(c => c.id)}
+                            strategy={verticalListSortingStrategy}
+                        >
+                            {collections.length > 0 ? (
+                                collections.map((col) => (
+                                    <SortableMobileCard
+                                        key={col.id}
+                                        collection={col}
+                                        aspectRatio={aspectRatio}
+                                        onActionClick={handleActionClick}
+                                    />
+                                ))
+                            ) : (
+                                <div className="rounded-xl border border-white/10 bg-neutral-900/40 p-8 text-center text-white/30 text-sm ml-[-2rem]">
+                                    No collections created yet.
+                                </div>
+                            )}
+                        </SortableContext>
                     </div>
                 )}
             </div>
@@ -282,7 +374,7 @@ export function CollectionTableClient({ collections, aspectRatio }: CollectionTa
                 description={selectedCollection ? `/${selectedCollection.slug}` : undefined}
                 actions={actions}
             />
-        </>
+        </DndContext>
     )
 }
 

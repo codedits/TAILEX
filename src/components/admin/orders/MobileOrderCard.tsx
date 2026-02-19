@@ -19,26 +19,26 @@ export function MobileOrderCard({ order, onActionClick }: MobileOrderCardProps) 
     const getStatusColor = (status: string) => {
         switch (status) {
             case "delivered":
-                return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                return "bg-green-100 text-green-700 border-green-200"
             case "shipped":
-                return "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                return "bg-blue-100 text-blue-700 border-blue-200"
             case "processing":
-                return "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                return "bg-amber-100 text-amber-700 border-amber-200"
             case "cancelled":
-                return "bg-red-500/10 text-red-400 border-red-500/20"
+                return "bg-red-100 text-red-700 border-red-200"
             default:
-                return "bg-neutral-500/10 text-neutral-400 border-neutral-500/20"
+                return "bg-gray-100 text-gray-600 border-border"
         }
     }
 
     return (
-        <div className="rounded-xl border border-white/10 bg-neutral-900/40 overflow-hidden">
+        <div className="rounded-xl border border-border bg-white overflow-hidden shadow-sm">
             <div className="p-4">
                 <div className="flex items-start justify-between gap-3">
                     {/* Order Info */}
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                            <span className="font-mono text-xs text-white/60">
+                            <span className="font-mono text-xs text-gray-500">
                                 #{order.id.slice(0, 8)}
                             </span>
                             <div
@@ -50,21 +50,21 @@ export function MobileOrderCard({ order, onActionClick }: MobileOrderCardProps) 
                                 {order.status || "pending"}
                             </div>
                         </div>
-                        <p className="text-white font-medium truncate">{order.email}</p>
-                        <p className="text-white/40 text-xs mt-1">
+                        <p className="text-gray-900 font-medium truncate">{order.email}</p>
+                        <p className="text-gray-500 text-xs mt-1">
                             {new Date(order.created_at).toLocaleDateString()}
                         </p>
                     </div>
 
                     {/* Price & Actions */}
                     <div className="flex items-center gap-2">
-                        <span className="font-mono font-medium text-white">
+                        <span className="font-mono font-medium text-gray-900">
                             {formatCurrency(order.total)}
                         </span>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 hover:bg-white/10 text-white/60"
+                            className="h-8 w-8 hover:bg-gray-100 text-gray-500"
                             onClick={(e) => {
                                 e.stopPropagation()
                                 onActionClick(order)
@@ -78,7 +78,7 @@ export function MobileOrderCard({ order, onActionClick }: MobileOrderCardProps) 
                 {/* Expand Button */}
                 <button
                     onClick={() => setExpanded(!expanded)}
-                    className="w-full mt-3 pt-3 border-t border-white/5 flex items-center justify-center gap-2 text-white/40 text-sm hover:text-white/60 transition-colors"
+                    className="w-full mt-3 pt-3 border-t border-gray-100 flex items-center justify-center gap-2 text-gray-500 text-sm hover:text-gray-700 transition-colors"
                 >
                     {expanded ? (
                         <>
@@ -102,12 +102,12 @@ export function MobileOrderCard({ order, onActionClick }: MobileOrderCardProps) 
                 )}
             >
                 <div className="overflow-hidden">
-                    <div className="px-4 pb-4 pt-0 space-y-3 border-t border-white/5">
+                    <div className="px-4 pb-4 pt-0 space-y-3 border-t border-gray-100">
                         {/* Shipping Address */}
                         {order.shipping_address && (
                             <div className="py-2">
-                                <span className="text-white/40 text-xs block mb-1">Shipping To</span>
-                                <span className="text-white/80 text-sm">
+                                <span className="text-gray-500 text-xs block mb-1">Shipping To</span>
+                                <span className="text-gray-700 text-sm">
                                     {typeof order.shipping_address === 'object'
                                         ? `${(order.shipping_address as any).city || ''}, ${(order.shipping_address as any).country || ''}`
                                         : String(order.shipping_address)
@@ -118,20 +118,20 @@ export function MobileOrderCard({ order, onActionClick }: MobileOrderCardProps) 
 
                         {/* Items Preview */}
                         {order.items && Array.isArray(order.items) && order.items.length > 0 && (
-                            <div className="py-2 border-t border-white/5">
-                                <span className="text-white/40 text-xs block mb-2">Items ({order.items.length})</span>
+                            <div className="py-2 border-t border-gray-100">
+                                <span className="text-gray-500 text-xs block mb-2">Items ({order.items.length})</span>
                                 <div className="space-y-2">
                                     {order.items.slice(0, 3).map((item: any, idx: number) => (
                                         <div key={idx} className="flex items-center gap-3">
-                                            <Package className="h-4 w-4 text-white/30" />
-                                            <span className="text-white/70 text-sm flex-1 truncate">
+                                            <Package className="h-4 w-4 text-gray-400" />
+                                            <span className="text-gray-700 text-sm flex-1 truncate">
                                                 {item.title || item.product_title || 'Product'}
                                             </span>
-                                            <span className="text-white/50 text-xs">×{item.quantity}</span>
+                                            <span className="text-gray-500 text-xs">×{item.quantity}</span>
                                         </div>
                                     ))}
                                     {order.items.length > 3 && (
-                                        <p className="text-white/40 text-xs">+{order.items.length - 3} more items</p>
+                                        <p className="text-gray-500 text-xs">+{order.items.length - 3} more items</p>
                                     )}
                                 </div>
                             </div>
@@ -142,4 +142,3 @@ export function MobileOrderCard({ order, onActionClick }: MobileOrderCardProps) 
         </div>
     )
 }
-

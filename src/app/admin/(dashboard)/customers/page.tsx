@@ -20,16 +20,16 @@ export default async function CustomersPage() {
   ]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight text-gray-900 mb-1">Customers</h2>
+          <h1 className="text-xl font-semibold text-gray-900">Customers</h1>
           <p className="text-gray-500 text-sm">View and manage your customer base.</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white border border-border rounded-2xl p-6 shadow-sm">
+        <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center border border-gray-100">
               <Users className="w-6 h-6 text-gray-500" />
@@ -42,7 +42,7 @@ export default async function CustomersPage() {
         </div>
       </div>
 
-      <div className="border border-border rounded-2xl bg-white overflow-hidden shadow-sm">
+      <div className="border border-border rounded-xl bg-white overflow-hidden shadow-sm overflow-x-auto">
         <Table>
           <TableHeader className="bg-gray-50/50">
             <TableRow className="border-gray-100 hover:bg-transparent">

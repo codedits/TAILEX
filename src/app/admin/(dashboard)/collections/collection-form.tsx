@@ -280,10 +280,7 @@ export function CollectionForm({ initialData }: { initialData?: any }) {
                 </div>
 
                 <div className="space-y-6">
-                    <div className="space-y-2">
-                        <Label className="text-gray-500 text-xs font-medium uppercase tracking-widest pl-1">Sort Order (Lower comes first)</Label>
-                        <Input name="sort_order" type="number" defaultValue={initialData?.sort_order ?? 0} className="bg-white border-border rounded-xl py-6 h-12 text-gray-900" />
-                    </div>
+
 
                     <div className="space-y-2">
                         <Label className="text-gray-500 text-xs font-medium uppercase tracking-widest pl-1">Description</Label>
@@ -302,6 +299,28 @@ export function CollectionForm({ initialData }: { initialData?: any }) {
                         </div>
                     </div>
 
+                    <div className="space-y-4 pt-4 border-t border-gray-100">
+                        <h3 className="text-gray-800 text-sm font-semibold">Display Settings</h3>
+
+                        <div className="space-y-2">
+                            <Label className="text-gray-500 text-xs font-medium uppercase tracking-widest pl-1">Hero Tagline</Label>
+                            <Input
+                                name="tagline"
+                                defaultValue={initialData?.metadata?.tagline || "Explore The Collection"}
+                                className="bg-white border-border rounded-xl py-6 h-12 text-gray-900"
+                            />
+                        </div>
+
+                        <div className="flex items-center space-x-2 pt-2">
+                            <Switch
+                                id="show_product_grid"
+                                name="show_product_grid"
+                                defaultChecked={initialData?.metadata?.show_product_grid !== false}
+                            />
+                            <Label htmlFor="show_product_grid" className="text-gray-900">Show Product Grid</Label>
+                        </div>
+                    </div>
+
                     <div className="flex items-center gap-4 pt-4">
                         <div className="flex items-center space-x-2">
                             <Switch id="is_visible" name="is_visible" defaultChecked={initialData?.is_visible !== false} />
@@ -315,7 +334,7 @@ export function CollectionForm({ initialData }: { initialData?: any }) {
                 <Button
                     type="submit"
                     disabled={isPending || isUploading}
-                    className="bg-gray-900 text-white hover:bg-gray-800 rounded-full px-12 py-6 font-semibold shadow-xl disabled:opacity-50"
+                    className="bg-gray-900 text-white hover:bg-gray-800 rounded-lg px-6 h-10 font-medium disabled:opacity-50"
                 >
                     {isPending ? "Validating..." : isUploading ? "Uploading..." : "Save Collection"}
                 </Button>

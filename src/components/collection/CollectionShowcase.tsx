@@ -24,6 +24,8 @@ interface CollectionShowcaseProps {
     collectionHref: string;
     className?: string;
     blurDataURL?: string;
+    showProductGrid?: boolean;
+    tagline?: string;
 }
 
 /**
@@ -43,6 +45,8 @@ export default function CollectionShowcase({
     collectionHref,
     className,
     blurDataURL,
+    showProductGrid = true,
+    tagline = "Explore The Collection",
 }: CollectionShowcaseProps) {
     const { ref: heroRef, isVisible: isHeroVisible } = useScrollReveal({ threshold: 0.1 });
     const { ref: contentRef, isVisible: isContentVisible } = useScrollReveal({ threshold: 0.2 });
@@ -85,7 +89,7 @@ export default function CollectionShowcase({
                 >
                     <div className="space-y-0.5 max-w-4xl">
                         <p className="font-great-vibes text-2xl md:text-4xl text-white/90 leading-none">
-                            Explore The Collection
+                            {tagline}
                         </p>
                         <h2 className="hero-text text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-[0.1em] leading-tight">
                             {title}
@@ -108,21 +112,23 @@ export default function CollectionShowcase({
             </div>
 
             {/* Section 2: The Product Grid Carousel */}
-            <div className="relative w-full py-4 md:py-8 px-4 md:px-8 bg-background border-t border-neutral-100 z-20">
-                <div className="mb-4 md:mb-6 flex justify-end items-center px-2">
-                    {/* Desktop "See All" Link */}
-                    <Link href={collectionHref} className="hidden md:flex items-center gap-2 text-sm font-medium hover:opacity-60 transition-opacity">
-                        See All Products <ArrowRight className="w-4 h-4" />
-                    </Link>
-                </div>
+            {showProductGrid && (
+                <div className="relative w-full py-4 md:py-8 px-4 md:px-8 bg-background border-t border-neutral-100 z-20">
+                    <div className="mb-4 md:mb-6 flex justify-end items-center px-2">
+                        {/* Desktop "See All" Link */}
+                        <Link href={collectionHref} className="hidden md:flex items-center gap-2 text-sm font-medium hover:opacity-60 transition-opacity">
+                            See All Products <ArrowRight className="w-4 h-4" />
+                        </Link>
+                    </div>
 
-                {/* Carousel Component - Uses Embla for drag-to-scroll support */}
-                <CollectionShowcaseCarousel
-                    products={carouselProducts}
-                    collectionHref={collectionHref}
-                    title={title}
-                />
-            </div>
+                    {/* Carousel Component - Uses Embla for drag-to-scroll support */}
+                    <CollectionShowcaseCarousel
+                        products={carouselProducts}
+                        collectionHref={collectionHref}
+                        title={title}
+                    />
+                </div>
+            )}
         </section>
     );
 }

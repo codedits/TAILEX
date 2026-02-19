@@ -36,23 +36,23 @@ export default async function AdminOrderDetailPage({ params }: Props) {
     // Helper for Badge Colors
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'delivered': return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
-            case 'shipped': return "bg-blue-500/10 text-blue-400 border-blue-500/20";
-            case 'processing': return "bg-amber-500/10 text-amber-400 border-amber-500/20";
-            case 'cancelled': return "bg-red-500/10 text-red-400 border-red-500/20";
-            default: return "bg-neutral-500/10 text-neutral-400 border-neutral-500/20";
+            case 'delivered': return "bg-green-100 text-green-700 border-green-200";
+            case 'shipped': return "bg-blue-100 text-blue-700 border-blue-200";
+            case 'processing': return "bg-amber-100 text-amber-700 border-amber-200";
+            case 'cancelled': return "bg-red-100 text-red-700 border-red-200";
+            default: return "bg-gray-100 text-gray-600 border-border";
         }
     };
 
     return (
-        <div className="max-w-[1200px] mx-auto p-8 space-y-8">
+        <div className="max-w-6xl mx-auto space-y-6">
             {/* Header */}
-            <div className="flex items-center gap-4 mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
                 <Link href="/admin/orders" className="text-gray-500 hover:text-gray-900 transition-colors">
                     <ArrowLeft className="w-5 h-5" />
                 </Link>
                 <div>
-                    <h1 className="text-3xl font-light text-gray-900 flex items-center gap-3">
+                    <h1 className="text-xl font-semibold text-gray-900 flex items-center gap-3">
                         Order #{order.id.slice(0, 8)}
                         <Badge variant="outline" className={`${getStatusColor(order.status)} uppercase text-xs tracking-wider font-medium border`}>
                             {order.status}
@@ -62,7 +62,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                         Placed on {new Date(order.created_at).toLocaleString()}
                     </p>
                 </div>
-                <div className="ml-auto flex gap-3">
+                <div className="sm:ml-auto flex gap-3">
                     <Button variant="outline" className="text-xs uppercase tracking-widest border-border hover:bg-gray-50 text-gray-700">
                         Print Invoice
                     </Button>

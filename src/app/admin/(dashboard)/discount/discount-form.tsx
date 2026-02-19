@@ -322,7 +322,7 @@ export function DiscountForm({ initialConfig }: DiscountFormProps) {
                 <Button
                     type="submit"
                     disabled={isPending}
-                    className="bg-gray-900 text-white hover:bg-gray-800 rounded-full px-8 py-6 font-semibold transition-all shadow-xl disabled:opacity-50"
+                    className="bg-gray-900 text-white hover:bg-gray-800 rounded-lg px-6 h-10 font-medium disabled:opacity-50"
                 >
                     {isPending ? 'Saving...' : 'Save Discount Settings'}
                 </Button>

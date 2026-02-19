@@ -71,7 +71,7 @@ export function HomepageBuilderClient({ initialSections }: HomepageBuilderClient
             </Reorder.Group>
 
             <div className="flex justify-end pt-4 border-t border-border">
-                <Button onClick={handleSave} disabled={isSaving} className="bg-gray-900 text-white hover:bg-gray-800 rounded-full px-8 shadow-lg">
+                <Button onClick={handleSave} disabled={isSaving} className="bg-gray-900 text-white hover:bg-gray-800 rounded-lg px-6 h-10 font-medium">
                     {isSaving ? "Saving..." : "Save Layout"}
                 </Button>
             </div>

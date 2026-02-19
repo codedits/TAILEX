@@ -17,12 +17,12 @@ export default async function EditCollectionPage({ params }: { params: { id: str
     }
 
     return (
-        <div className="max-w-5xl mx-auto space-y-8">
+        <div className="max-w-6xl mx-auto space-y-6">
             <div>
-                <h2 className="text-2xl font-semibold tracking-tight text-gray-900 mb-1">Edit Collection</h2>
+                <h1 className="text-xl font-semibold text-gray-900">Edit Collection</h1>
                 <p className="text-gray-500 text-sm">Update collection details and visibility.</p>
             </div>
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-border">
+            <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-border">
                 <CollectionForm initialData={collection} />
             </div>
         </div>

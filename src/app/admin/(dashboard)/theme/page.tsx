@@ -25,13 +25,13 @@ export default async function ThemePage() {
     return (
         <div className="space-y-10 max-w-4xl">
             <div>
-                <h2 className="text-2xl font-semibold tracking-tight text-gray-900 mb-1">Theme & Branding</h2>
+                <h1 className="text-xl font-semibold text-gray-900">Theme & Branding</h1>
                 <p className="text-gray-500 text-sm">Customize the visual identity of your storefront.</p>
             </div>
 
             <form action={updateThemeConfig}>
                 <div className="grid gap-10">
-                    <Card className="bg-white border-border rounded-2xl overflow-hidden shadow-sm">
+                    <Card className="bg-white border-border rounded-xl overflow-hidden shadow-sm">
                         <CardHeader className="border-b border-gray-100 bg-gray-50/50 px-8 py-6">
                             <CardTitle className="text-lg text-gray-900">Theme Mode</CardTitle>
                             <CardDescription className="text-gray-500">Select the base appearance for your storefront.</CardDescription>
@@ -52,7 +52,7 @@ export default async function ThemePage() {
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-white border-border rounded-2xl overflow-hidden shadow-sm">
+                    <Card className="bg-white border-border rounded-xl overflow-hidden shadow-sm">
                         <CardHeader className="border-b border-gray-100 bg-gray-50/50 px-8 py-6">
                             <CardTitle className="text-lg text-gray-900">Typography</CardTitle>
                             <CardDescription className="text-gray-500">Choose the primary font family for your store.</CardDescription>
@@ -81,7 +81,7 @@ export default async function ThemePage() {
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-white border-border rounded-2xl overflow-hidden shadow-sm">
+                    <Card className="bg-white border-border rounded-xl overflow-hidden shadow-sm">
                         <CardHeader className="border-b border-gray-100 bg-gray-50/50 px-8 py-6">
                             <CardTitle className="text-lg text-gray-900">Color Palette</CardTitle>
                             <CardDescription className="text-gray-500">Global color configuration for your store.</CardDescription>
@@ -114,7 +114,7 @@ export default async function ThemePage() {
                     </Card>
 
                     <div className="flex justify-end pt-4">
-                        <Button type="submit" className="bg-gray-900 text-white hover:bg-gray-800 rounded-full px-12 py-6 font-semibold transition-all shadow-xl">
+                        <Button type="submit" className="bg-gray-900 text-white hover:bg-gray-800 rounded-lg px-6 h-10 font-medium">
                             Save Theme
                         </Button>
                     </div>

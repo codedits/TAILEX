@@ -20,7 +20,7 @@ export default async function EditBlogPage({ params }: PageProps) {
     const isNew = false; // Assuming for now, as 'isNew' is not defined in the original context
 
     return (
-        <div className="space-y-8 p-4 md:p-8 max-w-[1200px] mx-auto">
+        <div className="space-y-6 max-w-5xl mx-auto">
             <div>
                 <Link
                     href="/admin/blog"
@@ -29,11 +29,11 @@ export default async function EditBlogPage({ params }: PageProps) {
                     <ArrowLeft className="w-4 h-4" /> Back to Blog
                 </Link>
                 <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-semibold tracking-tight text-gray-900">
+                    <h1 className="text-xl font-semibold text-gray-900">
                         {isNew ? 'New Post' : 'Edit Post'}
-                    </h2>
+                    </h1>
                     {post.status === "published" && (
-                        <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400">
+                        <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700">
                             Published
                         </span>
                     )}

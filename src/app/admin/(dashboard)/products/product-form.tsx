@@ -205,7 +205,7 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-8">
             {/* Info */}
-            <div className="bg-white border border-border rounded-2xl p-8 space-y-6 shadow-sm">
+            <div className="bg-white border border-border rounded-xl p-6 md:p-8 space-y-6 shadow-sm">
               <h3 className="text-lg font-light tracking-tight text-gray-900 mb-4 border-b border-gray-100 pb-4">Product Details</h3>
 
               <FormField
@@ -256,7 +256,7 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
             </div>
 
             {/* Media — New Background Upload System */}
-            <div className="bg-white border border-border rounded-2xl p-8 space-y-6 shadow-sm">
+            <div className="bg-white border border-border rounded-xl p-6 md:p-8 space-y-6 shadow-sm">
               <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
                 <h3 className="text-lg font-light tracking-tight text-gray-900">Media</h3>
                 {upload.isUploading && (
@@ -275,9 +275,9 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
             </div>
 
             {/* Pricing */}
-            <div className="bg-white border border-border rounded-2xl p-8 space-y-6 shadow-sm">
+            <div className="bg-white border border-border rounded-xl p-6 md:p-8 space-y-6 shadow-sm">
               <h3 className="text-lg font-light tracking-tight text-gray-900 mb-4 border-b border-gray-100 pb-4">Pricing</h3>
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
                   name="price"
@@ -312,9 +312,9 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
             </div>
 
             {/* Inventory */}
-            <div className="bg-white border border-border rounded-2xl p-8 space-y-6 shadow-sm">
+            <div className="bg-white border border-border rounded-xl p-6 md:p-8 space-y-6 shadow-sm">
               <h3 className="text-lg font-light tracking-tight text-gray-900 mb-4 border-b border-gray-100 pb-4">Inventory</h3>
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
                   name="sku"
@@ -374,7 +374,7 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
 
           {/* Right Column */}
           <div className="space-y-8">
-            <div className="bg-white border border-border rounded-2xl p-6 space-y-6 sticky top-24 shadow-sm">
+            <div className="bg-white border border-border rounded-xl p-6 space-y-6 lg:sticky lg:top-24 shadow-sm">
               <h3 className="text-lg font-light tracking-tight text-gray-900 border-b border-gray-100 pb-4">Status & Organization</h3>
 
               <FormField
@@ -452,7 +452,7 @@ export function ProductForm({ initialData, collections = [] }: ProductFormProps)
                 <Button
                   type="submit"
                   disabled={isPending || upload.isUploading}
-                  className="w-full bg-gray-900 text-white hover:bg-gray-800 rounded-xl h-12 font-semibold transition-all shadow-xl disabled:opacity-50"
+                  className="w-full bg-gray-900 text-white hover:bg-gray-800 rounded-lg h-10 font-medium disabled:opacity-50"
                 >
                   {isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                   {upload.isUploading

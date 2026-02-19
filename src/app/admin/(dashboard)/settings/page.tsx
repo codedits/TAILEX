@@ -11,10 +11,10 @@ export default async function SettingsPage() {
     const config = await StoreConfigService.getStoreConfig();
 
     return (
-        <div className="flex-1 space-y-6">
+        <div className="flex-1 space-y-6 max-w-6xl mx-auto">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-3xl font-light tracking-tight text-gray-900">Settings</h2>
+                    <h1 className="text-xl font-semibold text-gray-900">Settings</h1>
                     <p className="text-sm text-gray-500 mt-1">Configure your store appearance and behavior</p>
                 </div>
                 <Link

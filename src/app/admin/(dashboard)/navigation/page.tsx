@@ -17,20 +17,20 @@ export default async function NavigationPage() {
   const { data: menus } = await supabase.from("navigation_menus").select("*").order('created_at', { ascending: false });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight text-gray-900 mb-1">Navigation</h2>
+          <h1 className="text-xl font-semibold text-gray-900">Navigation</h1>
           <p className="text-gray-500 text-sm">Manage website menus and link structures.</p>
         </div>
         <form action={createMenu}>
-          <Button type="submit" className="bg-gray-900 text-white hover:bg-gray-800 rounded-full px-6 font-medium">
+          <Button type="submit" className="bg-gray-900 text-white hover:bg-gray-800 rounded-lg px-4 h-10 font-medium">
             <Plus className="mr-2 h-4 w-4" /> Add Menu
           </Button>
         </form>
       </div>
 
-      <div className="border border-border rounded-2xl bg-white overflow-hidden shadow-sm">
+      <div className="border border-border rounded-xl bg-white overflow-hidden shadow-sm overflow-x-auto">
         <Table>
           <TableHeader className="bg-gray-50/50">
             <TableRow className="border-gray-100 hover:bg-transparent">

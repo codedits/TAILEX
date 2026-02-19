@@ -19,11 +19,11 @@ export default async function AdminDashboard() {
   ]);
 
   return (
-    <div className="space-y-6 pb-10">
+    <div className="space-y-6 pb-10 max-w-6xl mx-auto">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">
+          <h1 className="text-xl font-semibold text-gray-900">
             Home
           </h1>
           <p className="text-gray-500 text-sm">

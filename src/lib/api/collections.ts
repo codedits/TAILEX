@@ -78,6 +78,10 @@ export async function createCollection(formData: FormData): Promise<ApiResponse<
     const blurDataURL = formData.get('blurDataURL') as string
     const sortOrder = parseInt(formData.get('sort_order') as string) || 0;
 
+    // Customization
+    const showProductGrid = formData.get('show_product_grid') === 'on';
+    const tagline = formData.get('tagline') as string;
+
     // Validation
     if (!title || title.trim().length < 2) {
       return { error: 'Collection title must be at least 2 characters' }
@@ -98,6 +102,16 @@ export async function createCollection(formData: FormData): Promise<ApiResponse<
       return { error: 'A collection with this slug already exists' }
     }
 
+    // Construct metadata
+    const metadata: Record<string, any> = {
+      show_product_grid: showProductGrid,
+      tagline: tagline || "Explore The Collection"
+    };
+
+    if (blurDataURL && imageUrl) {
+      metadata.blurDataUrls = { [imageUrl]: blurDataURL };
+    }
+
     const { data, error } = await supabase
       .from('collections')
       .insert({
@@ -107,7 +121,7 @@ export async function createCollection(formData: FormData): Promise<ApiResponse<
         image_url: imageUrl || null,
         is_visible: isVisible,
         sort_order: sortOrder,
-        metadata: blurDataURL && imageUrl ? { blurDataUrls: { [imageUrl]: blurDataURL } } : undefined,
+        metadata: metadata,
         seo_title: seoTitle?.trim() || null,
         seo_description: seoDescription?.trim() || null,
       })
@@ -123,7 +137,7 @@ export async function createCollection(formData: FormData): Promise<ApiResponse<
     revalidatePath('/collection');
     revalidatePath('/shop');
     revalidatePath('/');
-    (revalidateTag as any)('collections');
+    revalidateTag('collections', 'max');
 
     return { data: data as Collection }
   } catch (error) {
@@ -157,6 +171,10 @@ export async function updateCollection(formData: FormData): Promise<ApiResponse<
     const blurDataURL = formData.get('blurDataURL') as string
     const sortOrder = parseInt(formData.get('sort_order') as string) || 0;
 
+    // Customization
+    const showProductGrid = formData.get('show_product_grid') === 'on';
+    const tagline = formData.get('tagline') as string;
+
     // Validation
     if (!title || title.trim().length < 2) {
       return { error: 'Collection title must be at least 2 characters' }
@@ -178,6 +196,31 @@ export async function updateCollection(formData: FormData): Promise<ApiResponse<
       return { error: 'A collection with this slug already exists' }
     }
 
+    // Fetch existing collection to merge metadata
+    const { data: existingCollection } = await supabase
+      .from('collections')
+      .select('metadata')
+      .eq('id', id)
+      .single();
+
+    const existingMetadata = (existingCollection?.metadata as Record<string, any>) || {};
+
+    // Prepare new metadata
+    const newMetadata: Record<string, any> = {
+      ...existingMetadata,
+      show_product_grid: showProductGrid,
+      tagline: tagline || "Explore The Collection"
+    };
+
+    // Handle blurDataURL merge
+    if (blurDataURL && imageUrl) {
+      const existingBlurData = (existingMetadata.blurDataUrls as Record<string, string>) || {};
+      newMetadata.blurDataUrls = {
+        ...existingBlurData,
+        [imageUrl]: blurDataURL
+      };
+    }
+
     const updatePayload: Record<string, any> = {
       title: title.trim(),
       slug: slug.toLowerCase().trim(),
@@ -187,16 +230,8 @@ export async function updateCollection(formData: FormData): Promise<ApiResponse<
       sort_order: sortOrder,
       seo_title: seoTitle?.trim() || null,
       seo_description: seoDescription?.trim() || null,
+      metadata: newMetadata
     };
-
-    // Store blur in metadata if we uploaded a new image (or kept existing and passed blur?)
-    // If it's a new image, we have blurDataURL.
-    if (blurDataURL && imageUrl) {
-      // If existing metadata exists, we should merge or replace? 
-      // For collection cover, it's 1:1, but `blurDataUrls` implies map.
-      // Let's just set the map for this image.
-      updatePayload.metadata = { blurDataUrls: { [imageUrl]: blurDataURL } };
-    }
 
     const { data, error } = await supabase
       .from('collections')
@@ -219,7 +254,7 @@ export async function updateCollection(formData: FormData): Promise<ApiResponse<
     revalidatePath('/collection');
     revalidatePath('/shop');
     revalidatePath('/');
-    (revalidateTag as any)('collections');
+    revalidateTag('collections', 'max');
 
     return { data: data as Collection }
   } catch (error) {
@@ -260,7 +295,7 @@ export async function deleteCollection(id: string): Promise<ApiResponse<null>> {
     revalidatePath('/collection');
     revalidatePath('/shop');
     revalidatePath('/');
-    (revalidateTag as any)('collections');
+    revalidateTag('collections', 'max');
 
     return { message: 'Collection deleted successfully' }
   } catch (error) {
@@ -351,3 +386,25 @@ export const getCollection = unstable_cache(
   ['collection-by-slug'], // Key parts
   { tags: ['collections'], revalidate: 3600 } // Invalidate if collection changes (removed products tag dependency)
 )
+
+// Reorder collections (batch update)
+export async function reorderCollections(items: { id: string; sort_order: number }[]) {
+  const supabase = await createAdminClient();
+
+  // Perform updates in parallel
+  const updates = items.map(item =>
+    supabase
+      .from('collections')
+      .update({ sort_order: item.sort_order })
+      .eq('id', item.id)
+  );
+
+  await Promise.all(updates);
+
+  revalidateTag('collections', 'max');
+  revalidateTag('featured-collections', 'max');
+  revalidatePath('/', 'page');
+  revalidatePath('/admin/collections', 'page');
+
+  return { success: true };
+}

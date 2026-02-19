@@ -78,10 +78,10 @@ export default async function ProductsPage({
   const resolvedParams = await searchParams;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">
+          <h1 className="text-xl font-semibold text-gray-900">
             Products
           </h1>
           <p className="text-gray-500 text-sm">

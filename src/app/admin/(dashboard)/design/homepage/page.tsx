@@ -19,9 +19,9 @@ export default async function HomepageDesignPage() {
     ];
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-6 max-w-6xl mx-auto">
             <div>
-                <h2 className="text-2xl font-semibold tracking-tight text-gray-900 mb-1">Homepage Layout</h2>
+                <h1 className="text-xl font-semibold text-gray-900">Homepage Layout</h1>
                 <p className="text-gray-500 text-sm">Drag to reorder sections or toggle their visibility.</p>
             </div>
 

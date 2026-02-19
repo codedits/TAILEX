@@ -193,7 +193,7 @@ export const getFeaturedCollections = unstable_cache(
             const supabase = getSupabase()
             const { data } = await supabase
                 .from('collections')
-                .select('id, title, slug, image_url, description, is_visible, sort_order')
+                .select('id, title, slug, image_url, description, is_visible, sort_order, metadata')
                 .eq('is_visible', true)
                 .order('sort_order', { ascending: true })
                 .limit(limit)
@@ -234,7 +234,7 @@ export const getCollectionsWithProducts = unstable_cache(
             // 1. Get collections
             const { data: collections } = await supabase
                 .from('collections')
-                .select('id, title, slug, image_url, description, is_visible, sort_order')
+                .select('id, title, slug, image_url, description, is_visible, sort_order, metadata')
                 .eq('is_visible', true)
                 .order('sort_order', { ascending: true })
                 .limit(limit)

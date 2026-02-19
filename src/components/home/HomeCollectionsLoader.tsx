@@ -21,8 +21,14 @@ export async function HomeCollectionsLoader({ collectionsPromise, startIndex = 0
     return (
         <div className="relative flex flex-col items-center justify-center w-full overflow-hidden">
             {displayCollections.map((collection) => {
-                const blurDataUrls = (collection.metadata as Record<string, unknown>)?.blurDataUrls as Record<string, string> | undefined;
+                const metadata = collection.metadata as Record<string, any> | undefined;
+                const blurDataUrls = metadata?.blurDataUrls as Record<string, string> | undefined;
                 const coverBlur = collection.image_url ? blurDataUrls?.[collection.image_url] : undefined;
+
+                // Extract new customization props
+                const showProductGrid = metadata?.show_product_grid !== false; // Default true
+                const tagline = metadata?.tagline as string | undefined;
+
                 return (
                     <CollectionShowcase
                         key={collection.id}
@@ -33,6 +39,8 @@ export async function HomeCollectionsLoader({ collectionsPromise, startIndex = 0
                         collectionHref={`/collection/${collection.slug}`}
                         className="mb-0 cv-auto"
                         blurDataURL={coverBlur}
+                        showProductGrid={showProductGrid}
+                        tagline={tagline}
                     />
                 );
             })}
@@ -52,6 +60,10 @@ export async function FirstCollectionLoader({ collectionsPromise }: { collection
     const firstBlurDataUrls = (firstCollection.metadata as Record<string, unknown>)?.blurDataUrls as Record<string, string> | undefined;
     const firstCoverBlur = firstCollection.image_url ? firstBlurDataUrls?.[firstCollection.image_url] : undefined;
 
+    const firstMetadata = firstCollection.metadata as Record<string, any> | undefined;
+    const showProductGrid = firstMetadata?.show_product_grid !== false;
+    const tagline = firstMetadata?.tagline as string | undefined;
+
     return (
         <CollectionShowcase
             title={firstCollection.title}
@@ -61,6 +73,8 @@ export async function FirstCollectionLoader({ collectionsPromise }: { collection
             collectionHref={`/collection/${firstCollection.slug}`}
             className="mb-0"
             blurDataURL={firstCoverBlur}
+            showProductGrid={showProductGrid}
+            tagline={tagline}
         />
     );
 }

@@ -114,7 +114,7 @@ export function SettingsForm({ hero, theme, brand }: SettingsFormProps) {
   return (
     <form onSubmit={handleSubmit}>
       <div className="grid gap-10">
-        <Card className="bg-white border-border rounded-2xl overflow-hidden shadow-sm">
+        <Card className="bg-white border-border rounded-xl overflow-hidden shadow-sm">
           <CardHeader className="border-b border-gray-100 bg-gray-50/50 px-8 py-6">
             <CardTitle className="text-lg text-gray-900">Brand Identity</CardTitle>
             <CardDescription className="text-gray-500">Basic info that appears across your storefront.</CardDescription>
@@ -133,7 +133,7 @@ export function SettingsForm({ hero, theme, brand }: SettingsFormProps) {
           </CardContent>
         </Card>
 
-        <Card className="bg-white border-border rounded-2xl overflow-hidden shadow-sm">
+        <Card className="bg-white border-border rounded-xl overflow-hidden shadow-sm">
           <CardHeader className="border-b border-gray-100 bg-gray-50/50 px-8 py-6">
             <CardTitle className="text-lg text-gray-900">Hero Section</CardTitle>
             <CardDescription className="text-gray-500">Customize the initial impact of your homepage.</CardDescription>
@@ -284,7 +284,7 @@ export function SettingsForm({ hero, theme, brand }: SettingsFormProps) {
           </CardContent>
         </Card>
 
-        <Card className="bg-white border-border rounded-2xl overflow-hidden shadow-sm">
+        <Card className="bg-white border-border rounded-xl overflow-hidden shadow-sm">
           <CardHeader className="border-b border-gray-100 bg-gray-50/50 px-8 py-6">
             <CardTitle className="text-lg text-gray-900">Brand Palette</CardTitle>
             <CardDescription className="text-gray-500">Global color configuration for your store.</CardDescription>
@@ -306,7 +306,7 @@ export function SettingsForm({ hero, theme, brand }: SettingsFormProps) {
           <Button
             type="submit"
             disabled={isPending || isUploading}
-            className="bg-gray-900 text-white hover:bg-gray-800 rounded-full px-12 py-6 font-semibold transition-all shadow-xl disabled:opacity-50"
+            className="bg-gray-900 text-white hover:bg-gray-800 rounded-lg px-6 h-10 font-medium disabled:opacity-50"
           >
             {isPending ? 'Saving...' : 'Save Preferences'}
           </Button>
