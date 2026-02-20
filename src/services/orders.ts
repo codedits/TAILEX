@@ -147,15 +147,15 @@ export const OrderService = {
 
         // 4. Send Confirmation Email (Async / Fire-and-Forget)
         const orderId = (createdOrder as any).id;
-        Promise.resolve().then(async () => {
-            try {
-                // Fetch full order again just to be safe, or use returned object if complete
-                const fullOrder = await OrderService.getOrder(orderId);
-                await EmailService.sendOrderConfirmation(input.email, fullOrder);
-            } catch (err) {
-                console.error('Background Email Failed:', err);
-            }
-        });
+
+        try {
+            // Fetch full order again just to be safe, or use returned object if complete
+            const fullOrder = await OrderService.getOrder(orderId);
+            await EmailService.sendOrderConfirmation(input.email, fullOrder);
+        } catch (err) {
+            console.error('Email Sending Failed:', err);
+            // Do not fail the order creation, just log it
+        }
 
         revalidatePath('/admin/orders');
         return createdOrder as Order;

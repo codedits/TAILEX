@@ -13,8 +13,8 @@ export default async function AsyncProductGrid({ productsPromise }: AsyncProduct
     if (products.length === 0) {
         return (
             <div className="py-32 text-center col-span-full">
-                <p className="text-xl font-light text-white mb-2 tracking-wide font-display">No pieces found.</p>
-                <p className="text-white/40 font-mono text-xs uppercase tracking-widest">Try adjusting your filters</p>
+                <p className="text-xl font-light text-foreground mb-2 tracking-wide font-display">No pieces found.</p>
+                <p className="text-muted-foreground font-mono text-xs uppercase tracking-widest">Try adjusting your filters</p>
             </div>
         );
     }

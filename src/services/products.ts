@@ -365,106 +365,185 @@ export const ProductService = {
     ): Promise<ProductVariant[]> {
         const supabase = await createAdminClient();
 
-        // Delete existing variants (Note: this is destructive to cart items if ON DELETE CASCADE is set)
-        // TODO: Future refactor should update existing variants instead of delete/recreate
-        const { error: deleteError } = await supabase
+        // 1. Get existing variants to determine what to update vs insert vs delete
+        const { data: existingVariants, error: fetchError } = await supabase
             .from('product_variants')
-            .delete()
+            .select('id, inventory_levels(available)') // basic info needed
             .eq('product_id', productId);
 
-        if (deleteError) {
-            console.error('Error deleting variants:', deleteError);
-            throw new AppError(deleteError.message, 'DB_ERROR');
+        if (fetchError) {
+            console.error('Error fetching existing variants:', fetchError);
+            throw new AppError(fetchError.message, 'DB_ERROR');
         }
 
-        // Return early if no variants to create
-        if (variants.length === 0) {
-            return [];
+        const existingIds = new Set(existingVariants?.map(v => v.id) || []);
+
+        // 2. Classify Input Variants
+        const variantsToUpdate = variants.filter(v => v.id && existingIds.has(v.id));
+        const variantsToInsert = variants.filter(v => !v.id || !existingIds.has(v.id));
+
+        // 3. Determine Deletions (Existing - Updated)
+        // IDs present in DB but NOT in the update list should be deleted
+        const updateIds = new Set(variantsToUpdate.map(v => v.id));
+        const idsToDelete = existingVariants?.filter(v => !updateIds.has(v.id)).map(v => v.id) || [];
+
+        // 4. Execute Deletions
+        if (idsToDelete.length > 0) {
+            const { error: deleteError } = await supabase
+                .from('product_variants')
+                .delete()
+                .in('id', idsToDelete);
+
+            if (deleteError) {
+                console.error('Error deleting variants:', deleteError);
+                throw new AppError(deleteError.message, 'DB_ERROR');
+            }
         }
 
-        // Prepare variants for insert
-        const variantsToInsert = variants.map((v, index) => ({
+        // 5. Execute Updates
+        const updatedVariants = [];
+        for (const v of variantsToUpdate) {
+            const { data: updated, error: updateError } = await supabase
+                .from('product_variants')
+                .update({
+                    title: v.title || null,
+                    color: v.color || null,
+                    size: v.size || null,
+                    price: basePrice, // Enforce base price or allow strict override? Following previous logic: basePrice
+                    sale_price: baseSalePrice ?? null,
+                    sku: v.sku || null,
+                    status: v.status || 'active',
+                    position: v.position,
+                    image_url: v.image_url,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', v.id!)
+                .select()
+                .single();
+
+            if (updateError) {
+                console.error(`Error updating variant ${v.id}:`, updateError);
+                // Continue or throw? Let's throw to be safe
+                throw new AppError(updateError.message, 'DB_ERROR');
+            }
+            if (updated) updatedVariants.push(updated);
+        }
+
+        // 6. Execute Inserts
+        const variantsPayload = variantsToInsert.map((v, index) => ({
             product_id: productId,
             title: v.title || null,
             color: v.color || null,
             size: v.size || null,
-            price: basePrice, // Enforce base price
-            sale_price: baseSalePrice ?? null, // Enforce base sale price
+            price: basePrice,
+            sale_price: baseSalePrice ?? null,
             sku: v.sku || null,
             status: v.status || 'active',
-            position: v.position ?? index,
+            position: v.position ?? (existingVariants?.length || 0) + index,
             image_url: v.image_url
         }));
 
-        const { data: insertedVariants, error: insertError } = await supabase
-            .from('product_variants')
-            .insert(variantsToInsert)
-            .select();
+        let insertedVariants: ProductVariant[] = [];
+        if (variantsPayload.length > 0) {
+            const { data: inserted, error: insertError } = await supabase
+                .from('product_variants')
+                .insert(variantsPayload)
+                .select();
 
-        if (insertError) {
-            console.error('Error inserting variants:', insertError);
-            throw new AppError(insertError.message, 'DB_ERROR');
+            if (insertError) {
+                console.error('Error inserting variants:', insertError);
+                throw new AppError(insertError.message, 'DB_ERROR');
+            }
+            insertedVariants = (inserted || []) as ProductVariant[];
         }
 
-        // Handle Inventory Updates
-        if (insertedVariants && insertedVariants.length > 0) {
-            // Get default location
-            const { data: location } = await supabase
+        // 7. Handle Inventory Updates (for BOTH updated and inserted variants)
+        // We need to sync the 'inventory_quantity' field from input to 'inventory_levels' table
+        const allProcessedVariants = [...updatedVariants, ...insertedVariants];
+        const variantsMap = new Map([...variantsToUpdate, ...variantsToInsert].map(v => [v.id || 'new', v]));
+
+        // For inserted variants, we need to map by index since they didn't have IDs before
+        // Strategy: iterate over allProcessedVariants. 
+        // If it was an update, we look up by ID.
+        // If it was an insert, we look up by index in variantsPayload -> variantsToInsert
+
+        // Easier approach: Just re-iterate inputs? No, inputs don't have new IDs.
+
+        // Let's get the default location first
+        let locationId: string | null = null;
+        const { data: location } = await supabase
+            .from('inventory_locations')
+            .select('id')
+            .eq('is_default', true)
+            .maybeSingle();
+
+        if (location) {
+            locationId = location.id;
+        } else {
+            // Fallback to any location
+            const { data: anyLocation } = await supabase.from('inventory_locations').select('id').limit(1).maybeSingle();
+            locationId = anyLocation?.id || null;
+        }
+
+        // Create default location if absolutely needed (and we have variants to set stock for)
+        if (!locationId && allProcessedVariants.length > 0) {
+            const { data: newLocation } = await supabase
                 .from('inventory_locations')
+                .insert({ name: 'Default Warehouse', is_default: true })
                 .select('id')
-                .eq('is_default', true)
-                .maybeSingle();
+                .single();
+            locationId = newLocation?.id || null;
+        }
 
-            // If no default, get any location or create one
-            let locationId = location?.id;
-            if (!locationId) {
-                const { data: anyLocation } = await supabase
-                    .from('inventory_locations')
-                    .select('id')
-                    .limit(1)
-                    .maybeSingle();
+        if (locationId) {
+            // Prepare upsert payload for inventory
+            const inventoryUpserts = [];
 
-                if (anyLocation) {
-                    locationId = anyLocation.id;
-                } else {
-                    // Create a default location if absolutely none exist
-                    const { data: newLocation } = await supabase
-                        .from('inventory_locations')
-                        .insert({ name: 'Default Warehouse', is_default: true })
-                        .select('id')
-                        .single();
-                    locationId = newLocation?.id;
+            // 1. For Updated Variants
+            for (const v of variantsToUpdate) {
+                if (v.inventory_quantity !== undefined && v.id) {
+                    inventoryUpserts.push({
+                        location_id: locationId,
+                        variant_id: v.id,
+                        available: v.inventory_quantity
+                    });
                 }
             }
 
-            if (locationId) {
-                // Prepare inventory records
-                // We need to match inserted variants back to the input variants to get inventory_quantity
-                // Since we inserted in order, we can map by index
-                const inventoryToInsert = insertedVariants.map((v, index) => ({
-                    location_id: locationId,
-                    variant_id: v.id,
-                    available: variants[index].inventory_quantity ?? 0
-                }));
+            // 2. For Inserted Variants
+            // We need to match inserted outputs back to inputs to get quantity
+            // insertedVariants corresponds to variantsToInsert by index (usually, but parallel inserts might scramble? Supabase returns in order usually)
+            // To be safe, we can try to match by sku/options, but let's assume index order for now as it's standard.
+            // Or better: Supabase insert returns rows in order of insertion.
 
+            if (insertedVariants.length === variantsToInsert.length) {
+                for (let i = 0; i < insertedVariants.length; i++) {
+                    const inputV = variantsToInsert[i];
+                    const outputV = insertedVariants[i];
+                    if (inputV.inventory_quantity !== undefined) {
+                        inventoryUpserts.push({
+                            location_id: locationId,
+                            variant_id: outputV.id,
+                            available: inputV.inventory_quantity
+                        });
+                    }
+                }
+            }
+
+            if (inventoryUpserts.length > 0) {
+                // Upserting inventory levels
+                // We need a unique constraint on (location_id, variant_id) for upsert to work
                 const { error: invError } = await supabase
                     .from('inventory_levels')
-                    .insert(inventoryToInsert);
+                    .upsert(inventoryUpserts, { onConflict: 'location_id,variant_id' });
 
                 if (invError) {
-                    console.error('Error creating inventory levels:', invError);
-                    // Don't fail the whole request, but log it. Inventory will be 0.
-                } else {
-                    // Update returned variants with the inventory quantity we just set
-                    return insertedVariants.map((v, i) => ({
-                        ...v,
-                        inventory_quantity: inventoryToInsert[i].available
-                    }));
+                    console.error('Error updating inventory levels:', invError);
                 }
             }
         }
 
-        return (insertedVariants || []) as ProductVariant[];
+        return allProcessedVariants as ProductVariant[];
     },
 
     // Cart Validation
@@ -557,6 +636,7 @@ export const ProductService = {
     async handleImageUploads(files: File[], existingUrls: string[]): Promise<{
         urls: string[];
         blurDataUrls: Record<string, string>;
+        errors: string[];
     }> {
         const supabase = await createAdminClient();
         console.log('handleImageUploads: Starting', { fileCount: files.length, existingCount: existingUrls.length });
@@ -564,6 +644,7 @@ export const ProductService = {
         const validFiles = files.filter(f => f && f.size > 0);
         const newUrls: string[] = [];
         const blurMap: Record<string, string> = {};
+        const errors: string[] = [];
 
         for (const file of validFiles) {
             try {
@@ -587,6 +668,7 @@ export const ProductService = {
 
                 if (uploadError) {
                     console.error('Upload error:', uploadError);
+                    errors.push(`Failed to upload ${file.name}: ${uploadError.message}`);
                     continue;
                 }
                 console.log('Upload successful:', fileName);
@@ -594,25 +676,32 @@ export const ProductService = {
                 const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(fileName);
                 newUrls.push(publicUrl);
                 blurMap[publicUrl] = processed.blurDataURL;
-            } catch (err) {
+            } catch (err: any) {
                 console.error('Image processing error:', err);
-                // Fallback: upload raw file if Sharp fails
-                const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-                const fileName = `products/${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-                const { error: uploadError } = await supabase.storage
-                    .from('products')
-                    .upload(fileName, file, { contentType: file.type, cacheControl: '31536000' });
 
-                if (!uploadError) {
-                    const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(fileName);
-                    newUrls.push(publicUrl);
+                // Fallback: upload raw file if Sharp fails
+                try {
+                    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+                    const fileName = `products/${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+                    const { error: uploadError } = await supabase.storage
+                        .from('products')
+                        .upload(fileName, file, { contentType: file.type, cacheControl: '31536000' });
+
+                    if (!uploadError) {
+                        const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(fileName);
+                        newUrls.push(publicUrl);
+                    } else {
+                        errors.push(`Failed to upload ${file.name} (fallback): ${uploadError.message}`);
+                    }
+                } catch (fallbackErr: any) {
+                    errors.push(`Failed to upload ${file.name}: ${err.message || fallbackErr.message}`);
                 }
             }
         }
 
         const allUrls = Array.from(new Set([...preservedUrls, ...newUrls]));
 
-        return { urls: allUrls, blurDataUrls: blurMap };
+        return { urls: allUrls, blurDataUrls: blurMap, errors };
     },
 
     /**

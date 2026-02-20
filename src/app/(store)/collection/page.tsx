@@ -17,7 +17,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 
-export const revalidate = 3600; // 1 hour - standard cache time
+export const revalidate = 300; // 5 minutes - aggressive cache
 
 // Static metadata - no DB call
 export const metadata: Metadata = {

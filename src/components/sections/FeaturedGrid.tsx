@@ -36,7 +36,7 @@ const FeaturedGrid = ({ products }: FeaturedGridProps) => {
           const image = product.cover_image || (product.images && product.images?.[0]) || "";
           const blurDataUrls = (product.metadata as Record<string, unknown>)?.blurDataUrls as Record<string, string> | undefined;
           const blurSrc = image ? blurDataUrls?.[image] : undefined;
-          
+
           return (
             <Link
               key={product.id}
@@ -56,17 +56,17 @@ const FeaturedGrid = ({ products }: FeaturedGridProps) => {
                 />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center bg-neutral-950">
-                   <div className="w-[1px] h-6 bg-white/10" />
+                  <div className="w-[1px] h-6 bg-white/10" />
                 </div>
               )}
-              
+
               {/* Subtle Luxury Overlays */}
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/60 transition-colors duration-&lsqb;1200ms&rsqb;" />
+              <div className="absolute inset-0  group-hover:bg-black/20 transition-colors duration-&lsqb;1200ms&rsqb;" />
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40 transition-opacity duration-&lsqb;1200ms&rsqb;" />
-              
+
               {/* Text Content - Luxury Minimalist Style */}
               <div className="absolute inset-0 flex items-center justify-center p-2 text-center">
-                <h3 className="text-white text-[14px] md:text-[18px] lg:text-[24px] font-thin tracking-[0.45em] uppercase transition-all duration-700 group-hover:tracking-[0.6em] opacity-95">
+                <h3 className="text-white text-[14px]  md:text-[18px] lg:text-[24px] font-thin tracking-[0.45em] uppercase transition-all duration-700 group-hover:tracking-[0.6em] opacity-95">
                   {product.title}
                 </h3>
               </div>
