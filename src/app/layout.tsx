@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: `${baseUrl}/og-image.jpg`,
+        url: `${baseUrl}/pexels-koolshooters-6982602.webp`,
         width: 1200,
         height: 630,
         alt: `${SITE_NAME} - Premium Streetwear`,
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: `${SITE_NAME} | ${TAGLINE}`,
     description: `Shop ${SITE_NAME} for premium streetwear and minimalist clothing. High-quality apparel designed for modern wardrobes.`,
-    images: [`${baseUrl}/og-image.jpg`],
+    images: [`${baseUrl}/pexels-koolshooters-6982602.webp`],
     creator: "@tailexstudio",
   },
   robots: {

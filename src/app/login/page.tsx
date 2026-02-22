@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Loader2, ArrowLeft, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
@@ -66,23 +67,29 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen relative flex items-center justify-center overflow-hidden font-body">
-      {/* Background Video */}
+      {/* Background Image */}
       <div className="absolute inset-0 z-0 bg-black">
-        <div className="absolute inset-0 bg-black/60 z-10" /> {/* Dark Overlay */}
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full h-full object-cover"
-        >
-          <source src="https://grainient.b-cdn.net/%40Grainient-Freebies/8358807-uhd_4096_2160_25fps.mp4" type="video/mp4" />
-        </video>
+        <div className="absolute inset-0 bg-black/20 z-10" /> {/* Dark Overlay */}
+        <Image
+          src="/pexels-koolshooters-6982602.webp"
+          alt="Background"
+          fill
+          className="object-cover"
+          priority
+        />
       </div>
+
+      {/* Back Button - Top Left */}
+      <Link
+        href="/"
+        className=" absolute top-8 left-4 md:left-8 flex items-center justify-center gap-2 h-10 px-4 bg-black/40 backdrop-blur-md border border-white/20 rounded-lg text-xs font-bold uppercase tracking-[0.2em] text-white hover:bg-white/20 transition-all group z-30"
+      >
+        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back
+      </Link>
 
       {/* Glass Card */}
       <div className="relative z-20 w-full max-w-md px-4">
-        <div className="bg-black/30 backdrop-blur-xl border border-white/10 rounded-2xl p-8 md:p-12 shadow-2xl animate-in fade-in zoom-in-95 duration-700">
+        <div className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-2xl p-8 md:p-12 shadow-2xl animate-in fade-in zoom-in-95 duration-700">
           {/* Header */}
           <div className="text-center mb-10">
             <Link href="/" className="inline-block hover:opacity-70 transition-opacity">

@@ -127,8 +127,15 @@ export default function RegisterPage() {
       </div>
 
       {/* Form Side */}
-      <div className="w-full flex items-center justify-center p-8 bg-black">
-        <div className="w-full max-w-[380px] space-y-12">
+      <div className="w-full relative flex items-center justify-center p-8 bg-black">
+        {/* Back Button */}
+        <Link
+          href="/login"
+          className="absolute top-8 left-8 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 hover:text-white transition-colors group z-10"
+        >
+          <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" /> Back
+        </Link>
+        <div className="w-full max-w-[380px] space-y-12 mt-8 lg:mt-0">
           <div className="space-y-4">
             <div className="lg:hidden">
               <Link href="/" className="text-xl font-display uppercase tracking-widest font-black text-white mb-12 block text-center">
