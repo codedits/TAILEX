@@ -1,7 +1,6 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { motion } from "framer-motion"
 import { Target, ShoppingBag } from "lucide-react"
 import { useFormatCurrency } from "@/context/StoreConfigContext"
 
@@ -10,10 +9,13 @@ interface DashboardProgressProps {
     ordersCurrent: number
 }
 
-// Mock goals for demonstration - in a real app these might come from settings
+// Mock goals
 const REVENUE_GOAL = 50000
 const ORDERS_GOAL = 500
 
+/**
+ * DashboardProgress - CSS Version
+ */
 export function DashboardProgress({ revenueCurrent, ordersCurrent }: DashboardProgressProps) {
     const formatCurrency = useFormatCurrency()
 
@@ -37,11 +39,9 @@ export function DashboardProgress({ revenueCurrent, ordersCurrent }: DashboardPr
                 <CardContent>
                     <div className="space-y-2">
                         <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                            <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: `${revenueProgress}%` }}
-                                transition={{ duration: 1.5, ease: "easeOut" }}
-                                className="h-full bg-green-500 rounded-full"
+                            <div
+                                className="h-full bg-green-500 rounded-full transition-all duration-1000 ease-out-expo"
+                                style={{ width: `${revenueProgress}%` }}
                             />
                         </div>
                         <div className="flex justify-between text-xs text-gray-500">
@@ -68,11 +68,9 @@ export function DashboardProgress({ revenueCurrent, ordersCurrent }: DashboardPr
                 <CardContent>
                     <div className="space-y-2">
                         <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                            <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: `${ordersProgress}%` }}
-                                transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
-                                className="h-full bg-blue-500 rounded-full"
+                            <div
+                                className="h-full bg-blue-500 rounded-full transition-all duration-1000 ease-out-expo delay-300"
+                                style={{ width: `${ordersProgress}%` }}
                             />
                         </div>
                         <div className="flex justify-between text-xs text-gray-500">
@@ -86,5 +84,3 @@ export function DashboardProgress({ revenueCurrent, ordersCurrent }: DashboardPr
         </div>
     )
 }
-
-

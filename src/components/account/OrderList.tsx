@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import { Order } from '@/lib/types';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Package, ChevronRight, Clock, CheckCircle, Truck, AlertCircle } from 'lucide-react';
 import { useFormatCurrency } from '@/context/StoreConfigContext';
 
@@ -79,14 +78,12 @@ export default function OrderList({ initialOrders }: { initialOrders: Order[] })
 
     return (
         <div className="space-y-8 pb-12">
-            <AnimatePresence mode="popLayout">
+            <div className="space-y-8">
                 {orders.map((order, idx) => (
-                    <motion.div
+                    <div
                         key={order.id}
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                        className="group relative bg-white border border-neutral-100 rounded-[2rem] overflow-hidden hover:border-neutral-200 hover:shadow-2xl hover:shadow-black/5 transition-all duration-500"
+                        className="group relative bg-white border border-neutral-100 rounded-[2rem] overflow-hidden hover:border-neutral-200 hover:shadow-2xl hover:shadow-black/5 transition-all outline-none animate-in fade-in slide-in-from-bottom-8 fill-mode-both"
+                        style={{ animationDelay: `${idx * 100}ms`, animationDuration: '600ms' }}
                     >
                         <div className="p-8 md:p-10">
                             <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-10">
@@ -119,15 +116,13 @@ export default function OrderList({ initialOrders }: { initialOrders: Order[] })
                                         <span className={order.status === 'delivered' ? 'text-emerald-600' : ''}>Delivered</span>
                                     </div>
                                     <div className="relative h-1 bg-neutral-100 rounded-full overflow-hidden">
-                                        <motion.div
-                                            className="absolute left-0 top-0 h-full bg-black group-hover/progress:bg-neutral-800 transition-colors"
-                                            initial={{ width: 0 }}
-                                            animate={{
+                                        <div
+                                            className="absolute left-0 top-0 h-full bg-black group-hover/progress:bg-neutral-800 transition-all duration-1000 ease-out"
+                                            style={{
                                                 width: order.status === 'delivered' ? '100%' :
                                                     order.status === 'shipped' ? '75%' :
                                                         order.status === 'processing' ? '50%' : '25%'
                                             }}
-                                            transition={{ duration: 1.5, ease: [0.34, 1.56, 0.64, 1] }}
                                         />
                                     </div>
                                 </div>
@@ -185,9 +180,9 @@ export default function OrderList({ initialOrders }: { initialOrders: Order[] })
                                 </div>
                             </div>
                         </div>
-                    </motion.div>
+                    </div>
                 ))}
-            </AnimatePresence>
+            </div>
         </div>
     );
 }

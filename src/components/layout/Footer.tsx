@@ -1,8 +1,11 @@
+'use client';
+
 import Link from "next/link";
-import { Instagram, Twitter, Facebook, Youtube } from "lucide-react";
+import { Instagram, Twitter, Facebook, Youtube, ChevronDown } from "lucide-react";
 import { FooterConfig, SocialConfig } from "@/lib/types";
 import { ScrollToTopButton } from "./ScrollToTopButton";
 import { NewsletterForm } from "./NewsletterForm";
+import { useState } from "react";
 
 interface FooterProps {
   config?: FooterConfig;
@@ -11,20 +14,51 @@ interface FooterProps {
 }
 
 const defaultConfig: FooterConfig = {
-  tagline: '',
+  tagline: 'Minimalist design, premium quality, enduring style.',
   columns: [],
   showSocial: true,
-  copyright: '© {year} {brand}. All rights reserved.'
+  copyright: '© {year} {brand}.'
 };
 
-/**
- * Footer - Superfluid Style
- * 
- * distinct 3-layer design:
- * 1. Big Navigation (Shop, About, Contact)
- * 2. Interaction Layer (Newsletter + Utilities)
- * 3. Brand Statement (Massive Typography)
- */
+const FooterColumn = ({
+  title,
+  links
+}: {
+  title: string;
+  links: { name: string; href: string }[]
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="flex flex-col border-b border-neutral-900 lg:border-none">
+      {/* Mobile Toggle Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center justify-between py-4 lg:py-0 lg:mb-6 w-full text-left"
+      >
+        <h4 className="text-white text-xs font-semibold uppercase tracking-widest">{title}</h4>
+        <ChevronDown
+          className={`w-4 h-4 text-neutral-500 transition-transform duration-300 lg:hidden ${isOpen ? 'rotate-180' : ''}`}
+        />
+      </button>
+
+      {/* Desktop always visible, Mobile toggleable */}
+      <div className={`${isOpen ? 'block' : 'hidden'} lg:block`}>
+        <ul className="flex flex-col gap-3 pb-6 lg:pb-0">
+          {links.map(link => (
+            <li key={link.name}>
+              <Link href={link.href} className="text-neutral-400 text-sm hover:text-white transition-colors duration-300">
+                {link.name}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+
 const Footer = ({
   config = defaultConfig,
   brandName = 'TAILEX',
@@ -33,7 +67,7 @@ const Footer = ({
   const currentYear = new Date().getFullYear();
 
   // Parse copyright string
-  const copyrightText = (config.copyright || '© {year} {brand}. All rights reserved.')
+  const copyrightText = (config.copyright || '© {year} {brand}.')
     .replace('{year}', String(currentYear))
     .replace('{brand}', brandName);
 
@@ -45,152 +79,114 @@ const Footer = ({
     social.youtube && { name: 'YouTube', href: social.youtube, Icon: Youtube },
   ].filter(Boolean) as { name: string; href: string; Icon: typeof Facebook }[];
 
+  const defaultSocialLinks = [
+    { name: 'Instagram', href: 'https://instagram.com/tailex', Icon: Instagram },
+    { name: 'X', href: 'https://twitter.com/tailex', Icon: Twitter },
+    { name: 'Facebook', href: 'https://facebook.com/tailex', Icon: Facebook },
+    { name: 'YouTube', href: 'https://youtube.com/tailex', Icon: Youtube },
+  ];
+
+  const displaySocialLinks = socialLinks.length > 0 ? socialLinks : defaultSocialLinks;
+
   return (
-    <footer className="bg-black text-white font-sans flex flex-col w-full relative z-10">
+    <footer className="bg-black text-white font-sans border-t border-neutral-900 relative z-10 w-full overflow-hidden">
+      <div className="container mx-auto px-6 py-12 lg:py-20">
+        <div className="flex flex-col lg:flex-row justify-between gap-12 lg:gap-8">
 
-      {/* 1. TOP SECTION: Primary Navigation */}
-      {/* Grid: 3 columns on desktop, stacked on mobile. Borders for the 'grid' look. */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 border-t border-white">
-        {['SHOP', 'ABOUT', 'CONTACT'].map((item, idx) => (
-          <Link
-            href={`/${item.toLowerCase()}`}
-            key={item}
-            className={`
-              group relative h-[30vh] lg:h-[40vh] flex items-center justify-center 
-              border-b border-white lg:border-b-0
-              ${idx !== 2 ? 'lg:border-r border-white' : ''}
-              hover:bg-white hover:text-black transition-colors duration-500
-            `}
-          >
-            <span className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-              {item}
-            </span>
-          </Link>
-        ))}
-      </div>
-
-      {/* 2. MIDDLE SECTION: Newsletter & Utilities */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 w-full border-t border-white">
-
-        {/* Left: Newsletter / Movement */}
-        <div className="p-8 md:p-16 lg:p-24 border-b lg:border-b-0 border-white lg:border-r flex flex-col justify-between">
-          <div>
-            <h3 className="text-4xl md:text-5xl lg:text-6xl font-bold uppercase leading-[0.9] tracking-tight max-w-xl">
-              JOIN THE <br />
-              {brandName} <br />
-              MOVEMENT
-            </h3>
-          </div>
-          <div className="mt-12 w-full max-w-md">
-            <p className="text-sm font-bold uppercase tracking-widest mb-2">EMAIL</p>
-            <NewsletterForm placeholder="ENTER YOUR EMAIL" />
-            <p className="text-[10px] uppercase mt-4 text-white/60">
-              By subscribing you agree to our privacy policy.
-            </p>
-          </div>
-        </div>
-
-        {/* Right: Utility Links Grid */}
-        <div className="p-8 md:p-16 lg:p-24 bg-black">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-12">
-            {/* Help Column */}
-            <div className="flex flex-col gap-4">
-              <h4 className="font-bold text-sm uppercase tracking-widest mb-2">HELP</h4>
-              <ul className="flex flex-col gap-2">
-                {[
-                  { name: 'Contact Us', href: '/contact' },
-                  { name: 'FAQ', href: '/contact' },
-                  { name: 'Shipments', href: '/contact' },
-                  { name: 'Payments', href: '/contact' },
-                  { name: 'Track Your Order', href: '/account' },
-                  { name: 'Returns', href: '/contact' },
-                ].map(link => (
-                  <li key={link.name}>
-                    <Link href={link.href} className="text-sm text-white/70 hover:text-white transition-colors">
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+          {/* Left: Brand & Newsletter */}
+          <div className="w-full lg:w-5/12 flex flex-col gap-6">
+            <div>
+              <Link href="/" className="text-3xl font-bold tracking-tighter text-white inline-block uppercase">
+                {brandName}
+              </Link>
+              <p className="mt-3 text-neutral-400 text-sm max-w-sm leading-relaxed">
+                {config.tagline || 'Minimalist design, premium quality, enduring style.'}
+              </p>
             </div>
 
-            {/* Legal Column */}
-            <div className="flex flex-col gap-4">
-              <h4 className="font-bold text-sm uppercase tracking-widest mb-2">LEGAL INFO</h4>
-              <ul className="flex flex-col gap-2">
-                {[
-                  { name: 'Privacy Policy', href: '/privacy' },
-                  { name: 'Terms & Conditions', href: '/terms' },
-                  { name: 'Return Policy', href: '/terms' },
-                  { name: 'Cookie Policy', href: '/cookies' },
-                ].map(link => (
-                  <li key={link.name}>
-                    <Link href={link.href} className="text-sm text-white/70 hover:text-white transition-colors">
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Social Column */}
-            <div className="flex flex-col gap-4">
-              <h4 className="font-bold text-sm uppercase tracking-widest mb-2">FOLLOW US</h4>
-              <ul className="flex flex-col gap-2">
-                {[...socialLinks, { name: 'Tiktok', href: 'https://tiktok.com/@tailex' }].map((link, i) => (
-                  <li key={link.name || i}>
-                    <Link href={link.href} className="text-sm text-white/70 hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+            <div className="mt-2 text-white">
+              <h3 className="text-xs font-semibold tracking-widest uppercase mb-4">
+                Join our newsletter
+              </h3>
+              <div className="max-w-md">
+                <NewsletterForm placeholder="Email address" />
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* 3. BRAND SECTION: Massive Typography */}
-      <div className="relative w-full overflow-hidden border-t border-white py-4 lg:py-0">
-        <h1 className="text-[15vw] leading-none font-bold tracking-tighter text-center uppercase select-none">
-          {brandName}
-        </h1>
-      </div>
+          {/* Right: Navigation Links */}
+          <div className="w-full lg:w-7/12 grid grid-cols-1 md:grid-cols-3 gap-0 lg:gap-10 border-t border-neutral-900 lg:border-none">
 
-      {/* 4. BOTTOM BAR */}
-      <div className="w-full px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-4 border-t border-white/20">
-        {/* Icons / Values */}
-        <div className="flex gap-8">
-          <div className="flex flex-col items-center gap-1 group">
-            <span className="w-6 h-6 rounded-full border border-white flex items-center justify-center text-xs group-hover:bg-white group-hover:text-black transition-colors">⚡</span>
-            <span className="text-[8px] uppercase tracking-widest">FAST</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 group">
-            <span className="w-6 h-6 rounded-full border border-white flex items-center justify-center text-xs group-hover:bg-white group-hover:text-black transition-colors">∞</span>
-            <span className="text-[8px] uppercase tracking-widest">DURABLE</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 group">
-            <span className="w-6 h-6 rounded-full border border-white flex items-center justify-center text-xs group-hover:bg-white group-hover:text-black transition-colors">★</span>
-            <span className="text-[8px] uppercase tracking-widest">PREMIUM</span>
-          </div>
-        </div>
+            <FooterColumn
+              title="Shop"
+              links={[
+                { name: 'All Products', href: '/shop' },
+                { name: 'Collections', href: '/collection' }
+              ]}
+            />
 
-        {/* Scroll Top */}
-        <div className="absolute left-1/2 -translate-x-1/2 -top-6">
-          <ScrollToTopButton />
-        </div>
+            <FooterColumn
+              title="Company"
+              links={[
+                { name: 'About Us', href: '/about' },
+                { name: 'Journal', href: '/news' },
+                { name: 'Careers', href: '/careers' },
+                { name: 'Contact', href: '/contact' }
+              ]}
+            />
 
-        {/* Copyright & Cards */}
-        <div className="flex flex-col md:flex-row items-center gap-4 text-[10px] uppercase text-white/60">
-          <span>{copyrightText}</span>
-          <div className="flex gap-2">
-            <span className="w-8 h-5 bg-white/10 rounded" />
-            <span className="w-8 h-5 bg-white/10 rounded" />
-            <span className="w-8 h-5 bg-white/10 rounded" />
+            <FooterColumn
+              title="Support"
+              links={[
+                { name: 'My Account', href: '/account' },
+                { name: 'Privacy Policy', href: '/privacy' },
+                { name: 'Terms & Conditions', href: '/terms' },
+                { name: 'Cookie Policy', href: '/cookies' },
+              ]}
+            />
+
           </div>
         </div>
       </div>
 
+      {/* Bottom Bar */}
+      <div className="border-t border-neutral-900">
+        <div className="container mx-auto px-6 py-12 flex flex-col lg:flex-row justify-between items-center gap-10 relative">
+
+          {/* Scroll To Top - Absolute Centered ABOVE text */}
+          <div className="absolute top-8 left-1/2 -translate-x-1/2 -translate-y-1/2 transform">
+            <ScrollToTopButton />
+          </div>
+
+          {/* Copyright */}
+          <div className="text-[10px] text-neutral-500 uppercase tracking-widest flex-1 text-center lg:text-left">
+            <span>{copyrightText} All rights reserved.</span>
+          </div>
+
+          {/* Placeholder/Empty Mid for balance on desktop */}
+          <div className="hidden lg:block flex-1" />
+
+          {/* Social Links */}
+          <div className="flex items-center justify-center lg:justify-end gap-6 flex-1">
+            {displaySocialLinks.map((link, idx) => {
+              const Icon = link.Icon;
+              return (
+                <a
+                  key={idx}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-neutral-500 hover:text-white transition-colors duration-300"
+                  aria-label={`Follow us on ${link.name}`}
+                >
+                  <Icon className="w-4 h-4" />
+                </a>
+              );
+            })}
+          </div>
+
+        </div>
+      </div>
     </footer>
   );
 };

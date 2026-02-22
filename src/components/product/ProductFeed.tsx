@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import ProductCard from "@/components/product/ProductCard";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import type { Product } from "@/lib/types";
 
 export default function ProductFeed({ initialProducts }: { initialProducts: Product[] }) {
@@ -19,7 +18,6 @@ export default function ProductFeed({ initialProducts }: { initialProducts: Prod
   const [sortBy, setSortBy] = useState("newest");
   const [selectedType, setSelectedType] = useState("all");
 
-  // Extract unique product types for filtering
   const productTypes = useMemo(() => {
     const types = new Set(initialProducts.map(p => p.product_type).filter(Boolean));
     return ["all", ...Array.from(types)];
@@ -28,7 +26,6 @@ export default function ProductFeed({ initialProducts }: { initialProducts: Prod
   const filteredProducts = useMemo(() => {
     let result = [...initialProducts];
 
-    // Search Filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(p =>
@@ -38,12 +35,10 @@ export default function ProductFeed({ initialProducts }: { initialProducts: Prod
       );
     }
 
-    // Type Filter
     if (selectedType !== "all") {
       result = result.filter(p => p.product_type === selectedType);
     }
 
-    // Sorting
     switch (sortBy) {
       case "price-low":
         result.sort((a, b) => a.price - b.price);
@@ -61,7 +56,6 @@ export default function ProductFeed({ initialProducts }: { initialProducts: Prod
 
   return (
     <section className="px-6 md:px-12 pb-32">
-      {/* Modern Filter Bar */}
       <div className="flex flex-col md:flex-row gap-6 mb-16 items-start md:items-center justify-between">
         <div className="relative w-full md:w-96 group">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-foreground transition-colors" />
@@ -108,7 +102,6 @@ export default function ProductFeed({ initialProducts }: { initialProducts: Prod
         </div>
       </div>
 
-      {/* Results Info */}
       <div className="mb-10 flex items-center justify-between">
         <p className="text-sm text-muted-foreground uppercase tracking-widest font-medium">
           {filteredProducts.length} {filteredProducts.length === 1 ? 'Product' : 'Products'} found
@@ -123,33 +116,23 @@ export default function ProductFeed({ initialProducts }: { initialProducts: Prod
         )}
       </div>
 
-      {/* Products Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-8 md:gap-12">
-        <AnimatePresence mode="popLayout">
-          {filteredProducts.map((product, index) => (
-            <motion.div
-              key={product.id}
-              layout
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.4, delay: index * 0.05 }}
-            >
-              <ProductCard {...product} />
-            </motion.div>
-          ))}
-        </AnimatePresence>
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-8 md:gap-12 relative min-h-[500px]">
+        {filteredProducts.map((product, index) => (
+          <div
+            key={product.id}
+            className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out-expo fill-mode-both"
+            style={{ animationDelay: `${(index % 12) * 50}ms` }}
+          >
+            <ProductCard {...product} />
+          </div>
+        ))}
       </div>
 
       {filteredProducts.length === 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="py-40 text-center"
-        >
+        <div className="py-20 text-center animate-in fade-in duration-700">
           <h3 className="text-2xl font-display mb-2">No matching silhouettes</h3>
           <p className="text-muted-foreground font-light">Try adjusting your search or filters.</p>
-        </motion.div>
+        </div>
       )}
     </section>
   );

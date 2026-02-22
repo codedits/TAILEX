@@ -2,142 +2,79 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Collection } from "@/lib/types";
-import { motion } from "framer-motion";
 import { TextReveal } from "@/components/ui/text-reveal";
-import { ArrowUpRight } from "lucide-react";
 
-// Fallback image if none provided
-const fallbackImage = "https://framerusercontent.com/images/BjQfJy7nQoVxvCYTFzwZxprDWiQ.jpg";
+interface Category {
+  id: string;
+  title: string;
+  description?: string;
+  image_url?: string;
+  slug: string;
+}
 
 interface CategoryGridProps {
-  collections: Collection[];
-  sectionTitle?: string;
-  sectionDescription?: string;
-  aspectRatio?: number;
+  categories: Category[];
+  title?: string;
+  className?: string;
 }
 
 const CategoryGrid = ({
-  collections,
-  sectionTitle = "Everyday\nEssentials",
-  sectionDescription = "Explore our best-selling categories — from crisp polos and refined shirts to versatile jackets and relaxed-fit trousers.",
-  aspectRatio = 0.85 // Slightly taller for modern look
+  categories,
+  title = "Shop by Category",
+  className = ""
 }: CategoryGridProps) => {
-  const items = collections.slice(0, 4);
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.1,
-      },
-    },
-  };
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: 40 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        ease: [0.21, 0.47, 0.32, 0.98] as const // Custom ease for smooth entry
-      },
-    },
-  };
+  if (!categories?.length) return null;
 
   return (
-    <section className="relative w-full bg-background z-10">
-      <div className="w-full max-w-[1920px] mx-auto px-4 md:px-8 py-20 md:py-32">
-
-        {/* --- Header Section --- */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16 md:mb-24">
+    <section className={`py-24 bg-white ${className}`}>
+      <div className="container mx-auto px-6">
+        <div className="text-center max-w-2xl mx-auto mb-16">
           <TextReveal
-            variant="stagger"
-            className="text-foreground whitespace-pre-line text-5xl md:text-7xl font-bold tracking-tighter leading-[0.95]"
+            variant="slideUp"
+            className="text-4xl md:text-5xl font-display uppercase tracking-tight"
           >
-            {sectionTitle}
+            {title}
           </TextReveal>
-
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="lg:max-w-md"
-          >
-            <p className="text-muted-foreground text-lg leading-relaxed font-light">
-              {sectionDescription}
-            </p>
-          </motion.div>
         </div>
 
-        {/* --- Grid Section --- */}
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-10% 0px" }}
-          variants={containerVariants}
-        >
-          {items.map((collection) => {
-            const imageUrl = collection.image_url || fallbackImage;
-            const blurDataUrls = (collection.metadata as Record<string, unknown>)?.blurDataUrls as Record<string, string> | undefined;
-            const blurSrc = collection.image_url ? blurDataUrls?.[collection.image_url] : undefined;
-
-            return (
-              <motion.div key={collection.id} variants={cardVariants} className="w-full">
-                <Link
-                  href={`/collection/${collection.slug}`}
-                  className="group relative block w-full overflow-hidden rounded-xl bg-gray-100"
-                  style={{ aspectRatio: `${aspectRatio}` }}
-                >
-                  {/* Image Layer */}
-                  <motion.div
-                    className="absolute inset-0 w-full h-full"
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.7, ease: "easeOut" }}
-                  >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {categories.map((category, index) => (
+            <div
+              key={category.id}
+              className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out fill-mode-both group"
+              style={{ animationDelay: `${index * 150}ms` }}
+            >
+              <Link href={`/collection/${category.slug}`} className="block relative h-full w-full overflow-hidden">
+                <div className="relative aspect-[4/5] bg-neutral-100 overflow-hidden">
+                  {category.image_url ? (
                     <Image
-                      src={imageUrl}
-                      alt={collection.title}
+                      src={category.image_url}
+                      alt={category.title}
                       fill
-                      className="object-cover transition-all duration-700 ease-out group-hover:grayscale-[20%]"
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                      quality={80}
-                      placeholder={blurSrc ? "blur" : "empty"}
-                      blurDataURL={blurSrc}
+                      className="object-cover object-center transition-transform duration-700 ease-out-expo group-hover:scale-105"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
-                    {/* Dark overlay for contrast if mix-blend fails on certain backgrounds */}
-                    <div className="absolute inset-0 bg-black/10 transition-colors group-hover:bg-black/0" />
-                  </motion.div>
+                  ) : (
+                    <div className="absolute inset-0 bg-neutral-200" />
+                  )}
+                  {/* Overlay gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                </div>
 
-                  {/* Content Layer - Centered with Mix Blend Mode */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
-                    <div className="relative z-20 text-center mix-blend-difference">
-                      <h3 className="text-white text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter uppercase">
-                        {collection.title}
-                      </h3>
-                      <p className="mt-2 text-white/80 font-medium tracking-widest text-xs uppercase opacity-0 transform translate-y-4 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0">
-                        View Collection
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Corner Button - Appears on Hover */}
-                  <div className="absolute bottom-6 left-6 z-30 opacity-0 transform translate-y-4 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0">
-                    <span className="flex items-center justify-center w-12 h-12 rounded-full bg-white text-black backdrop-blur-sm">
-                      <ArrowUpRight className="w-5 h-5" />
-                    </span>
-                  </div>
-
-                </Link>
-              </motion.div>
-            );
-          })}
-        </motion.div>
+                <div className="absolute bottom-0 left-0 right-0 p-8 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 ease-out-expo">
+                  <h3 className="text-white text-2xl font-bold uppercase tracking-widest">
+                    {category.title}
+                  </h3>
+                  {category.description && (
+                    <p className="text-white/80 mt-2 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100 line-clamp-2">
+                      {category.description}
+                    </p>
+                  )}
+                </div>
+              </Link>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

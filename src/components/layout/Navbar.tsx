@@ -11,12 +11,6 @@ const CartSheet = dynamic(() => import("@/components/layout/CartSheet").then(mod
 const SearchModal = dynamic(() => import("@/components/layout/SearchModal").then(mod => mod.SearchModal), { ssr: false });
 import { MenuItem } from "@/lib/types";
 
-// Lazy-load AnimatePresence — framer-motion chunk only needed when mobile menu is used
-const AnimatePresence = dynamic(
-  () => import("framer-motion").then(mod => mod.AnimatePresence),
-  { ssr: false }
-);
-
 // Lazy-load the mobile menu to reduce initial bundle size
 const MobileMenuOverlay = dynamic(() => import("./MobileMenuOverlay"), {
   ssr: false,
@@ -157,11 +151,9 @@ const Navbar = ({ brandName = "TAILEX", navItems }: { brandName?: string; navIte
       </header>
 
       {/* Full Screen Menu Overlay - Dynamically Loaded */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <MobileMenuOverlay navLinks={linksToDisplay} onClose={() => setIsMenuOpen(false)} />
-        )}
-      </AnimatePresence>
+      {isMenuOpen && (
+        <MobileMenuOverlay navLinks={linksToDisplay} onClose={() => setIsMenuOpen(false)} />
+      )}
     </>
   );
 };

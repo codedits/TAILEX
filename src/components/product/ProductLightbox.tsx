@@ -11,7 +11,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 
 interface ProductLightboxProps {
   images: string[];
@@ -195,14 +194,10 @@ export function ProductLightbox({
   }, [images.length]);
 
   return (
-    <AnimatePresence>
+    <>
       {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[100] bg-black flex flex-col"
+        <div
+          className="fixed inset-0 z-[100] bg-black flex flex-col animate-in fade-in duration-200"
         >
           {/* Top bar */}
           <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-gradient-to-b from-black/90 via-black/50 to-transparent">
@@ -324,8 +319,8 @@ export function ProductLightbox({
               Pinch or Scroll to zoom · Arrows to navigate
             </div>
           )}
-        </motion.div>
+        </div>
       )}
-    </AnimatePresence>
+    </>
   );
 }

@@ -41,7 +41,7 @@ const ProductCard = React.memo(({ priority = false, ...product }: ProductCardPro
   // Logic
   const isSale = !!(sale_price && sale_price < price);
   const isNew = tags?.some(t => t.toLowerCase() === 'new');
-  const discount = isSale ? Math.round(((price - (sale_price as number)) / price) * 100) : 0;
+  const savedAmount = isSale ? price - (sale_price as number) : 0;
   const isWishlisted = isInWishlist(id);
   const hasVariants = variants && variants.length > 0;
 
@@ -128,8 +128,8 @@ const ProductCard = React.memo(({ priority = false, ...product }: ProductCardPro
         {/* --- Badges (Top Left) --- */}
         <div className="absolute top-2 left-2 z-20 flex flex-col gap-1 pointer-events-none">
           {isSale && (
-            <span className="bg-white/90 backdrop-blur-sm text-red-700 text-[10px] font-bold px-2 py-1 uppercase tracking-wide rounded-sm shadow-sm border border-red-100">
-              -{discount}%
+            <span className="bg-red-600 text-white text-[10px] sm:text-[12px] font-semibold px-2 py-1 sm:px-3 sm:py-[5px] rounded-full leading-none shadow-sm flex items-center justify-center max-w-[90%] truncate">
+              Save {formatCurrency(savedAmount).replace(/\s/g, '')}
             </span>
           )}
           {isNew && !isSale && (
@@ -195,7 +195,7 @@ const ProductCard = React.memo(({ priority = false, ...product }: ProductCardPro
                 <span className="text-red-700 font-semibold text-sm">
                   {formatCurrency(sale_price || 0)}
                 </span>
-                <span className="text-neutral-400 text-xs line-through decoration-neutral-300">
+                <span className="text-neutral-500 text-[13px] font-medium line-through decoration-neutral-400">
                   {formatCurrency(price || 0)}
                 </span>
 

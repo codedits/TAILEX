@@ -7,7 +7,6 @@ import { HomeProductsLoader } from "@/components/home/HomeProductsLoader";
 
 // Sections that can be lazy-loaded to reduce TBT
 const TrustBar = dynamic(() => import("@/components/sections/TrustBar").then(mod => mod.TrustBar));
-const Featuring = dynamic(() => import("@/components/sections/Featuring"));
 
 import { HOMEPAGE_TEXT } from "@/config/homepage-text";
 
@@ -96,13 +95,6 @@ export default function HomeLayout({ data }: HomeLayoutProps) {
                     productsPromise={data.productsPromise}
                 />
             </Suspense>
-
-            {/* ============================================ */}
-            {/* FEATURING: Client Component                 */}
-            {/* ============================================ */}
-            <div className="w-full">
-                <Featuring />
-            </div>
 
             {/* ============================================ */}
             {/* FOOTER: Streamed LAST via Suspense          */}
