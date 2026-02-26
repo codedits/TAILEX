@@ -25,6 +25,26 @@ export const revalidate = 3600; // ISR: 1 hour — cached shop listing
 export const metadata = {
     title: "Shop All | TAILEX",
     description: "Browse our complete collection of premium fashion items.",
+    openGraph: {
+        title: "Shop All | TAILEX",
+        description: "Browse our complete collection of premium fashion items.",
+        type: "website",
+        url: "https://tailex.studio/shop",
+        images: [
+            {
+                url: "https://tailex.studio/pexels-koolshooters-6982602.webp",
+                width: 1200,
+                height: 630,
+                alt: "Shop TAILEX",
+            }
+        ],
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "Shop All | TAILEX",
+        description: "Browse our complete collection of premium fashion items.",
+        images: ["https://tailex.studio/pexels-koolshooters-6982602.webp"],
+    }
 };
 
 export default async function ShopPage({ searchParams }: {
@@ -70,6 +90,33 @@ export default async function ShopPage({ searchParams }: {
 
     return (
         <main className="min-h-screen bg-background text-foreground">
+            {/* Breadcrumb Schema */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "BreadcrumbList",
+                        "itemListElement": [
+                            {
+                                "@type": "ListItem",
+                                "position": 1,
+                                "name": "Home",
+                                "item": "https://tailex.studio"
+                            },
+                            {
+                                "@type": "ListItem",
+                                "position": 2,
+                                "name": "Shop",
+                                "item": "https://tailex.studio/shop"
+                            }
+                        ]
+                    })
+                }}
+            />
+            {/* Visually Hidden Semantic H1 */}
+            <h1 className="sr-only">Shop All TAILEX Products</h1>
+
             <Navbar brandName={brand.name} navItems={navItems} />
 
             <div className="pt-4 pb-24 px-6 md:px-12">

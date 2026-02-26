@@ -4,6 +4,15 @@ import { CommandPalette } from "@/components/admin/CommandPalette"
 import { AdminBreadcrumbs } from "@/components/admin/AdminBreadcrumbs"
 import Link from "next/link"
 import { ExternalLink, Search, Bell } from "lucide-react"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Admin Dashboard | TAILEX",
+  robots: {
+    index: false,
+    follow: false,
+  }
+}
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (

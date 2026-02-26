@@ -2,6 +2,15 @@ import { StoreHeader } from "@/components/layout/StoreHeader";
 
 import { getBrandConfig, getFooterConfig, getSocialConfig } from "@/lib/theme";
 import { AccountSidebar } from "@/components/account/AccountSidebar";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "My Account | TAILEX",
+    robots: {
+        index: false,
+        follow: false,
+    }
+}
 
 export default async function AccountLayout({
     children,

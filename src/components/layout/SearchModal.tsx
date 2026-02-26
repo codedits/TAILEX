@@ -240,7 +240,7 @@ export function SearchModal() {
                                                     >
                                                         <div className="h-10 w-10 shrink-0 rounded-md overflow-hidden bg-neutral-100 border border-neutral-100 relative">
                                                             {product.cover_image ? (
-                                                                <Image src={product.cover_image} alt="" width={40} height={40} sizes="40px" quality={75} className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500" />
+                                                                <Image src={product.cover_image} alt={product.title} width={40} height={40} sizes="40px" quality={75} className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500" />
                                                             ) : (
                                                                 <div className="w-full h-full flex items-center justify-center">
                                                                     <Search className="w-4 h-4 text-neutral-300" />

@@ -137,6 +137,36 @@ export default async function ProductPage({ params }: Props) {
           })
         }}
       />
+      {/* Breadcrumb Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://tailex.studio"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Shop",
+                "item": "https://tailex.studio/shop"
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": typedProduct.title,
+                "item": `https://tailex.studio/product/${typedProduct.slug}`
+              }
+            ]
+          })
+        }}
+      />
       <Navbar brandName={brand.name} navItems={navItems} />
 
       <div className="pt-0 md:pt-8 pb-20 px-0 md:px-12">

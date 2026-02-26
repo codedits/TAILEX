@@ -108,11 +108,10 @@ const ProductCard = React.memo(({ priority = false, ...product }: ProductCardPro
               />
             )}
             {/* Secondary Image (Swap on Hover) */}
-            {/* Secondary Image (Swap on Hover) - Lazy Loaded & Desktop Only */}
             {hasHovered && isValidImage(imageSecondary) && (
               <Image
                 src={imageSecondary}
-                alt=""
+                alt={`${title} alternate view`}
                 fill
                 loading="lazy"
                 sizes={sizes}

@@ -49,6 +49,26 @@ export async function generateMetadata({ params }: Props) {
     return {
         title: collection.seo_title || `${collection.title} Collection | TAILEX`,
         description: collection.seo_description || collection.description || `Shop our ${collection.title} collection`,
+        openGraph: {
+            title: collection.seo_title || `${collection.title} Collection | TAILEX`,
+            description: collection.seo_description || collection.description || `Shop our ${collection.title} collection`,
+            type: "website",
+            url: `https://tailex.studio/collection/${collection.slug}`,
+            images: [
+                {
+                    url: collection.image_url || "https://framerusercontent.com/images/T0Z10o3Yaf4JPrk9f5lhcmJJwno.jpg",
+                    width: 1200,
+                    height: 630,
+                    alt: collection.title,
+                }
+            ],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: collection.seo_title || `${collection.title} Collection | TAILEX`,
+            description: collection.seo_description || collection.description || `Shop our ${collection.title} collection`,
+            images: [collection.image_url || "https://framerusercontent.com/images/T0Z10o3Yaf4JPrk9f5lhcmJJwno.jpg"],
+        }
     };
 }
 
@@ -97,6 +117,62 @@ export default async function CollectionDetailPage({ params, searchParams }: Pro
 
     return (
         <main className="min-h-screen bg-background text-foreground selection:bg-black selection:text-white font-sans overflow-visible">
+            {/* Collection Schema */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "CollectionPage",
+                        "name": collection.title,
+                        "description": collection.seo_description || collection.description || `Shop our ${collection.title} collection`,
+                        "url": `https://tailex.studio/collection/${collection.slug}`,
+                        "mainEntity": {
+                            "@type": "ItemList",
+                            "itemListElement": await productsPromise.then(products =>
+                                (products || []).map((product, index) => ({
+                                    "@type": "ListItem",
+                                    "position": index + 1,
+                                    "url": `https://tailex.studio/product/${product.slug}`
+                                }))
+                            )
+                        }
+                    })
+                }}
+            />
+            {/* Breadcrumb Schema */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "BreadcrumbList",
+                        "itemListElement": [
+                            {
+                                "@type": "ListItem",
+                                "position": 1,
+                                "name": "Home",
+                                "item": "https://tailex.studio"
+                            },
+                            {
+                                "@type": "ListItem",
+                                "position": 2,
+                                "name": "Shop",
+                                "item": "https://tailex.studio/shop"
+                            },
+                            {
+                                "@type": "ListItem",
+                                "position": 3,
+                                "name": collection.title,
+                                "item": `https://tailex.studio/collection/${collection.slug}`
+                            }
+                        ]
+                    })
+                }}
+            />
+            {/* Visually Hidden Semantic H1 */}
+            <h1 className="sr-only">{collection.title} Collection</h1>
+
             <Navbar brandName={brand.name} navItems={navItems} />
 
             <div className="pt-4 pb-24 px-6 md:px-12">
