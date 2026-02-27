@@ -33,7 +33,7 @@ export default async function CollectionPage() {
     StoreConfigService.getStoreConfig(),
     supabase
       .from('products')
-      .select('id, category_id')
+      .select('id, category_id, cover_image')
       .eq('status', 'active'),
     supabase
       .from('collections')
@@ -47,14 +47,23 @@ export default async function CollectionPage() {
   const socialConfig = config.social;
   const navItems = config.navigation.main;
 
-  const safeProducts = (productsResult.data || []) as Pick<Product, 'id' | 'category_id'>[];
+  const safeProducts = (productsResult.data || []) as Pick<Product, 'id' | 'category_id' | 'cover_image'>[];
   const safeCollections = (collectionsResult.data || []) as Collection[];
 
-  // Calculate product count per collection
-  const collectionsWithCounts = safeCollections.map(col => ({
-    ...col,
-    product_count: safeProducts.filter(p => p.category_id === col.id).length
-  }));
+  // Calculate product count per collection and grab up to 5 images for hover preview
+  const collectionsWithCounts = safeCollections.map(col => {
+    const colProducts = safeProducts.filter(p => p.category_id === col.id);
+    const validImages = colProducts
+      .map(p => p.cover_image)
+      .filter((img): img is string => typeof img === 'string' && img.trim().length > 0)
+      .slice(0, 5); // Limit to 5 images for performance
+
+    return {
+      ...col,
+      product_count: colProducts.length,
+      product_images: validImages
+    };
+  });
 
   return (
     <main className="min-h-screen bg-background">
