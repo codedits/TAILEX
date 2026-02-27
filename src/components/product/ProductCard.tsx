@@ -22,7 +22,6 @@ const ProductCard = React.memo(({ priority = false, ...product }: ProductCardPro
   const { addItem } = useCart();
   const { isInWishlist, toggleItem } = useWishlist();
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [hasHovered, setHasHovered] = useState(false);
 
   const { title, price, images, slug, cover_image, sale_price, tags, id, review_count, average_rating, metadata, variants } = product;
 
@@ -77,11 +76,7 @@ const ProductCard = React.memo(({ priority = false, ...product }: ProductCardPro
   };
 
   return (
-    <div
-      className="group relative flex flex-col w-full"
-      onMouseEnter={() => setHasHovered(true)}
-      onTouchStart={() => setHasHovered(true)} // Optional: for immediate feedback on tap if desired, though usually hover is enough
-    >
+    <div className="group relative flex flex-col w-full">
       {/* --- Image Container --- */}
       <div className="relative aspect-[2/3] w-full overflow-hidden bg-neutral-100 rounded-sm"> {/* Standard fashion aspect ratio */}
 
@@ -108,7 +103,7 @@ const ProductCard = React.memo(({ priority = false, ...product }: ProductCardPro
               />
             )}
             {/* Secondary Image (Swap on Hover) */}
-            {hasHovered && isValidImage(imageSecondary) && (
+            {isValidImage(imageSecondary) && (
               <Image
                 src={imageSecondary}
                 alt={`${title} alternate view`}
@@ -118,7 +113,7 @@ const ProductCard = React.memo(({ priority = false, ...product }: ProductCardPro
                 quality={75}
                 placeholder={blurDataUrls?.[imageSecondary] ? "blur" : "empty"}
                 blurDataURL={blurDataUrls?.[imageSecondary]}
-                className="absolute inset-0 object-cover opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100 hidden md:block"
+                className="absolute inset-0 object-cover opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100 hidden md:block"
               />
             )}
           </div>
